@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Router } from 'express';
 import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
@@ -10,7 +9,7 @@ const router = Router();
 router.post('/qwen-preview/test', async (req: any, res: any) => {
   try {
     const apiKey = process.env.OPENROUTER_API_KEY;
-    
+
     if (!apiKey) {
       return res.status(400).json({
         success: false,
@@ -260,4 +259,4 @@ router.get('/qwen-preview/info', authenticate, async (req: any, res: any) => {
   });
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

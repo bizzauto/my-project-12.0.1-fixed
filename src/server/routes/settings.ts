@@ -1,4 +1,3 @@
-// @ts-nocheck\n
 import { Router } from 'express';
 import { prisma } from '../index.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
@@ -145,4 +144,4 @@ router.delete('/appointments/:id', requireRole('OWNER', 'ADMIN'), async (req: an
   }
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

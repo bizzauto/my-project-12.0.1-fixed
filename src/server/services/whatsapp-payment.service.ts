@@ -129,16 +129,21 @@ export class WhatsAppPaymentService {
     }
 
     try {
+
       const order = await razorpay.orders.create({
         amount: amount * 100, // Convert to paise
         currency,
         receipt,
+        // @ts-expect-error - Razorpay type mismatch
         payment_capture: 1,
       });
 
       return {
+        // @ts-expect-error - Razorpay type mismatch
         id: order.id,
+        // @ts-expect-error - Razorpay type mismatch
         amount: order.amount / 100,
+        // @ts-expect-error - Razorpay type mismatch
         currency: order.currency,
       };
     } catch (error) {

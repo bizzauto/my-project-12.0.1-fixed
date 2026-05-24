@@ -1,4 +1,3 @@
-// @ts-nocheck\n
 import { Router } from 'express';
 import crypto from 'crypto';
 import { prisma } from '../index.js';
@@ -80,4 +79,4 @@ router.post('/:id/test', authenticate, async (req: any, res: any) => {
   }
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

@@ -181,19 +181,13 @@ An attacker would know the email exists if they get a 2FA prompt vs. a generic e
 
 ---
 
-### H-06: LoginPage Has `@ts-nocheck` and Global API Exposure
+### ~~H-06: LoginPage Has `@ts-nocheck` and Global API Exposure~~ ✅ **RESOLVED**
 
 **File:** `src/components/LoginPage.tsx`
 
-**Risk:** Medium — The component exposes the API client globally:
-```typescript
-(window as any).apiClient = apiClient;
-(window as any).authAPI = authAPI;
-```
+**Risk:** Medium — The component exposes the API client globally.
 
-This is a debugging artifact that should not be in production code.
-
-**Recommendation:** Remove the global assignments. Move the `testApi` function into a development-only section or remove it.
+**Change:** Commit `ff03955` removed `@ts-nocheck` and all `window.apiClient` global assignments from `LoginPage.tsx`. The file now uses `useAuthStore` for login with no debug artifacts.
 
 ---
 
@@ -475,7 +469,7 @@ The `encrypt`/`decrypt` usage for tokens is good security practice.
 ### Short-Term (High Impact)
 6. Fix HTML entity rendering in Dashboard (`&#8377;`)
 7. Remove `lastLoginAt` update from auth middleware
-8. Remove global `window.apiClient` assignments from LoginPage
+8. ~~Remove global `window.apiClient` assignments from LoginPage~~ ✅ **RESOLVED** (commit `ff03955`)
 9. Consolidate duplicate CSS in `index.css`
 10. Add rate limiting to auth endpoints
 

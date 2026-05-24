@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Router } from 'express';
 import { prisma } from '../index.js';
 import { authenticate, requireBusinessOwner } from '../middleware/auth.js';
@@ -154,4 +153,4 @@ router.post('/pipelines', authenticate, async (req: any, res: any) => {
   }
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

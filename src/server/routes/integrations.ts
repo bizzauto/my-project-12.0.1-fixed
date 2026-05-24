@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Router, Response } from 'express';
 import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
@@ -171,6 +170,7 @@ router.post('/email', async (req: any, res: Response) => {
     } = req.body;
 
     const integration = await EmailService.configureEmail(businessId, {
+      // @ts-expect-error - Prisma schema type mismatch
       smtpHost: smtpHost || 'smtp.gmail.com',
       smtpPort: smtpPort || 587,
       smtpSecure: smtpSecure || false,
@@ -195,7 +195,9 @@ router.post('/email/test', async (req: any, res: Response) => {
   try {
     const { smtpHost, smtpPort, smtpSecure, smtpUser, smtpPass } = req.body;
 
-    const isValid = await EmailService.testEmailConfig(req.user.businessId, {
+
+    const isValid = await EmailService.testEmailConfig({
+      // @ts-expect-error - Prisma schema type mismatch
       smtpHost,
       smtpPort,
       smtpSecure,
@@ -306,4 +308,4 @@ router.delete('/:id', async (req: any, res: Response) => {
   }
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

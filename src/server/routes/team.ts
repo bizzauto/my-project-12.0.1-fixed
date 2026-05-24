@@ -1,4 +1,3 @@
-// @ts-nocheck\n
 import { Router } from 'express';
 import crypto from 'crypto';
 import { prisma } from '../index.js';
@@ -559,8 +558,9 @@ router.get('/audit-logs/export', async (req: any, res: any) => {
       where,
       orderBy: { createdAt: 'desc' },
       include: {
-        user: {
-          select: { id: true, name: true, email: true },
+        // @ts-expect-error - Prisma field mismatch
+          user: {
+            select: { id: true, name: true, email: true },
         },
       },
     });
@@ -607,6 +607,7 @@ router.get('/api-keys', async (req: any, res: any) => {
       select: {
         id: true,
         name: true,
+        // @ts-expect-error - Prisma schema type mismatch
         prefix: true,
         permissions: true,
         lastUsedAt: true,
@@ -648,6 +649,7 @@ router.post('/api-keys', requireRole('OWNER', 'ADMIN'), async (req: any, res: an
         businessId: req.user.businessId,
         name,
         key,
+        // @ts-expect-error - Prisma schema type mismatch
         prefix,
         permissions,
         expiresAt: expiresIn ? new Date(Date.now() + expiresIn * 1000) : null,
@@ -693,4 +695,4 @@ router.delete('/api-keys/:id', requireRole('OWNER', 'ADMIN'), async (req: any, r
   }
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

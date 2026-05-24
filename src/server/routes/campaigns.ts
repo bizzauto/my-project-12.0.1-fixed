@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Router } from 'express';
 import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
@@ -114,6 +113,7 @@ router.post('/', authenticate, async (req: any, res: any) => {
     }
 
     const campaign = await prisma.campaign.create({
+      // @ts-expect-error - Prisma schema type mismatch
       data: {
         businessId: req.user.businessId,
         name,
@@ -284,6 +284,7 @@ router.post('/:id/start', authenticate, async (req: any, res: any) => {
 
           await prisma.dripQueue.create({
             data: {
+              // @ts-expect-error - Prisma schema type mismatch
               businessId: campaign.businessId,
             campaignId: campaign.id,
               contactId: contact.id,
@@ -497,4 +498,4 @@ router.get('/:id/stats', authenticate, async (req: any, res: any) => {
   }
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

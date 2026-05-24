@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createClient, RedisClientType } from 'redis';
 
 let redisClient: RedisClientType | null = null;
@@ -11,7 +10,7 @@ export async function initRedis(): Promise<RedisClientType | null> {
 
   try {
     const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-    
+
     redisClient = createClient({
       url: redisUrl,
       socket: {
@@ -59,8 +58,9 @@ export const cacheHelpers = {
     }
 
     try {
-      const cached = await redisClient.get(key);
+      const cached = await redisClient.get(key as string);
       if (cached) {
+        // @ts-expect-error - Redis type mismatch
         return JSON.parse(cached) as T;
       }
 
@@ -93,7 +93,7 @@ export const cacheHelpers = {
   // User-specific cache
   async cacheUserData<T>(userId: string, key: string, data: T, ttl: number = 3600): Promise<void> {
     if (!redisClient || !isConnected) return;
-    
+
     try {
       await redisClient.setEx(`user:${userId}:${key}`, ttl, JSON.stringify(data));
     } catch (error) {
@@ -103,9 +103,10 @@ export const cacheHelpers = {
 
   async getUserData<T>(userId: string, key: string): Promise<T | null> {
     if (!redisClient || !isConnected) return null;
-    
+
     try {
-      const data = await redisClient.get(`user:${userId}:${key}`);
+      const data = await redisClient.get(`user:${userId}:${key}` as string);
+      // @ts-expect-error - Redis type mismatch
       return data ? JSON.parse(data) : null;
     } catch (error) {
       console.error('User cache get error:', error);
@@ -116,7 +117,7 @@ export const cacheHelpers = {
   // Business-specific cache
   async cacheBusinessData<T>(businessId: string, key: string, data: T, ttl: number = 600): Promise<void> {
     if (!redisClient || !isConnected) return;
-    
+
     try {
       await redisClient.setEx(`business:${businessId}:${key}`, ttl, JSON.stringify(data));
     } catch (error) {
@@ -126,9 +127,10 @@ export const cacheHelpers = {
 
   async getBusinessData<T>(businessId: string, key: string): Promise<T | null> {
     if (!redisClient || !isConnected) return null;
-    
+
     try {
-      const data = await redisClient.get(`business:${businessId}:${key}`);
+      const data = await redisClient.get(`business:${businessId}:${key}` as string);
+      // @ts-expect-error - Redis type mismatch
       return data ? JSON.parse(data) : null;
     } catch (error) {
       console.error('Business cache get error:', error);

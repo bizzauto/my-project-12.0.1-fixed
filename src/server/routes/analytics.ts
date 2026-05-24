@@ -500,4 +500,4 @@ router.get('/contacts', authenticate, async (req: any, res: any) => {
   }
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

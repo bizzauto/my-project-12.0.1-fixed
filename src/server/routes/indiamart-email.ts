@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Router, Response } from 'express';
 import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
@@ -178,6 +177,7 @@ router.post('/sync', authenticate, async (req: any, res: Response) => {
 
     // Create activity
     await prisma.activity.create({
+      // @ts-expect-error - Prisma schema type mismatch
       data: {
         businessId,
         type: 'indiamart_sync',
@@ -297,6 +297,7 @@ router.post('/connect', authenticate, async (req: any, res: Response) => {
     }
 
     // Test connection
+    // @ts-expect-error - imap module has no types
     const Imap = (await import('imap')).default;
     const imap = new Imap({
       user: email,
@@ -346,4 +347,4 @@ router.post('/connect', authenticate, async (req: any, res: Response) => {
   }
 });
 
-export default router; // @ts-nocheck
+export default router; 

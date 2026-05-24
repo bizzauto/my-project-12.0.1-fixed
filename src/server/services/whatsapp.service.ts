@@ -1,4 +1,3 @@
-// @ts-nocheck
 import axios from 'axios';
 import { prisma } from '../index.js';
 import { decrypt, encrypt } from '../utils/auth.js';
@@ -60,7 +59,8 @@ export class WhatsAppService {
       const response = await axios.post(url, payload, config);
 
       // Save message to database
-      await prisma.message.create({
+      await
+    prisma.message.create({
         data: {
           businessId,
           contactId: options.messageId,
@@ -81,7 +81,7 @@ export class WhatsAppService {
       return response.data;
     } catch (error: any) {
       console.error('WhatsApp send error:', error.response?.data || error.message);
-      
+
       // Save failed message
       await prisma.message.create({
         data: {
@@ -160,6 +160,7 @@ export class WhatsAppService {
       const response = await axios.post(url, payload, config);
 
       await prisma.message.create({
+        // @ts-expect-error - Prisma schema type mismatch
         data: {
           businessId,
           direction: 'outbound',
@@ -237,6 +238,7 @@ export class WhatsAppService {
       const response = await axios.post(url, payload, config);
 
       await prisma.message.create({
+        // @ts-expect-error - Prisma schema type mismatch
         data: {
           businessId,
           direction: 'outbound',
@@ -495,7 +497,7 @@ export class WhatsAppService {
     // This would integrate with a WhatsApp Web API service
     // For official API, we use OAuth flow instead
     // Implementation depends on your WhatsApp provider
-    
+
     // For now, return placeholder
     return 'qr-code-placeholder';
   }
@@ -513,7 +515,7 @@ export class WhatsAppService {
       .createHmac('sha256', secret)
       .update(payload)
       .digest('hex');
-    
+
     return signature === `sha256=${expected}`;
   }
 }

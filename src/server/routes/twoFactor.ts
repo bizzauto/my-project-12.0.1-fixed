@@ -1,4 +1,3 @@
-// @ts-nocheck\n
 import { Router, Request, Response } from 'express';
 import { authenticate } from '../middleware/auth.js';
 import { TwoFactorService } from '../services/twoFactor.service.js';
@@ -159,4 +158,4 @@ router.delete('/disable', authenticate, async (req: any, res: Response) => {
   }
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { simpleParser, EmailAddress } from 'mailparser';
 import { prisma } from '../index.js';
 import { LeadCaptureService } from './lead-capture.service.js';
@@ -144,8 +143,10 @@ export class IndiaMARTEmailService {
     errors: string[];
   }> {
     // Dynamic import to handle optional dependency
+    // @ts-expect-error - imap module has no types
     const Imap = (await import('imap')).default;
-    const imap = new Imap({
+    const imap =
+      new Imap({
       user: config.email,
       password: config.password,
       host: config.imapHost,
@@ -338,6 +339,7 @@ export class IndiaMARTEmailService {
 
     try {
       // Fetch emails using node-imap
+      // @ts-expect-error - imap module has no types
       const Imap = (await import('imap')).default;
       const imap = new Imap({
         user: emailConfig.email,

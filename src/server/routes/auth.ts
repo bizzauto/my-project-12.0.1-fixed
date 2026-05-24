@@ -6,6 +6,7 @@ import { authenticate, AuthRequest } from '../middleware/auth.js';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { encrypt, decrypt } from '../utils/auth.js';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
 
@@ -96,8 +97,17 @@ router.post('/register', async (req: Request, res: Response) => {
   }
 });
 
+// Rate limiter: 5 login attempts per IP per minute
+const loginLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5,
+  message: { success: false, error: 'Too many login attempts. Please try again after a minute.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Login
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', loginLimiter, async (req: Request, res: Response) => {
   try {
     const { email, password, twoFactorToken } = req.body;
     const { TwoFactorService } = await import('../services/twoFactor.service.js');

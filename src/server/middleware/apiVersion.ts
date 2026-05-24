@@ -10,6 +10,7 @@ interface TokenPayload {
   businessId: string;
   plan: string;
   role: string;
+  type?: string;
 }
 
 interface TokenPair {

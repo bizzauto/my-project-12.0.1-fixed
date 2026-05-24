@@ -67,5 +67,9 @@ fly.toml
 .qwen/
 .roo/
 
+# Windows reserved device names
+/nul
+nul
+
 # Accidental nested repos
 MY\ PROJECT*/

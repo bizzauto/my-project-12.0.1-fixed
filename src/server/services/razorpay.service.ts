@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
@@ -158,6 +157,7 @@ export const createSubscription = async (
   try {
     const subscription = await razorpay.subscriptions.create({
       plan_id: planId,
+      // @ts-expect-error - Razorpay type mismatch
       customer_id: customerId,
       total_count,
       addons: [],
@@ -209,6 +209,8 @@ export const fetchSubscription = async (subscriptionId: string) => {
     };
   }
 };
+
+export { razorpay };
 
 export default {
   createRazorpayOrder,

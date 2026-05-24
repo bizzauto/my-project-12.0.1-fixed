@@ -1,14 +1,7 @@
-// @ts-nocheck
-import { Server as SocketServer } from 'socket.io';
+import { Server as SocketServer, Socket } from 'socket.io';
 import { Server as HttpServer } from 'http';
 import jwt from 'jsonwebtoken';
-import { redisClient } from './redis.js';
-
-interface AuthenticatedSocket extends any {
-  userId?: string;
-  businessId?: string;
-  plan?: string;
-}
+import { default as redisClient } from './services/redis.service.js';
 
 export function setupWebSocket(httpServer: HttpServer) {
   const io = new SocketServer(httpServer, {
@@ -22,7 +15,7 @@ export function setupWebSocket(httpServer: HttpServer) {
   });
 
   // Authentication middleware
-  io.use(async (socket: AuthenticatedSocket, next) => {
+  io.use(async (socket: Socket, next) => {
     try {
       const token = socket.handshake.auth.token || socket.handshake.query.token;
       if (!token) {
@@ -39,7 +32,7 @@ export function setupWebSocket(httpServer: HttpServer) {
     }
   });
 
-  io.on('connection', async (socket: AuthenticatedSocket) => {
+  io.on('connection', async (socket: Socket) => {
     console.log(`🔌 User connected: ${socket.userId} (Business: ${socket.businessId})`);
 
     // Join user's business room
@@ -64,7 +57,7 @@ export function setupWebSocket(httpServer: HttpServer) {
     // Handle real-time messaging
     socket.on('send:message', async (data) => {
       const { contactId, message, type } = data;
-      
+
       // Emit to relevant room
       io.to(`business:${socket.businessId}`).emit('new:message', {
         contactId,

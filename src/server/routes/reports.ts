@@ -1,4 +1,3 @@
-// @ts-nocheck\n
 import { Router } from 'express';
 import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
@@ -130,4 +129,4 @@ router.get('/export/campaigns', async (req: any, res: any) => {
   }
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

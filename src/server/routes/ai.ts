@@ -1,4 +1,3 @@
-
 import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
 import axios from 'axios';
@@ -223,4 +222,4 @@ function estimateTokens(prompt: string, response: string): number {
   return Math.ceil((prompt.length + response.length) / 4);
 }
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

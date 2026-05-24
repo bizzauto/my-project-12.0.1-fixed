@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as Sentry from '@sentry/node';
 
 export function initSentry() {
@@ -11,16 +10,16 @@ export function initSentry() {
     dsn: process.env.SENTRY_DSN,
     environment: process.env.NODE_ENV || 'development',
     release: `bizzauto@${process.env.npm_package_version || '1.0.0'}`,
-    
+
     // Performance monitoring
     integrations: [
       Sentry.httpIntegration(),
       Sentry.expressIntegration(),
     ],
-    
+
     // Sampling rates
     tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-    
+
     // Filter events
     beforeSend(event, hint) {
       // Don't send certain errors in development
@@ -29,7 +28,7 @@ export function initSentry() {
       }
       return event;
     },
-    
+
     // Additional context
     initialScope: {
       tags: {
@@ -52,6 +51,7 @@ export function captureError(error: Error, context?: Record<string, any>) {
 
 export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info', context?: Record<string, any>) {
   if (process.env.SENTRY_DSN) {
+    // @ts-expect-error - newer @sentry/node types differ from runtime API
     Sentry.captureMessage(message, level, {
       extra: context,
     });

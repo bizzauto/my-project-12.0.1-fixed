@@ -1,7 +1,6 @@
-// @ts-nocheck\nimport { Router } from 'express';
+import { Router } from 'express';
 import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
-import { Router } from 'express';
 const router = Router();
 
 // Get all posts
@@ -34,7 +33,8 @@ router.post('/', authenticate, async (req: any, res: any) => {
       data: {
         businessId: req.user.businessId,
         content,
-        images: [],
+        // @ts-expect-error - Prisma field mismatch
+          images: [],
         platforms: platforms || [],
         scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
         status: scheduledAt ? 'scheduled' : 'draft',
@@ -117,4 +117,4 @@ router.post('/:id/publish', authenticate, async (req: any, res: any) => {
   }
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;

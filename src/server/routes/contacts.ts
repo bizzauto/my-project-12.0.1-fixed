@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Router } from 'express';
 import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
@@ -92,6 +91,7 @@ router.get('/:id', authenticate, async (req: any, res: any) => {
           take: 50,
         },
         pipeline: true,
+        // @ts-expect-error - Prisma schema type mismatch
         stage: true,
       },
     });
@@ -161,6 +161,7 @@ router.post('/', authenticate, async (req: any, res: any) => {
 
     // Create activity
     await prisma.activity.create({
+      // @ts-expect-error - Prisma schema type mismatch
       data: {
         businessId: req.user.businessId,
         contactId: contact.id,
@@ -173,6 +174,7 @@ router.post('/', authenticate, async (req: any, res: any) => {
     // Update business stats
     await prisma.business.update({
       where: { id: req.user.businessId },
+      // @ts-expect-error - Prisma schema type mismatch
       data: { totalContacts: { increment: 1 } },
     });
 
@@ -259,6 +261,7 @@ router.delete('/:id', authenticate, async (req: any, res: any) => {
     // Update business stats
     await prisma.business.update({
       where: { id: req.user.businessId },
+      // @ts-expect-error - Prisma schema type mismatch
       data: { totalContacts: { decrement: 1 } },
     });
 
@@ -336,6 +339,7 @@ router.post('/import', authenticate, async (req: any, res: any) => {
     if (created.length > 0) {
       await prisma.business.update({
         where: { id: req.user.businessId },
+        // @ts-expect-error - Prisma schema type mismatch
         data: { totalContacts: { increment: created.length } },
       });
     }
@@ -412,4 +416,4 @@ router.get('/search', authenticate, async (req: any, res: any) => {
   }
 });
 
-export default router; // @ts-nocheck // @ts-nocheck
+export default router;
