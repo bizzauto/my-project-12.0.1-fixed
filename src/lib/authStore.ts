@@ -152,6 +152,34 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
+  googleLogin: async (credential: string) => {
+    set({ isLoading: true });
+    try {
+      const res = await authAPI.googleLogin(credential);
+      const { user, business, token } = res.data.data;
+      localStorage.setItem('token', token);
+      set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted: true });
+    } catch (error: any) {
+      set({ isLoading: false });
+      const message = error.response?.data?.error || error.response?.data?.message || 'Google sign-in failed';
+      throw new Error(message);
+    }
+  },
+
+  appleLogin: async (credential: string, name?: string) => {
+    set({ isLoading: true });
+    try {
+      const res = await authAPI.appleLogin(credential, name);
+      const { user, business, token } = res.data.data;
+      localStorage.setItem('token', token);
+      set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted: true });
+    } catch (error: any) {
+      set({ isLoading: false });
+      const message = error.response?.data?.error || error.response?.data?.message || 'Apple sign-in failed';
+      throw new Error(message);
+    }
+  },
+
   register: async (data) => {
     set({ isLoading: true });
     try {

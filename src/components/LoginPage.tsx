@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Shield, Zap, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '../lib/authStore';
 import { useTranslation } from 'react-i18next';
+import { GoogleLogin } from '@react-oauth/google';
+import AppleLogin from './AppleLogin';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
@@ -147,6 +149,53 @@ const LoginPage: React.FC = () => {
                   )}
                 </button>
               </form>
+
+              {/* Divider */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-gray-50 dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">
+                    {t('login.orContinueWith', 'or continue with')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Social Sign-In Buttons */}
+              <div className="flex flex-col items-center gap-3">
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    if (credentialResponse.credential) {
+                      try {
+                        setIsLoading(true);
+                        setError('');
+                        await useAuthStore.getState().googleLogin(credentialResponse.credential);
+                        const role = useAuthStore.getState().user?.role;
+                        if (role === 'SUPER_ADMIN') {
+                          navigate('/admin');
+                        } else {
+                          navigate('/dashboard');
+                        }
+                      } catch (err: any) {
+                        setError(err.message || 'Google sign-in failed');
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }
+                  }}
+                  onError={() => {
+                    setError('Google sign-in failed. Please try again.');
+                  }}
+                  theme="outline"
+                  size="large"
+                  text="signin_with"
+                  shape="rectangular"
+                />
+                <AppleLogin
+                  onError={(err) => setError(err)}
+                />
+              </div>
             </>
           ) : (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">

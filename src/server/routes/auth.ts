@@ -7,8 +7,349 @@ import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { encrypt, decrypt } from '../utils/auth.js';
 import rateLimit from 'express-rate-limit';
+import { OAuth2Client } from 'google-auth-library';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
+
+// Google OAuth Client for verifying ID tokens
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// Apple's JWKS endpoint for token verification
+const APPLE_KEYS_URL = 'https://appleid.apple.com/auth/keys';
+
+// Cache Apple public keys (refreshed on demand)
+let appleKeysCache: { keys: any[]; fetchedAt: number } | null = null;
+
+async function getApplePublicKeys(): Promise<any[]> {
+  if (appleKeysCache && Date.now() - appleKeysCache.fetchedAt < 3600000) {
+    return appleKeysCache.keys;
+  }
+  try {
+    const res = await fetch(APPLE_KEYS_URL);
+    const data: any = await res.json();
+    appleKeysCache = { keys: data.keys, fetchedAt: Date.now() };
+    return data.keys;
+  } catch (err) {
+    if (appleKeysCache) return appleKeysCache.keys;
+    throw err;
+  }
+}
+
+// POST /api/auth/apple - Apple Sign-In/Sign-Up
+router.post('/apple', async (req: Request, res: Response) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        success: false,
+        error: 'Apple credential is required',
+      });
+    }
+
+    // Decode the token header to get the key ID (kid)
+    const decodedHeader: any = jwt.decode(credential, { complete: true })?.header;
+    if (!decodedHeader || !decodedHeader.kid) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid Apple token: missing key ID',
+      });
+    }
+
+    // Fetch Apple's public keys and find the matching one
+    const keys = await getApplePublicKeys();
+    const key = keys.find((k: any) => k.kid === decodedHeader.kid);
+    if (!key) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid Apple token: no matching public key',
+      });
+    }
+
+    // Build the public key from JWK
+    const publicKey = crypto.createPublicKey({
+      key: {
+        kty: key.kty,
+        kid: key.kid,
+        alg: key.alg,
+        n: key.n,
+        e: key.e,
+      },
+      format: 'jwk',
+    });
+
+    // Verify the JWT
+    const payload = jwt.verify(credential, publicKey, {
+      algorithms: ['RS256'],
+      issuer: 'https://appleid.apple.com',
+      audience: process.env.APPLE_CLIENT_ID,
+    }) as jwt.JwtPayload;
+
+    const email = payload.email || `${payload.sub}@privaterelay.appleid.com`;
+    const name = req.body.name || email.split('@')[0];
+    const appleId = payload.sub;
+
+    // Check if user exists by appleId or email
+    let user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { appleId },
+          { email },
+        ],
+      },
+      include: { business: true },
+    });
+
+    if (user) {
+      // Link appleId if not already linked
+      if (!user.appleId) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { appleId },
+          include: { business: true },
+        });
+      }
+
+      if (!user.isActive) {
+        return res.status(403).json({
+          success: false,
+          error: 'Your account has been suspended. Contact support.',
+        });
+      }
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      });
+
+      const token = generateToken({
+        id: user.id,
+        email: user.email,
+        businessId: user.businessId || 'super-admin',
+        role: user.role,
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          user: { id: user.id, email: user.email, name: user.name, role: user.role, businessId: user.businessId },
+          business: user.business ? { id: user.business.id, name: user.business.name, type: user.business.type, plan: user.business.plan } : null,
+          token,
+        },
+      });
+    }
+
+    // Create new account with Apple
+    const business = await prisma.business.create({
+      data: {
+        name: `${name}'s Business`,
+        type: 'general',
+        plan: 'FREE',
+        planStartedAt: new Date(),
+        planExpiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    user = await prisma.user.create({
+      data: {
+        email,
+        appleId,
+        name,
+        businessId: business.id,
+        role: 'OWNER',
+        emailVerified: new Date(),
+        isVerified: true,
+      },
+      include: { business: true },
+    });
+
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      businessId: user.businessId,
+      role: user.role,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        user: { id: user.id, email: user.email, name: user.name, role: user.role, businessId: user.businessId },
+        business: { id: business.id, name: business.name, type: business.type, plan: business.plan },
+        token,
+      },
+    });
+  } catch (error: any) {
+    console.error('Apple auth error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to authenticate with Apple',
+      details: error.message,
+    });
+  }
+});
+
+// POST /api/auth/google - Google Sign-In/Sign-Up
+router.post('/google', async (req: Request, res: Response) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        success: false,
+        error: 'Google credential is required',
+      });
+    }
+
+    // Verify Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid Google token',
+      });
+    }
+
+    const { email, name, sub: googleId, picture } = payload;
+
+    // Check if user exists by googleId or email
+    let user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { googleId },
+          { email },
+        ],
+      },
+      include: { business: true },
+    });
+
+    if (user) {
+      // Link googleId if not already linked
+      if (!user.googleId) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { googleId, image: picture || user.image },
+          include: { business: true },
+        });
+      }
+
+      // Update profile picture if not set
+      if (picture && !user.image) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { image: picture },
+        });
+      }
+
+      // Check if account is active
+      if (!user.isActive) {
+        return res.status(403).json({
+          success: false,
+          error: 'Your account has been suspended. Contact support.',
+        });
+      }
+
+      // Update last login
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      });
+
+      const token = generateToken({
+        id: user.id,
+        email: user.email,
+        businessId: user.businessId || 'super-admin',
+        role: user.role,
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            businessId: user.businessId,
+            image: user.image,
+          },
+          business: user.business ? {
+            id: user.business.id,
+            name: user.business.name,
+            type: user.business.type,
+            plan: user.business.plan,
+          } : null,
+          token,
+        },
+      });
+    }
+
+    // User doesn't exist — create a new account with Google
+    const business = await prisma.business.create({
+      data: {
+        name: name ? `${name}'s Business` : 'My Business',
+        type: 'general',
+        plan: 'FREE',
+        planStartedAt: new Date(),
+        planExpiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    user = await prisma.user.create({
+      data: {
+        email,
+        googleId,
+        name: name || email.split('@')[0],
+        image: picture,
+        businessId: business.id,
+        role: 'OWNER',
+        emailVerified: new Date(),
+        isVerified: true,
+      },
+      include: { business: true },
+    });
+
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      businessId: user.businessId,
+      role: user.role,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          businessId: user.businessId,
+          image: user.image,
+        },
+        business: {
+          id: business.id,
+          name: business.name,
+          type: business.type,
+          plan: business.plan,
+        },
+        token,
+      },
+    });
+  } catch (error: any) {
+    console.error('Google auth error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to authenticate with Google',
+      details: error.message,
+    });
+  }
+});
 
 // Register
 router.post('/register', async (req: Request, res: Response) => {

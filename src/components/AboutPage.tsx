@@ -1,9 +1,11 @@
 import React from 'react';
 import Footer from './Footer';
+import PublicNavbar from './PublicNavbar';
 import { Users, Target, Award, Globe, Zap, Heart, ArrowRight } from 'lucide-react';
 
 const AboutPage: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate }) => (
   <div className="min-h-screen bg-white">
+    <PublicNavbar />
     {/* Hero */}
     <div className="bg-gradient-to-br from-blue-600 to-purple-700 text-white py-20 px-8">
       <div className="max-w-4xl mx-auto text-center">

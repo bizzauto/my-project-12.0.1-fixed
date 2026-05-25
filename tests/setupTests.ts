@@ -1,5 +1,17 @@
 import '@testing-library/jest-dom';
 
+// Mock scrollIntoView for chat components
+if (typeof window !== 'undefined' && typeof window.HTMLDivElement !== 'undefined') {
+  window.HTMLDivElement.prototype.scrollIntoView = jest.fn();
+}
+
+// Polyfill TextEncoder/TextDecoder for react-router-dom compatibility in jsdom
+if (typeof global.TextEncoder === 'undefined') {
+  const { TextEncoder, TextDecoder } = require('util');
+  global.TextEncoder = TextEncoder;
+  global.TextDecoder = TextDecoder as any;
+}
+
 // Only run DOM-specific setup in jsdom environment
 if (typeof window !== 'undefined') {
   // Mock window.matchMedia

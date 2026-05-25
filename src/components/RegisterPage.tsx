@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User, Phone, Building2, Eye, EyeOff, ArrowRight, Check, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../lib/authStore';
+import { GoogleLogin } from '@react-oauth/google';
+import AppleLogin from './AppleLogin';
 
 const RegisterPage: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -124,6 +126,43 @@ const RegisterPage: React.FC = () => {
                   Continue <ArrowRight size={18} />
                 </button>
               </form>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">
+                    or continue with
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center gap-3">
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    if (credentialResponse.credential) {
+                      try {
+                        setError('');
+                        await useAuthStore.getState().googleLogin(credentialResponse.credential);
+                        navigate('/onboarding', { replace: true });
+                      } catch (err: any) {
+                        setError(err.message || 'Google sign-in failed');
+                      }
+                    }
+                  }}
+                  onError={() => {
+                    setError('Google sign-in failed. Please try again.');
+                  }}
+                  theme="outline"
+                  size="large"
+                  text="signin_with"
+                  shape="rectangular"
+                />
+                <AppleLogin
+                  onError={(err) => setError(err)}
+                />
+              </div>
             </>
           )}
 

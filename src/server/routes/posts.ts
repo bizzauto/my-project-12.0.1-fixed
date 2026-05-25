@@ -24,6 +24,23 @@ router.get('/', authenticate, async (req: any, res: any) => {
   }
 });
 
+// Get single post
+router.get('/:id', authenticate, async (req: any, res: any) => {
+  try {
+    const post = await prisma.post.findFirst({
+      where: { id: req.params.id, businessId: req.user.businessId },
+    });
+
+    if (!post) {
+      return res.status(404).json({ success: false, error: 'Post not found' });
+    }
+
+    res.json({ success: true, data: post });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Failed to fetch post', details: error.message });
+  }
+});
+
 // Create post
 router.post('/', authenticate, async (req: any, res: any) => {
   try {

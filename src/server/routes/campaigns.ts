@@ -358,6 +358,72 @@ router.post('/:id/pause', authenticate, async (req: any, res: any) => {
   }
 });
 
+// Send campaign (alias for start, for frontend parity)
+router.post('/:id/send', authenticate, async (req: any, res: any) => {
+  try {
+    const campaign = await prisma.campaign.findFirst({
+      where: {
+        id: req.params.id,
+        businessId: req.user.businessId,
+      },
+    });
+
+    if (!campaign) {
+      return res.status(404).json({
+        success: false,
+        error: 'Campaign not found',
+      });
+    }
+
+    if (campaign.status !== 'draft') {
+      return res.status(400).json({
+        success: false,
+        error: 'Can only send draft campaigns',
+      });
+    }
+
+    // Get target contacts
+    const where: any = {
+      businessId: req.user.businessId,
+      whatsappOptIn: true,
+    };
+
+    if (campaign.targetTags && campaign.targetTags.length > 0) {
+      where.tags = {
+        hasSome: campaign.targetTags,
+      };
+    }
+
+    const contacts = await prisma.contact.findMany({
+      where,
+      select: { id: true, phone: true },
+    });
+
+    // Update campaign status
+    await prisma.campaign.update({
+      where: { id: campaign.id },
+      data: {
+        status: 'active',
+        startedAt: new Date(),
+        targetContacts: contacts.length,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: `Campaign sent to ${contacts.length} contacts`,
+      data: { contactCount: contacts.length },
+    });
+  } catch (error: any) {
+    console.error('Send campaign error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to send campaign',
+      details: error.message,
+    });
+  }
+});
+
 // Schedule campaign
 router.post('/:id/schedule', authenticate, async (req: any, res: any) => {
   try {

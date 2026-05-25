@@ -35,6 +35,8 @@ apiClient.interceptors.response.use(
 export const authAPI = {
   register: (data: any) => apiClient.post('/auth/register', data),
   login: (credentials: any) => apiClient.post('/auth/login', credentials),
+  googleLogin: (credential: string) => apiClient.post('/auth/google', { credential }),
+  appleLogin: (credential: string, name?: string) => apiClient.post('/auth/apple', { credential, name }),
   getProfile: () => apiClient.get('/auth/me'),
   updateProfile: (data: any) => apiClient.put('/auth/profile', data),
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
@@ -103,6 +105,7 @@ export const campaignsAPI = {
   delete: (id: string) => apiClient.delete(`/campaigns/${id}`),
   schedule: (id: string, scheduledAt: string) =>
     apiClient.post(`/campaigns/${id}/schedule`, { scheduledAt }),
+  send: (id: string) => apiClient.post(`/campaigns/${id}/send`),
   start: (id: string) => apiClient.post(`/campaigns/${id}/start`),
   pause: (id: string) => apiClient.post(`/campaigns/${id}/pause`),
   stats: (id: string) => apiClient.get(`/campaigns/${id}/stats`),
@@ -244,6 +247,25 @@ export const notificationsAPI = {
   markRead: (id: string) => apiClient.post(`/notifications/${id}/read`),
   markAllRead: () => apiClient.post('/notifications/read-all'),
   delete: (id: string) => apiClient.delete(`/notifications/${id}`),
+};
+
+// Email Marketing API
+export const emailAPI = {
+  listTemplates: (params?: any) => apiClient.get('/email/templates', { params }),
+  getTemplate: (id: string) => apiClient.get(`/email/templates/${id}`),
+  createTemplate: (data: any) => apiClient.post('/email/templates', data),
+  updateTemplate: (id: string, data: any) => apiClient.put(`/email/templates/${id}`, data),
+  deleteTemplate: (id: string) => apiClient.delete(`/email/templates/${id}`),
+  listDrips: () => apiClient.get('/email/drips'),
+  createDrip: (data: any) => apiClient.post('/email/drips', data),
+  updateDrip: (id: string, data: any) => apiClient.put(`/email/drips/${id}`, data),
+  toggleDrip: (id: string, isActive: boolean) => apiClient.patch(`/email/drips/${id}/toggle`, { isActive }),
+  deleteDrip: (id: string) => apiClient.delete(`/email/drips/${id}`),
+  listLists: () => apiClient.get('/email/lists'),
+  createList: (data: any) => apiClient.post('/email/lists', data),
+  deleteList: (id: string) => apiClient.delete(`/email/lists/${id}`),
+  testConnection: (config: any) => apiClient.post('/email/test-connection', config),
+  saveConfig: (config: any) => apiClient.post('/email/config', config),
 };
 
 // Automation API

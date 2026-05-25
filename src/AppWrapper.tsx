@@ -1,3 +1,4 @@
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuthStore } from './lib/authStore';
@@ -386,12 +387,16 @@ function AppRoutes() {
   );
 }
 
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
 export default function AppWrapper() {
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </ErrorBoundary>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </ErrorBoundary>
+    </GoogleOAuthProvider>
   );
 }

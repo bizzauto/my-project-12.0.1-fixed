@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useToast } from '../components/Toast';
 import { subscriptionsAPI } from '../lib/api';
 import { Check, Loader2, CreditCard } from 'lucide-react';
+import PublicNavbar from './PublicNavbar';
+import Footer from './Footer';
 
 interface PricingCardProps {
   plan: {
@@ -265,8 +267,9 @@ export default function PricingPage({ onNavigate }: PricingPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-16 px-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <PublicNavbar />
+      <div className="max-w-7xl mx-auto px-6 pt-16 pb-8">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
@@ -290,7 +293,7 @@ export default function PricingPage({ onNavigate }: PricingPageProps) {
         </div>
 
         {/* FAQ Section */}
-        <div className="mt-20 max-w-3xl mx-auto">
+        <div className="mt-20 max-w-3xl mx-auto pb-16">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
             Frequently Asked Questions
           </h2>
@@ -334,6 +337,7 @@ export default function PricingPage({ onNavigate }: PricingPageProps) {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

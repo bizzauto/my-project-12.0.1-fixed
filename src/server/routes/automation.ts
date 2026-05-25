@@ -86,6 +86,42 @@ router.post('/rules', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, re
 });
 
 // Update automation rule
+router.put('/rules/:id', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: Response) => {
+  try {
+    const rule = await prisma.chatbotFlow.findFirst({
+      where: { id: req.params.id, businessId: req.user.businessId },
+    });
+
+    if (!rule) {
+      return res.status(404).json({
+        success: false,
+        error: 'Automation rule not found',
+      });
+    }
+
+    const { name, trigger, keywords, response, aiEnabled } = req.body;
+
+    const updated = await prisma.chatbotFlow.update({
+      where: { id: req.params.id },
+      data: {
+        ...(name !== undefined && { name }),
+        ...(trigger !== undefined && { trigger }),
+        ...(keywords !== undefined && { keywords }),
+        ...(response !== undefined && { response }),
+        ...(aiEnabled !== undefined && { aiEnabled }),
+      },
+    });
+
+    res.json({ success: true, data: updated });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update automation rule',
+      details: error.message,
+    });
+  }
+});
+
 // Toggle automation rule
 router.patch('/rules/:id/toggle', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: Response) => {
   try {

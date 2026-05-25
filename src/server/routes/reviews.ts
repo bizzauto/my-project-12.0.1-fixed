@@ -27,6 +27,23 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   }
 });
 
+// Get single review
+router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const review = await prisma.review.findFirst({
+      where: { id: req.params.id, businessId: req.user.businessId },
+    });
+
+    if (!review) {
+      return res.status(404).json({ success: false, error: 'Review not found' });
+    }
+
+    res.json({ success: true, data: review });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Failed to fetch review', details: error.message });
+  }
+});
+
 // Update review reply
 router.put('/:id/reply', authenticate, async (req: AuthRequest, res: Response) => {
   try {

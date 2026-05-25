@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import {
   MessageSquare, Zap, Users, BarChart3, Globe,
   ArrowRight, Play, TrendingUp, Award, Phone,
-  Moon, Sun, Menu, X, CheckCircle, Bot, Sparkles,
+  X, CheckCircle, Bot, Sparkles,
   ChevronRight, ChevronLeft, UserPlus, ChevronDown, Star
 } from 'lucide-react';
 import LandingPageBottom from './LandingPageBottom';
+import PublicNavbar from './PublicNavbar';
 import { useAuthStore } from '../lib/authStore';
 import { useThemeStore } from '../lib/themeStore';
 
@@ -189,8 +190,6 @@ const slides = [
 const LandingPage: React.FC = () => {
   const { demoLogin } = useAuthStore();
   const { isDark, toggle } = useThemeStore();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -198,7 +197,7 @@ const LandingPage: React.FC = () => {
   const touchStartX = useRef(0);
 
   useEffect(() => {
-    const h = () => { setScrolled(window.scrollY > 20); setShowBackToTop(window.scrollY > 500); };
+    const h = () => setShowBackToTop(window.scrollY > 500);
     window.addEventListener('scroll', h);
     return () => window.removeEventListener('scroll', h);
   }, []);
@@ -218,35 +217,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0A0F1C] text-gray-900 dark:text-white transition-colors duration-300">
-      {/* Navbar */}
-      <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 dark:bg-[#0A0F1C]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 shadow-lg' : 'bg-transparent'}`}>
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-lg flex items-center justify-center"><Zap size={18} className="text-white" /></div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">BizzAuto</h1>
-          </div>
-          <div className="hidden md:flex items-center gap-1">
-            {['Features', 'Pricing', 'About', 'Contact'].map(l => (
-              <Link key={l} to={`/${l.toLowerCase()}`} className="px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-all">{l}</Link>
-            ))}
-          </div>
-          <div className="flex items-center gap-3">
-            <button onClick={toggle} className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-all">{isDark ? <Sun size={18} /> : <Moon size={18} />}</button>
-            <Link to="/login" className="hidden sm:block text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm font-medium px-4 py-2 transition-all">Sign In</Link>
-            <Link to="/register" className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all">Get Started Free</Link>
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5">{mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}</button>
-          </div>
-        </div>
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white/95 dark:bg-[#0A0F1C]/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/5 animate-fade-in-up">
-            <div className="px-6 py-4 space-y-2">
-              {['Features', 'Pricing', 'About', 'Contact'].map(l => (
-                <Link key={l} to={`/${l.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="block w-full text-left px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg">{l}</Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </nav>
+      <PublicNavbar isDark={isDark} onToggleDark={toggle} />
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-16 pb-24">
