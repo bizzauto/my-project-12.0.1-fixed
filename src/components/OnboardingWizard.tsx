@@ -1,12 +1,45 @@
-import React, { useState } from 'react';
-import { Check, ArrowRight, ArrowLeft, Building2, MessageSquare, Zap, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, ArrowRight, ArrowLeft, Building2, MessageSquare, Zap, Star, CheckCircle, RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../lib/authStore';
+import { whatsappAPI, googleBusinessAPI, subscriptionsAPI } from '../lib/api';
+
+type ConnectionState = 'loading' | 'connected' | 'disconnected';
 
 const OnboardingWizard: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [selectedType, setSelectedType] = useState('');
+  const [waStatus, setWaStatus] = useState<ConnectionState>('loading');
+  const [gbpStatus, setGbpStatus] = useState<ConnectionState>('loading');
+  const [razorpayStatus, setRazorpayStatus] = useState<ConnectionState>('loading');
   const totalSteps = 4;
   const { user, business, setOnboardingCompleted } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch WhatsApp status
+    whatsappAPI.getStatus()
+      .then(res => setWaStatus(res.data?.data?.connected ? 'connected' : 'disconnected'))
+      .catch(() => setWaStatus('disconnected'));
+    
+    // Fetch Google Business status
+    googleBusinessAPI.getStatus()
+      .then(res => setGbpStatus(res.data?.data?.connected ? 'connected' : 'disconnected'))
+      .catch(() => setGbpStatus('disconnected'));
+    
+    // Fetch subscription to check Razorpay payment setup
+    subscriptionsAPI.getCurrent()
+      .then(res => {
+        const sub = res.data?.data;
+        // Consider Razorpay connected if user has a paid plan (not FREE/TRIAL)
+        if (sub && sub.plan && sub.plan !== 'FREE' && sub.plan !== 'TRIAL') {
+          setRazorpayStatus('connected');
+        } else {
+          setRazorpayStatus('disconnected');
+        }
+      })
+      .catch(() => setRazorpayStatus('disconnected'));
+  }, []);
 
   const steps = [
     { title: 'Welcome', icon: <Star size={24} /> },
@@ -15,10 +48,22 @@ const OnboardingWizard: React.FC<{ onComplete?: () => void }> = ({ onComplete })
     { title: 'Done!', icon: <Check size={24} /> },
   ];
 
-  const handleComplete = () => {
+  const handleComplete = (navigateTo?: string) => {
     setOnboardingCompleted(true);
+    if (navigateTo) {
+      navigate(navigateTo);
+    } else {
+      navigate('/dashboard');
+    }
     onComplete?.();
   };
+
+  const tools = [
+    { name: 'WhatsApp Business API', desc: 'Send automated messages', icon: '💬', status: waStatus, action: () => handleComplete('/whatsapp') },
+    { name: 'Google Business Profile', desc: 'Manage on Search & Maps', icon: '🏪', status: gbpStatus, action: () => handleComplete('/google-business') },
+    { name: 'Google Sheets', desc: 'Sync contacts automatically', icon: '📊', status: 'disconnected' as ConnectionState, action: () => handleComplete('/settings') },
+    { name: 'Razorpay', desc: 'Accept payments', icon: '💳', status: razorpayStatus, action: () => handleComplete('/settings') },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center p-8">
@@ -73,11 +118,7 @@ const OnboardingWizard: React.FC<{ onComplete?: () => void }> = ({ onComplete })
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Connect your tools</h2>
               <div className="space-y-3 mb-6">
-                {[
-                  { name: 'WhatsApp Business API', desc: 'Send automated messages', icon: '💬', connected: false },
-                  { name: 'Google Sheets', desc: 'Sync contacts automatically', icon: '📊', connected: false },
-                  { name: 'Razorpay', desc: 'Accept payments', icon: '💳', connected: false },
-                ].map(tool => (
+                {tools.map(tool => (
                   <div key={tool.name} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{tool.icon}</span>
@@ -86,7 +127,19 @@ const OnboardingWizard: React.FC<{ onComplete?: () => void }> = ({ onComplete })
                         <p className="text-sm text-gray-500">{tool.desc}</p>
                       </div>
                     </div>
-                    <button className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Connect</button>
+                    {tool.status === 'connected' ? (
+                      <div className="flex items-center gap-2 px-4 py-2 text-green-700 bg-green-50 rounded-lg text-sm font-medium">
+                        <CheckCircle size={16} /> Connected
+                      </div>
+                    ) : tool.status === 'loading' ? (
+                      <div className="flex items-center gap-2 px-4 py-2 text-gray-400 bg-gray-100 rounded-lg text-sm">
+                        <RefreshCw size={14} className="animate-spin" /> Checking...
+                      </div>
+                    ) : (
+                      <button onClick={tool.action} className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                        Connect
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -117,7 +170,7 @@ const OnboardingWizard: React.FC<{ onComplete?: () => void }> = ({ onComplete })
             </button>
           ) : <div />}
           <button onClick={() => step < totalSteps ? setStep(step + 1) : handleComplete()}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
             {step < totalSteps ? 'Continue' : 'Get Started'} <ArrowRight size={18} />
           </button>
         </div>

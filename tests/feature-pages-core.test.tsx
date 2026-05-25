@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { render, RenderOptions } from '@testing-library/react';
 
@@ -94,5 +94,19 @@ describe('WhatsAppModule', () => {
     await waitFor(() => {
       expect(screen.getByText('Connection')).toBeInTheDocument();
     });
+  });
+
+  it('navigates to QR connect view when clicking Connection nav', async () => {
+    renderWithRouter(<WhatsAppModule />);
+
+    // Click the Connection nav button
+    const connectionBtn = screen.getByText('Connection');
+    fireEvent.click(connectionBtn);
+
+    // Verify QR connect view renders
+    await waitFor(() => {
+      expect(screen.getByText('Connect WhatsApp')).toBeInTheDocument();
+    });
+    expect(screen.getByText(/Link your WhatsApp Business account to start messaging/i)).toBeInTheDocument();
   });
 });

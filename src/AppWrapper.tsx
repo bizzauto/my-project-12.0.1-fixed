@@ -389,6 +389,8 @@ function AppRoutes() {
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
+export { ProtectedRoute, SuperAdminRoute };
+
 export default function AppWrapper() {
   return (
     <GoogleOAuthProvider clientId={googleClientId}>

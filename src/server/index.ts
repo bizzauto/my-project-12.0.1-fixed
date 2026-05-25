@@ -94,6 +94,10 @@ app.use(helmet({
   },
   crossOriginEmbedderPolicy: false,
 }));
+// Trust proxy — required when behind a reverse proxy (Nginx, Coolify, Cloudflare)
+// so that rate-limiter and req.ip use the real client IP from X-Forwarded-For
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'https://bizzautoai.com',
   credentials: true,

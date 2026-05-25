@@ -1,6 +1,18 @@
+// AppleLogin uses import.meta.env which Jest can't handle — mock it
+jest.mock('../src/components/AppleLogin', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
+// GoogleLogin needs GoogleOAuthProvider wrapper — mock both like other test files
+jest.mock('@react-oauth/google', () => ({
+  GoogleOAuthProvider: ({ children }: any) => children,
+  GoogleLogin: () => null,
+}));
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import LoginPage from '../../src/components/LoginPage';
+import LoginPage from '../src/components/LoginPage';
 
 describe('LoginPage', () => {
   const renderComponent = () => {
@@ -16,14 +28,14 @@ describe('LoginPage', () => {
     expect(screen.getByText(/Sign in/i)).toBeInTheDocument();
   });
 
-  it('shows demo login button', () => {
+  it('shows the sign-in button with arrow icon', () => {
     renderComponent();
-    expect(screen.getByText(/Try Demo/i)).toBeInTheDocument();
+    expect(screen.getByText(/Sign In/i)).toBeInTheDocument();
   });
 
-  it('shows forgot password link', () => {
+  it('shows trusted by section', () => {
     renderComponent();
-    expect(screen.getByText(/Forgot password/i)).toBeInTheDocument();
+    expect(screen.getByText(/Trusted by 1000/i)).toBeInTheDocument();
   });
 
   it('shows sign up link', () => {
