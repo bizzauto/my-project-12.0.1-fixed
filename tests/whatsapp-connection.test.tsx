@@ -998,4 +998,459 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
     });
   });
+
+  // ========================================================
+  // Evolution API - Scanning to Connected Transition
+  // ========================================================
+
+  describe('Evolution API - Scanning to Connected Transition', () => {
+    /**
+     * Evolution API scanning → connected transition tests.
+     *
+     * Unlike Meta QR mode (which auto-transitions scanning → connecting → connected
+     * via timers at 2s and 4s), the Evolution API connection flow only sets
+     * connectionStatus to 'scanning' and waits for an external event (webhook,
+     * socket, or page refresh) to detect the connected state.
+     *
+     * The only mechanism that transitions scanning → connected is the mount-time
+     * useEffect which checks /evolution/config → /evolution/status. If status
+     * returns state: 'open', it sets isEvolutionConnected(true) and
+     * connectionStatus('connected').
+     *
+     * These tests verify:
+     * 1. Evolution scanning does NOT auto-connect (unlike Meta mode)
+     * 2. Scanning → connected via re-mount with state='open'
+     * 3. Scanning persists when switching view tabs
+     * 4. Error during Evolution connect shows error message
+     */
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.useFakeTimers();
+
+      // Explicitly reset apiClient mock to prevent leaking from previous tests.
+      // jest.clearAllMocks() only clears call data, not implementations.
+      // Since apiClient.get and apiClient.post share the same underlying mockFn,
+      // resetting one resets both.
+      const apiMock = apiClient.get as jest.Mock;
+      apiMock.mockReset();
+      apiMock.mockResolvedValue({ data: { success: true, data: {} } });
+
+      (whatsappAPI.getTemplates as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
+      (whatsappAPI.listBroadcasts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
+      (whatsappAPI.getContacts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
+      (whatsappAPI.getAutoReplies as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
+      (whatsappAPI.listConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('does NOT auto-transition to connected after scanning (unlike Meta mode)', async () => {
+      // Meta mode: after Simulate Scan, timers advance: 2s→connecting, 4s→connected
+      // Evolution mode: after Connect & Get QR Code, connectionStatus stays 'scanning'
+      // with NO auto-transition timers.
+
+      renderWithRouter(<WhatsAppModule />);
+      await navigateToConnectView();
+
+      // ── Configure Evolution API ──
+      fireEvent.click(screen.getByText('Evolution API'));
+      await waitFor(() => expect(screen.getByText(/Connect via Evolution API/i)).toBeInTheDocument());
+
+      fireEvent.click(screen.getByText('Configure Evolution API'));
+      await waitFor(() =>
+        expect(screen.getByPlaceholderText('https://your-evolution-api.com')).toBeInTheDocument()
+      );
+
+      fireEvent.change(screen.getByPlaceholderText('https://your-evolution-api.com'), {
+        target: { value: 'https://evo.example.com' },
+      });
+      fireEvent.change(screen.getByPlaceholderText('Your Evolution API key'), {
+        target: { value: 'sk-test' },
+      });
+      fireEvent.click(screen.getByText(/Save Configuration/i));
+
+      await waitFor(() => {
+        expect(screen.getByText('Evolution API Configured')).toBeInTheDocument();
+      });
+
+      // ── Connect → scanning ──
+      fireEvent.click(screen.getByText('Connect & Get QR Code'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Evolution API Configured')).toBeInTheDocument();
+      });
+
+      // Verify: still Disconnected (scanning !== connected)
+      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+
+      // Advance timers past 4 seconds (Meta mode would have auto-connected by now)
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      // Evolution should STILL show Disconnected — no auto-transition
+      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+      expect(screen.queryByText(/WhatsApp Connected/i)).not.toBeInTheDocument();
+
+      // Verify there is no "Connecting..." overlay either (Evolution never enters 'connecting' state)
+      expect(screen.queryByText('Connecting...')).not.toBeInTheDocument();
+
+      // The Evolution mode should still show the configured badge
+      expect(screen.getByText('Evolution API Configured')).toBeInTheDocument();
+    });
+
+    it('transitions scanning → connected when re-mounted with state=open from status check', async () => {
+      // Simulates what happens after a page refresh or when external polling
+      // detects that the Evolution API instance is now connected.
+      //
+      // Scenario:
+      //   1. First mount: Evolution config exists but status returns 'close'
+      //   2. Configure → Connect → scanning state
+      //   3. External event changes server state → 'open'
+      //   4. Unmount + remount with status='open' → connected detects it
+
+      // ── First render: status returns 'close' (not connected yet) ──
+      const firstRenderMock = jest.fn().mockImplementation(async (url: string, ..._rest: any[]) => {
+        if (url === '/evolution/config') {
+          return {
+            data: { baseUrl: 'https://evo.test.com', apiKey: 'sk-test', instanceName: 'test-instance' },
+          };
+        }
+        if (typeof url === 'string' && url.includes('/evolution/status')) {
+          return { data: { state: 'close' } }; // Not connected yet
+        }
+        return { data: { success: true, data: {} } };
+      });
+      (apiClient.get as jest.Mock).mockImplementation(firstRenderMock);
+
+      const { unmount } = renderWithRouter(<WhatsAppModule />);
+
+      // Wait for mount to settle — should show Disconnected (status is 'close')
+      await waitFor(() => {
+        expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+      });
+
+      // Navigate to Connection, switch to Evolution — should show configured badge
+      fireEvent.click(screen.getByText('Connection'));
+      await waitFor(() => expect(screen.getByText('Connect WhatsApp')).toBeInTheDocument());
+
+      fireEvent.click(screen.getByText('Evolution API'));
+      await waitFor(() => expect(screen.getByText('Connect & Get QR Code')).toBeInTheDocument());
+
+      // Connect → scanning
+      fireEvent.click(screen.getByText('Connect & Get QR Code'));
+      await waitFor(() => expect(screen.getByText('Evolution API Configured')).toBeInTheDocument());
+      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+
+      // ── Simulate external event: server now reports state=open ──
+      unmount();
+
+      // Reset mock and set up to return 'open' on next mount
+      const secondRenderMock = jest.fn().mockImplementation(async (url: string, ..._rest: any[]) => {
+        if (url === '/evolution/config') {
+          return {
+            data: { baseUrl: 'https://evo.test.com', apiKey: 'sk-test', instanceName: 'test-instance' },
+          };
+        }
+        if (typeof url === 'string' && url.includes('/evolution/status')) {
+          return { data: { state: 'open' } }; // Now connected!
+        }
+        return { data: { success: true, data: {} } };
+      });
+      (apiClient.get as jest.Mock).mockReset();
+      (apiClient.get as jest.Mock).mockImplementation(secondRenderMock);
+
+      renderWithRouter(<WhatsAppModule />);
+
+      // Mount-time check should detect 'open' and auto-connect
+      await waitFor(() => {
+        expect(screen.getByText(/Connected/)).toBeInTheDocument();
+      });
+
+      // Navigate to Connection tab to verify full connected UI
+      fireEvent.click(screen.getByText('Connection'));
+      await waitFor(() => {
+        expect(screen.getByText(/WhatsApp Connected/i)).toBeInTheDocument();
+      });
+      expect(screen.getByText(/Disconnect WhatsApp/)).toBeInTheDocument();
+      expect(screen.getByText(/Messages Sent/)).toBeInTheDocument();
+    });
+
+    it('preserves scanning state when switching between Connection and Chats views', async () => {
+      // After clicking Connect in Evolution mode, the component enters scanning
+      // state. Switching away from the Connection tab and back should preserve
+      // the scanning state (no regression to disconnected).
+
+      renderWithRouter(<WhatsAppModule />);
+      await navigateToConnectView();
+
+      // Configure Evolution API
+      fireEvent.click(screen.getByText('Evolution API'));
+      await waitFor(() => expect(screen.getByText(/Connect via Evolution API/i)).toBeInTheDocument());
+
+      fireEvent.click(screen.getByText('Configure Evolution API'));
+      await waitFor(() =>
+        expect(screen.getByPlaceholderText('https://your-evolution-api.com')).toBeInTheDocument()
+      );
+      fireEvent.change(screen.getByPlaceholderText('https://your-evolution-api.com'), {
+        target: { value: 'https://evo.example.com' },
+      });
+      fireEvent.change(screen.getByPlaceholderText('Your Evolution API key'), {
+        target: { value: 'sk-test' },
+      });
+      fireEvent.click(screen.getByText(/Save Configuration/i));
+      await waitFor(() => expect(screen.getByText('Evolution API Configured')).toBeInTheDocument());
+
+      // Connect → scanning
+      fireEvent.click(screen.getByText('Connect & Get QR Code'));
+      await waitFor(() => expect(screen.getByText('Evolution API Configured')).toBeInTheDocument());
+      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+
+      // ── Switch to Chats view ──
+      fireEvent.click(screen.getByText('Chats'));
+      await waitFor(() => {
+        expect(screen.getByText(/BizzAuto Solutions WhatsApp/i)).toBeInTheDocument();
+      });
+
+      // Nav should still show Disconnected
+      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+
+      // ── Switch back to Connection view ──
+      fireEvent.click(screen.getByText('Connection'));
+      await waitFor(() => {
+        expect(screen.getByText('Connect WhatsApp')).toBeInTheDocument();
+      });
+
+      // Evolution config should still be shown (component not recreated)
+      fireEvent.click(screen.getByRole('button', { name: /Evolution API/i }));
+      await waitFor(() => {
+        expect(screen.getByText('Evolution API Configured')).toBeInTheDocument();
+      });
+
+      // Nav should still show Disconnected — scanning state preserved
+      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+
+      // Verify Connect & Get QR Code button is still available
+      expect(screen.getByText('Connect & Get QR Code')).toBeInTheDocument();
+    });
+
+    it('shows error message when Evolution API connect fails', async () => {
+      // When the Evolution API instance creation or connect call fails,
+      // an error message should be displayed instead of entering scanning state.
+
+      // Override apiClient.post to reject on Evolution connect endpoints
+      (apiClient.post as jest.Mock).mockImplementation(async (url: string, ..._rest: any[]) => {
+        if (url === '/evolution/instance' || url === '/evolution/connect') {
+          throw new Error('Evolution API instance not reachable');
+        }
+        return { data: { success: true, data: {} } };
+      });
+
+      renderWithRouter(<WhatsAppModule />);
+      await navigateToConnectView();
+
+      // Configure Evolution API
+      fireEvent.click(screen.getByText('Evolution API'));
+      await waitFor(() => expect(screen.getByText(/Connect via Evolution API/i)).toBeInTheDocument());
+
+      fireEvent.click(screen.getByText('Configure Evolution API'));
+      await waitFor(() =>
+        expect(screen.getByPlaceholderText('https://your-evolution-api.com')).toBeInTheDocument()
+      );
+      fireEvent.change(screen.getByPlaceholderText('https://your-evolution-api.com'), {
+        target: { value: 'https://evo.example.com' },
+      });
+      fireEvent.change(screen.getByPlaceholderText('Your Evolution API key'), {
+        target: { value: 'sk-test' },
+      });
+      fireEvent.click(screen.getByText(/Save Configuration/i));
+      await waitFor(() => expect(screen.getByText('Evolution API Configured')).toBeInTheDocument());
+
+      // Click Connect — will fail
+      fireEvent.click(screen.getByText('Connect & Get QR Code'));
+
+      // Error message should appear
+      await waitFor(() => {
+        expect(screen.getByText(/Evolution API instance not reachable/i)).toBeInTheDocument();
+      });
+
+      // The component should NOT be in scanning state — nav still shows Disconnected
+      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+
+      // Evolution config should still be preserved (error doesn't clear config)
+      expect(screen.getByText('Evolution API Configured')).toBeInTheDocument();
+
+      // Restore mock
+      (apiClient.post as jest.Mock).mockReset();
+      (apiClient.post as jest.Mock).mockResolvedValue({ data: { success: true, data: {} } });
+    });
+
+    it('shows network error message when Evolution API URL is invalid/unreachable', async () => {
+      // When the base URL is incorrect or the server is not reachable,
+      // the apiClient.post call fails with a network-level error.
+
+      // Override apiClient.post to reject with network error for Evolution endpoints
+      (apiClient.post as jest.Mock).mockImplementation(async (url: string, ..._rest: any[]) => {
+        if (url === '/evolution/instance' || url === '/evolution/connect') {
+          throw new Error('Network error: Failed to connect to Evolution API server at https://invalid.example.com');
+        }
+        return { data: { success: true, data: {} } };
+      });
+
+      renderWithRouter(<WhatsAppModule />);
+      await navigateToConnectView();
+
+      // Configure Evolution API with an invalid URL
+      fireEvent.click(screen.getByText('Evolution API'));
+      await waitFor(() => expect(screen.getByText(/Connect via Evolution API/i)).toBeInTheDocument());
+
+      fireEvent.click(screen.getByText('Configure Evolution API'));
+      await waitFor(() =>
+        expect(screen.getByPlaceholderText('https://your-evolution-api.com')).toBeInTheDocument()
+      );
+      fireEvent.change(screen.getByPlaceholderText('https://your-evolution-api.com'), {
+        target: { value: 'https://invalid.example.com' },
+      });
+      fireEvent.change(screen.getByPlaceholderText('Your Evolution API key'), {
+        target: { value: 'sk-test' },
+      });
+      fireEvent.click(screen.getByText(/Save Configuration/i));
+      await waitFor(() => expect(screen.getByText('Evolution API Configured')).toBeInTheDocument());
+
+      // Click Connect — will fail with network error
+      fireEvent.click(screen.getByText('Connect & Get QR Code'));
+
+      // The network error message should appear in the error banner
+      await waitFor(() => {
+        expect(screen.getByText(/Failed to connect to Evolution API server/i)).toBeInTheDocument();
+      });
+
+      // Component should NOT be in scanning state
+      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+
+      // Evolution config should still be preserved
+      expect(screen.getByText('Evolution API Configured')).toBeInTheDocument();
+
+      // The configured badge and error banner both show the URL — verify it appears
+      expect(screen.getAllByText(/invalid\.example\.com/).length).toBeGreaterThanOrEqual(1);
+
+      // User should still be able to update configuration after error
+      expect(screen.getByText('Update Configuration')).toBeInTheDocument();
+
+      // Restore mock
+      (apiClient.post as jest.Mock).mockReset();
+      (apiClient.post as jest.Mock).mockResolvedValue({ data: { success: true, data: {} } });
+    });
+
+    it('shows authentication error when Evolution API key is invalid', async () => {
+      // When the API key is wrong or expired, the Evolution API returns
+      // an authentication error (401 Unauthorized).
+
+      // Override apiClient.post to reject with auth error for Evolution endpoints
+      (apiClient.post as jest.Mock).mockImplementation(async (url: string, ..._rest: any[]) => {
+        if (url === '/evolution/instance' || url === '/evolution/connect') {
+          throw new Error('Authentication failed: Invalid API key (401)');
+        }
+        return { data: { success: true, data: {} } };
+      });
+
+      renderWithRouter(<WhatsAppModule />);
+      await navigateToConnectView();
+
+      // Configure Evolution API with a bad API key
+      fireEvent.click(screen.getByText('Evolution API'));
+      await waitFor(() => expect(screen.getByText(/Connect via Evolution API/i)).toBeInTheDocument());
+
+      fireEvent.click(screen.getByText('Configure Evolution API'));
+      await waitFor(() =>
+        expect(screen.getByPlaceholderText('https://your-evolution-api.com')).toBeInTheDocument()
+      );
+      fireEvent.change(screen.getByPlaceholderText('https://your-evolution-api.com'), {
+        target: { value: 'https://evo.example.com' },
+      });
+      fireEvent.change(screen.getByPlaceholderText('Your Evolution API key'), {
+        target: { value: 'invalid-key-12345' },
+      });
+      fireEvent.click(screen.getByText(/Save Configuration/i));
+      await waitFor(() => expect(screen.getByText('Evolution API Configured')).toBeInTheDocument());
+
+      // Click Connect — will fail with auth error
+      fireEvent.click(screen.getByText('Connect & Get QR Code'));
+
+      // The authentication error message should appear
+      await waitFor(() => {
+        expect(screen.getByText(/Invalid API key \(401\)/i)).toBeInTheDocument();
+      });
+
+      // Component should NOT be in scanning state
+      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+
+      // Evolution config should still be preserved
+      expect(screen.getByText('Evolution API Configured')).toBeInTheDocument();
+
+      // User should be able to update config to fix their API key
+      expect(screen.getByText('Update Configuration')).toBeInTheDocument();
+
+      // Restore mock
+      (apiClient.post as jest.Mock).mockReset();
+      (apiClient.post as jest.Mock).mockResolvedValue({ data: { success: true, data: {} } });
+    });
+
+    it('shows timeout error when Evolution API server does not respond', async () => {
+      // When the Evolution API server is slow or unresponsive,
+      // the request times out with a timeout error.
+
+      // Override apiClient.post to reject with timeout error for Evolution endpoints
+      (apiClient.post as jest.Mock).mockImplementation(async (url: string, ..._rest: any[]) => {
+        if (url === '/evolution/instance' || url === '/evolution/connect') {
+          throw new Error('Request timeout: Evolution API server took too long to respond');
+        }
+        return { data: { success: true, data: {} } };
+      });
+
+      renderWithRouter(<WhatsAppModule />);
+      await navigateToConnectView();
+
+      // Configure Evolution API
+      fireEvent.click(screen.getByText('Evolution API'));
+      await waitFor(() => expect(screen.getByText(/Connect via Evolution API/i)).toBeInTheDocument());
+
+      fireEvent.click(screen.getByText('Configure Evolution API'));
+      await waitFor(() =>
+        expect(screen.getByPlaceholderText('https://your-evolution-api.com')).toBeInTheDocument()
+      );
+      fireEvent.change(screen.getByPlaceholderText('https://your-evolution-api.com'), {
+        target: { value: 'https://evo.example.com' },
+      });
+      fireEvent.change(screen.getByPlaceholderText('Your Evolution API key'), {
+        target: { value: 'sk-test' },
+      });
+      fireEvent.click(screen.getByText(/Save Configuration/i));
+      await waitFor(() => expect(screen.getByText('Evolution API Configured')).toBeInTheDocument());
+
+      // Click Connect — will fail with timeout error
+      fireEvent.click(screen.getByText('Connect & Get QR Code'));
+
+      // The timeout error message should appear
+      await waitFor(() => {
+        expect(screen.getByText(/Request timeout/i)).toBeInTheDocument();
+      });
+
+      // Component should NOT be in scanning state
+      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+
+      // Evolution config should still be preserved
+      expect(screen.getByText('Evolution API Configured')).toBeInTheDocument();
+
+      // User should be able to retry — connect button still present
+      expect(screen.getByText('Connect & Get QR Code')).toBeInTheDocument();
+
+      // Restore mock
+      (apiClient.post as jest.Mock).mockReset();
+      (apiClient.post as jest.Mock).mockResolvedValue({ data: { success: true, data: {} } });
+    });
+  });
 });

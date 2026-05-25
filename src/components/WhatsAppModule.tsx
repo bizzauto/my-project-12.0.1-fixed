@@ -180,7 +180,8 @@ const QRConnectView: React.FC<{
   evolutionConfig?: EvolutionConfig;
   onEvolutionConfigChange?: (config: EvolutionConfig) => void;
   onEvolutionConnect?: () => void;
-}> = ({ connectionStatus, connectedPhone, onConnect, onDisconnect, onRefreshQR, qrValue, connectionMode = 'qr', onModeChange = () => { }, evolutionConfig = { baseUrl: '', apiKey: '', instanceName: '', configured: false }, onEvolutionConfigChange = () => { }, onEvolutionConnect = () => { } }) => {
+  apiError?: string | null;
+}> = ({ connectionStatus, connectedPhone, onConnect, onDisconnect, onRefreshQR, qrValue, connectionMode = 'qr', onModeChange = () => { }, evolutionConfig = { baseUrl: '', apiKey: '', instanceName: '', configured: false }, onEvolutionConfigChange = () => { }, onEvolutionConnect = () => { }, apiError = null }) => {
   const [step, setStep] = useState(0);
   const [showEvolutionForm, setShowEvolutionForm] = useState(false);
 
@@ -249,6 +250,15 @@ const QRConnectView: React.FC<{
   return (
     <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="bg-white rounded-2xl shadow-xl p-10 max-w-2xl w-full mx-4">
+        {apiError && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3" role="alert">
+            <AlertCircle size={20} className="text-red-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-red-800">Connection Error</p>
+              <p className="text-sm text-red-600 mt-1">{apiError}</p>
+            </div>
+          </div>
+        )}
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <MessageSquare size={40} className="text-white" />
@@ -2311,6 +2321,7 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             evolutionConfig={evolutionConfig}
             onEvolutionConfigChange={handleEvolutionConfigSave}
             onEvolutionConnect={handleEvolutionConnect}
+            apiError={apiError}
           />
         )}
         {currentView === 'chats' && (
