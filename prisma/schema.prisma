@@ -240,6 +240,7 @@ model Contact {
   // WhatsApp
   whatsappOptIn   Boolean   @default(false)
   whatsappBlocked Boolean   @default(false)
+  emailOptIn      Boolean   @default(false)
   waProfilePic    String?
   waLastMessageAt DateTime?
   lastMessageAt   DateTime?
@@ -1227,8 +1228,22 @@ model ScheduledMessage {
   scheduledAt DateTime
   status      String   @default("pending")
   error       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  // Template fields for broadcast campaigns
+  templateName     String?
+  templateLanguage String?
+  templateVars     Json?
+
+  // Media fields
+  mediaUrl  String?
+  mediaType String?
+
+  // Delivery tracking
+  waMessageId String?
+  sentAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   @@index([businessId])
   @@index([status])
 }

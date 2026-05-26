@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  MessageSquare, Users, Calendar, Star, RefreshCw,
+  MessageSquare, Users, Calendar, Star, RefreshCw, Smartphone,
 } from 'lucide-react';
 import {
   LineChart, Line, PieChart, Pie, Cell,
@@ -405,7 +405,7 @@ export default function DashboardPage() {
               <span className="text-sm font-medium text-green-700 dark:text-green-400">WhatsApp Chat</span>
             </button>
             <button onClick={() => navigate('/social')} className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all gap-2 border border-blue-200/50 dark:border-blue-800/30 hover-lift">
-              <span className="text-2xl">&#128241;</span>
+              <Smartphone className="text-blue-600 dark:text-blue-400" size={24} />
               <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Create Post</span>
             </button>
             <button onClick={() => navigate('/creative')} className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 transition-all gap-2 border border-purple-200/50 dark:border-purple-800/30 hover-lift">
