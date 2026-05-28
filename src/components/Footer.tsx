@@ -36,19 +36,20 @@ const Footer: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate 
             </p>
             <div className="flex gap-3">
               {[
-                { icon: 'f', href: '#' },
-                { icon: '𝕏', href: '#' },
-                { icon: '📷', href: '#' },
-                { icon: 'in', href: '#' },
-                { icon: '▶', href: '#' },
+                { icon: 'f', label: 'Facebook' },
+                { icon: '𝕏', label: 'Twitter' },
+                { icon: '📷', label: 'Instagram' },
+                { icon: 'in', label: 'LinkedIn' },
+                { icon: '▶', label: 'YouTube' },
               ].map((social, i) => (
-                <a
+                <button
                   key={i}
-                  href={social.href}
+                  onClick={nav('about')}
                   className="w-9 h-9 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-700 hover:text-white transition-colors font-bold text-sm"
+                  title={social.label}
                 >
                   {social.icon}
-                </a>
+                </button>
               ))}
             </div>
           </div>
@@ -68,7 +69,7 @@ const Footer: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate 
                 { label: 'Pricing', page: 'pricing' },
               ].map(link => (
                 <li key={link.label}>
-                  <a href="#" onClick={nav(link.page)} className="text-gray-400 hover:text-white text-sm transition-colors">{link.label}</a>
+                  <button onClick={nav(link.page)} className="bg-transparent border-0 p-0 text-left text-gray-400 hover:text-white text-sm transition-colors cursor-pointer">{link.label}</button>
                 </li>
               ))}
             </ul>
@@ -80,7 +81,7 @@ const Footer: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate 
             <ul className="space-y-2">
               {['Real Estate', 'Healthcare', 'Education', 'E-Commerce', 'Restaurants', 'Salons & Spas', 'Agencies', 'Startups'].map(link => (
                 <li key={link}>
-                  <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">{link}</a>
+                  <span className="text-gray-500 text-sm cursor-default">{link}</span>
                 </li>
               ))}
             </ul>
@@ -101,7 +102,7 @@ const Footer: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate 
                 { label: 'Feature Request', page: 'contact' },
               ].map(link => (
                 <li key={link.label}>
-                  <a href="#" onClick={nav(link.page)} className="text-gray-400 hover:text-white text-sm transition-colors">{link.label}</a>
+                  <button onClick={nav(link.page)} className="bg-transparent border-0 p-0 text-left text-gray-400 hover:text-white text-sm transition-colors cursor-pointer">{link.label}</button>
                 </li>
               ))}
             </ul>
@@ -120,7 +121,7 @@ const Footer: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate 
                 { label: 'Security', page: 'about' },
               ].map(link => (
                 <li key={link.label}>
-                  <a href="#" onClick={nav(link.page)} className="text-gray-400 hover:text-white text-sm transition-colors">{link.label}</a>
+                  <button onClick={nav(link.page)} className="bg-transparent border-0 p-0 text-left text-gray-400 hover:text-white text-sm transition-colors cursor-pointer">{link.label}</button>
                 </li>
               ))}
             </ul>
