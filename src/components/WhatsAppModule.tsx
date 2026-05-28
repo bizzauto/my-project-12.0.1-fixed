@@ -400,9 +400,22 @@ const QRConnectView: React.FC<{
                                 alt="WhatsApp QR Code"
                                 className="w-64 h-64 object-contain mx-auto rounded-lg"
                               />
+                            ) : qrValue.startsWith('iVBOR') || qrValue.startsWith('/9j/') || qrValue.length > 100 ? (
+                              <img
+                                src={`data:image/png;base64,${qrValue}`}
+                                alt="WhatsApp QR Code"
+                                className="w-64 h-64 object-contain mx-auto rounded-lg"
+                              />
                             ) : (
-                              <div className="w-64 h-64 mx-auto flex items-center justify-center bg-purple-50 rounded-lg">
-                                <QrCode size={120} className="text-purple-400" />
+                              <div className="w-64 h-64 mx-auto">
+                                <QRCodeSVG
+                                  value={qrValue}
+                                  size={256}
+                                  level="M"
+                                  includeMargin={true}
+                                  bgColor="#ffffff"
+                                  fgColor="#1a1a1a"
+                                />
                               </div>
                             )}
                             <p className="text-sm text-gray-500 mt-3">
@@ -2129,7 +2142,7 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             // Check status
             try {
               const status = await evolutionAPI.getStatus(config.instanceName);
-              if (mounted && status?.data?.state === 'open') {
+              if (mounted && status?.data?.data?.status === 'connected') {
                 setIsEvolutionConnected(true);
                 setConnectionStatus('connected');
               }
@@ -2183,6 +2196,28 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     }
   }, [isEvolutionConnected, evolutionInstanceName]);
 
+  // Poll connection status when scanning to detect QR scan completion
+  useEffect(() => {
+    if (connectionStatus !== 'scanning' || !evolutionInstanceName) return;
+    let mounted = true;
+    const poll = async () => {
+      try {
+        const res = await evolutionAPI.getStatus(evolutionInstanceName);
+        if (!mounted) return;
+        if (res?.data?.data?.status === 'connected') {
+          setIsEvolutionConnected(true);
+          setConnectionStatus('connected');
+          setConnectedPhone(res.data.data.phone || '');
+        } else if (res?.data?.data?.status === 'disconnected') {
+          setConnectionStatus('disconnected');
+        }
+      } catch {}
+    };
+    poll();
+    const interval = setInterval(poll, 3000);
+    return () => { mounted = false; clearInterval(interval); };
+  }, [connectionStatus, evolutionInstanceName]);
+
   const handleEvolutionConnect = async () => {
     setApiError(null);
     if (!evolutionConfig.configured) {
@@ -2192,6 +2227,7 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     try {
       const instanceName = evolutionConfig.instanceName || `instance-${Date.now()}`;
       setEvolutionInstanceName(instanceName);
+      setEvolutionQR(''); // Clear previous QR
 
       // Try to create instance (include apiKey!)
       try {
@@ -2207,10 +2243,14 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       // Connect and get QR
       const connectRes = await evolutionAPI.connectInstance(instanceName);
       // Server wraps response: { success: true, data: { qrCode, qrCodeBase64, status } }
-      if (connectRes?.data?.data?.qrCode || connectRes?.data?.data?.qrCodeBase64) {
-        setEvolutionQR(connectRes.data.data.qrCodeBase64 || connectRes.data.data.qrCode);
+      const qrCode = connectRes?.data?.data?.qrCodeBase64 || connectRes?.data?.data?.qrCode || '';
+      if (qrCode) {
+        setEvolutionQR(qrCode);
+        setConnectionStatus('scanning');
+      } else {
+        // Empty QR - timeout scenario, show error
+        setApiError('QR code generation timed out. The Evolution API may need a restart. Try again or check your server configuration.');
       }
-      setConnectionStatus('scanning');
     } catch (err: any) {
       setApiError(err?.message || 'Failed to connect to Evolution API');
     }

@@ -38,6 +38,7 @@ export class EvolutionApiService {
 
   /**
    * Create a new Evolution API instance
+   * If instance already exists, still saves config to DB gracefully.
    */
   static async createInstance(businessId: string, options: {
     baseUrl: string;
@@ -54,6 +55,13 @@ export class EvolutionApiService {
           instanceName,
           qrcode: true,
           integration: 'WHATSAPP-BAILEYS',
+          number: '', // Auto-detect instance owner number
+          rejectCall: false,
+          groupsIgnore: true,
+          alwaysOnline: true,
+          readMessages: true,
+          readStatus: true,
+          syncFullHistory: false,
           webhook: options.webhookUrl ? {
             url: options.webhookUrl,
             webhookByEvents: true,
@@ -81,11 +89,9 @@ export class EvolutionApiService {
         }
       );
 
-      // Save integration config
+      // Save integration config on success
       await prisma.integration.upsert({
-        where: {
-          id: `evo_${businessId}`,
-        },
+        where: { id: `evo_${businessId}` },
         create: {
           id: `evo_${businessId}`,
           businessId,
@@ -114,6 +120,43 @@ export class EvolutionApiService {
 
       return response.data;
     } catch (error: any) {
+      const isAlreadyExists = error.response?.status === 403 && 
+        (error.response?.data?.response?.message?.[0]?.includes('already in use') 
+         || error.response?.data?.error === 'Forbidden');
+
+      if (isAlreadyExists) {
+        // Instance already exists — save config and treat as success
+        console.log('Evolution API instance already exists, saving config...');
+        await prisma.integration.upsert({
+          where: { id: `evo_${businessId}` },
+          create: {
+            id: `evo_${businessId}`,
+            businessId,
+            type: 'evolution_api',
+            name: 'Evolution API',
+            config: {
+              baseUrl: options.baseUrl,
+              apiKey: options.apiKey,
+              instanceName,
+              instanceId: '',
+              status: 'exists',
+            },
+            isActive: true,
+          },
+          update: {
+            config: {
+              baseUrl: options.baseUrl,
+              apiKey: options.apiKey,
+              instanceName,
+              instanceId: '',
+              status: 'exists',
+            },
+            isActive: true,
+          },
+        });
+        return { success: true, message: 'Instance already exists', instanceName };
+      }
+
       console.error('Evolution API create instance error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.message || 'Failed to create Evolution API instance');
     }
@@ -121,6 +164,13 @@ export class EvolutionApiService {
 
   /**
    * Connect to an existing instance and get QR code
+   * Evolution API v2.x: GET /instance/connect/:name returns QR pairing data
+   * Response: { pairingCode, code, base64?, count }
+   * - `code` = raw QR string (encode with QRCodeSVG on frontend)
+   * - `base64` = base64-encoded QR image (display directly as <img>)
+   * 
+   * Known issue: Evolution API v2.x sometimes returns { count: 0 } instead of QR data.
+   * Workaround: Retry with delay, then fallback to /instance/qrcode/:name.
    */
   static async connectInstance(businessId: string): Promise<{
     qrCode: string;
@@ -129,36 +179,109 @@ export class EvolutionApiService {
   }> {
     const config = await this.getConfig(businessId);
 
-    try {
-      // Connect the instance
-      await axios.post(
-        `${config.baseUrl}/instance/connect/${config.instanceName}`,
-        {},
-        { headers: { apikey: config.apiKey } }
-      );
+    // Helper: extract QR code from various response formats
+    const extractQR = (data: any): string => {
+      if (typeof data === 'string') return data;
+      if (data?.base64) return data.base64;
+      if (data?.qrcode?.base64Image) return data.qrcode.base64Image;
+      if (data?.qrcode?.code) return data.qrcode.code;
+      if (data?.code) return data.code;
+      if (data?.pairingCode) return data.pairingCode;
+      return '';
+    };
 
-      // Fetch QR code
-      const qrResponse = await axios.get(
-        `${config.baseUrl}/instance/qrcode/${config.instanceName}`,
-        { headers: { apikey: config.apiKey } }
-      );
+    // Helper: check if response has meaningful QR data
+    const hasQRData = (data: any): boolean => {
+      if (typeof data === 'string' && data.length > 0) return true;
+      if (data?.base64 || data?.code || data?.pairingCode) return true;
+      if (data?.qrcode?.base64Image || data?.qrcode?.code) return true;
+      return false;
+    };
 
-      // Update status
-      await this.updateStatus(businessId, 'scanning');
+    // Retry logic for known bug where Evolution API returns { count: 0 }
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 2000;
 
-      return {
-        qrCode: qrResponse.data?.qrcode?.code || qrResponse.data?.base64 || '',
-        qrCodeBase64: qrResponse.data?.qrcode?.base64Image || qrResponse.data?.base64Image,
-        status: 'scanning',
-      };
-    } catch (error: any) {
-      console.error('Evolution API connect error:', error.response?.data || error.message);
-      throw new Error('Failed to connect Evolution API instance');
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const response = await axios.get(
+          `${config.baseUrl}/instance/connect/${config.instanceName}`,
+          { headers: { apikey: config.apiKey }, timeout: 15000 }
+        );
+
+        const data = response.data;
+
+        if (hasQRData(data)) {
+          const qrCodeRaw = extractQR(data);
+          await this.updateStatus(businessId, 'scanning');
+          const isBase64Image = qrCodeRaw.startsWith('data:') || qrCodeRaw.startsWith('iVBOR');
+          return {
+            qrCode: qrCodeRaw,
+            qrCodeBase64: isBase64Image ? qrCodeRaw : undefined,
+            status: 'scanning',
+          };
+        }
+
+        // { count: 0 } or empty data — retry if attempts remain
+        if (attempt < MAX_RETRIES) {
+          console.log(`Evolution API connect returned no QR data (attempt ${attempt}/${MAX_RETRIES}), retrying in ${RETRY_DELAY_MS}ms...`);
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+        } else {
+          // All retries exhausted — try fallback to /instance/qrcode/:name endpoint
+          console.log('Evolution API /instance/connect exhausted retries, trying /instance/qrcode fallback...');
+          try {
+            const fallbackResponse = await axios.get(
+              `${config.baseUrl}/instance/qrcode/${config.instanceName}`,
+              { headers: { apikey: config.apiKey }, timeout: 10000 }
+            );
+            const fallbackData = fallbackResponse.data;
+            if (hasQRData(fallbackData)) {
+              const qrCodeRaw = extractQR(fallbackData);
+              await this.updateStatus(businessId, 'scanning');
+              const isBase64Image = qrCodeRaw.startsWith('data:') || qrCodeRaw.startsWith('iVBOR');
+              console.log('Successfully got QR code via /instance/qrcode fallback endpoint');
+              return {
+                qrCode: qrCodeRaw,
+                qrCodeBase64: isBase64Image ? qrCodeRaw : undefined,
+                status: 'scanning',
+              };
+            }
+          } catch (fallbackErr: any) {
+            console.log('/instance/qrcode fallback also failed:', fallbackErr.message);
+          }
+
+          // Both endpoints failed — throw helpful error
+          throw new Error(
+            'Evolution API returned no QR code. This is a known issue. ' +
+            'Try restarting the Evolution API container or check if it has enough memory. ' +
+            'Known workaround: Set CACHE_REDIS_ENABLED=false, CACHE_LOCAL_ENABLED=true, ' +
+            'DATABASE_SAVE_DATA_CHATS=false, DATABASE_SAVE_DATA_CONTACTS=false, ' +
+            'DATABASE_SAVE_DATA_HISTORIC=false in your Evolution API environment.'
+          );
+        }
+      } catch (error: any) {
+        // If it's our custom error, re-throw it directly
+        if (error.message?.includes('Evolution API returned no QR code')) {
+          throw error;
+        }
+
+        if (attempt < MAX_RETRIES) {
+          console.log(`Evolution API connect attempt ${attempt} failed: ${error.message}, retrying...`);
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+        } else {
+          console.error('Evolution API connect error (all retries exhausted):', error.response?.data || error.message);
+          throw new Error('Failed to connect Evolution API instance: ' + (error.response?.data?.message || error.message));
+        }
+      }
     }
+
+    throw new Error('Failed to connect Evolution API instance (unexpected)');
   }
 
   /**
    * Get connection status
+   * Evolution API v2.x: GET /instance/connectionState/:instanceName
+   * Returns: { instance: { instanceName, state: 'open' | 'close' | 'connecting' } }
    */
   static async getConnectionStatus(businessId: string): Promise<{
     status: 'disconnected' | 'scanning' | 'connected';
@@ -170,21 +293,34 @@ export class EvolutionApiService {
       const config = await this.getConfig(businessId);
 
       const response = await axios.get(
-        `${config.baseUrl}/instance/fetchInstances?instanceName=${config.instanceName}`,
+        `${config.baseUrl}/instance/connectionState/${config.instanceName}`,
         { headers: { apikey: config.apiKey } }
       );
 
-      const instance = Array.isArray(response.data) ? response.data[0] : response.data;
-      const state = instance?.instance?.state || instance?.state || 'close';
+      const state = response.data?.instance?.state || 'close';
 
       if (state === 'open') {
-        // Fetch profile info
+        // Fetch profile info — phone, name, and picture
+        let phone = '';
         let profileName = '';
         let profilePicUrl = '';
+
+        // Fetch instance details for phone number (fallback to fetchInstances)
+        try {
+          const fetchRes = await axios.get(
+            `${config.baseUrl}/instance/fetchInstances?instanceName=${config.instanceName}`,
+            { headers: { apikey: config.apiKey } }
+          );
+          const instanceData = Array.isArray(fetchRes.data) ? fetchRes.data[0] : fetchRes.data;
+          phone = instanceData?.instance?.phone || instanceData?.phone || '';
+          profileName = instanceData?.instance?.profileName || instanceData?.profileName || profileName;
+        } catch {}
+
+        // Fetch profile picture
         try {
           const profileRes = await axios.post(
             `${config.baseUrl}/chat/fetchProfilePictureUrl/${config.instanceName}`,
-            { number: instance?.instance?.phone || '' },
+            { number: '' },
             { headers: { apikey: config.apiKey } }
           );
           profilePicUrl = profileRes.data?.profilePictureUrl || '';
@@ -194,11 +330,11 @@ export class EvolutionApiService {
 
         return {
           status: 'connected',
-          phone: instance?.instance?.phone || '',
-          profileName: instance?.instance?.profileName || '',
+          phone,
+          profileName,
           profilePicUrl,
         };
-      } else if (state === 'connecting') {
+      } else if (state === 'connecting' || state === 'pairing' || state === 'syncing') {
         return { status: 'scanning' };
       } else {
         return { status: 'disconnected' };
