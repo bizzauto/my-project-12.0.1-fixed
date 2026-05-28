@@ -173,6 +173,10 @@ function getOptimalModel(type: string) {
 async function callAIProvider(model: any, prompt: string) {
   try {
     if (model.provider === 'openrouter') {
+      const apiKey = process.env.OPENROUTER_API_KEY;
+      if (!apiKey || apiKey === 'your_openrouter_api_key') {
+        throw new Error('OPENROUTER_API_KEY not configured in .env');
+      }
       const response = await axios.post(
         'https://openrouter.ai/api/v1/chat/completions',
         {
@@ -183,7 +187,7 @@ async function callAIProvider(model: any, prompt: string) {
         },
         {
           headers: {
-            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
             'HTTP-Referer': 'https://yoursaas.in',
             'X-Title': 'YourSaaS',
@@ -194,6 +198,32 @@ async function callAIProvider(model: any, prompt: string) {
     }
 
     if (model.provider === 'grok') {
+      const grokKey = process.env.GROK_API_KEY;
+      if (!grokKey || grokKey === 'your_grok_api_key') {
+        // Fallback to OpenRouter with llama model
+        const openrouterKey = process.env.OPENROUTER_API_KEY;
+        if (!openrouterKey || openrouterKey === 'your_openrouter_api_key') {
+          throw new Error('Neither GROK_API_KEY nor OPENROUTER_API_KEY configured in .env');
+        }
+        const response = await axios.post(
+          'https://openrouter.ai/api/v1/chat/completions',
+          {
+            model: 'meta-llama/llama-3.1-8b-instruct:free',
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 500,
+            temperature: 0.7,
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${openrouterKey}`,
+              'Content-Type': 'application/json',
+              'HTTP-Referer': 'https://yoursaas.in',
+              'X-Title': 'YourSaaS',
+            },
+          }
+        );
+        return { text: response.data.choices[0].message.content };
+      }
       const response = await axios.post(
         'https://api.x.ai/v1/chat/completions',
         {
@@ -203,7 +233,7 @@ async function callAIProvider(model: any, prompt: string) {
         },
         {
           headers: {
-            'Authorization': `Bearer ${process.env.GROK_API_KEY}`,
+            'Authorization': `Bearer ${grokKey}`,
             'Content-Type': 'application/json',
           },
         }

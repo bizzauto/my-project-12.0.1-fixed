@@ -27,38 +27,7 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get single review
-router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  try {
-    const review = await prisma.review.findFirst({
-      where: { id: req.params.id, businessId: req.user.businessId },
-    });
-
-    if (!review) {
-      return res.status(404).json({ success: false, error: 'Review not found' });
-    }
-
-    res.json({ success: true, data: review });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: 'Failed to fetch review', details: error.message });
-  }
-});
-
-// Update review reply
-router.put('/:id/reply', authenticate, async (req: AuthRequest, res: Response) => {
-  try {
-    const { replyText } = req.body;
-    await prisma.review.update({
-      where: { id: req.params.id },
-      data: { replyText, repliedAt: new Date(), replyStatus: 'sent' },
-    });
-    res.json({ success: true, message: 'Reply sent' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: 'Failed to send reply', details: error.message });
-  }
-});
-
-// Get review stats
+// Get review stats (MUST be before /:id)
 router.get('/stats', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const businessId = req.user.businessId;
@@ -98,6 +67,37 @@ router.get('/stats', authenticate, async (req: AuthRequest, res: Response) => {
   } catch (error: any) {
     console.error('Get review stats error:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch review stats', details: error.message });
+  }
+});
+
+// Get single review
+router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const review = await prisma.review.findFirst({
+      where: { id: req.params.id, businessId: req.user.businessId },
+    });
+
+    if (!review) {
+      return res.status(404).json({ success: false, error: 'Review not found' });
+    }
+
+    res.json({ success: true, data: review });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Failed to fetch review', details: error.message });
+  }
+});
+
+// Update review reply
+router.put('/:id/reply', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { replyText } = req.body;
+    await prisma.review.update({
+      where: { id: req.params.id },
+      data: { replyText, repliedAt: new Date(), replyStatus: 'sent' },
+    });
+    res.json({ success: true, message: 'Reply sent' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Failed to send reply', details: error.message });
   }
 });
 

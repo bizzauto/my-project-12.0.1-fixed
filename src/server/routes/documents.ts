@@ -54,7 +54,63 @@ router.put('/:id', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: 
   }
 });
 
-// Get single document
+// ==================== DOCUMENT TEMPLATES ====================
+
+router.get('/templates', async (req: AuthRequest, res: Response) => {
+  try {
+    const templates = await prisma.documentTemplate.findMany({
+      where: { OR: [{ businessId: req.user.businessId }, { isDefault: true }] },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ success: true, data: templates });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/templates', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: Response) => {
+  try {
+    const template = await prisma.documentTemplate.create({
+      data: { businessId: req.user.businessId, ...req.body },
+    });
+    res.status(201).json({ success: true, data: template });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ==================== AI CONTENT ====================
+
+router.get('/ai-content', async (req: AuthRequest, res: Response) => {
+  try {
+    const { type, page = '1', limit = '20' } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const where: any = { userId: req.user.id };
+    if (type) where.type = type;
+
+    const [content, total] = await Promise.all([
+      prisma.aIContent.findMany({ where, skip, take: parseInt(limit), orderBy: { createdAt: 'desc' } }),
+      prisma.aIContent.count({ where }),
+    ]);
+
+    res.json({ success: true, data: { content, pagination: { page: parseInt(page), limit: parseInt(limit), total } } });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/ai-content', async (req: AuthRequest, res: Response) => {
+  try {
+    const aiContent = await prisma.aIContent.create({
+      data: { userId: req.user.id, ...req.body },
+    });
+    res.status(201).json({ success: true, data: aiContent });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single document (MUST be after /templates and /ai-content to avoid route conflicts!)
 router.get('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const document = await prisma.document.findFirst({
@@ -138,62 +194,6 @@ router.delete('/:id', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, re
   try {
     await prisma.document.delete({ where: { id: req.params.id, businessId: req.user.businessId } });
     res.json({ success: true, message: 'Deleted' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// ==================== DOCUMENT TEMPLATES ====================
-
-router.get('/templates', async (req: AuthRequest, res: Response) => {
-  try {
-    const templates = await prisma.documentTemplate.findMany({
-      where: { OR: [{ businessId: req.user.businessId }, { isDefault: true }] },
-      orderBy: { createdAt: 'desc' },
-    });
-    res.json({ success: true, data: templates });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-router.post('/templates', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: Response) => {
-  try {
-    const template = await prisma.documentTemplate.create({
-      data: { businessId: req.user.businessId, ...req.body },
-    });
-    res.status(201).json({ success: true, data: template });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// ==================== AI CONTENT ====================
-
-router.get('/ai-content', async (req: AuthRequest, res: Response) => {
-  try {
-    const { type, page = '1', limit = '20' } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const where: any = { businessId: req.user.businessId };
-    if (type) where.type = type;
-
-    const [content, total] = await Promise.all([
-      prisma.aIContent.findMany({ where, skip, take: parseInt(limit), orderBy: { createdAt: 'desc' } }),
-      prisma.aIContent.count({ where }),
-    ]);
-
-    res.json({ success: true, data: { content, pagination: { page: parseInt(page), limit: parseInt(limit), total } } });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-router.post('/ai-content', async (req: AuthRequest, res: Response) => {
-  try {
-    const aiContent = await prisma.aIContent.create({
-      data: { businessId: req.user.businessId, userId: req.user.id, ...req.body },
-    });
-    res.status(201).json({ success: true, data: aiContent });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }

@@ -139,10 +139,12 @@ const evolutionAPI = {
 };
 
 // Helper: try API first, fall back to mock data
-async function tryAPI<T>(apiCall: () => Promise<{ data: T }>, fallback: T): Promise<T> {
+async function tryAPI<T>(apiCall: () => Promise<{ data: any }>, fallback: T): Promise<T> {
   try {
     const res = await apiCall();
-    return res?.data ?? fallback;
+    const body = res?.data;
+    // Backend wraps: { success: true, data: actualData } → unwrap to actualData
+    return (body?.data as T) ?? (body as T) ?? fallback;
   } catch {
     return fallback;
   }

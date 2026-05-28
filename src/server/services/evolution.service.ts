@@ -55,13 +55,21 @@ export class EvolutionApiService {
   /**
    * Create a new Evolution API instance
    * If instance already exists, still saves config to DB gracefully.
+   * When baseUrl/apiKey are not provided, reads from internal config (DB/env).
    */
   static async createInstance(businessId: string, options: {
-    baseUrl: string;
-    apiKey: string;
+    baseUrl?: string;
+    apiKey?: string;
     instanceName?: string;
     webhookUrl?: string;
   }): Promise<any> {
+    // If baseUrl/apiKey not provided, read from internal config
+    if (!options.baseUrl || !options.apiKey) {
+      const internalConfig = await this.getConfig(businessId);
+      options.baseUrl = options.baseUrl || internalConfig.baseUrl;
+      options.apiKey = options.apiKey || internalConfig.apiKey;
+      options.instanceName = options.instanceName || internalConfig.instanceName;
+    }
     const instanceName = options.instanceName || `biz_${businessId.slice(-8)}`;
 
     try {
@@ -891,6 +899,7 @@ export class EvolutionApiService {
     status: string;
     instanceName: string;
     baseUrl: string;
+    apiKey: string;
   }> {
     // First check database for a saved config
     const integration = await prisma.integration.findFirst({
@@ -904,6 +913,7 @@ export class EvolutionApiService {
         status: config.status || 'disconnected',
         instanceName: config.instanceName || '',
         baseUrl: config.baseUrl || '',
+        apiKey: config.apiKey || '',
       };
     }
 
@@ -917,10 +927,11 @@ export class EvolutionApiService {
         status: 'disconnected',
         instanceName: process.env.EVOLUTION_INSTANCE_NAME || `biz_${businessId.slice(-8)}`,
         baseUrl: envBaseUrl,
+        apiKey: envApiKey,
       };
     }
 
-    return { configured: false, status: 'disconnected', instanceName: '', baseUrl: '' };
+    return { configured: false, status: 'disconnected', instanceName: '', baseUrl: '', apiKey: '' };
   }
 }
 

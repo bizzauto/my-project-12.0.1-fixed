@@ -6,7 +6,7 @@ import axios from 'axios';
 const router = Router();
 
 // Debug endpoint - Test Qwen 3.6 Plus connection
-router.post('/qwen-preview/test', async (req: any, res: any) => {
+router.post('/test', async (req: any, res: any) => {
   try {
     const apiKey = process.env.OPENROUTER_API_KEY;
 
@@ -53,7 +53,7 @@ router.post('/qwen-preview/test', async (req: any, res: any) => {
 });
 
 // Qwen 3.6 Plus Preview - Advanced AI Model
-router.post('/qwen-preview', authenticate, async (req: any, res: any) => {
+router.post('/', authenticate, async (req: any, res: any) => {
   try {
     const { prompt, maxTokens = 2000, temperature = 0.7, type = 'general' } = req.body;
 
@@ -147,7 +147,7 @@ router.post('/qwen-preview', authenticate, async (req: any, res: any) => {
 });
 
 // Qwen 3.6 Plus Preview - Streaming endpoint
-router.post('/qwen-preview/stream', authenticate, async (req: any, res: any) => {
+router.post('/stream', authenticate, async (req: any, res: any) => {
   try {
     const { prompt, maxTokens = 2000, temperature = 0.7 } = req.body;
 
@@ -234,7 +234,7 @@ router.post('/qwen-preview/stream', authenticate, async (req: any, res: any) => 
 });
 
 // Get Qwen 3.6 Plus Preview info
-router.get('/qwen-preview/info', authenticate, async (req: any, res: any) => {
+router.get('/info', authenticate, async (req: any, res: any) => {
   res.json({
     success: true,
     data: {

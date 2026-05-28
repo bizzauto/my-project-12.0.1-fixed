@@ -46,10 +46,7 @@ router.post('/instance', authenticate, async (req: any, res: any) => {
     if (!businessId) return res.status(400).json({ success: false, error: 'Business ID required' });
 
     const { baseUrl, apiKey, instanceName, webhookUrl } = req.body;
-    if (!baseUrl || !apiKey) {
-      return res.status(400).json({ success: false, error: 'baseUrl and apiKey are required' });
-    }
-
+    // baseUrl/apiKey are optional - service falls back to DB config / env vars
     const result = await EvolutionApiService.createInstance(businessId, {
       baseUrl, apiKey, instanceName, webhookUrl,
     });
