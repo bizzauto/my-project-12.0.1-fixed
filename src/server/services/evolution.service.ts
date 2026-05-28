@@ -20,20 +20,36 @@ export class EvolutionApiService {
     apiKey: string;
     instanceName: string;
   }> {
+    // First, try to get config from database (user-configured via UI)
     const integration = await prisma.integration.findFirst({
       where: { businessId, type: 'evolution_api', isActive: true },
     });
 
-    if (!integration) {
-      throw new Error('Evolution API not configured for this business');
+    if (integration) {
+      const config = integration.config as any;
+      return {
+        baseUrl: config.baseUrl || '',
+        apiKey: config.apiKey || '',
+        instanceName: config.instanceName || `biz_${businessId.slice(-8)}`,
+      };
     }
 
-    const config = integration.config as any;
-    return {
-      baseUrl: config.baseUrl || '',
-      apiKey: config.apiKey || '',
-      instanceName: config.instanceName || `biz_${businessId.slice(-8)}`,
-    };
+    // FALLBACK: Read from environment variables as system default
+    // This allows the backend to work immediately without UI configuration
+    const envBaseUrl = process.env.EVOLUTION_API_URL;
+    const envApiKey = process.env.EVOLUTION_API_KEY;
+    const envInstanceName = process.env.EVOLUTION_INSTANCE_NAME;
+
+    if (envBaseUrl && envApiKey) {
+      return {
+        baseUrl: envBaseUrl,
+        apiKey: envApiKey,
+        instanceName: envInstanceName || `biz_${businessId.slice(-8)}`,
+      };
+    }
+
+    // No config found anywhere
+    throw new Error('Evolution API not configured. Set EVOLUTION_API_URL and EVOLUTION_API_KEY in .env or configure via UI.');
   }
 
   /**
@@ -227,30 +243,7 @@ export class EvolutionApiService {
           console.log(`Evolution API connect returned no QR data (attempt ${attempt}/${MAX_RETRIES}), retrying in ${RETRY_DELAY_MS}ms...`);
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
         } else {
-          // All retries exhausted — try fallback to /instance/qrcode/:name endpoint
-          console.log('Evolution API /instance/connect exhausted retries, trying /instance/qrcode fallback...');
-          try {
-            const fallbackResponse = await axios.get(
-              `${config.baseUrl}/instance/qrcode/${config.instanceName}`,
-              { headers: { apikey: config.apiKey }, timeout: 10000 }
-            );
-            const fallbackData = fallbackResponse.data;
-            if (hasQRData(fallbackData)) {
-              const qrCodeRaw = extractQR(fallbackData);
-              await this.updateStatus(businessId, 'scanning');
-              const isBase64Image = qrCodeRaw.startsWith('data:') || qrCodeRaw.startsWith('iVBOR');
-              console.log('Successfully got QR code via /instance/qrcode fallback endpoint');
-              return {
-                qrCode: qrCodeRaw,
-                qrCodeBase64: isBase64Image ? qrCodeRaw : undefined,
-                status: 'scanning',
-              };
-            }
-          } catch (fallbackErr: any) {
-            console.log('/instance/qrcode fallback also failed:', fallbackErr.message);
-          }
-
-          // Both endpoints failed — throw helpful error
+          // All retries exhausted — throw helpful error
           throw new Error(
             'Evolution API returned no QR code. This is a known issue. ' +
             'Try restarting the Evolution API container or check if it has enough memory. ' +
@@ -899,21 +892,35 @@ export class EvolutionApiService {
     instanceName: string;
     baseUrl: string;
   }> {
+    // First check database for a saved config
     const integration = await prisma.integration.findFirst({
       where: { businessId, type: 'evolution_api' },
     });
 
-    if (!integration) {
-      return { configured: false, status: 'disconnected', instanceName: '', baseUrl: '' };
+    if (integration) {
+      const config = integration.config as any;
+      return {
+        configured: true,
+        status: config.status || 'disconnected',
+        instanceName: config.instanceName || '',
+        baseUrl: config.baseUrl || '',
+      };
     }
 
-    const config = integration.config as any;
-    return {
-      configured: true,
-      status: config.status || 'disconnected',
-      instanceName: config.instanceName || '',
-      baseUrl: config.baseUrl || '',
-    };
+    // Fallback: check if environment variables are set
+    // This ensures the frontend shows 'Connect' button when env vars exist
+    const envBaseUrl = process.env.EVOLUTION_API_URL;
+    const envApiKey = process.env.EVOLUTION_API_KEY;
+    if (envBaseUrl && envApiKey) {
+      return {
+        configured: true,
+        status: 'disconnected',
+        instanceName: process.env.EVOLUTION_INSTANCE_NAME || `biz_${businessId.slice(-8)}`,
+        baseUrl: envBaseUrl,
+      };
+    }
+
+    return { configured: false, status: 'disconnected', instanceName: '', baseUrl: '' };
   }
 }
 

@@ -2243,13 +2243,19 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       // Connect and get QR
       const connectRes = await evolutionAPI.connectInstance(instanceName);
       // Server wraps response: { success: true, data: { qrCode, qrCodeBase64, status } }
-      const qrCode = connectRes?.data?.data?.qrCodeBase64 || connectRes?.data?.data?.qrCode || '';
+      const responseData = connectRes?.data?.data || connectRes?.data;
+      const qrCode = responseData?.qrCodeBase64 || responseData?.qrCode || '';
       if (qrCode) {
         setEvolutionQR(qrCode);
         setConnectionStatus('scanning');
       } else {
-        // Empty QR - timeout scenario, show error
-        setApiError('QR code generation timed out. The Evolution API may need a restart. Try again or check your server configuration.');
+        // No QR yet - show general error with helpful message
+        // Common issue: instance already exists in 'connecting' state
+        setApiError(
+          'No QR code received from Evolution API. The instance may already be in use or stuck. '
+          + 'Try deleting the instance first, or check the Evolution API server logs. '
+          + 'Known fix: Set DATABASE_SAVE_DATA_CHATS=false in Evolution API env vars.'
+        );
       }
     } catch (err: any) {
       setApiError(err?.message || 'Failed to connect to Evolution API');
@@ -2258,14 +2264,18 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
   const handleEvolutionConfigSave = async (config: EvolutionConfig) => {
     setEvolutionConfig(config);
+    setApiError(null);
     try {
       await evolutionAPI.saveConfig({
         baseUrl: config.baseUrl,
         apiKey: config.apiKey,
         instanceName: config.instanceName,
       });
-    } catch {
-      // Config saved locally only
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.error || err?.message || 'Failed to save Evolution API configuration';
+      // Revert configured flag so UI doesn't show 'Connect' when backend save failed
+      setEvolutionConfig(prev => ({ ...prev, configured: false }));
+      setApiError(errorMsg);
     }
   };
 
