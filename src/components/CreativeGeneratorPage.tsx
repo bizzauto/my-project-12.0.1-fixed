@@ -593,10 +593,10 @@ const CreativeGeneratorPage: React.FC = () => {
                     </div>
                   )}
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <button className="p-2 bg-white rounded-lg hover:bg-gray-100">
+                    <button onClick={handleDownload} className="p-2 bg-white rounded-lg hover:bg-gray-100">
                       <Download size={16} className="text-gray-900" />
                     </button>
-                    <button className="p-2 bg-white rounded-lg hover:bg-gray-100">
+                    <button onClick={() => { navigator.clipboard?.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="p-2 bg-white rounded-lg hover:bg-gray-100">
                       <Share2 size={16} className="text-gray-900" />
                     </button>
                   </div>

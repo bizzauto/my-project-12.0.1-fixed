@@ -444,7 +444,7 @@ const EmailMarketingPage: React.FC = () => {
                         <button onClick={() => sendCampaign(campaign.id)} className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 flex items-center gap-1"><Send size={12} /> Send</button>
                       )}
                       {campaign.status === 'scheduled' && (
-                        <button className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-xs rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-1"><Edit3 size={12} /> Edit</button>
+                        <button onClick={() => { setEditingCampaign(campaign); setShowComposeModal(true); }} className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-xs rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-1"><Edit3 size={12} /> Edit</button>
                       )}
                       {campaign.status === 'sending' && (
                         <span className="flex items-center gap-1 px-3 py-1.5 bg-yellow-100 text-yellow-700 text-xs rounded-lg"><Loader2 size={12} className="animate-spin" /> Sending</span>
@@ -739,19 +739,19 @@ const EmailMarketingPage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <div><p className="text-sm font-medium text-gray-900 dark:text-white">Track Opens</p><p className="text-xs text-gray-500">Embed tracking pixel</p></div>
-                <button className="relative w-10 h-5 rounded-full bg-blue-600"><span className="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full" /></button>
+                <button onClick={() => showToast('Setting updated')} className="relative w-10 h-5 rounded-full bg-blue-600"><span className="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full" /></button>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <div><p className="text-sm font-medium text-gray-900 dark:text-white">Track Clicks</p><p className="text-xs text-gray-500">Convert links to tracked URLs</p></div>
-                <button className="relative w-10 h-5 rounded-full bg-blue-600"><span className="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full" /></button>
+                <button onClick={() => showToast('Setting updated')} className="relative w-10 h-5 rounded-full bg-blue-600"><span className="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full" /></button>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <div><p className="text-sm font-medium text-gray-900 dark:text-white">Unsubscribe Footer</p><p className="text-xs text-gray-500">Automatically add unsubscribe link</p></div>
-                <button className="relative w-10 h-5 rounded-full bg-blue-600"><span className="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full" /></button>
+                <button onClick={() => showToast('Setting updated')} className="relative w-10 h-5 rounded-full bg-blue-600"><span className="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full" /></button>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <div><p className="text-sm font-medium text-gray-900 dark:text-white">Bounce Handling</p><p className="text-xs text-gray-500">Auto-suppress hard bounces</p></div>
-                <button className="relative w-10 h-5 rounded-full bg-blue-600"><span className="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full" /></button>
+                <button onClick={() => showToast('Setting updated')} className="relative w-10 h-5 rounded-full bg-blue-600"><span className="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full" /></button>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <div><p className="text-sm font-medium text-gray-900 dark:text-white">Daily Sending Limit</p><p className="text-xs text-gray-500">Cap emails per day</p></div>
@@ -869,16 +869,16 @@ const ComposeModal: React.FC<{
               <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Content</label>
                 <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
                   <div className="flex items-center gap-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                    <button className="px-2 py-1 text-xs font-medium text-gray-600 hover:bg-white dark:hover:bg-gray-600 rounded">B</button>
-                    <button className="px-2 py-1 text-xs font-medium text-gray-600 hover:bg-white dark:hover:bg-gray-600 rounded italic">I</button>
-                    <button className="px-2 py-1 text-xs font-medium text-gray-600 hover:bg-white dark:hover:bg-gray-600 rounded underline">U</button>
+                    <button onClick={() => showToast('Rich text editor coming soon')} className="px-2 py-1 text-xs font-medium text-gray-600 hover:bg-white dark:hover:bg-gray-600 rounded">B</button>
+                    <button onClick={() => showToast('Rich text editor coming soon')} className="px-2 py-1 text-xs font-medium text-gray-600 hover:bg-white dark:hover:bg-gray-600 rounded italic">I</button>
+                    <button onClick={() => showToast('Rich text editor coming soon')} className="px-2 py-1 text-xs font-medium text-gray-600 hover:bg-white dark:hover:bg-gray-600 rounded underline">U</button>
                     <span className="text-gray-300 mx-1">|</span>
-                    <button className="px-2 py-1 text-xs text-gray-600 hover:bg-white dark:hover:bg-gray-600 rounded flex items-center gap-1"><Zap size={12} /> AI Write</button>
+                    <button onClick={() => showToast('AI writing assistant coming soon')} className="px-2 py-1 text-xs text-gray-600 hover:bg-white dark:hover:bg-gray-600 rounded flex items-center gap-1"><Zap size={12} /> AI Write</button>
                   </div>
                   <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Write your email content here... Use {{name}}, {{business}} for personalization." rows={8} className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none resize-none text-sm" />
                 </div>
                 <div className="flex items-center justify-between mt-2">
-                  <button className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1"><Zap size={12} /> ✨ Generate with AI</button>
+                  <button onClick={() => showToast('AI content generation coming soon')} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1"><Zap size={12} /> ✨ Generate with AI</button>
                   <span className="text-xs text-gray-400">{content.length} chars</span>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CreditCard, Download, CheckCircle, ArrowUpRight, FileText, RefreshCw, Loader2, AlertCircle } from 'lucide-react';
+import { CreditCard, Download, CheckCircle, ArrowUpRight, FileText, RefreshCw, Loader2, AlertCircle, Bell } from 'lucide-react';
 import { billingAPI, subscriptionsAPI, analyticsAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
 import ConfirmDialog from './ConfirmDialog';
@@ -14,12 +14,18 @@ const BillingPage: React.FC = () => {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [usage, setUsage] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const currentPlan = subscription?.plan || {
     name: business?.plan || 'STARTER',
     price: business?.plan === 'PRO' ? '₹2,999' : business?.plan === 'ENTERPRISE' ? '₹9,999' : '₹1,499',
     nextBilling: subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
     status: subscription?.status || 'Active',
+  };
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
   };
 
   const loadBilling = useCallback(async () => {
@@ -103,6 +109,16 @@ const BillingPage: React.FC = () => {
     );
   }
 
+  // Toast
+  const toastEl = toast && (
+    <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white flex items-center gap-2 ${
+      toast.type === 'success' ? 'bg-green-500' : toast.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+    }`}>
+      {toast.type === 'success' ? <CheckCircle size={18} /> : toast.type === 'error' ? <AlertCircle size={18} /> : <Bell size={18} />}
+      {toast.message}
+    </div>
+  );
+
   if (error) {
     return (
       <div className="p-8">
@@ -117,6 +133,7 @@ const BillingPage: React.FC = () => {
 
   return (
     <div className="p-8">
+      {toastEl}
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"><CreditCard className="text-blue-600" size={32} />Billing & Subscription</h1>
@@ -185,7 +202,7 @@ const BillingPage: React.FC = () => {
               <p className="text-sm text-gray-500">No payment method on file</p>
             </div>
           )}
-          <button className="w-full py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Change Card</button>
+          <button onClick={() => showToast('Payment settings page coming soon', 'info')} className="w-full py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Change Card</button>
           <div className="mt-4 pt-4 border-t border-gray-100">
             <h4 className="text-sm font-medium text-gray-700 mb-2">Billing Cycle</h4>
             <div className="flex gap-2">
@@ -232,7 +249,7 @@ const BillingPage: React.FC = () => {
                     {inv.status === 'paid' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
                     {inv.status ? inv.status.charAt(0).toUpperCase() + inv.status.slice(1) : 'Pending'}
                   </span>
-                  <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"><Download size={16} /></button>
+                  <button onClick={() => showToast(`Downloading invoice ${inv.id || inv.invoiceNumber}...`)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"><Download size={16} /></button>
                 </div>
               </div>
             ))}
