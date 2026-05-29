@@ -398,6 +398,16 @@ router.post('/password-reset', async (req: Request, res: Response) => {
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour expiry
+
+    // Store reset token in database
+    await prisma.user.update({
+      where: { email },
+      data: {
+        resetToken: crypto.createHash('sha256').update(resetToken).digest('hex'),
+        resetTokenExpiresAt,
+      },
+    });
 
     try {
       await EmailService.sendPasswordResetEmail(
@@ -440,6 +450,35 @@ router.post('/password-reset/confirm', async (req: Request, res: Response) => {
         error: 'Password must be at least 8 characters',
       });
     }
+
+    // Hash the token and find user
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: hashedToken,
+        resetTokenExpiresAt: { gte: new Date() },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid or expired reset token',
+      });
+    }
+
+    // Hash new password and clear reset token
+    const bcrypt = await import('bcryptjs');
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiresAt: null,
+      },
+    });
 
     res.json({
       success: true,

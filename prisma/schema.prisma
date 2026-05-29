@@ -38,6 +38,10 @@ model User {
   csrfToken          String?
   csrfTokenExpiresAt DateTime?
 
+  // Password Reset Token
+  resetToken          String?
+  resetTokenExpiresAt DateTime?
+
   notifications Notification[]
   themePref     ThemePreference?
   aiContents    AIContent[]
@@ -273,6 +277,9 @@ model Contact {
   @@unique([businessId, phone])
   @@unique([businessId, email])
   @@index([businessId])
+  @@index([businessId, source])
+  @@index([businessId, createdAt])
+  @@index([businessId, lastMessageAt])
   @@index([source])
   @@index([tags])
 }
@@ -336,6 +343,9 @@ model Activity {
   createdAt DateTime @default(now())
 
   @@index([businessId])
+  @@index([businessId, contactId])
+  @@index([businessId, type])
+  @@index([businessId, createdAt])
   @@index([contactId])
   @@index([type])
 }
@@ -386,6 +396,9 @@ model Message {
   createdAt DateTime @default(now())
 
   @@index([contactId])
+  @@index([businessId])
+  @@index([businessId, contactId])
+  @@index([businessId, status])
   @@index([status])
   @@index([createdAt])
 }

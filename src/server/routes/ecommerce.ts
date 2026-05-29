@@ -25,10 +25,11 @@ router.get('/store', async (req: AuthRequest, res: Response) => {
 
 router.put('/store', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
+    const { name, description, url, provider, config, isActive } = req.body;
     const store = await prisma.eCommerceStore.upsert({
       where: { businessId: req.user.businessId },
-      update: req.body,
-      create: { businessId: req.user.businessId, ...req.body, name: req.body.name || 'My Store', provider: req.body.provider || 'custom' },
+      update: { name, description, url, provider, config, isActive },
+      create: { businessId: req.user.businessId, name: name || 'My Store', provider: provider || 'custom', description, url, config, isActive },
     });
     res.json({ success: true, data: store });
   } catch (error: any) {
@@ -70,9 +71,10 @@ router.post('/products', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest,
 
 router.put('/products/:id', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
+    const { name, description, price, compareAtPrice, sku, barcode, quantity, trackInventory, images, mainImage, category, tags, isActive, status } = req.body;
     const product = await prisma.product.update({
       where: { id: req.params.id, businessId: req.user.businessId },
-      data: req.body,
+      data: { name, description, price, compareAtPrice, sku, barcode, quantity, trackInventory, images, mainImage, category, tags, isActive, status },
     });
     res.json({ success: true, data: product });
   } catch (error: any) {
@@ -148,9 +150,10 @@ router.put('/orders/:id', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
+    const { status, paymentStatus, notes, shippingAddress } = req.body;
     const updated = await prisma.order.update({
       where: { id: req.params.id },
-      data: req.body,
+      data: { status, paymentStatus, notes, shippingAddress },
     });
 
     res.json({ success: true, data: updated });

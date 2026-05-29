@@ -1,5 +1,5 @@
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuthStore } from './lib/authStore';
 import { MobileApp } from './lib/capacitor-app';
@@ -53,6 +53,7 @@ import EmailMarketingPage from './components/EmailMarketingPage';
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isInitialized, onboardingCompleted } = useAuthStore();
+  const location = useLocation();
 
   if (!isInitialized) {
     return <PageSkeleton />;
@@ -63,7 +64,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   // Check if onboarding is required (only redirect if not already on /onboarding)
-  if (!onboardingCompleted && !window.location.pathname.startsWith('/onboarding')) {
+  if (!onboardingCompleted && !location.pathname.startsWith('/onboarding')) {
     return <Navigate to="/onboarding" replace />;
   }
 

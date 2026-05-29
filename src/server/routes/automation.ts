@@ -445,9 +445,10 @@ router.put('/automations/:id', requireRole('OWNER', 'ADMIN'), async (req: AuthRe
       });
     }
 
+    const { name, description, isActive, trigger, actions } = req.body;
     const updated = await prisma.automationRule.update({
       where: { id: req.params.id },
-      data: req.body,
+      data: { name, description, isActive, trigger, actions },
     });
 
     res.json({ success: true, data: updated });

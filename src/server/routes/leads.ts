@@ -5,14 +5,24 @@ import { authenticate, AuthRequest } from '../middleware/auth.js';
 import { LeadCaptureService } from '../services/lead-capture.service.js';
 import { WhatsAppService } from '../services/whatsapp.service.js';
 import { EmailService } from '../services/email.service.js';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
+
+// Rate limiter for public lead capture endpoints (100 requests per minute per IP)
+const leadCaptureLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: { success: false, error: 'Too many requests. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 /**
  * POST /api/leads/indiamart/:businessId
  * Capture lead from IndiaMART webhook
  */
-router.post('/indiamart/:businessId', async (req: Request, res: Response) => {
+router.post('/indiamart/:businessId', leadCaptureLimiter, async (req: Request, res: Response) => {
   try {
     const { businessId } = req.params as { businessId: string };
     const leadData = req.body;
@@ -51,7 +61,7 @@ router.post('/indiamart/:businessId', async (req: Request, res: Response) => {
  * POST /api/leads/justdial/:businessId
  * Capture lead from JustDial webhook
  */
-router.post('/justdial/:businessId', async (req: Request, res: Response) => {
+router.post('/justdial/:businessId', leadCaptureLimiter, async (req: Request, res: Response) => {
   try {
     const { businessId } = req.params as { businessId: string };
     const leadData = req.body;
@@ -87,7 +97,7 @@ router.post('/justdial/:businessId', async (req: Request, res: Response) => {
  * POST /api/leads/facebook/:businessId
  * Capture lead from Facebook Lead Ads webhook
  */
-router.post('/facebook/:businessId', async (req: Request, res: Response) => {
+router.post('/facebook/:businessId', leadCaptureLimiter, async (req: Request, res: Response) => {
   try {
     const { businessId } = req.params as { businessId: string };
     const leadData = req.body;
@@ -124,7 +134,7 @@ router.post('/facebook/:businessId', async (req: Request, res: Response) => {
  * POST /api/leads/instagram/:businessId
  * Capture lead from Instagram Lead Ads webhook
  */
-router.post('/instagram/:businessId', async (req: Request, res: Response) => {
+router.post('/instagram/:businessId', leadCaptureLimiter, async (req: Request, res: Response) => {
   try {
     const { businessId } = req.params as { businessId: string };
     const leadData = req.body;
@@ -158,9 +168,9 @@ router.post('/instagram/:businessId', async (req: Request, res: Response) => {
 
 /**
  * POST /api/leads/manual
- * Manually create lead (for forms, imports, etc.)
+ * Create a lead manually
  */
-router.post('/manual', async (req: Request, res: Response) => {
+router.post('/manual', leadCaptureLimiter, async (req: Request, res: Response) => {
   try {
     const { businessId, source, leadData } = req.body;
 
@@ -538,9 +548,10 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
 /**
  * POST /api/leads/capture/:businessId
- * Public lead capture endpoint (no auth required - for website forms)
+ * Public lead capture endpoint for website forms
+ * No authentication required - rate limited
  */
-router.post('/capture/:businessId', async (req: Request, res: Response) => {
+router.post('/capture/:businessId', leadCaptureLimiter, async (req: Request, res: Response) => {
   try {
     const { businessId } = req.params as { businessId: string };
     const { name, phone, email, company, product, requirement, city, supplier, source: src } = req.body;

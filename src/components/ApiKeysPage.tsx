@@ -3,6 +3,7 @@ import { Key, Plus, Trash2, Copy, CheckCircle, AlertTriangle, RefreshCw } from '
 import { apiKeysAPI } from '../lib/api';
 import { PageSkeleton } from './Skeleton';
 import ConfirmDialog from './ConfirmDialog';
+import { useToast } from './Toast';
 
 interface ApiKey {
   id: string;
@@ -15,6 +16,7 @@ interface ApiKey {
 }
 
 const ApiKeysPage: React.FC = () => {
+  const { error: showError } = useToast();
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewKey, setShowNewKey] = useState(false);
@@ -59,7 +61,7 @@ const generateKey = async () => {
 		loadKeys();
 	} catch (err) {
 		console.error('Failed to generate API key:', err);
-		alert('Failed to generate API key. Please try again.');
+		showError('Failed to generate API key. Please try again.');
 	} finally {
 		setCreating(false);
 	}

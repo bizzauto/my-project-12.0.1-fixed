@@ -9,6 +9,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../lib/authStore';
 import { contactsAPI, businessAPI } from '../lib/api';
+import { useToast } from './Toast';
 
 // ============================================================
 // TYPES
@@ -296,6 +297,7 @@ const StageBadge: React.FC<{ stage: string }> = ({ stage }) => (
 export default function CRMPage() {
   const navigate = useNavigate();
   const { business, isDemoMode } = useAuthStore();
+  const { info } = useToast();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -340,26 +342,31 @@ export default function CRMPage() {
   }, []);
 
   // Filters
-  const filteredContacts = contacts.filter(c =>
+  const filteredContacts = useMemo(() => contacts.filter(c =>
     (c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.company.toLowerCase().includes(search.toLowerCase()) ||
       c.email.toLowerCase().includes(search.toLowerCase()) ||
       c.phone.includes(search)) &&
     (stageFilter === 'all' || c.stage === stageFilter)
-  );
+  ), [contacts, search, stageFilter]);
 
   // Stats
-  const totalDealValue = deals.reduce((sum, d) => sum + d.value, 0);
-  const wonDeals = deals.filter(d => d.stage === 'Closed Won' || d.stage === 'Won').reduce((sum, d) => sum + d.value, 0);
-  const totalRevenue = ledger.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
-  const totalExpenses = ledger.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
-  const todayAppointments = appointments.filter(a => a.date === new Date().toISOString().split('T')[0]);
+  const crmStats = useMemo(() => {
+    const totalDealValue = deals.reduce((sum, d) => sum + d.value, 0);
+    const wonDeals = deals.filter(d => d.stage === 'Closed Won' || d.stage === 'Won').reduce((sum, d) => sum + d.value, 0);
+    const totalRevenue = ledger.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
+    const totalExpenses = ledger.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
+    const todayAppointments = appointments.filter(a => a.date === new Date().toISOString().split('T')[0]);
+    return { totalDealValue, wonDeals, totalRevenue, totalExpenses, todayAppointments };
+  }, [deals, ledger, appointments]);
 
-  const pipelineDeals = PIPELINE_STAGES.map(stage => ({
+  const { totalDealValue, wonDeals, totalRevenue, totalExpenses, todayAppointments } = crmStats;
+
+  const pipelineDeals = useMemo(() => PIPELINE_STAGES.map(stage => ({
     ...stage,
     deals: deals.filter(d => d.stage === stage.name || d.stage === stage.id.replace('_', ' ').replace(/(?:^|\s)\S/g, L => L.toUpperCase())),
     total: deals.filter(d => d.stage === stage.name || d.stage === stage.id.replace('_', ' ').replace(/(?:^|\s)\S/g, L => L.toUpperCase())).reduce((s, d) => s + d.value, 0),
-  }));
+  })), [deals]);
 
   // Add Contact
   const handleAddContact = (contactData: any) => {
@@ -1229,7 +1236,7 @@ const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = 
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={() => alert('Edit task feature coming soon')} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"><Edit3 size={14} className="text-gray-400" /></button>
+                    <button onClick={() => info('Edit task feature coming soon')} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"><Edit3 size={14} className="text-gray-400" /></button>
                   </div>
                 </div>
               )) : (

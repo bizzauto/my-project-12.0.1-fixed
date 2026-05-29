@@ -169,7 +169,16 @@ router.put('/:id', authenticate, async (req: any, res: any) => {
 
     const updated = await prisma.campaign.update({
       where: { id: req.params.id },
-      data: req.body,
+      data: {
+        name: req.body.name,
+        templateName: req.body.templateName,
+        templateVars: req.body.templateVars,
+        targetTags: req.body.targetTags,
+        targetFilters: req.body.targetFilters,
+        contactIds: req.body.contactIds,
+        content: req.body.content,
+        scheduledAt: req.body.scheduledAt,
+      },
     });
 
     res.json({

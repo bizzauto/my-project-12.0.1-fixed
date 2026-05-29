@@ -29,10 +29,11 @@ router.get('/', async (req: any, res: any) => {
 // Update white-label settings
 router.put('/', requireRole('OWNER', 'ADMIN'), async (req: any, res: any) => {
   try {
+    const { brandName, logoUrl, faviconUrl, primaryColor, customCss, customDomain, isActive } = req.body;
     const settings = await prisma.whiteLabel.upsert({
       where: { businessId: req.user.businessId },
-      update: req.body,
-      create: { businessId: req.user.businessId, ...req.body },
+      update: { brandName, logoUrl, faviconUrl, primaryColor, customCss, customDomain, isActive },
+      create: { businessId: req.user.businessId, brandName, logoUrl, faviconUrl, primaryColor, customCss, customDomain, isActive },
     });
     res.json({ success: true, data: settings });
   } catch (error: any) {
@@ -62,10 +63,11 @@ router.get('/theme', async (req: any, res: any) => {
 
 router.put('/theme', async (req: any, res: any) => {
   try {
+    const { theme, sidebarCollapsed, accentColor } = req.body;
     const prefs = await prisma.themePreference.upsert({
       where: { userId: req.user.id },
-      update: req.body,
-      create: { userId: req.user.id, ...req.body },
+      update: { theme, sidebarCollapsed, accentColor },
+      create: { userId: req.user.id, theme, sidebarCollapsed, accentColor },
     });
     res.json({ success: true, data: prefs });
   } catch (error: any) {
@@ -122,9 +124,10 @@ router.put('/appointments/:id', requireRole('OWNER', 'ADMIN'), async (req: any, 
     });
     if (!appointment) return res.status(404).json({ success: false, error: 'Not found' });
 
+    const { title, description, service, startTime, endTime, status, location, isOnline, meetingLink, meetingUrl } = req.body;
     const updated = await prisma.appointment.update({
       where: { id: req.params.id },
-      data: req.body,
+      data: { title, description, service, startTime, endTime, status, location, isOnline, meetingLink, meetingUrl },
     });
     res.json({ success: true, data: updated });
   } catch (error: any) {

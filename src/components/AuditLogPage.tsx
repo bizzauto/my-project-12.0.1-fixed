@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Clock, Search, Download, RefreshCw } from 'lucide-react';
 import { auditLogAPI } from '../lib/api';
 import { PageSkeleton } from './Skeleton';
+import { useToast } from './Toast';
 
 interface LogEntry {
   id: string;
@@ -14,6 +15,7 @@ interface LogEntry {
 }
 
 const AuditLogPage: React.FC = () => {
+  const { error: showError } = useToast();
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -57,7 +59,7 @@ const AuditLogPage: React.FC = () => {
       link.click();
       link.remove();
     } catch {
-      alert('Export failed. Please try again.');
+      showError('Export failed. Please try again.');
     }
   };
 

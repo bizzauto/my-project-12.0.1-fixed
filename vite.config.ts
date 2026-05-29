@@ -21,6 +21,9 @@ export default defineConfig({
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
   },
+  esbuild: {
+    jsxDev: false,
+  },
   base: './',
   server: {
     host: '0.0.0.0',

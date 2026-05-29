@@ -1,7 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { Upload, Download, FileSpreadsheet, CheckCircle, AlertCircle, X, Loader2, Users } from 'lucide-react';
+import { useToast } from './Toast';
 
 const BulkImportPage: React.FC = () => {
+  const { error: showError } = useToast();
   const [step, setStep] = useState<'upload' | 'preview' | 'processing' | 'done'>('upload');
   const [file, setFile] = useState<File | null>(null);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -11,7 +13,7 @@ const BulkImportPage: React.FC = () => {
     const f = e.target.files?.[0];
     if (!f) return;
     if (!f.name.endsWith('.csv') && !f.name.endsWith('.xlsx')) {
-      alert('Only CSV and Excel files are supported');
+      showError('Only CSV and Excel files are supported');
       return;
     }
     setFile(f);

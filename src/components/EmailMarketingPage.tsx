@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Mail, Send, Clock, BarChart3, Users, Plus, Play, Pause, Eye, Trash2, Zap,
   MessageSquare, Settings, CheckCircle, XCircle, AlertCircle, RefreshCw,
@@ -257,29 +257,34 @@ const EmailMarketingPage: React.FC = () => {
   useEffect(() => { loadData(); }, [loadData]);
 
   // ── Computed stats ─────────────────────────────────────────────────
-  const totalSent = campaigns.reduce((s, c) => s + (c.sent || 0), 0);
-  const totalDelivered = campaigns.reduce((s, c) => s + (c.delivered || 0), 0);
-  const totalOpens = campaigns.reduce((s, c) => s + (c.opened || 0), 0);
-  const totalClicks = campaigns.reduce((s, c) => s + (c.clicked || 0), 0);
-  const totalBounces = campaigns.reduce((s, c) => s + (c.bounced || 0), 0);
-  const avgOpenRate = totalDelivered > 0 ? ((totalOpens / totalDelivered) * 100).toFixed(1) : '0';
-  const avgClickRate = totalOpens > 0 ? ((totalClicks / totalOpens) * 100).toFixed(1) : '0';
-  const avgBounceRate = totalSent > 0 ? ((totalBounces / totalSent) * 100).toFixed(1) : '0';
-  const totalRecipients = campaigns.reduce((s, c) => s + c.recipients, 0);
+  const emailStats = useMemo(() => {
+    const totalSent = campaigns.reduce((s, c) => s + (c.sent || 0), 0);
+    const totalDelivered = campaigns.reduce((s, c) => s + (c.delivered || 0), 0);
+    const totalOpens = campaigns.reduce((s, c) => s + (c.opened || 0), 0);
+    const totalClicks = campaigns.reduce((s, c) => s + (c.clicked || 0), 0);
+    const totalBounces = campaigns.reduce((s, c) => s + (c.bounced || 0), 0);
+    const avgOpenRate = totalDelivered > 0 ? ((totalOpens / totalDelivered) * 100).toFixed(1) : '0';
+    const avgClickRate = totalOpens > 0 ? ((totalClicks / totalOpens) * 100).toFixed(1) : '0';
+    const avgBounceRate = totalSent > 0 ? ((totalBounces / totalSent) * 100).toFixed(1) : '0';
+    const totalRecipients = campaigns.reduce((s, c) => s + c.recipients, 0);
+    return { totalSent, totalDelivered, totalOpens, totalClicks, totalBounces, avgOpenRate, avgClickRate, avgBounceRate, totalRecipients };
+  }, [campaigns]);
 
-  const filteredCampaigns = campaigns.filter(c =>
+  const { totalSent, totalDelivered, totalOpens, totalClicks, totalBounces, avgOpenRate, avgClickRate, avgBounceRate, totalRecipients } = emailStats;
+
+  const filteredCampaigns = useMemo(() => campaigns.filter(c =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.subject.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [campaigns, searchQuery]);
 
-  const filteredTemplates = templates.filter(t =>
+  const filteredTemplates = useMemo(() => templates.filter(t =>
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [templates, searchQuery]);
 
-  const filteredLists = emailLists.filter(l =>
+  const filteredLists = useMemo(() => emailLists.filter(l =>
     l.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [emailLists, searchQuery]);
 
   // ── Campaign actions ───────────────────────────────────────────────
   const sendCampaign = async (id: string) => {

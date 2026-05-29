@@ -34,7 +34,8 @@ router.post('/', authenticate, async (req: any, res: any) => {
 // Update webhook
 router.put('/:id', authenticate, async (req: any, res: any) => {
   try {
-    await prisma.webhook.update({ where: { id: req.params.id }, data: req.body });
+    const { url, events, isActive } = req.body;
+    await prisma.webhook.update({ where: { id: req.params.id }, data: { url, events, isActive } });
     res.json({ success: true, message: 'Webhook updated' });
   } catch (error: any) {
     res.status(500).json({ success: false, error: 'Failed to update webhook', details: error.message });

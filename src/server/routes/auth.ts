@@ -729,9 +729,28 @@ router.put('/change-password', authenticate, async (req: AuthRequest, res: Respo
 // POST /api/auth/create-super-admin
 // Usage: curl -X POST http://localhost:4000/api/auth/create-super-admin
 //   -H "Content-Type: application/json"
+//   -H "x-bootstrap-token: YOUR_SUPER_ADMIN_BOOTSTRAP_TOKEN"
 //   -d '{"email": "admin@example.com", "password": "SuperAdmin123!", "name": "Super Admin"}'
 router.post('/create-super-admin', async (req: Request, res: Response) => {
   try {
+    // Bootstrap token verification - required for creating first super admin
+    const bootstrapToken = req.headers['x-bootstrap-token'];
+    const expectedToken = process.env.SUPER_ADMIN_BOOTSTRAP_TOKEN;
+
+    if (!expectedToken) {
+      return res.status(503).json({
+        success: false,
+        error: 'Super admin creation is not configured. Set SUPER_ADMIN_BOOTSTRAP_TOKEN in environment.',
+      });
+    }
+
+    if (!bootstrapToken || bootstrapToken !== expectedToken) {
+      return res.status(403).json({
+        success: false,
+        error: 'Invalid bootstrap token',
+      });
+    }
+
     const { email, password, name } = req.body;
 
     if (!email || !password) {

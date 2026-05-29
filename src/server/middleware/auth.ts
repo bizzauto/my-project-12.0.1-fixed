@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../index.js';
+import { CSRFService } from '../services/csrf.service.js';
 
 export interface AuthRequest extends Request {
   user?: any;
@@ -81,7 +82,6 @@ export const authenticate = async (
     }
 
     // Generate CSRF token for the session
-    const { CSRFService } = await import('../services/csrf.service.js');
     const csrfToken = await CSRFService.generateToken(user.id);
     res.setHeader('X-CSRF-Token', csrfToken);
 

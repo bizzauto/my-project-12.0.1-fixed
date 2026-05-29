@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, Search, Package, ShoppingCart, TrendingUp, Eye, Edit, Trash2, Share2, X, MessageSquare, Upload, AlertTriangle, Tag, Percent, Trash, Minus, Plus as PlusIcon, Check, Clock, Truck, CreditCard } from 'lucide-react';
 import apiClient from '../lib/api';
+import { useToast } from './Toast';
 
 interface ProductVariant {
   size?: string;
@@ -97,6 +98,7 @@ const ecommerceAPI = {
 };
 
 const ECommercePage: React.FC = () => {
+  const { error: showError } = useToast();
   const [tab, setTab] = useState<'products' | 'orders' | 'coupons'>('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [showProductModal, setShowProductModal] = useState(false);
@@ -131,22 +133,27 @@ const ECommercePage: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  const filteredProducts = products.filter(p =>
+  const filteredProducts = useMemo(() => products.filter(p =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [products, searchQuery]);
 
-  const filteredOrders = orders.filter(o =>
+  const filteredOrders = useMemo(() => orders.filter(o =>
     o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     o.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [orders, searchQuery]);
 
-  const lowStockProducts = products.filter(p => p.stock > 0 && p.lowStockThreshold && p.stock <= p.lowStockThreshold);
+  const lowStockProducts = useMemo(() => products.filter(p => p.stock > 0 && p.lowStockThreshold && p.stock <= p.lowStockThreshold), [products]);
 
-  const totalRevenue = orders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + o.total, 0);
-  const totalOrders = orders.length;
-  const activeProducts = products.filter(p => p.status === 'active').length;
-  const pendingOrders = orders.filter(o => o.status === 'pending').length;
+  const ecommerceStats = useMemo(() => {
+    const totalRevenue = orders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + o.total, 0);
+    const totalOrders = orders.length;
+    const activeProducts = products.filter(p => p.status === 'active').length;
+    const pendingOrders = orders.filter(o => o.status === 'pending').length;
+    return { totalRevenue, totalOrders, activeProducts, pendingOrders };
+  }, [orders, products]);
+
+  const { totalRevenue, totalOrders, activeProducts, pendingOrders } = ecommerceStats;
 
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.variant?.price || item.product.price) * item.quantity, 0);
   const cartDiscount = appliedCoupon
@@ -197,17 +204,17 @@ const ECommercePage: React.FC = () => {
     const coupon = coupons.find(c => c.code.toUpperCase() === couponCodeInput.toUpperCase() && c.active);
     if (coupon) {
       if (coupon.minOrder && cartSubtotal < coupon.minOrder) {
-        alert(`Minimum order of ₹${coupon.minOrder} required for this coupon`);
+        showError(`Minimum order of ₹${coupon.minOrder} required for this coupon`);
         return;
       }
       if (coupon.maxUses && coupon.usedCount && coupon.usedCount >= coupon.maxUses) {
-        alert('This coupon has reached its usage limit');
+        showError('This coupon has reached its usage limit');
         return;
       }
       setAppliedCoupon(coupon);
       setCouponCodeInput('');
     } else {
-      alert('Invalid or expired coupon code');
+      showError('Invalid or expired coupon code');
     }
   };
 

@@ -44,9 +44,10 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     });
     if (!flow) return res.status(404).json({ success: false, error: 'Flow not found' });
 
+    const { name, trigger, keywords, response, aiEnabled, isActive } = req.body;
     const updated = await prisma.chatbotFlow.update({
       where: { id: req.params.id },
-      data: req.body,
+      data: { name, trigger, keywords, response, aiEnabled, isActive },
     });
     res.json({ success: true, data: updated });
   } catch (error: any) {

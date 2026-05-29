@@ -44,9 +44,10 @@ router.post('/', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: Re
 
 router.put('/:id', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
+    const { name, type, content, html, status, clientName, clientPhone, clientEmail, amount } = req.body;
     const document = await prisma.document.update({
       where: { id: req.params.id, businessId: req.user.businessId },
-      data: req.body,
+      data: { name, type, content, html, status, clientName, clientPhone, clientEmail, amount },
     });
     res.json({ success: true, data: document });
   } catch (error: any) {

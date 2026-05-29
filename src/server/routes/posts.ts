@@ -74,7 +74,8 @@ router.put('/:id', authenticate, async (req: any, res: any) => {
       return res.status(400).json({ success: false, error: 'Cannot publish post' });
     }
 
-    const updated = await prisma.post.update({ where: { id: req.params.id }, data: req.body });
+    const { content, mediaUrls, link, platforms, scheduledAt } = req.body;
+    const updated = await prisma.post.update({ where: { id: req.params.id }, data: { content, mediaUrls, link, platforms, scheduledAt } });
     res.json({ success: true, data: updated });
   } catch (error: any) {
     res.status(500).json({ success: false, error: 'Failed to update post', details: error.message });
