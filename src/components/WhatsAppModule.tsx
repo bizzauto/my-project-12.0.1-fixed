@@ -615,8 +615,8 @@ const ChatView: React.FC<{
       try {
         await evolutionAPI.sendText({
           instanceName: evolutionInstanceName,
-          number: selectedContact.phone.replace(/\s/g, ''),
-          text: message,
+          to: selectedContact.phone.replace(/\s/g, ''),
+          message: message,
         });
         setMessages(prev => prev.map(m => m.id === newMsg.id ? { ...m, status: 'sent' } : m));
       } catch {
@@ -2322,8 +2322,8 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         try {
           await evolutionAPI.sendText({
             instanceName: evolutionInstanceName,
-            number: contact.phone.replace(/\s/g, ''),
-            text: message,
+            to: contact.phone.replace(/\s/g, ''),
+            message: message,
           });
           return;
         } catch {
