@@ -49,6 +49,20 @@ import SuperAdminDashboard from './components/SuperAdminDashboard';
 import OnboardingWizard from './components/OnboardingWizard';
 import BulkImportPage from './components/BulkImportPage';
 import EmailMarketingPage from './components/EmailMarketingPage';
+import WorkflowBuilder from './components/WorkflowBuilder';
+import FunnelBuilder from './components/FunnelBuilder';
+import SurveyBuilder from './components/SurveyBuilder';
+import CourseBuilder from './components/CourseBuilder';
+import TriggerLinks from './components/TriggerLinks';
+import PaymentLinks from './components/PaymentLinks';
+import ClientPortal from './components/ClientPortal';
+import ConversationsPage from './components/ConversationsPage';
+import CustomFieldsBuilder from './components/CustomFieldsBuilder';
+import BlogManager from './components/BlogManager';
+import ReviewRequests from './components/ReviewRequests';
+import AgencyDashboard from './components/AgencyDashboard';
+import MissedCallSettings from './components/MissedCallSettings';
+import SnapshotManager from './components/SnapshotManager';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -313,6 +327,154 @@ function AppRoutes() {
           <ProtectedRoute>
             <AuthLayout>
               <EmailMarketingPage />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Automation & AI */}
+      <Route
+        path="/workflows"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <WorkflowBuilder />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/trigger-links"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <TriggerLinks />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Marketing */}
+      <Route
+        path="/surveys"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <SurveyBuilder />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/blog"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <BlogManager />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/review-requests"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <ReviewRequests />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/payment-links"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <PaymentLinks />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Growth */}
+      <Route
+        path="/courses"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <CourseBuilder />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/funnels"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <FunnelBuilder />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/conversations"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <ConversationsPage />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Settings */}
+      <Route
+        path="/custom-fields"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <CustomFieldsBuilder />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/client-portal"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <ClientPortal />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/agency"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <AgencyDashboard />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/missed-call-settings"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <MissedCallSettings />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/snapshots"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <SnapshotManager />
             </AuthLayout>
           </ProtectedRoute>
         }

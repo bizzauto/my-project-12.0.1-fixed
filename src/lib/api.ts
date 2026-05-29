@@ -283,6 +283,18 @@ export const automationAPI = {
   triggerN8nWorkflow: (workflowId: string, data?: any) => apiClient.post(`/automation/n8n/workflows/${workflowId}/trigger`, data),
 };
 
+// Trigger Links API
+export const triggerLinksAPI = {
+  list: (params?: any) => apiClient.get('/trigger-links', { params }),
+  get: (id: string) => apiClient.get(`/trigger-links/${id}`),
+  create: (data: any) => apiClient.post('/trigger-links', data),
+  update: (id: string, data: any) => apiClient.put(`/trigger-links/${id}`, data),
+  delete: (id: string) => apiClient.delete(`/trigger-links/${id}`),
+  toggle: (id: string) => apiClient.patch(`/trigger-links/${id}/toggle`),
+  analytics: (id: string, params?: any) => apiClient.get(`/trigger-links/${id}/analytics`, { params }),
+  qrCode: (id: string) => apiClient.get(`/trigger-links/${id}/qr`, { responseType: 'blob' }),
+};
+
 // Appointments API
 export const appointmentsAPI = {
   list: (params?: any) => apiClient.get('/appointments', { params }),
@@ -361,6 +373,49 @@ export const instagramAPI = {
   getMedia: (limit?: number) => apiClient.get('/instagram/media', { params: { limit } }),
   getMediaInsights: (mediaId: string) =>
     apiClient.get(`/instagram/media/${mediaId}/insights`),
+};
+
+// Conversations / Unified Inbox API
+export const conversationsAPI = {
+  list: (params?: { channel?: string; status?: string; search?: string; page?: number; limit?: number }) =>
+    apiClient.get('/conversations', { params }),
+  getStats: () => apiClient.get('/conversations/stats'),
+  get: (contactId: string, params?: { page?: number; limit?: number }) =>
+    apiClient.get(`/conversations/${encodeURIComponent(contactId)}`, { params }),
+  reply: (contactId: string, data: { content: string; channel?: string }) =>
+    apiClient.post(`/conversations/${encodeURIComponent(contactId)}/reply`, data),
+  markRead: (contactId: string) =>
+    apiClient.patch(`/conversations/${encodeURIComponent(contactId)}/read`),
+  archive: (contactIds: string[]) =>
+    apiClient.post('/conversations/archive', { contactIds }),
+};
+
+// Payment Links API
+export const paymentLinksAPI = {
+  list: (params?: any) => apiClient.get('/payment-links', { params }),
+  get: (id: string) => apiClient.get(`/payment-links/${id}`),
+  create: (data: any) => apiClient.post('/payment-links', data),
+  update: (id: string, data: any) => apiClient.put(`/payment-links/${id}`, data),
+  delete: (id: string) => apiClient.delete(`/payment-links/${id}`),
+  getTransactions: (id: string, params?: any) => apiClient.get(`/payment-links/${id}/transactions`, { params }),
+  send: (id: string) => apiClient.post(`/payment-links/${id}/send`),
+};
+
+// Custom Fields API
+export const customFieldsAPI = {
+  listAll: (params?: { entityType?: string; isVisible?: string; search?: string }) =>
+    apiClient.get('/custom-fields', { params }),
+  get: (id: string) => apiClient.get(`/custom-fields/${id}`),
+  create: (data: any) => apiClient.post('/custom-fields', data),
+  update: (id: string, data: any) => apiClient.put(`/custom-fields/${id}`, data),
+  delete: (id: string) => apiClient.delete(`/custom-fields/${id}`),
+  reorder: (fieldIds: string[]) => apiClient.put('/custom-fields/reorder', { fieldIds }),
+  getEntityFields: (entityType: string) =>
+    apiClient.get(`/custom-fields/entity/${entityType}`),
+  getEntityFieldValues: (entityType: string, entityId: string) =>
+    apiClient.get(`/custom-fields/entity/${entityType}/${entityId}`),
+  saveEntityFieldValues: (entityType: string, entityId: string, values: Record<string, any>) =>
+    apiClient.post(`/custom-fields/entity/${entityType}/values`, { entityId, values }),
 };
 
 export default apiClient;

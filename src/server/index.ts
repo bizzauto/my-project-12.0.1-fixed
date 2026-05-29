@@ -43,7 +43,19 @@ import superAdminRoutes from './routes/super-admin.js';
 import teamRoutes from './routes/team.js';
 import twoFactorRoutes from './routes/twoFactor.js';
 import webhooksRoutes from './routes/webhooks.js';
+import surveysRoutes from './routes/surveys.js';
 import whatsappRoutes from './routes/whatsapp.js';
+import workflowRoutes from './routes/workflows.js';
+import paymentLinksRoutes from './routes/payment-links.js';
+import blogRoutes from './routes/blog.js';
+import clientPortalRoutes from './routes/client-portal.js';
+import conversationsRoutes from './routes/conversations.js';
+import agencyRoutes from './routes/agency.js';
+import coursesRoutes from './routes/courses.js';
+import triggerLinksRoutes from './routes/trigger-links.js';
+import reviewRequestsRoutes from './routes/review-requests.js';
+import customFieldsRoutes from './routes/custom-fields.js';
+import funnelsRoutes from './routes/funnels.js';
 import { securityHeaders, apiSecurityHeaders } from './middleware/security.js';
 
 dotenv.config();
@@ -168,12 +180,24 @@ app.use('/api/qwen-preview', qwenPreviewRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/surveys', surveysRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/two-factor', twoFactorRoutes);
 app.use('/api/webhooks', webhooksRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/workflows', workflowRoutes);
+app.use('/api/payment-links', paymentLinksRoutes);
+app.use('/api/blog', blogRoutes);
+app.use('/api/client-portal', clientPortalRoutes);
+app.use('/api/conversations', conversationsRoutes);
+app.use('/api/agency', agencyRoutes);
+app.use('/api/courses', coursesRoutes);
+app.use('/api/trigger-links', triggerLinksRoutes);
+app.use('/api/review-requests', reviewRequestsRoutes);
+app.use('/api/custom-fields', customFieldsRoutes);
+app.use('/api/funnels', funnelsRoutes);
 
 // Test endpoints (development only)
 if (NODE_ENV !== 'production') {

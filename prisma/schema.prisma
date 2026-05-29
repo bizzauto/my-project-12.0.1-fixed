@@ -45,6 +45,7 @@ model User {
   notifications Notification[]
   themePref     ThemePreference?
   aiContents    AIContent[]
+  agencies      Agency[]
 
   @@index([businessId])
   @@index([appleId])
@@ -150,6 +151,21 @@ model Business {
   emailLists       EmailList[]
   scheduledMessages ScheduledMessage[]
   autoReplies     AutoReply[]
+  // New feature relations
+  workflows       Workflow[]
+  workflowExecutions WorkflowExecution[]
+  funnels         Funnel[]
+  surveys         Survey[]
+  courses         Course[]
+  triggerLinks    TriggerLink[]
+  clientPortals   ClientPortal[]
+  customFields    CustomField[]
+  blogPosts       BlogPost[]
+  blogCategories  BlogCategory[]
+  paymentLinks    PaymentLink[]
+  reviewRequests  ReviewRequest[]
+  reviewRequestCampaigns ReviewRequestCampaign[]
+  subAccounts     SubAccount[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1365,4 +1381,472 @@ model AutoReply {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   @@index([businessId])
+}
+
+// ==================== VISUAL WORKFLOW BUILDER ====================
+model Workflow {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
+  name        String
+  description String?
+  isActive    Boolean  @default(false)
+  triggerType String   // message_received, lead_created, appointment_booked, form_subscribed, tag_added, deal_stage_changed
+  triggerConfig Json?  // { keywords, forms, tags, etc }
+  nodes       Json     @default("[]") // React Flow nodes array
+  edges       Json     @default("[]") // React Flow edges array
+  runCount    Int      @default(0)
+  lastRunAt   DateTime?
+  createdBy   String?
+  executions  WorkflowExecution[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([businessId])
+  @@index([businessId, isActive])
+}
+
+model WorkflowExecution {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
+  workflowId  String
+  workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  status      String   @default("running") // running, completed, failed, paused
+  triggerData Json?    // What triggered this run
+  nodeResults Json?    // Results of each node execution
+  error       String?
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  @@index([businessId])
+  @@index([workflowId])
+  @@index([status])
+}
+
+// ==================== FUNNEL / PAGE BUILDER ====================
+model Funnel {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
+  name        String
+  description String?
+  domain      String?  // Custom domain
+  isActive    Boolean  @default(true)
+  pages       FunnelPage[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([businessId])
+}
+
+model FunnelPage {
+  id          String   @id @default(cuid())
+  funnelId    String
+  funnel      Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  businessId  String
+  name        String
+  slug        String   // URL slug
+  type        String   @default("landing") // landing, thank_you, checkout, opt_in, sales, order_form
+  content     Json     // Page builder content (sections, blocks)
+  html        String?  // Rendered HTML
+  seoTitle    String?
+  seoDescription String?
+  seoImage    String?
+  customCss   String?
+  customJs    String?
+  conversionScript String? // Track conversions
+  isPublished Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@unique([funnelId, slug])
+  @@index([funnelId])
+}
+
+model FunnelTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  category    String   // landing, sales, opt_in, checkout, thank_you
+  thumbnail   String?
+  content     Json     // Template content structure
+  isSystem    Boolean  @default(true)
+  usageCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+// ==================== SURVEY / FORM BUILDER ====================
+model Survey {
+  id           String   @id @default(cuid())
+  businessId   String
+  business     Business @relation(fields: [businessId], references: [id])
+  name         String
+  description  String?
+  type         String   @default("form") // form, survey, nps, poll, quiz
+  isActive     Boolean  @default(true)
+  isPublished  Boolean  @default(false)
+  settings     Json?    // { redirectUrl, webhookUrl, notificationEmail, allowMultiple }
+  thankYouMessage String?
+  thankYouRedirect String?
+  questions    SurveyQuestion[]
+  responses    SurveyResponse[]
+  submissionCount Int @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@index([businessId])
+}
+
+model SurveyQuestion {
+  id            String   @id @default(cuid())
+  surveyId      String
+  survey        Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  type          String   // text, email, phone, number, textarea, select, multi_select, radio, checkbox, rating, nps, date, file, heading, paragraph, divider
+  label         String
+  placeholder   String?
+  required      Boolean  @default(false)
+  options       Json?    // For select/radio/checkbox: [{label, value}]
+  validation    Json?    // { minLength, maxLength, min, max, pattern }
+  conditionalLogic Json? // { dependsOn, operator, value } - show/hide based on other answers
+  order         Int      @default(0)
+  width         String   @default("full") // full, half, third
+  createdAt     DateTime @default(now())
+  @@index([surveyId])
+}
+
+model SurveyResponse {
+  id         String   @id @default(cuid())
+  surveyId   String
+  survey     Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  businessId String
+  contactId  String?
+  answers    Json     // { questionId: answer }
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?
+  submittedAt DateTime @default(now())
+  @@index([surveyId])
+  @@index([businessId])
+}
+
+// ==================== MEMBERSHIP / COURSE BUILDER ====================
+model Course {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id])
+  name          String
+  description   String?
+  thumbnail     String?
+  price         Float    @default(0)
+  currency      String   @default("INR")
+  isActive      Boolean  @default(true)
+  isPublished   Boolean  @default(false)
+  accessType    String   @default("paid") // free, paid, subscription
+  dripContent   Boolean  @default(false) // Release lessons over time
+  dripInterval  Int?     // Days between lesson releases
+  modules       CourseModule[]
+  enrollments   CourseEnrollment[]
+  enrollmentCount Int @default(0)
+  rating        Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@index([businessId])
+}
+
+model CourseModule {
+  id        String   @id @default(cuid())
+  courseId   String
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  name      String
+  description String?
+  order     Int      @default(0)
+  isPublished Boolean @default(true)
+  lessons   CourseLesson[]
+  createdAt DateTime @default(now())
+  @@index([courseId])
+}
+
+model CourseLesson {
+  id          String   @id @default(cuid())
+  moduleId    String
+  module      CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  type        String   @default("video") // video, text, quiz, assignment, download
+  content     Json?    // { videoUrl, textContent, quizQuestions, fileUrl }
+  duration    Int?     // Duration in minutes
+  order       Int      @default(0)
+  isFree      Boolean  @default(false) // Preview lesson
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  @@index([moduleId])
+}
+
+model CourseEnrollment {
+  id          String   @id @default(cuid())
+  courseId     String
+  course       Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  businessId  String
+  contactId   String?
+  userId      String?
+  status      String   @default("active") // active, completed, expired, cancelled
+  progress    Float    @default(0) // 0-100%
+  enrolledAt  DateTime @default(now())
+  completedAt DateTime?
+  lastAccessedAt DateTime?
+  @@unique([courseId, contactId])
+  @@index([courseId])
+  @@index([businessId])
+}
+
+// ==================== TRIGGER LINKS ====================
+model TriggerLink {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
+  name        String
+  shortCode   String   @unique
+  originalUrl String
+  campaignId  String?  // Trigger automation campaign
+  workflowId  String?  // Trigger workflow
+  tags        String[] // Tags to add on click
+  isActive    Boolean  @default(true)
+  clickCount  Int      @default(0)
+  lastClickedAt DateTime?
+  clicks      TriggerLinkClick[]
+  createdAt   DateTime @default(now())
+  @@index([businessId])
+  @@index([shortCode])
+}
+
+model TriggerLinkClick {
+  id          String   @id @default(cuid())
+  linkId      String
+  link        TriggerLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  ipAddress   String?
+  userAgent   String?
+  referer     String?
+  country     String?
+  city        String?
+  device      String?
+  browser     String?
+  contactId   String?
+  clickedAt   DateTime @default(now())
+  @@index([linkId])
+  @@index([clickedAt])
+}
+
+// ==================== CLIENT PORTAL ====================
+model ClientPortal {
+  id              String   @id @default(cuid())
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id])
+  contactId       String
+  token           String   @unique
+  permissions     Json     @default("[\"view_invoices\",\"view_deals\",\"view_appointments\",\"make_payments\"]")
+  isActive        Boolean  @default(true)
+  lastLoginAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  @@unique([businessId, contactId])
+  @@index([businessId])
+  @@index([token])
+}
+
+// ==================== CUSTOM FIELDS ====================
+model CustomField {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
+  name        String
+  slug        String
+  type        String   // text, number, email, phone, date, datetime, select, multi_select, radio, checkbox, textarea, url, currency, file
+  entityType  String   // contact, lead, deal, appointment, order
+  options     Json?    // For select/multi_select: [{label, value}]
+  validation  Json?    // { required, minLength, maxLength, min, max, pattern }
+  defaultValue String?
+  placeholder String?
+  helpText    String?
+  isRequired  Boolean  @default(false)
+  isVisible   Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@unique([businessId, entityType, slug])
+  @@index([businessId])
+}
+
+// ==================== BLOG MODULE ====================
+model BlogPost {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id])
+  title         String
+  slug          String
+  excerpt       String?
+  content       String   // Rich text / HTML
+  featuredImage String?
+  author        String?
+  categoryId    String?
+  category      BlogCategory? @relation(fields: [categoryId], references: [id])
+  tags          String[]
+  seoTitle      String?
+  seoDescription String?
+  seoKeywords   String?
+  status        String   @default("draft") // draft, published, archived
+  publishedAt   DateTime?
+  viewCount     Int      @default(0)
+  readingTime   Int?     // Minutes
+  comments      BlogComment[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@unique([businessId, slug])
+  @@index([businessId])
+  @@index([status])
+  @@index([publishedAt])
+}
+
+model BlogCategory {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
+  name        String
+  slug        String
+  description String?
+  posts       BlogPost[]
+  createdAt   DateTime @default(now())
+  @@unique([businessId, slug])
+  @@index([businessId])
+}
+
+model BlogComment {
+  id          String   @id @default(cuid())
+  postId      String
+  post        BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  businessId  String
+  contactId   String?
+  name        String
+  email       String
+  content     String
+  isApproved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  @@index([postId])
+  @@index([businessId])
+}
+
+// ==================== PAYMENT LINKS ====================
+model PaymentLink {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id])
+  name          String
+  description   String?
+  amount        Float
+  currency      String   @default("INR")
+  type          String   @default("fixed") // fixed, flexible, subscription
+  minAmount     Float?
+  razorpayOrderId String?
+ razorpayLinkId String?
+  shortCode     String   @unique
+  isActive      Boolean  @default(true)
+  expiresAt     DateTime?
+  maxPayments   Int?
+  paymentCount  Int      @default(0)
+  totalCollected Float   @default(0)
+  contactId     String?  // Specific contact
+  invoiceId     String?  // Linked invoice
+  metadata      Json?
+  transactions  PaymentLinkTransaction[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@index([businessId])
+  @@index([shortCode])
+}
+
+model PaymentLinkTransaction {
+  id              String   @id @default(cuid())
+  linkId          String
+  link            PaymentLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  contactId       String?
+  razorpayPaymentId String?
+  amount          Float
+  currency        String   @default("INR")
+  status          String   @default("pending") // pending, captured, failed, refunded
+  metadata        Json?
+  paidAt          DateTime @default(now())
+  @@index([linkId])
+  @@index([status])
+}
+
+// ==================== REPUTATION MANAGEMENT ====================
+model ReviewRequest {
+  id           String   @id @default(cuid())
+  businessId   String
+  business     Business @relation(fields: [businessId], references: [id])
+  contactId    String?
+  appointmentId String?
+  orderId      String?
+  channel      String   @default("whatsapp") // whatsapp, email, sms
+  message      String
+  reviewUrl    String   // Google review link
+  status       String   @default("pending") // pending, sent, opened, completed, failed
+  sentAt       DateTime?
+  openedAt     DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+  @@index([businessId])
+  @@index([status])
+  @@index([contactId])
+}
+
+model ReviewRequestCampaign {
+  id              String   @id @default(cuid())
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id])
+  name            String
+  triggerType     String   // appointment_completed, order_delivered, manual
+  triggerConfig   Json?    // { appointmentTypes, orderStatuses, daysAfter }
+  channel         String   @default("whatsapp")
+  messageTemplate String
+  reviewUrl       String
+  isActive        Boolean  @default(true)
+  sentCount       Int      @default(0)
+  completedCount  Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  @@index([businessId])
+}
+
+// ==================== SAAS MODE / AGENCY ====================
+model Agency {
+  id              String   @id @default(cuid())
+  ownerId         String
+  owner           User     @relation(fields: [ownerId], references: [id])
+  name            String
+  logo            String?
+  website         String?
+  customDomain    String?
+  plan            String   @default("starter") // starter, professional, enterprise
+  maxSubAccounts  Int      @default(5)
+  subAccountCount Int      @default(0)
+  branding        Json?    // { primaryColor, logo, favicon, customCss }
+  billingConfig   Json?    // { billingCycle, markup, commission }
+  isActive        Boolean  @default(true)
+  subAccounts     SubAccount[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  @@index([ownerId])
+}
+
+model SubAccount {
+  id              String   @id @default(cuid())
+  agencyId        String
+  agency          Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id])
+  name            String
+  plan            String   @default("starter")
+  status          String   @default("active") // active, suspended, cancelled
+  customDomain    String?
+  branding        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  @@unique([agencyId, businessId])
+  @@index([agencyId])
 }

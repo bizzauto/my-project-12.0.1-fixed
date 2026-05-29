@@ -5,7 +5,9 @@ import {
   BarChart3, Settings, Bell,
   Shield, LogOut,
   Zap, UserPlus, MapPin, Bot, PhoneCall,
-  ShoppingCart, FileText, Clock, MoreVertical, Share2, Moon, Sun, Menu, X, Mail
+  ShoppingCart, FileText, Clock, MoreVertical, Share2, Moon, Sun, Menu, X, Mail,
+  Workflow, Link, GraduationCap, MessageCircle, FormInput, PenTool,
+  CreditCard, Building2, PhoneOff, Camera
 } from 'lucide-react';
 import { useAuthStore } from '../lib/authStore';
 import { useThemeStore } from '../lib/themeStore';
@@ -41,7 +43,39 @@ const menuItems: MenuItem[] = [
   { id: '/bulk-import', label: 'Import', icon: <Users size={20} /> },
 ];
 
+const menuSections: { label: string; items: MenuItem[] }[] = [
+  {
+    label: 'Automation & AI',
+    items: [
+      { id: '/workflows', label: 'Workflows', icon: <Workflow size={20} /> },
+      { id: '/trigger-links', label: 'Trigger Links', icon: <Link size={20} /> },
+    ],
+  },
+  {
+    label: 'Marketing',
+    items: [
+      { id: '/surveys', label: 'Surveys & Forms', icon: <FormInput size={20} /> },
+      { id: '/blog', label: 'Blog', icon: <PenTool size={20} /> },
+      { id: '/review-requests', label: 'Review Requests', icon: <Star size={20} /> },
+      { id: '/payment-links', label: 'Payment Links', icon: <CreditCard size={20} /> },
+    ],
+  },
+  {
+    label: 'Growth',
+    items: [
+      { id: '/courses', label: 'Courses', icon: <GraduationCap size={20} /> },
+      { id: '/funnels', label: 'Funnels', icon: <MessageCircle size={20} /> },
+      { id: '/conversations', label: 'Conversations', icon: <MessageSquare size={20} /> },
+    ],
+  },
+];
+
 const settingsMenuItems: MenuItem[] = [
+  { id: '/custom-fields', label: 'Custom Fields', icon: <FormInput size={20} /> },
+  { id: '/client-portal', label: 'Client Portal', icon: <Building2 size={20} /> },
+  { id: '/agency', label: 'Agency', icon: <Users size={20} /> },
+  { id: '/missed-call-settings', label: 'Missed Call', icon: <PhoneOff size={20} /> },
+  { id: '/snapshots', label: 'Snapshots', icon: <Camera size={20} /> },
   { id: '/profile', label: 'Profile', icon: <Shield size={20} /> },
   { id: '/settings', label: 'Settings', icon: <Settings size={20} /> },
   { id: '/billing', label: 'Billing', icon: <MoreVertical size={20} />, roles: ['OWNER', 'ADMIN'] },
@@ -168,6 +202,34 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                 </span>
               )}
             </button>
+          ))}
+
+          {menuSections.map((section) => (
+            <div key={section.label}>
+              <div className="my-3 border-t border-white/10" />
+              {!collapsed && (
+                <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-3 mb-1">
+                  {section.label}
+                </p>
+              )}
+              {section.items.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => navigate(item.id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
+                    isActive(item.id)
+                      ? 'bg-gradient-to-r from-blue-600/90 to-purple-600/90 text-white shadow-lg shadow-blue-500/20 font-medium'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <span className={`transition-transform duration-200 ${isActive(item.id) ? 'scale-110' : 'group-hover:scale-105'}`}>
+                    {item.icon}
+                  </span>
+                  {!collapsed && <span className="text-sm">{item.label}</span>}
+                </button>
+              ))}
+            </div>
           ))}
 
           <div className="my-3 border-t border-white/10" />
@@ -404,6 +466,29 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                 </button>
               ))}
             </div>
+
+            {/* New feature sections */}
+            {menuSections.map((section) => (
+              <div key={section.label} className="px-4 pb-3 border-t border-gray-200 dark:border-gray-700 pt-3">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">{section.label}</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {section.items.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => navigate(item.id)}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
+                        isActive(item.id)
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      {item.icon}
+                      <span className="text-[11px] font-medium text-center leading-tight">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
 
             {/* Settings items */}
             <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-3">
