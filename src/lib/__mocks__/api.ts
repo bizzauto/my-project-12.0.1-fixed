@@ -1,12 +1,11 @@
 // Manual mock for the API module
-const mockFn = jest.fn();
-
+// Each HTTP method gets its own jest.fn() to prevent cross-method interference
 const mockApiClient = {
-  get: mockFn.mockResolvedValue({ data: { success: true, data: {} } }),
-  post: mockFn.mockResolvedValue({ data: { success: true, data: {} } }),
-  put: mockFn.mockResolvedValue({ data: { success: true, data: {} } }),
-  patch: mockFn.mockResolvedValue({ data: { success: true, data: {} } }),
-  delete: mockFn.mockResolvedValue({ data: { success: true, data: {} } }),
+  get: jest.fn().mockResolvedValue({ data: { success: true, data: {} } }),
+  post: jest.fn().mockResolvedValue({ data: { success: true, data: {} } }),
+  put: jest.fn().mockResolvedValue({ data: { success: true, data: {} } }),
+  patch: jest.fn().mockResolvedValue({ data: { success: true, data: {} } }),
+  delete: jest.fn().mockResolvedValue({ data: { success: true, data: {} } }),
   interceptors: {
     request: { use: jest.fn(), eject: jest.fn() },
     response: { use: jest.fn(), eject: jest.fn() },
@@ -103,4 +102,11 @@ module.exports = {
   googleBusinessAPI: createMockAPI({ list: {}, update: {} }),
   auditLogAPI: createMockAPI({ list: {} }),
   postersAPI: createMockAPI({ list: {}, create: {}, delete: {} }),
+  instagramAPI: createMockAPI({
+    connect: {}, disconnect: {}, getStatus: {},
+    getAccount: {}, uploadMedia: {}, createContainer: {},
+    createCarouselContainer: {}, checkContainerStatus: {},
+    publishContainer: {}, publish: {}, publishCarousel: {},
+    publishPost: {}, getMedia: {}, getMediaInsights: {},
+  }),
 };

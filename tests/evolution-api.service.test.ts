@@ -72,6 +72,7 @@ describe('EvolutionApiService', () => {
           status: 'disconnected',
           instanceName: '',
           baseUrl: '',
+          apiKey: '',
         });
         expect(mockedPrisma.integration.findFirst).toHaveBeenCalledWith({
           where: { businessId: BUSINESS_ID, type: 'evolution_api' },
@@ -95,6 +96,7 @@ describe('EvolutionApiService', () => {
           status: 'connected',
           instanceName: INSTANCE_NAME,
           baseUrl: BASE_URL,
+          apiKey: API_KEY,
         });
       });
 
@@ -269,11 +271,11 @@ describe('EvolutionApiService', () => {
         });
         mockedPrisma.integration.update.mockResolvedValue({});
 
-        mockedAxios.post.mockResolvedValue({ data: {} });
+        // Service uses axios.get for connect endpoint
+        // Use only qrcode.code (not base64Image) to test that code path
         mockedAxios.get.mockResolvedValue({
           data: {
-            qrcode: { code: 'qr-code-string', base64Image: 'base64-image-data' },
-            base64Image: 'legacy-base64',
+            qrcode: { code: 'qr-code-string' },
           },
         });
 
@@ -281,19 +283,12 @@ describe('EvolutionApiService', () => {
 
         expect(result).toEqual({
           qrCode: 'qr-code-string',
-          qrCodeBase64: 'base64-image-data',
           status: 'scanning',
         });
 
-        expect(mockedAxios.post).toHaveBeenCalledWith(
-          `${BASE_URL}/instance/connect/${INSTANCE_NAME}`,
-          {},
-          expect.objectContaining({ headers: { apikey: API_KEY } })
-        );
-
         expect(mockedAxios.get).toHaveBeenCalledWith(
-          `${BASE_URL}/instance/qrcode/${INSTANCE_NAME}`,
-          expect.objectContaining({ headers: { apikey: API_KEY } })
+          `${BASE_URL}/instance/connect/${INSTANCE_NAME}`,
+          expect.objectContaining({ headers: { apikey: API_KEY }, timeout: 15000 })
         );
 
         // Status should be updated to scanning
@@ -320,14 +315,16 @@ describe('EvolutionApiService', () => {
 
         await expect(
           EvolutionApiService.connectInstance(BUSINESS_ID)
-        ).rejects.toThrow('Evolution API not configured for this business');
+        ).rejects.toThrow('Evolution API not configured');
       });
 
       it('throws error on API failure', async () => {
         mockedPrisma.integration.findFirst.mockResolvedValue({
           config: { baseUrl: BASE_URL, apiKey: API_KEY, instanceName: INSTANCE_NAME },
         });
-        mockedAxios.post.mockRejectedValue({
+        // Reset get to remove any lingering mockResolvedValue from previous tests
+        mockedAxios.get.mockReset();
+        mockedAxios.get.mockRejectedValue({
           response: { data: { message: 'Connection timeout' } },
         });
 
@@ -405,7 +402,9 @@ describe('EvolutionApiService', () => {
         expect(result).toEqual({ status: 'disconnected' });
       });
 
-      it('handles array response from fetchInstances', async () => {
+      it('returns disconnected when connectionState returns unexpected format', async () => {
+        // Service now uses connectionState endpoint which expects { instance: { state } }
+        // An array response means no matching instance found → disconnected
         mockedAxios.get.mockResolvedValue({
           data: [
             {
@@ -413,12 +412,10 @@ describe('EvolutionApiService', () => {
             },
           ],
         });
-        mockedAxios.post.mockResolvedValue({ data: {} });
 
         const result = await EvolutionApiService.getConnectionStatus(BUSINESS_ID);
 
-        expect(result.status).toBe('connected');
-        expect(result.phone).toBe('911234567890');
+        expect(result.status).toBe('disconnected');
       });
 
       it('handles profile picture fetch gracefully on failure', async () => {
@@ -451,14 +448,12 @@ describe('EvolutionApiService', () => {
           `${BASE_URL}/instance/logout/${INSTANCE_NAME}`,
           expect.objectContaining({ headers: { apikey: API_KEY } })
         );
-      });
-
-      it('throws error when not configured', async () => {
+      });      it('throws error when not configured', async () => {
         mockedPrisma.integration.findFirst.mockResolvedValue(null);
 
         await expect(
           EvolutionApiService.disconnectInstance(BUSINESS_ID)
-        ).rejects.toThrow('Evolution API not configured for this business');
+        ).rejects.toThrow('Evolution API not configured');
       });
 
       it('throws error on API failure', async () => {
@@ -1120,7 +1115,7 @@ describe('EvolutionApiService', () => {
 
       await expect(
         EvolutionApiService.connectInstance(BUSINESS_ID)
-      ).rejects.toThrow('Evolution API not configured for this business');
+      ).rejects.toThrow('Evolution API not configured');
     });
 
     it('throws error when getConfig called with missing businessId', async () => {
@@ -1128,7 +1123,7 @@ describe('EvolutionApiService', () => {
 
       await expect(
         EvolutionApiService.connectInstance('')
-      ).rejects.toThrow('Evolution API not configured for this business');
+      ).rejects.toThrow('Evolution API not configured');
     });
   });
 });

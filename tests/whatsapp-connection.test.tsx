@@ -426,6 +426,17 @@ describe('WhatsAppModule - Evolution API Mode', () => {
     (whatsappAPI.getContacts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.getAutoReplies as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.listConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
+
+    // apiClient.post returns QR code data for Evolution API connect endpoints
+    (apiClient.post as jest.Mock).mockImplementation(async (url: string, ..._rest: any[]) => {
+      if (url === '/evolution/connect') {
+        return { data: { success: true, data: { qrCodeBase64: 'data:image/png;base64,testqrcodedata', status: 'scanning' } } };
+      }
+      if (url === '/evolution/instance') {
+        return { data: { success: true } };
+      }
+      return { data: { success: true, data: {} } };
+    });
   });
 
   afterEach(() => {
@@ -559,10 +570,9 @@ describe('WhatsAppModule - Evolution API Mode', () => {
     // Click Connect — triggers handleEvolutionConnect → apiClient.post('/evolution/connect', ...)
     fireEvent.click(screen.getByText('Connect & Get QR Code'));
 
-    // After the async call resolves, connectionStatus becomes 'scanning'
-    // Verify the component shows scanning UI (Generating QR code...) instead of badge
+    // After the async call resolves, connectionStatus becomes 'scanning'     // Verify the component shows scanning UI (QR code display) instead of badge
     await waitFor(() => {
-      expect(screen.getByText(/Generating QR code/i)).toBeInTheDocument();
+      expect(screen.getByText(/Scan this QR code with WhatsApp/i)).toBeInTheDocument();
     });
 
     // The nav bar should still show Disconnected (scanning is not connected)
@@ -833,11 +843,15 @@ describe('WhatsAppModule - Evolution API Mode', () => {
      * state, the tests switch to 'evolution' mode after disconnecting.
      */
 
+    let statusCallCount = 0;
+
     beforeEach(() => {
+      statusCallCount = 0;
+
       // Override apiClient.get to return Evolution configured config + connected status
-      const mockFn = apiClient.get as jest.Mock;
-      mockFn.mockReset();
-      mockFn.mockImplementation(async (url: string, ..._rest: any[]) => {
+      const mockGet = apiClient.get as jest.Mock;
+      mockGet.mockReset();
+      mockGet.mockImplementation(async (url: string, ..._rest: any[]) => {
         if (url === '/evolution/config') {
           return {
             data: {
@@ -848,7 +862,24 @@ describe('WhatsAppModule - Evolution API Mode', () => {
           };
         }
         if (typeof url === 'string' && url.includes('/evolution/status')) {
-          return { data: { state: 'open' } };
+          statusCallCount++;
+          // First call = mount-time check → return 'connected' for auto-connect
+          // Subsequent calls = polling → return 'close' so scanning→connected doesn't auto-trigger
+          if (statusCallCount === 1) {
+            return { data: { data: { status: 'connected' } } };
+          }
+          return { data: { data: { status: 'close' } } };
+        }
+        return { data: { success: true, data: {} } };
+      });
+
+      // apiClient.post returns QR code data for Evolution API connect endpoints
+      (apiClient.post as jest.Mock).mockImplementation(async (url: string, ..._rest: any[]) => {
+        if (url === '/evolution/connect') {
+          return { data: { success: true, data: { qrCodeBase64: 'data:image/png;base64,testqrcodedata', status: 'scanning' } } };
+        }
+        if (url === '/evolution/instance') {
+          return { data: { success: true } };
         }
         return { data: { success: true, data: {} } };
       });
@@ -988,9 +1019,9 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       // Reconnect
       fireEvent.click(screen.getByText('Connect & Get QR Code'));
 
-      // Should transition to scanning state
+      // Should transition to scanning state (QR code displayed)
       await waitFor(() => {
-        expect(screen.getByText(/Generating QR code/i)).toBeInTheDocument();
+        expect(screen.getByText(/Scan this QR code with WhatsApp/i)).toBeInTheDocument();
       });
       // Nav should still show Disconnected (scanning !== connected)
       expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
@@ -1026,13 +1057,23 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       jest.clearAllMocks();
       jest.useFakeTimers();
 
-      // Explicitly reset apiClient mock to prevent leaking from previous tests.
-      // jest.clearAllMocks() only clears call data, not implementations.
-      // Since apiClient.get and apiClient.post share the same underlying mockFn,
-      // resetting one resets both.
-      const apiMock = apiClient.get as jest.Mock;
-      apiMock.mockReset();
-      apiMock.mockResolvedValue({ data: { success: true, data: {} } });
+      // apiClient.get and apiClient.post are now separate mock functions
+      // (each has its own jest.fn() in __mocks__/api.ts).
+      const apiGet = apiClient.get as jest.Mock;
+      apiGet.mockReset();
+      apiGet.mockResolvedValue({ data: { success: true, data: {} } });
+
+      const apiPost = apiClient.post as jest.Mock;
+      apiPost.mockReset();
+      apiPost.mockImplementation(async (url: string, ..._rest: any[]) => {
+        if (url === '/evolution/connect') {
+          return { data: { success: true, data: { qrCodeBase64: 'data:image/png;base64,testqrcodedata', status: 'scanning' } } };
+        }
+        if (url === '/evolution/instance') {
+          return { data: { success: true } };
+        }
+        return { data: { success: true, data: {} } };
+      });
 
       (whatsappAPI.getTemplates as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
       (whatsappAPI.listBroadcasts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
@@ -1078,7 +1119,7 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       fireEvent.click(screen.getByText('Connect & Get QR Code'));
 
       await waitFor(() => {
-        expect(screen.getByText(/Generating QR code/i)).toBeInTheDocument();
+        expect(screen.getByText(/Scan this QR code with WhatsApp/i)).toBeInTheDocument();
       });
 
       // Verify: still Disconnected (scanning !== connected)
@@ -1096,8 +1137,8 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       // Verify there is no "Connecting..." overlay either (Evolution never enters 'connecting' state)
       expect(screen.queryByText('Connecting...')).not.toBeInTheDocument();
 
-      // The Evolution mode scanning UI should still be showing
-      expect(screen.getByText(/Generating QR code/i)).toBeInTheDocument();
+      // The Evolution mode scanning UI should still be showing (QR code displayed)
+      expect(screen.getByText(/Scan this QR code with WhatsApp/i)).toBeInTheDocument();
     });
 
     it('transitions scanning → connected when re-mounted with state=open from status check', async () => {
@@ -1118,7 +1159,7 @@ describe('WhatsAppModule - Evolution API Mode', () => {
           };
         }
         if (typeof url === 'string' && url.includes('/evolution/status')) {
-          return { data: { state: 'close' } }; // Not connected yet
+          return { data: { data: { status: 'close' } } }; // Not connected yet
         }
         return { data: { success: true, data: {} } };
       });
@@ -1140,7 +1181,7 @@ describe('WhatsAppModule - Evolution API Mode', () => {
 
       // Connect → scanning
       fireEvent.click(screen.getByText('Connect & Get QR Code'));
-      await waitFor(() => expect(screen.getByText(/Generating QR code/i)).toBeInTheDocument());
+      await waitFor(() => expect(screen.getByText(/Scan this QR code with WhatsApp/i)).toBeInTheDocument());
       expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
 
       // ── Simulate external event: server now reports state=open ──
@@ -1154,7 +1195,7 @@ describe('WhatsAppModule - Evolution API Mode', () => {
           };
         }
         if (typeof url === 'string' && url.includes('/evolution/status')) {
-          return { data: { state: 'open' } }; // Now connected!
+          return { data: { data: { status: 'connected' } } }; // Now connected!
         }
         return { data: { success: true, data: {} } };
       });
@@ -1204,7 +1245,7 @@ describe('WhatsAppModule - Evolution API Mode', () => {
 
       // Connect → scanning
       fireEvent.click(screen.getByText('Connect & Get QR Code'));
-      await waitFor(() => expect(screen.getByText(/Generating QR code/i)).toBeInTheDocument());
+      await waitFor(() => expect(screen.getByText(/Scan this QR code with WhatsApp/i)).toBeInTheDocument());
       expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
 
       // ── Switch to Chats view ──
@@ -1225,7 +1266,7 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       // Evolution scanning state should still be preserved (component not recreated)
       fireEvent.click(screen.getByRole('button', { name: /Evolution API/i }));
       await waitFor(() => {
-        expect(screen.getByText(/Generating QR code/i)).toBeInTheDocument();
+        expect(screen.getByText(/Scan this QR code with WhatsApp/i)).toBeInTheDocument();
       });
 
       // Nav should still show Disconnected — scanning state preserved
