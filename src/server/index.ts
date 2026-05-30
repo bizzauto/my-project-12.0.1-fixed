@@ -62,6 +62,7 @@ import cartRecoveryRoutes from './routes/cart-recovery.js';
 import liveChatRoutes from './routes/live-chat.js';
 import referralsRoutes from './routes/referrals.js';
 import videoMeetingsRoutes from './routes/video-meetings.js';
+import supportTicketsRoutes from './routes/support-tickets.js';
 import { securityHeaders, apiSecurityHeaders } from './middleware/security.js';
 
 dotenv.config();
@@ -210,6 +211,7 @@ app.use('/api/cart-recovery', cartRecoveryRoutes);
 app.use('/api/live-chat', liveChatRoutes);
 app.use('/api/referrals', referralsRoutes);
 app.use('/api/video-meetings', videoMeetingsRoutes);
+app.use('/api/support-tickets', supportTicketsRoutes);
 
 // Test endpoints (development only)
 if (NODE_ENV !== 'production') {

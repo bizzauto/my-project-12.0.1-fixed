@@ -180,6 +180,7 @@ model Business {
   aiFollowUps         AIFollowUp[]
   whatsappCatalogs    WhatsAppCatalog[]
   videoMeetings       VideoMeeting[]
+  supportTickets      SupportTicket[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -306,6 +307,7 @@ model Contact {
   referredBy    Referral[] @relation("Referrer")
   referredUsers Referral[] @relation("Referee")
   aiFollowUps   AIFollowUp[]
+  supportTickets SupportTicket[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2159,4 +2161,50 @@ model VideoMeeting {
   @@index([businessId])
   @@index([scheduledAt])
   @@index([status])
+}
+
+// ==================== SUPPORT TICKETS ====================
+model SupportTicket {
+  id              String   @id @default(cuid())
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id])
+  ticketNumber    String   @unique // e.g., #TICKET-001
+  contactId       String?
+  contact         Contact? @relation(fields: [contactId], references: [id])
+  name            String
+  email           String?
+  phone           String?
+  subject         String
+  description     String
+  category        String   @default("general") // general, billing, technical, feature_request, bug
+  priority        String   @default("medium") // low, medium, high, urgent
+  status          String   @default("open") // open, in_progress, waiting, resolved, closed
+  assignedTo      String?
+  tags            String[]
+  attachments     String[] // file URLs
+  internalNotes   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  replies         TicketReply[]
+  @@index([businessId])
+  @@index([ticketNumber])
+  @@index([status])
+  @@index([priority])
+  @@index([contactId])
+}
+
+model TicketReply {
+  id              String   @id @default(cuid())
+  ticketId        String
+  ticket          SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  senderType      String   // customer, agent, system
+  senderId        String?
+  senderName      String
+  message         String
+  attachments     String[]
+  isInternal      Boolean  @default(false) // internal notes not visible to customer
+  createdAt       DateTime @default(now())
+  @@index([ticketId])
 }
