@@ -61,22 +61,84 @@ router.post('/webhook/:businessId', async (req: Request, res: Response) => {
 
     if (value?.messages) {
       for (const message of value.messages) {
+        const senderPhone = message.from;
+        
         // Find or create contact
         let contact = await prisma.contact.findFirst({
           where: {
             businessId,
-            phone: message.from,
+            phone: senderPhone,
           },
         });
 
+        let isNewContact = false;
+
         if (!contact) {
+          // NEW LEAD - Auto-create from WhatsApp message
           contact = await prisma.contact.create({
             data: {
               businessId,
-              name: message.from,
-              phone: message.from,
+              name: `WhatsApp ${senderPhone}`,
+              phone: senderPhone,
               source: 'whatsapp',
+              tags: ['WhatsApp Lead', 'Auto-Captured'],
               whatsappOptIn: true,
+              lastActivity: new Date(),
+              lastMessageAt: new Date(),
+            },
+          });
+          isNewContact = true;
+          console.log(`[WhatsApp] New lead created: ${senderPhone}`);
+
+          // Create activity log
+          await prisma.activity.create({
+            data: {
+              businessId,
+              contactId: contact.id,
+              type: 'lead_captured',
+              title: 'New lead from WhatsApp',
+              content: `Auto-captured from incoming WhatsApp message`,
+              metadata: { source: 'whatsapp', phone: senderPhone },
+              createdBy: 'system',
+            },
+          });
+
+          // Send auto-reply if enabled
+          try {
+            const business = await prisma.business.findUnique({
+              where: { id: businessId },
+              select: { autoReplyEnabled: true, autoReplyMessage: true, name: true },
+            });
+
+            if (business?.autoReplyEnabled && business?.autoReplyMessage) {
+              const autoReply = business.autoReplyMessage
+                .replace(/{{name}}/g, 'Customer')
+                .replace(/{{business}}/g, business.name || 'Business');
+
+              // Send auto-reply via WhatsApp API
+              const creds = await getWhatsAppCredentials(businessId);
+              await axios.post(
+                `${WHATSAPP_API_BASE}/${creds.phoneNumberId}/messages`,
+                {
+                  messaging_product: 'whatsapp',
+                  to: senderPhone,
+                  type: 'text',
+                  text: { body: autoReply },
+                },
+                { headers: { Authorization: `Bearer ${creds.accessToken}` } }
+              );
+              console.log(`[WhatsApp] Auto-reply sent to ${senderPhone}`);
+            }
+          } catch (autoReplyError: any) {
+            console.error(`[WhatsApp] Auto-reply failed:`, autoReplyError.message);
+          }
+        } else {
+          // Existing contact - update last activity
+          await prisma.contact.update({
+            where: { id: contact.id },
+            data: { 
+              lastMessageAt: new Date(),
+              lastActivity: new Date(),
             },
           });
         }
@@ -94,19 +156,12 @@ router.post('/webhook/:businessId', async (req: Request, res: Response) => {
         if (message.type === 'text') {
           messageData.content = message.text.body;
         } else if (message.type === 'image') {
-
           messageData.mediaUrl = message.image.id;
           messageData.content = message.image.caption;
         }
 
         await prisma.message.create({
           data: messageData,
-        });
-
-        // Update contact last activity
-        await prisma.contact.update({
-          where: { id: contact.id },
-          data: { lastMessageAt: new Date() },
         });
 
         // Check if chatbot should respond
@@ -118,8 +173,6 @@ router.post('/webhook/:businessId', async (req: Request, res: Response) => {
         });
 
         if (chatbotFlow) {
-          // Trigger chatbot response (async)
-          // This would be handled by a queue in production
           console.log('Triggering chatbot for message:', message.id);
         }
       }

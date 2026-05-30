@@ -753,15 +753,40 @@ export class EvolutionApiService {
           where: { businessId, phone: from },
         });
 
+        let isNewContact = false;
+
         if (!contact) {
           contact = await prisma.contact.create({
             data: {
               businessId,
-              name: from || 'WhatsApp Contact',
+              name: `WhatsApp ${from}`,
               phone: from,
               source: 'whatsapp',
+              tags: ['WhatsApp Lead', 'Auto-Captured'],
               whatsappOptIn: true,
+              lastActivity: new Date(),
+              lastMessageAt: new Date(),
             },
+          });
+          isNewContact = true;
+          console.log(`[Evolution] New lead created: ${from}`);
+
+          // Create activity log
+          await prisma.activity.create({
+            data: {
+              businessId,
+              contactId: contact.id,
+              type: 'lead_captured',
+              title: 'New lead from WhatsApp',
+              content: 'Auto-captured from Evolution API message',
+              metadata: { source: 'evolution', phone: from },
+              createdBy: 'system',
+            },
+          });
+        } else {
+          await prisma.contact.update({
+            where: { id: contact.id },
+            data: { lastMessageAt: new Date(), lastActivity: new Date() },
           });
         }
 
@@ -774,8 +799,7 @@ export class EvolutionApiService {
           : msg.message?.documentMessage ? 'document'
           : 'text';
 
-        await
-      prisma.message.create({
+        await prisma.message.create({
           data: {
             businessId,
             contactId: contact.id,
@@ -785,13 +809,6 @@ export class EvolutionApiService {
             waMessageId: msg.key?.id,
             status: 'received',
           },
-        });
-
-        // Update contact last activity
-        await
-      prisma.contact.update({
-          where: { id: contact.id },
-          data: { lastMessageAt: new Date(), lastActivity: new Date() },
         });
 
         break;
