@@ -481,6 +481,49 @@ export default function SettingsPage() {
           </button>
         </div>
       </form>
+
+      {/* Social Media Connections */}
+      <div className="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+          <Globe className="text-blue-600" size={20} />
+          Social Media Connections
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Connect your social media accounts to manage them from BizzAuto.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            { name: 'WhatsApp Business', icon: '💬', color: 'green', connected: !!business?.waAccessToken, desc: 'Send messages, auto-replies, campaigns' },
+            { name: 'Facebook', icon: '📘', color: 'blue', connected: !!business?.fbAccessToken, desc: 'Post to pages, lead ads' },
+            { name: 'Instagram', icon: '📷', color: 'pink', connected: !!business?.igAccessToken, desc: 'Post, stories, reels' },
+            { name: 'LinkedIn', icon: '💼', color: 'blue', connected: !!business?.linkedinAccessToken, desc: 'Professional posts' },
+            { name: 'Twitter/X', icon: '🐦', color: 'sky', connected: !!business?.twitterAccessToken, desc: 'Tweets and threads' },
+            { name: 'Google Business', icon: '🏢', color: 'red', connected: !!business?.gbpAccessToken, desc: 'Reviews, posts, insights' },
+            { name: 'Google OAuth', icon: '🔐', color: 'red', connected: !!user?.googleId, desc: 'Sign in with Google' },
+            { name: 'Apple Sign-In', icon: '🍎', color: 'gray', connected: !!user?.appleId, desc: 'Sign in with Apple' },
+          ].map((social) => (
+            <div key={social.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{social.icon}</span>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">{social.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{social.desc}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {social.connected ? (
+                  <span className="flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-medium">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span> Connected
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 rounded-full text-xs font-medium">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full"></span> Not Connected
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
