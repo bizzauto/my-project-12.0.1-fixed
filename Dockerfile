@@ -23,6 +23,8 @@ RUN npm install --omit=dev && npx prisma generate
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
+COPY start.sh ./
+RUN chmod +x start.sh
 
 # Create necessary directories
 RUN mkdir -p uploads logs
@@ -32,4 +34,4 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:4000/health/live || exit 1
 
-CMD ["sh", "-c", "node dist/server/index.js"]
+CMD ["./start.sh"]
