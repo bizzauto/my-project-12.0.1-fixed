@@ -93,6 +93,9 @@ export class LeadCaptureService {
       },
     });
 
+    // Trigger n8n workflows
+    await this.triggerN8nWorkflow(businessId, { ...leadData, source: 'indiamart', contactId: contact.id });
+
     return contact;
   }
 
@@ -418,6 +421,43 @@ export class LeadCaptureService {
 
     // Default: assign to first admin
     return users[0].id;
+  }
+
+  /**
+   * Trigger n8n workflow for new lead
+   */
+  static async triggerN8nWorkflow(businessId: string, leadData: any): Promise<void> {
+    try {
+      const n8nUrl = process.env.N8N_URL;
+      if (!n8nUrl) return; // n8n not configured
+
+      // Find active automation rules that trigger on lead capture
+      const rules = await prisma.chatbotFlow.findMany({
+        where: {
+          businessId,
+          isActive: true,
+          trigger: 'new_lead',
+        },
+      });
+
+      for (const rule of rules) {
+        if (rule.n8nWorkflowId) {
+          try {
+            await axios.post(`${n8nUrl}/webhook/${rule.n8nWorkflowId}`, {
+              event: 'new_lead',
+              businessId,
+              lead: leadData,
+              timestamp: new Date().toISOString(),
+            }, { timeout: 10000 });
+            console.log(`[N8N] Triggered workflow ${rule.n8nWorkflowId} for lead`);
+          } catch (e: any) {
+            console.error(`[N8N] Failed to trigger workflow:`, e.message);
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error(`[N8N] Error triggering workflows:`, error.message);
+    }
   }
 }
 
