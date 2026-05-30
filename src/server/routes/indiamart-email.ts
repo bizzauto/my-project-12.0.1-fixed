@@ -32,12 +32,15 @@ router.post('/setup', authenticate, async (req: any, res: Response) => {
       });
     }
 
+    // Clean password - remove spaces (Gmail App Passwords have spaces)
+    const cleanPassword = password.replace(/\s/g, '');
+
     // Save email config (encrypted)
     const emailConfig = {
       imapHost,
       imapPort: imapPort || 993,
       email,
-      password: encrypt(password),
+      password: encrypt(cleanPassword),
       useSSL,
       spreadsheetId,
       autoSync,
@@ -276,6 +279,47 @@ router.post('/test-connection', authenticate, async (req: any, res: Response) =>
       error: error.message,
       hint: 'Check IMAP host, port, email and password. For Gmail, use App Password.',
     });
+  }
+});
+
+/**
+ * GET /api/indiamart-email/debug
+ * Debug IMAP configuration (shows settings without password)
+ */
+router.get('/debug', authenticate, async (req: any, res: Response) => {
+  try {
+    const businessId = req.user.businessId;
+
+    const integration = await prisma.integration.findFirst({
+      where: { businessId, type: 'indiamart_email' },
+    });
+
+    if (!integration) {
+      return res.json({
+        success: true,
+        data: { configured: false, message: 'No IndiaMART email integration found' },
+      });
+    }
+
+    const config = integration.config as any;
+
+    res.json({
+      success: true,
+      data: {
+        configured: true,
+        imapHost: config.imapHost,
+        imapPort: config.imapPort,
+        email: config.email,
+        useSSL: config.useSSL,
+        passwordLength: config.password ? decrypt(config.password).length : 0,
+        passwordPreview: config.password ? decrypt(config.password).substring(0, 4) + '****' : 'N/A',
+        autoSync: config.autoSync,
+        lastSyncAt: config.lastSyncAt,
+        isActive: integration.isActive,
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

@@ -253,7 +253,7 @@ export class EmailLeadService {
 
       await new Promise<void>((resolve, reject) => {
         imap.once('ready', () => {
-          console.log(`[${platformName}] IMAP connected`);
+          console.log(`[${platformName}] IMAP connected successfully`);
           imap.openBox('INBOX', true, async (err) => {
             if (err) {
               imap.end();
@@ -261,31 +261,56 @@ export class EmailLeadService {
               return;
             }
 
-            // Build search query - search from all platform domains
+            console.log(`[${platformName}] Searching emails since ${since.toISOString()}`);
+
+            // Simple search - just get recent emails, filter manually
             const searchQuery: any[] = [['SINCE', since]];
-            if (searchDomains.length === 1) {
-              searchQuery.push(['FROM', searchDomains[0]]);
-            } else {
-              searchQuery.push(['OR', ['FROM', searchDomains[0]], ['OR', ['FROM', searchDomains[1]], ['OR', ['FROM', searchDomains[2]], ['FROM', searchDomains[3]]]]]);
-            }
 
             imap.search(searchQuery, async (err, results) => {
-              if (err || !results || results.length === 0) {
-                console.log(`[${platformName}] No emails found`);
+              if (err) {
+                console.error(`[${platformName}] Search error:`, err);
                 imap.end();
                 resolve();
                 return;
               }
 
-              console.log(`[${platformName}] Found ${results.length} emails`);
+              if (!results || results.length === 0) {
+                console.log(`[${platformName}] No emails found in INBOX`);
+                imap.end();
+                resolve();
+                return;
+              }
+
+              console.log(`[${platformName}] Found ${results.length} total emails, filtering for ${platformName}...`);
 
               const toFetch = results.slice(-limit);
               const fetch = imap.fetch(toFetch, { bodies: '', struct: true });
+
+              let emailCount = 0;
+              let matchCount = 0;
 
               fetch.on('message', async (msg) => {
                 msg.on('body', async (stream) => {
                   try {
                     const parsed = await simpleParser(stream);
+                    const fromAddress = ((parsed as any).from?.[0]?.address || '').toLowerCase();
+                    const subject = ((parsed as any).subject || '').toLowerCase();
+                    emailCount++;
+
+                    // Check if this email is from the platform
+                    const isMatch = searchDomains.some(domain => fromAddress.includes(domain)) ||
+                                   subject.includes(platform.toLowerCase()) ||
+                                   subject.includes('enquiry') ||
+                                   subject.includes('inquiry') ||
+                                   subject.includes('lead');
+
+                    if (!isMatch) {
+                      return; // Skip non-platform emails
+                    }
+
+                    matchCount++;
+                    console.log(`[${platformName}] Match #${matchCount}: From: ${fromAddress}, Subject: ${(parsed as any).subject}`);
+
                     const leadData = this.parseEmail(
                       (parsed as any).html || '',
                       (parsed as any).text || '',
@@ -304,6 +329,7 @@ export class EmailLeadService {
 
                       if (existing) {
                         result.skipped++;
+                        console.log(`[${platformName}] Skipping duplicate: ${leadData.phone}`);
                         return;
                       }
 
@@ -320,9 +346,12 @@ export class EmailLeadService {
                       result.newLeads++;
                       result.leads.push(contact);
                       console.log(`[${platformName}] New lead: ${leadData.name} ${leadData.phone}`);
+                    } else {
+                      console.log(`[${platformName}] Could not parse lead from email: ${fromAddress}`);
                     }
                   } catch (e: any) {
                     result.errors.push(`Parse error: ${e.message}`);
+                    console.error(`[${platformName}] Parse error:`, e.message);
                   }
                 });
               });
