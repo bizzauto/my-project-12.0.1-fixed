@@ -315,6 +315,8 @@ export default function CRMPage() {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [showGoalModal, setShowGoalModal] = useState(false);
+  const [draggedDeal, setDraggedDeal] = useState<string | null>(null);
+  const [dragOverStage, setDragOverStage] = useState<string | null>(null);
   const [showDealModal, setShowDealModal] = useState(false);
   const [contactViewMode, setContactViewMode] = useState<'table' | 'grid'>('table');
   const [pipelineId, setPipelineId] = useState('default');
@@ -369,6 +371,43 @@ export default function CRMPage() {
   })), [deals]);
 
   // Add Contact
+  // Drag and Drop handlers for Pipeline
+  const handleDragStart = (e: React.DragEvent, dealId: string) => {
+    setDraggedDeal(dealId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', dealId);
+  };
+
+  const handleDragOver = (e: React.DragEvent, stageId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverStage(stageId);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverStage(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetStageId: string) => {
+    e.preventDefault();
+    const dealId = e.dataTransfer.getData('text/plain');
+    if (dealId && draggedDeal) {
+      // Update deal stage in state
+      setDeals((prev) => prev.map((d) =>
+        d.id === dealId ? { ...d, stage: targetStageId } : d
+      ));
+      // Here you would also call the API to persist the change
+      // await contactsAPI.update(dealId, { stage: targetStageId });
+    }
+    setDraggedDeal(null);
+    setDragOverStage(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedDeal(null);
+    setDragOverStage(null);
+  };
+
   const handleAddContact = (contactData: any) => {
     const newContact: Contact = {
       ...contactData,
@@ -722,9 +761,24 @@ export default function CRMPage() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-b-xl p-3 space-y-3 min-h-[200px]">
+                <div
+                  className={`bg-gray-50 dark:bg-gray-800/50 rounded-b-xl p-3 space-y-3 min-h-[200px] transition-colors ${
+                    dragOverStage === stage.id ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-400 ring-inset' : ''
+                  }`}
+                  onDragOver={(e) => handleDragOver(e, stage.id)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, stage.id)}
+                >
                   {stage.deals.map(deal => (
-                    <div key={deal.id} className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm border border-gray-200 dark:border-gray-600 cursor-grab hover:shadow-md transition-shadow">
+                    <div
+                      key={deal.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, deal.id)}
+                      onDragEnd={handleDragEnd}
+                      className={`bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm border border-gray-200 dark:border-gray-600 cursor-grab active:cursor-grabbing hover:shadow-md transition-all ${
+                        draggedDeal === deal.id ? 'opacity-50 scale-95' : ''
+                      }`}
+                    >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-gray-900 dark:text-white truncate flex-1">{deal.title}</span>
                         <span className="text-xs font-bold text-green-600 ml-2">₹{deal.value.toLocaleString()}</span>
@@ -745,7 +799,7 @@ export default function CRMPage() {
                   ))}
                   {stage.deals.length === 0 && (
                     <div className="flex items-center justify-center h-20 text-xs text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg">
-                      Drag deals here
+                      Drop deals here
                     </div>
                   )}
                 </div>
