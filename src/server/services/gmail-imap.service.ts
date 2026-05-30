@@ -1,5 +1,6 @@
 import { prisma } from '../index.js';
 import { LeadCaptureService } from './lead-capture.service.js';
+import { EmailLeadService } from './email-lead.service.js';
 
 /**
  * Gmail IMAP Service - Simple and Reliable
@@ -144,25 +145,18 @@ export class GmailIMAPService {
                 // Create leads from each email
                 for (const email of indiamartEmails) {
                   try {
-                    // Extract phone
-                    const phoneMatch = (email.text || email.html).match(/(?:\+?91[\s.-]?)?([6-9]\d{9})/);
-                    const phone = phoneMatch ? phoneMatch[1].slice(-10) : '';
+                    // Use the improved parser from EmailLeadService
+                    const leadData = EmailLeadService.parseEmail(
+                      email.html || '',
+                      email.text || '',
+                      'indiamart'
+                    );
 
-                    // Extract email
-                    const emailMatch = (email.text || '').match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-                    const buyerEmail = emailMatch ? emailMatch[0] : '';
-
-                    // Extract name
-                    const nameMatch = (email.text || '').match(/(?:Dear|Query from|Buyer Name|Customer Name)[:\s]*([A-Za-z\s]+)/i);
-                    const name = nameMatch ? nameMatch[1].trim() : 'IndiaMART Customer';
-
-                    // Extract product
-                    const productMatch = (email.text || '').match(/(?:Product|Requirement|Interested)[:\s]*(.+)/i);
-                    const product = productMatch ? productMatch[1].trim().substring(0, 200) : '';
-
-                    // Extract city
-                    const cityMatch = (email.text || '').match(/(?:City|Location)[:\s]*([A-Za-z\s]+)/i);
-                    const city = cityMatch ? cityMatch[1].trim() : '';
+                    const phone = leadData?.phone || '';
+                    const buyerEmail = leadData?.email || '';
+                    const name = leadData?.name || 'IndiaMART Customer';
+                    const product = leadData?.product || '';
+                    const city = leadData?.city || '';
 
                     if (phone || buyerEmail) {
                       // Check duplicate
@@ -179,7 +173,7 @@ export class GmailIMAPService {
                           city,
                         });
                         result.leadsCreated++;
-                        result.details.push(`Created lead: ${name} ${phone}`);
+                        result.details.push(`Created lead: ${name} ${phone} ${buyerEmail}`);
                       } else {
                         result.details.push(`Skipped duplicate: ${phone}`);
                       }

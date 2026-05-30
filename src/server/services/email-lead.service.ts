@@ -40,9 +40,26 @@ export class EmailLeadService {
   static parseIndiaMART(content: string): ParsedLead | null {
     const result: ParsedLead = { name: '', phone: '', email: '', product: '', requirement: '', city: '', source: 'indiamart' };
 
-    // Name - multiple patterns
-    const nameMatch = content.match(/(?:Dear\s+)?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?|Query\s+from\s+(.+?)(?:\n|$)|Buyer\s+Name[:\s]*(.+?)(?:\n|$)|Customer\s+Name[:\s]*(.+?)(?:\n|$))/i);
-    if (nameMatch) result.name = (nameMatch[1] || nameMatch[2] || nameMatch[3] || nameMatch[4] || '').trim();
+    // Name - multiple patterns for IndiaMART format
+    const namePatterns = [
+      /(?:Dear\s+)?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+      /Query\s+from\s+([^\n]+)/i,
+      /Buyer\s+Name[:\s]*([^\n]+)/i,
+      /Customer\s+Name[:\s]*([^\n]+)/i,
+      /Contact\s+Person[:\s]*([^\n]+)/i,
+      /Enquiry\s+from[:\s]*([^\n]+)/i,
+      /Hi[,!\s]+([A-Z][a-z]+)/i,
+    ];
+    for (const pattern of namePatterns) {
+      const match = content.match(pattern);
+      if (match && match[1]) {
+        const name = match[1].trim();
+        if (name.length > 2 && name.length < 50 && !name.toLowerCase().includes('indiamart')) {
+          result.name = name;
+          break;
+        }
+      }
+    }
 
     // Phone - multiple patterns
     const phones = content.match(/(?:\+?91[\s.-]?)?([6-9]\d{9})/g);
@@ -53,28 +70,86 @@ export class EmailLeadService {
       }
     }
 
-    // Email
-    const emails = content.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g);
-    if (emails) {
-      const valid = emails.filter(e => !e.includes('indiamart.com') && !e.includes('noreply') && !e.includes('justdial') && !e.includes('tradeindia'));
-      if (valid.length > 0) result.email = valid[0];
+    // Email - multiple patterns
+    const emailPatterns = [
+      /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g,
+      /Email[:\s]*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i,
+      /Mail[:\s]*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i,
+    ];
+    for (const pattern of emailPatterns) {
+      const emails = content.match(pattern);
+      if (emails) {
+        const valid = emails.filter(e => 
+          !e.includes('indiamart.com') && 
+          !e.includes('noreply') && 
+          !e.includes('justdial') && 
+          !e.includes('tradeindia') &&
+          !e.includes('support@')
+        );
+        if (valid.length > 0) {
+          result.email = valid[0];
+          break;
+        }
+      }
     }
 
-    // Product
-    const productMatch = content.match(/(?:Requirement\s+for|Inquiry\s+for|Interested\s+in|Product\s+Name|Product)[:\s]*(.+?)(?:\n|$)/i);
-    if (productMatch) result.product = productMatch[1].trim().substring(0, 200);
+    // Product - multiple patterns
+    const productPatterns = [
+      /Requirement\s+for[:\s]*([^\n]+)/i,
+      /Inquiry\s+for[:\s]*([^\n]+)/i,
+      /Interested\s+in[:\s]*([^\n]+)/i,
+      /Product\s+Name[:\s]*([^\n]+)/i,
+      /Product[:\s]*([^\n]+)/i,
+      /Looking\s+for[:\s]*([^\n]+)/i,
+      /Want\s+to\s+buy[:\s]*([^\n]+)/i,
+    ];
+    for (const pattern of productPatterns) {
+      const match = content.match(pattern);
+      if (match && match[1]) {
+        result.product = match[1].trim().substring(0, 200);
+        break;
+      }
+    }
 
-    // Requirement
-    const reqMatch = content.match(/(?:Requirement|Query|Details|Message|Description|Customer\s+Requirement|Your\s+Requirement)[:\s]*(.+?)(?:\n\n|$)/is);
-    if (reqMatch) result.requirement = reqMatch[1].trim().substring(0, 500);
+    // Requirement/Message
+    const reqPatterns = [
+      /Requirement[:\s]*([^\n]+)/i,
+      /Query[:\s]*([^\n]+)/i,
+      /Message[:\s]*([^\n]+)/i,
+      /Description[:\s]*([^\n]+)/i,
+      /Details[:\s]*([^\n]+)/i,
+      /Customer\s+Requirement[:\s]*([^\n]+)/i,
+    ];
+    for (const pattern of reqPatterns) {
+      const match = content.match(pattern);
+      if (match && match[1]) {
+        result.requirement = match[1].trim().substring(0, 500);
+        break;
+      }
+    }
 
-    // City
-    const cityMatch = content.match(/(?:City|Location|From|Buyer\s+City)[:\s]*([A-Za-z\s]+?)(?:\n|$)/i);
-    if (cityMatch) result.city = cityMatch[1].trim().substring(0, 100);
+    // City - multiple patterns
+    const cityPatterns = [
+      /City[:\s]*([A-Za-z\s]+?)(?:\n|$)/i,
+      /Location[:\s]*([A-Za-z\s]+?)(?:\n|$)/i,
+      /From[:\s]*([A-Za-z\s]+?)(?:\n|$)/i,
+      /Buyer\s+City[:\s]*([A-Za-z\s]+?)(?:\n|$)/i,
+      /Address[:\s]*([A-Za-z\s]+?)(?:\n|$)/i,
+    ];
+    for (const pattern of cityPatterns) {
+      const match = content.match(pattern);
+      if (match && match[1]) {
+        const city = match[1].trim();
+        if (city.length > 2 && city.length < 50) {
+          result.city = city;
+          break;
+        }
+      }
+    }
 
     // If we have at least phone or email, return the lead
     if (result.phone || result.email) {
-      console.log(`[IndiaMART Parser] Found: name=${result.name}, phone=${result.phone}, email=${result.email}`);
+      console.log(`[IndiaMART Parser] Found: name=${result.name}, phone=${result.phone}, email=${result.email}, product=${result.product}, city=${result.city}`);
       return result;
     }
 
