@@ -581,15 +581,24 @@ const SocialMediaPage: React.FC = () => {
           <div className="p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
               <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"><ChevronLeft size={20} /></button>
-              <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">April 2026</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
+                {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </h3>
               <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"><ChevronRight size={20} /></button>
             </div>
-            <button
-              onClick={() => setShowComposeModal(true)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs sm:text-sm hover:bg-blue-700"
-            >
-              <Plus size={16} /> <span className="hidden sm:inline">New Post</span><span className="sm:hidden">New</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1 text-xs">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-green-500 rounded-full"></span>Published</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-blue-500 rounded-full"></span>Scheduled</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-gray-300 rounded-full"></span>Draft</span>
+              </div>
+              <button
+                onClick={() => setShowComposeModal(true)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs sm:text-sm hover:bg-blue-700"
+              >
+                <Plus size={16} /> <span className="hidden sm:inline">New Post</span><span className="sm:hidden">New</span>
+              </button>
+            </div>
           </div>
           <div className="grid grid-cols-7 min-w-[500px] sm:min-w-0">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
