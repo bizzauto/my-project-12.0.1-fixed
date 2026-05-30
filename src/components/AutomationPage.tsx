@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Zap, Plus, Play, Pause, Trash2, Edit3, Clock,
-  MessageSquare, Settings, Bot,
+  MessageSquare, Settings, Bot, GitBranch,
   CheckCircle, XCircle, ArrowRight, RefreshCw, Loader2
 } from 'lucide-react';
 import { automationAPI } from '../lib/api';
@@ -52,7 +53,8 @@ const defaultSettings: AutomationSettings = {
 
 const AutomationPage: React.FC = () => {
   const { isDemoMode } = useAuthStore();
-  const [activeView, setActiveView] = useState<'automations' | 'templates' | 'settings'>('automations');
+  const navigate = useNavigate();
+  const [activeView, setActiveView] = useState<'automations' | 'workflows' | 'templates' | 'settings'>('automations');
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [automations, setAutomations] = useState<AutomationRule[]>([]);
   const [settings, setSettings] = useState<AutomationSettings>(defaultSettings);
@@ -326,16 +328,23 @@ const AutomationPage: React.FC = () => {
       </div>
 
       {/* View Tabs */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-2 flex gap-2 mb-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-2 flex gap-2 mb-6 overflow-x-auto">
         {[
           { id: 'automations' as const, label: 'My Automations', icon: <Zap size={16} /> },
+          { id: 'workflows' as const, label: 'Visual Workflows', icon: <GitBranch size={16} /> },
           { id: 'templates' as const, label: 'Templates', icon: <Plus size={16} /> },
           { id: 'settings' as const, label: 'Settings', icon: <Settings size={16} /> },
         ].map(tab => (
           <button
             key={tab.id}
-            onClick={() => setActiveView(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeView === tab.id
+            onClick={() => {
+              if (tab.id === 'workflows') {
+                navigate('/workflows');
+              } else {
+                setActiveView(tab.id);
+              }
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${activeView === tab.id
                 ? 'bg-blue-50 text-blue-600'
                 : 'text-gray-600 hover:bg-gray-50'
               }`}
