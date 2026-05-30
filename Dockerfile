@@ -29,9 +29,11 @@ RUN chmod +x start.sh
 # Create necessary directories
 RUN mkdir -p uploads logs
 
-EXPOSE 4000
+# Use PORT env var (default 4000)
+ENV PORT=4000
+EXPOSE ${PORT}
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:4000/health/live || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost:${PORT}/health/live || exit 1
 
 CMD ["./start.sh"]
