@@ -294,18 +294,32 @@ const ECommercePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Low Stock Alert */}
+      {/* Low Stock Alert - Enhanced */}
       {lowStockProducts.length > 0 && (
         <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-          <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-medium mb-2">
-            <AlertTriangle size={18} />
-            Low Stock Alert ({lowStockProducts.length} items)
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-medium">
+              <AlertTriangle size={18} />
+              Low Stock Alert ({lowStockProducts.length} items need restocking)
+            </div>
+            <button className="text-xs px-3 py-1 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors">
+              View All
+            </button>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {lowStockProducts.slice(0, 5).map(p => (
-              <span key={p.id} className="px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-lg text-sm">
-                {p.name}: {p.stock} left
-              </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {lowStockProducts.slice(0, 6).map(p => (
+              <div key={p.id} className="flex items-center gap-3 p-2 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                  {p.image ? <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover" /> : <Package size={16} className="text-gray-400" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{p.name}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400">{p.stock} left (min: {p.lowStockThreshold})</p>
+                </div>
+                <button className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded hover:bg-blue-200 transition-colors flex-shrink-0">
+                  Restock
+                </button>
+              </div>
             ))}
           </div>
         </div>
@@ -613,20 +627,26 @@ const AddProductModal: React.FC<{
   const [lowStockThreshold, setLowStockThreshold] = useState('10');
   const [sku, setSku] = useState('');
   const [description, setDescription] = useState('');
-  const [productImage, setProductImage] = useState<string | null>(null);
+  const [productImages, setProductImages] = useState<string[]>([]);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [showVariantForm, setShowVariantForm] = useState(false);
   const [newVariant, setNewVariant] = useState<Partial<ProductVariant>>({});
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProductImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files) {
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProductImages(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
     }
+  };
+
+  const removeImage = (index: number) => {
+    setProductImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const addVariant = () => {
@@ -653,7 +673,8 @@ const AddProductModal: React.FC<{
       status: 'active',
       sku: sku || `SKU-${Date.now()}`,
       description,
-      image: productImage || undefined,
+      image: productImages[0] || undefined,
+      images: productImages.length > 0 ? productImages : undefined,
       variants: variants.length > 0 ? variants : undefined,
       rating: 4.5,
       numReviews: Math.floor(Math.random() * 100),
@@ -670,27 +691,32 @@ const AddProductModal: React.FC<{
           </button>
         </div>
         <div className="p-4 space-y-4">
-          {/* Product Image Upload */}
+          {/* Product Images Upload - Multi Image */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Image</label>
-            {productImage ? (
-              <div className="relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                <img src={productImage} alt="Product" className="w-full h-40 object-cover" />
-                <button
-                  type="button"
-                  onClick={() => setProductImage(null)}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all">
-                <Upload size={24} className="text-gray-400 mb-2" />
-                <p className="text-xs text-gray-500">Click to upload product image</p>
-                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
-              </label>
-            )}
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Images</label>
+            <div className="grid grid-cols-4 gap-2 mb-2">
+              {productImages.map((img, i) => (
+                <div key={i} className="relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 group">
+                  <img src={img} alt={`Product ${i + 1}`} className="w-full h-20 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X size={12} />
+                  </button>
+                  {i === 0 && <span className="absolute bottom-0 left-0 bg-blue-500 text-white text-[10px] px-1">Main</span>}
+                </div>
+              ))}
+              {productImages.length < 8 && (
+                <label className="w-full h-20 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 transition-colors">
+                  <Plus size={16} className="text-gray-400" />
+                  <span className="text-[10px] text-gray-400">Add</span>
+                  <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+                </label>
+              )}
+            </div>
+            <p className="text-xs text-gray-400">Upload up to 8 images. First image is the main product image.</p>
           </div>
 
           <div>
