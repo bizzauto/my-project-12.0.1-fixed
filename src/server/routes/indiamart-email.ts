@@ -5,6 +5,7 @@ import { IndiaMARTEmailService } from '../services/indiamart-email.service.js';
 import { EmailLeadService, Platform } from '../services/email-lead.service.js';
 import { GmailIMAPService } from '../services/gmail-imap.service.js';
 import { encrypt, decrypt } from '../utils/auth.js';
+import { simpleParser } from 'mailparser';
 
 const router = Router();
 
@@ -202,7 +203,6 @@ router.post('/debug-emails', authenticate, async (req: any, res: Response) => {
 
             fetch.on('message', (msg) => {
               msg.on('body', (stream) => {
-                const { simpleParser } = require('mailparser');
                 simpleParser(stream).then((parsed: any) => {
                   emails.push({
                     from: parsed.from?.text || '',

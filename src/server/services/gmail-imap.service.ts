@@ -1,6 +1,7 @@
 import { prisma } from '../index.js';
 import { LeadCaptureService } from './lead-capture.service.js';
 import { EmailLeadService } from './email-lead.service.js';
+import { simpleParser } from 'mailparser';
 
 /**
  * Gmail IMAP Service - Simple and Reliable
@@ -108,7 +109,6 @@ export class GmailIMAPService {
 
               fetch.on('message', (msg, seqno) => {
                 msg.on('body', (stream) => {
-                  const { simpleParser } = require('mailparser');
                   simpleParser(stream)
                     .then((parsed: any) => {
                       emails.push({
