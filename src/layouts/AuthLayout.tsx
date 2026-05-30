@@ -41,6 +41,7 @@ const menuItems: MenuItem[] = [
   { id: '/analytics', label: 'Analytics', icon: <BarChart3 size={20} /> },
   { id: '/reports', label: 'Reports', icon: <Share2 size={20} /> },
   { id: '/bulk-import', label: 'Import', icon: <Users size={20} /> },
+  { id: '/import-leads', label: 'Import Leads', icon: <Upload size={20} /> },
 ];
 
 const menuSections: { label: string; items: MenuItem[] }[] = [

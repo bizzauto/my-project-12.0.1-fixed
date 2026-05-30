@@ -48,6 +48,7 @@ import SettingsPage from './components/SettingsPage';
 import SuperAdminDashboard from './components/SuperAdminDashboard';
 import OnboardingWizard from './components/OnboardingWizard';
 import BulkImportPage from './components/BulkImportPage';
+import EmailLeadImporter from './components/EmailLeadImporter';
 import EmailMarketingPage from './components/EmailMarketingPage';
 import WorkflowBuilder from './components/WorkflowBuilder';
 import FunnelBuilder from './components/FunnelBuilder';
@@ -305,6 +306,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AuthLayout>
               <BulkImportPage />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/import-leads"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <EmailLeadImporter />
             </AuthLayout>
           </ProtectedRoute>
         }
