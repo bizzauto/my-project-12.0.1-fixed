@@ -86,17 +86,26 @@ export default function LeadGenerationPage(){
     body: JSON.stringify({ days: 7 })
    });
    const d = await r.json();
-   if (d.success) {
-    const emails = d.data?.emails || [];
-    let msg = `Found ${d.data?.found || 0} emails (total: ${d.data?.totalEmails || 0})\n\n`;
+   console.log('Debug result:', d);
+   if (d.success && d.data) {
+    const emails = d.data.emails || [];
+    let msg = `Total emails in inbox: ${d.data.totalEmails || 0}\n`;
+    msg += `Emails found: ${d.data.found || 0}\n`;
+    msg += `Emails fetched: ${emails.length}\n\n`;
+    if (d.data.error) msg += `Error: ${d.data.error}\n\n`;
     emails.forEach((e: any, i: number) => {
-      msg += `Email ${i+1}:\nFrom: ${e.from}\nSubject: ${e.subject}\nText: ${e.textPreview?.substring(0, 200)}\n\n`;
+      msg += `--- Email ${i+1} ---\n`;
+      msg += `From: ${e.from}\n`;
+      msg += `Subject: ${e.subject}\n`;
+      msg += `Preview: ${(e.textPreview || '').substring(0, 300)}\n\n`;
     });
     alert(msg);
    } else {
-    toast_(d.error || 'Debug failed', 'error');
+    alert(`Error: ${d.error || d.data?.error || 'Debug failed'}`);
    }
-  } catch { toast_('Debug failed', 'error'); }
+  } catch (e: any) {
+   alert('Debug error: ' + e.message);
+  }
   setImSyncing(false);
  };
 

@@ -138,24 +138,29 @@ router.post('/debug-emails', authenticate, async (req: any, res: Response) => {
     const businessId = req.user.businessId;
     const { days = 7 } = req.body;
 
+    console.log(`[Debug] Request for businessId: ${businessId}`);
+
     const integration = await prisma.integration.findFirst({
       where: { businessId, type: 'indiamart_email', isActive: true },
     });
 
     if (!integration) {
+      console.log(`[Debug] No integration found`);
       return res.status(400).json({ success: false, error: 'Not configured' });
     }
 
     const config = integration.config as any;
     const password = decrypt(config.password);
 
+    console.log(`[Debug] Config: email=${config.email}, host=${config.imapHost}, port=${config.imapPort}`);
+
     const Imap = (await import('imap')).default;
     const imap = new Imap({
       user: config.email,
       password: password,
-      host: 'imap.gmail.com',
-      port: 993,
-      tls: true,
+      host: config.imapHost || 'imap.gmail.com',
+      port: config.imapPort || 993,
+      tls: config.useSSL !== false,
       tlsOptions: { rejectUnauthorized: false },
       connTimeout: 30000,
       authTimeout: 20000,
@@ -166,17 +171,32 @@ router.post('/debug-emails', authenticate, async (req: any, res: Response) => {
       const safeResolve = (v: any) => { if (!resolved) { resolved = true; try { imap.end(); } catch {} resolve(v); } };
 
       imap.once('ready', () => {
+        console.log('[Debug] IMAP connected!');
         imap.openBox('INBOX', true, (err, box) => {
-          if (err) { safeResolve({ error: err.message }); return; }
+          if (err) { 
+            console.log('[Debug] Error opening INBOX:', err.message);
+            safeResolve({ error: err.message }); 
+            return; 
+          }
+
+          console.log(`[Debug] INBOX opened. Total: ${box.messages.total}`);
 
           const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
           imap.search([['SINCE', since]], (err, results) => {
-            if (err || !results || results.length === 0) {
+            if (err) {
+              console.log('[Debug] Search error:', err.message);
+              safeResolve({ error: err.message });
+              return;
+            }
+
+            console.log(`[Debug] Found ${results ? results.length : 0} emails`);
+
+            if (!results || results.length === 0) {
               safeResolve({ totalEmails: box.messages.total, found: 0, emails: [] });
               return;
             }
 
-            const toFetch = results.slice(-3); // Last 3 emails
+            const toFetch = results.slice(-3);
             const fetch = imap.fetch(toFetch, { bodies: '' });
             const emails: any[] = [];
 
@@ -188,13 +208,13 @@ router.post('/debug-emails', authenticate, async (req: any, res: Response) => {
                     from: parsed.from?.text || '',
                     subject: parsed.subject || '',
                     textPreview: (parsed.text || '').substring(0, 1000),
-                    htmlPreview: (parsed.html || '').substring(0, 500),
                   });
                 }).catch(() => {});
               });
             });
 
             fetch.once('end', () => {
+              console.log(`[Debug] Fetched ${emails.length} emails`);
               safeResolve({
                 totalEmails: box.messages.total,
                 found: results.length,
@@ -205,13 +225,19 @@ router.post('/debug-emails', authenticate, async (req: any, res: Response) => {
         });
       });
 
-      imap.once('error', (err) => safeResolve({ error: err.message }));
+      imap.once('error', (err) => {
+        console.log('[Debug] IMAP error:', err.message);
+        safeResolve({ error: err.message });
+      });
+
       setTimeout(() => safeResolve({ error: 'timeout' }), 30000);
       imap.connect();
     });
 
+    console.log('[Debug] Result:', debugResult);
     res.json({ success: true, data: debugResult });
   } catch (error: any) {
+    console.error('[Debug] Error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
