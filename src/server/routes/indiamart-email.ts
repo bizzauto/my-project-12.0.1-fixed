@@ -130,6 +130,93 @@ router.get('/config', authenticate, async (req: any, res: Response) => {
 });
 
 /**
+ * POST /api/indiamart-email/debug-emails
+ * Shows actual email content for debugging
+ */
+router.post('/debug-emails', authenticate, async (req: any, res: Response) => {
+  try {
+    const businessId = req.user.businessId;
+    const { days = 7 } = req.body;
+
+    const integration = await prisma.integration.findFirst({
+      where: { businessId, type: 'indiamart_email', isActive: true },
+    });
+
+    if (!integration) {
+      return res.status(400).json({ success: false, error: 'Not configured' });
+    }
+
+    const config = integration.config as any;
+    const password = decrypt(config.password);
+
+    const Imap = (await import('imap')).default;
+    const imap = new Imap({
+      user: config.email,
+      password: password,
+      host: 'imap.gmail.com',
+      port: 993,
+      tls: true,
+      tlsOptions: { rejectUnauthorized: false },
+      connTimeout: 30000,
+      authTimeout: 20000,
+    });
+
+    const debugResult = await new Promise<any>((resolve) => {
+      let resolved = false;
+      const safeResolve = (v: any) => { if (!resolved) { resolved = true; try { imap.end(); } catch {} resolve(v); } };
+
+      imap.once('ready', () => {
+        imap.openBox('INBOX', true, (err, box) => {
+          if (err) { safeResolve({ error: err.message }); return; }
+
+          const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+          imap.search([['SINCE', since]], (err, results) => {
+            if (err || !results || results.length === 0) {
+              safeResolve({ totalEmails: box.messages.total, found: 0, emails: [] });
+              return;
+            }
+
+            const toFetch = results.slice(-3); // Last 3 emails
+            const fetch = imap.fetch(toFetch, { bodies: '' });
+            const emails: any[] = [];
+
+            fetch.on('message', (msg) => {
+              msg.on('body', (stream) => {
+                const { simpleParser } = require('mailparser');
+                simpleParser(stream).then((parsed: any) => {
+                  emails.push({
+                    from: parsed.from?.text || '',
+                    subject: parsed.subject || '',
+                    textPreview: (parsed.text || '').substring(0, 1000),
+                    htmlPreview: (parsed.html || '').substring(0, 500),
+                  });
+                }).catch(() => {});
+              });
+            });
+
+            fetch.once('end', () => {
+              safeResolve({
+                totalEmails: box.messages.total,
+                found: results.length,
+                emails: emails,
+              });
+            });
+          });
+        });
+      });
+
+      imap.once('error', (err) => safeResolve({ error: err.message }));
+      setTimeout(() => safeResolve({ error: 'timeout' }), 30000);
+      imap.connect();
+    });
+
+    res.json({ success: true, data: debugResult });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
  * POST /api/indiamart-email/test-gmail
  * Direct Gmail test - shows exactly what's happening
  */

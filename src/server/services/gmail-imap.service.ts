@@ -145,6 +145,11 @@ export class GmailIMAPService {
                 // Create leads from each email
                 for (const email of indiamartEmails) {
                   try {
+                    // Log email content for debugging
+                    console.log(`[GmailIMAP] Processing email: ${email.subject}`);
+                    console.log(`[GmailIMAP] From: ${email.from}`);
+                    console.log(`[GmailIMAP] Text preview: ${(email.text || '').substring(0, 500)}`);
+
                     // Use the improved parser from EmailLeadService
                     const leadData = EmailLeadService.parseEmail(
                       email.html || '',
@@ -152,31 +157,45 @@ export class GmailIMAPService {
                       'indiamart'
                     );
 
+                    console.log(`[GmailIMAP] Parse result:`, leadData);
+
                     const phone = leadData?.phone || '';
                     const buyerEmail = leadData?.email || '';
                     const name = leadData?.name || 'IndiaMART Customer';
                     const product = leadData?.product || '';
                     const city = leadData?.city || '';
 
-                    if (phone || buyerEmail) {
+                    // If parser failed, try to extract phone directly from email text
+                    let finalPhone = phone;
+                    if (!finalPhone) {
+                      const phoneMatch = (email.text || '').match(/(?:\+?91[\s.-]?)?([6-9]\d{9})/);
+                      if (phoneMatch) {
+                        finalPhone = phoneMatch[1].slice(-10);
+                        console.log(`[GmailIMAP] Extracted phone directly: ${finalPhone}`);
+                      }
+                    }
+
+                    if (finalPhone || buyerEmail) {
                       // Check duplicate
-                      const existing = phone ? await prisma.contact.findFirst({
-                        where: { businessId, phone, source: 'indiamart' },
+                      const existing = finalPhone ? await prisma.contact.findFirst({
+                        where: { businessId, phone: finalPhone, source: 'indiamart' },
                       }) : null;
 
                       if (!existing) {
                         await LeadCaptureService.captureIndiaMARTLead(businessId, {
                           name,
-                          phone,
+                          phone: finalPhone,
                           email: buyerEmail || undefined,
                           product,
                           city,
                         });
                         result.leadsCreated++;
-                        result.details.push(`Created lead: ${name} ${phone} ${buyerEmail}`);
+                        result.details.push(`Created lead: ${name} ${finalPhone} ${buyerEmail}`);
                       } else {
-                        result.details.push(`Skipped duplicate: ${phone}`);
+                        result.details.push(`Skipped duplicate: ${finalPhone}`);
                       }
+                    } else {
+                      result.details.push(`No phone/email found in: ${email.subject}`);
                     }
                   } catch (e: any) {
                     result.errors.push(`Error creating lead: ${e.message}`);
