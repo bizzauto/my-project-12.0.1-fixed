@@ -140,6 +140,7 @@ export default function LeadGenerationPage(){
  const [imConfig, setImConfig] = useState<any>(null);
  const [showImSettings, setShowImSettings] = useState(false);
  const [imSyncing, setImSyncing] = useState(false);
+ const [imTesting, setImTesting] = useState(false);
  const [syncResult, setSyncResult] = useState<any>(null);
  const [imSyncDays, setImSyncDays] = useState(7);
  const [imPlatform, setImPlatform] = useState('indiamart');
