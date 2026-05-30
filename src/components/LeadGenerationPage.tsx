@@ -22,6 +22,7 @@ export default function LeadGenerationPage(){
   const[leads,setLeads]=useState<Lead[]>([]);
   const[loading,setLoading]=useState(true);
   const[showForm,setShowForm]=useState(false);
+  const[showBulkAdd,setShowBulkAdd]=useState(false);
   const[form,setForm]=useState<FormData>(EF);
   const[sel,setSel]=useState<Set<string>>(new Set());
   const[fSrc,setFSrc]=useState('all');
@@ -138,6 +139,20 @@ export default function LeadGenerationPage(){
     catch{toast_('Failed to add lead. Please try again.','error');}
   };
 
+  const handleBulkAdd=async()=>{
+    const textarea=document.getElementById('bulkLeads') as HTMLTextAreaElement;
+    if(!textarea||!textarea.value.trim()){toast_('Please paste leads data','error');return;}
+    const lines=textarea.value.trim().split('\n').filter(l=>l.trim());
+    let successCount=0;
+    for(const line of lines){
+      const parts=line.split(',').map(p=>p.trim());
+      if(parts.length<2)continue;
+      const[name,phone,email,source,product,city]=parts;
+      try{const token=localStorage.getItem('token'),bid=localStorage.getItem('businessId');await fetch(`${API}/leads/manual`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({businessId:bid,source:source||'manual',leadData:{name:name||'Unknown',phone:phone||'',email:email||undefined,product:product||undefined,city:city||undefined}})});successCount++;}catch{}
+    }
+    if(successCount>0){toast_(`Added ${successCount} leads!`,'success');setShowBulkAdd(false);fetchLeads();}else toast_('No leads added','error');
+  };
+
   const csvExport=()=>{const x=sel.size>0?leads.filter(l=>sel.has(l.id)):leads;const h=['Name','Phone','Email','Company','Location','Product','Supplier','Requirement','Source','Status','Deal Value','Created At'];const rows=x.map(l=>[l.name,l.phone,l.email||'',l.company||'',l.location||'',l.product||'',l.supplier||'',l.requirement||'',l.source,l.status,l.dealValue?.toString()||'',new Date(l.createdAt).toLocaleString()]);const csv=[h,...rows].map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');const b=new Blob([csv],{type:'text/csv'}),u=window.URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`leads_${new Date().toISOString().slice(0,10)}.csv`;a.click();window.URL.revokeObjectURL(u);toast_('Exported CSV!','success');};
 
   const handleExport=async(fmt:'csv'|'excel'|'sheets')=>{
@@ -192,6 +207,7 @@ export default function LeadGenerationPage(){
           <button onClick={()=>setShowExport(true)} className={`${btn} bg-green-600 hover:bg-green-700`}><Download size={16}/> Export</button>
           <button onClick={()=>setShowReply(true)} className={`${btn} bg-purple-600 hover:bg-purple-700`}><Send size={16}/> Bulk Reply</button>
           <button onClick={()=>setShowForm(true)} className={`${btn} bg-blue-600 hover:bg-blue-700`}><Plus size={16}/> Add Lead</button>
+          <button onClick={()=>setShowBulkAdd(true)} className={`${btn} bg-purple-600 hover:bg-purple-700`}><Upload size={16}/> Bulk Add</button>
         </div>
       </div>
 
@@ -349,6 +365,25 @@ export default function LeadGenerationPage(){
           <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags (comma separated)</label><input type="text" value={form.tags} onChange={e=>setForm({...form,tags:e.target.value})} className={inp} placeholder="Hot Lead, VIP, New"/></div>
           <div className="flex justify-end gap-3 pt-2"><button type="button" onClick={()=>{setShowForm(false);setForm(EF);}} className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm">Cancel</button><button type="submit" className={`${btn} bg-blue-600 hover:bg-blue-700`}><Plus size={16}/> Add Lead</button></div>
         </form>
+      </Modal>
+
+      {/* Bulk Add Modal */}
+      <Modal open={showBulkAdd} onClose={()=>setShowBulkAdd(false)} title="Bulk Add Leads" size="lg">
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Paste leads in CSV format. Each line should have: Name, Phone, Email, Source, Product, City
+          </p>
+          <textarea
+            id="bulkLeads"
+            rows={10}
+            placeholder={`Rahul Sharma, 9876543210, rahul@gmail.com, indiamart, Hair Oil, Mumbai\nPriya Patel, 9876543211, priya@gmail.com, facebook_ads, Shampoo, Delhi\nAmit Kumar, 9876543212, , justdial, Face Cream, Bangalore`}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
+          />
+          <div className="flex justify-end gap-3">
+            <button onClick={()=>setShowBulkAdd(false)} className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm">Cancel</button>
+            <button onClick={handleBulkAdd} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium">Import Leads</button>
+          </div>
+        </div>
       </Modal>
 
       {/* Lead Detail Modal */}
