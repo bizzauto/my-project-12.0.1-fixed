@@ -130,15 +130,13 @@ router.get('/config', authenticate, async (req: any, res: Response) => {
 });
 
 /**
- * POST /api/indiamart-email/simple-sync
- * Simple Gmail sync - 100% reliable
+ * POST /api/indiamart-email/test-gmail
+ * Direct Gmail test - shows exactly what's happening
  */
-router.post('/simple-sync', authenticate, async (req: any, res: Response) => {
+router.post('/test-gmail', authenticate, async (req: any, res: Response) => {
   try {
     const businessId = req.user.businessId;
-    const { days = 30 } = req.body;
 
-    // Get email config
     const integration = await prisma.integration.findFirst({
       where: { businessId, type: 'indiamart_email', isActive: true },
     });
@@ -153,6 +151,156 @@ router.post('/simple-sync', authenticate, async (req: any, res: Response) => {
     const config = integration.config as any;
     const password = decrypt(config.password);
 
+    console.log(`[TestGmail] Testing connection for ${config.email}`);
+
+    // Simple IMAP connection test
+    const Imap = (await import('imap')).default;
+    
+    const imap = new Imap({
+      user: config.email,
+      password: password,
+      host: 'imap.gmail.com',
+      port: 993,
+      tls: true,
+      tlsOptions: { rejectUnauthorized: false },
+      connTimeout: 30000,
+      authTimeout: 20000,
+    });
+
+    const testResult = await new Promise<any>((resolve) => {
+      let resolved = false;
+      
+      const safeResolve = (value: any) => {
+        if (!resolved) {
+          resolved = true;
+          try { imap.end(); } catch {}
+          resolve(value);
+        }
+      };
+
+      imap.once('ready', () => {
+        console.log('[TestGmail] IMAP connected!');
+        imap.openBox('INBOX', true, (err, box) => {
+          if (err) {
+            safeResolve({ success: false, error: `Cannot open INBOX: ${err.message}` });
+            return;
+          }
+
+          console.log(`[TestGmail] INBOX opened. Total messages: ${box.messages.total}`);
+
+          // Search for ALL emails in last 30 days
+          const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+          imap.search([['SINCE', since]], (err, results) => {
+            if (err) {
+              safeResolve({ success: false, error: `Search error: ${err.message}` });
+              return;
+            }
+
+            console.log(`[TestGmail] Found ${results ? results.length : 0} emails in last 30 days`);
+
+            if (!results || results.length === 0) {
+              safeResolve({ 
+                success: true, 
+                connected: true,
+                totalEmails: box.messages.total,
+                recentEmails: 0,
+                message: 'Connected but no emails in last 30 days'
+              });
+              return;
+            }
+
+            // Fetch first 5 emails to check content
+            const toFetch = results.slice(-5);
+            const fetch = imap.fetch(toFetch, { bodies: '' });
+            const emails: any[] = [];
+
+            fetch.on('message', (msg) => {
+              msg.on('body', (stream) => {
+                const { simpleParser } = require('mailparser');
+                simpleParser(stream)
+                  .then((parsed: any) => {
+                    emails.push({
+                      from: parsed.from?.text || '',
+                      subject: parsed.subject || '',
+                      date: parsed.date,
+                      hasPhone: /\d{10}/.test(parsed.text || ''),
+                    });
+                  })
+                  .catch(() => {});
+              });
+            });
+
+            fetch.once('end', () => {
+              console.log(`[TestGmail] Sample emails:`, emails);
+              safeResolve({
+                success: true,
+                connected: true,
+                totalEmails: box.messages.total,
+                recentEmails: results.length,
+                sampleEmails: emails,
+                message: `Found ${results.length} emails. ${emails.length} sampled.`
+              });
+            });
+
+            fetch.once('error', (err) => {
+              safeResolve({ success: false, error: `Fetch error: ${err.message}` });
+            });
+          });
+        });
+      });
+
+      imap.once('error', (err) => {
+        console.error('[TestGmail] IMAP error:', err.message);
+        safeResolve({ 
+          success: false, 
+          error: `IMAP error: ${err.message}`,
+          hint: 'Check email and App Password. For Gmail, use App Password from myaccount.google.com/apppasswords'
+        });
+      });
+
+      setTimeout(() => {
+        safeResolve({ success: false, error: 'Connection timeout' });
+      }, 30000);
+
+      imap.connect();
+    });
+
+    res.json(testResult);
+  } catch (error: any) {
+    console.error('[TestGmail] Error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * POST /api/indiamart-email/simple-sync
+ * Simple Gmail sync - 100% reliable
+ */
+router.post('/simple-sync', authenticate, async (req: any, res: Response) => {
+  try {
+    const businessId = req.user.businessId;
+    const { days = 30 } = req.body;
+
+    console.log(`[SimpleSync] Request received for businessId: ${businessId}`);
+
+    // Get email config
+    const integration = await prisma.integration.findFirst({
+      where: { businessId, type: 'indiamart_email', isActive: true },
+    });
+
+    if (!integration) {
+      console.log(`[SimpleSync] No integration found for businessId: ${businessId}`);
+      return res.status(400).json({
+        success: false,
+        error: 'Email not configured. Please setup first.',
+      });
+    }
+
+    const config = integration.config as any;
+    const password = decrypt(config.password);
+
+    console.log(`[SimpleSync] Config found: email=${config.email}, host=${config.imapHost}, port=${config.imapPort}`);
+    console.log(`[SimpleSync] Password length: ${password.length} chars`);
     console.log(`[SimpleSync] Starting sync for ${config.email}`);
 
     const result = await GmailIMAPService.fetchAndCreateLeads(
@@ -167,7 +315,9 @@ router.post('/simple-sync', authenticate, async (req: any, res: Response) => {
       }
     );
 
-    console.log(`[SimpleSync] Result:`, result);
+    console.log(`[SimpleSync] Result: success=${result.success}, total=${result.totalEmails}, indiamart=${result.indiamartEmails}, created=${result.leadsCreated}`);
+    console.log(`[SimpleSync] Details:`, result.details);
+    console.log(`[SimpleSync] Errors:`, result.errors);
 
     // Update last sync time
     await prisma.integration.update({
@@ -184,7 +334,7 @@ router.post('/simple-sync', authenticate, async (req: any, res: Response) => {
       success: result.success,
       message: result.success 
         ? `Synced ${result.leadsCreated} new leads from ${result.indiamartEmails} IndiaMART emails`
-        : 'Sync failed',
+        : 'Sync failed - check server logs',
       data: result,
     });
   } catch (error: any) {
