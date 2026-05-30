@@ -76,6 +76,30 @@ export default function LeadGenerationPage(){
   setImSyncing(false);
  };
 
+ const debugEmails = async () => {
+  setImSyncing(true);
+  try {
+   const token = localStorage.getItem('token');
+   const r = await fetch(`${API}/indiamart-email/debug-emails`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ days: 7 })
+   });
+   const d = await r.json();
+   if (d.success) {
+    const emails = d.data?.emails || [];
+    let msg = `Found ${d.data?.found || 0} emails (total: ${d.data?.totalEmails || 0})\n\n`;
+    emails.forEach((e: any, i: number) => {
+      msg += `Email ${i+1}:\nFrom: ${e.from}\nSubject: ${e.subject}\nText: ${e.textPreview?.substring(0, 200)}\n\n`;
+    });
+    alert(msg);
+   } else {
+    toast_(d.error || 'Debug failed', 'error');
+   }
+  } catch { toast_('Debug failed', 'error'); }
+  setImSyncing(false);
+ };
+
  const testImConnection = async () => {
    setImTesting(true);
    try {
@@ -196,9 +220,12 @@ export default function LeadGenerationPage(){
        <option value="justdial">JustDial</option>
        <option value="tradeindia">TradeIndia</option>
       </select>
-      <button onClick={syncIndiaMART} disabled={imSyncing} className="flex items-center gap-2 px-4 py-2 bg-white text-orange-600 rounded-lg hover:bg-orange-50 text-sm font-medium">
-       <RefreshCw size={16} className={imSyncing?'animate-spin':''}/> {imSyncing?'Syncing...':'Sync'}
-      </button>
+       <button onClick={syncIndiaMART} disabled={imSyncing} className="flex items-center gap-2 px-4 py-2 bg-white text-orange-600 rounded-lg hover:bg-orange-50 text-sm font-medium">
+        <RefreshCw size={16} className={imSyncing?'animate-spin':''}/> {imSyncing?'Syncing...':'Sync'}
+       </button>
+       <button onClick={debugEmails} disabled={imSyncing} className="flex items-center gap-2 px-3 py-2 bg-white/30 text-white rounded-lg hover:bg-white/40 text-sm font-medium">
+        <Eye size={16}/> Debug
+       </button>
      </div>
     )}
     <button onClick={()=>setShowImSettings(true)} className="flex items-center gap-2 px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 text-sm font-medium">
