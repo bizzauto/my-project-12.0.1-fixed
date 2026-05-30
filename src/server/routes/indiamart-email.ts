@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
 import { IndiaMARTEmailService } from '../services/indiamart-email.service.js';
+import { EmailLeadService, Platform } from '../services/email-lead.service.js';
 import { encrypt, decrypt } from '../utils/auth.js';
 
 const router = Router();
@@ -125,27 +126,35 @@ router.get('/config', authenticate, async (req: any, res: Response) => {
 });
 
 /**
- * POST /api/indiamart/sync
- * Manually sync IndiaMART emails to leads
+ * POST /api/indiamart-email/sync
+ * Sync leads from email - supports indiamart, justdial, tradeindia
  */
 router.post('/sync', authenticate, async (req: any, res: Response) => {
   try {
     const businessId = req.user.businessId;
-    const { since, days = 30 } = req.body; // since: specific date, days: default 30 days
+    const { since, days = 30, platform = 'indiamart' } = req.body;
 
-    // Get email config
+    // Get platform-specific integration
+    const integrationType = `email_${platform}`;
     const integration = await prisma.integration.findFirst({
-      where: { businessId, type: 'indiamart_email', isActive: true },
+      where: { businessId, type: integrationType, isActive: true },
     });
 
-    if (!integration) {
+    // Fallback to indiamart_email for backward compatibility
+    const fallbackIntegration = !integration ? await prisma.integration.findFirst({
+      where: { businessId, type: 'indiamart_email', isActive: true },
+    }) : null;
+
+    const activeIntegration = integration || fallbackIntegration;
+
+    if (!activeIntegration) {
       return res.status(400).json({
         success: false,
-        error: 'IndiaMART email not configured. Please setup first.',
+        error: `${EmailLeadService.getPlatformName(platform as Platform)} email not configured. Please setup first.`,
       });
     }
 
-    const config = integration.config as any;
+    const config = activeIntegration.config as any;
     const emailConfig = {
       imapHost: config.imapHost,
       imapPort: config.imapPort,
@@ -154,7 +163,6 @@ router.post('/sync', authenticate, async (req: any, res: Response) => {
       useSSL: config.useSSL,
     };
 
-    // Calculate since date - support both specific date and days range
     let sinceDate: Date;
     if (since) {
       sinceDate = new Date(since);
@@ -162,11 +170,12 @@ router.post('/sync', authenticate, async (req: any, res: Response) => {
       sinceDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
     }
 
-    console.log(`[IndiaMART] Sync requested: since=${sinceDate.toISOString()}, days=${days}`);
+    console.log(`[EmailLead] Sync: platform=${platform}, since=${sinceDate.toISOString()}`);
 
-    const result = await IndiaMARTEmailService.processIndiaMARTEmails(
+    const result = await EmailLeadService.processEmails(
       businessId,
       emailConfig,
+      platform as Platform,
       {
         since: sinceDate,
         saveToSheet: !!config.spreadsheetId,
@@ -176,7 +185,7 @@ router.post('/sync', authenticate, async (req: any, res: Response) => {
 
     // Update last sync time
     await prisma.integration.update({
-      where: { id: integration.id },
+      where: { id: activeIntegration.id },
       data: {
         config: {
           ...config,
@@ -213,25 +222,33 @@ router.post('/sync', authenticate, async (req: any, res: Response) => {
 });
 
 /**
- * POST /api/indiamart/test-connection
- * Test IMAP connection and count IndiaMART emails
+ * POST /api/indiamart-email/test-connection
+ * Test IMAP connection for any platform
  */
 router.post('/test-connection', authenticate, async (req: any, res: Response) => {
   try {
     const businessId = req.user.businessId;
+    const { platform = 'indiamart' } = req.body;
 
+    const integrationType = `email_${platform}`;
     const integration = await prisma.integration.findFirst({
-      where: { businessId, type: 'indiamart_email', isActive: true },
+      where: { businessId, type: integrationType, isActive: true },
     });
 
-    if (!integration) {
+    const fallbackIntegration = !integration ? await prisma.integration.findFirst({
+      where: { businessId, type: 'indiamart_email', isActive: true },
+    }) : null;
+
+    const activeIntegration = integration || fallbackIntegration;
+
+    if (!activeIntegration) {
       return res.status(400).json({
         success: false,
-        error: 'IndiaMART email not configured.',
+        error: `${EmailLeadService.getPlatformName(platform as Platform)} email not configured.`,
       });
     }
 
-    const config = integration.config as any;
+    const config = activeIntegration.config as any;
     const emailConfig = {
       imapHost: config.imapHost,
       imapPort: config.imapPort,
@@ -240,73 +257,20 @@ router.post('/test-connection', authenticate, async (req: any, res: Response) =>
       useSSL: config.useSSL,
     };
 
-    // Test IMAP connection
-    const Imap = (await import('imap')).default as any;
-    const imap = new Imap({
-      user: emailConfig.email,
-      password: emailConfig.password,
-      host: emailConfig.imapHost,
-      port: emailConfig.imapPort,
-      tls: emailConfig.useSSL,
-      tlsOptions: { rejectUnauthorized: false },
-      connTimeout: 15000,
-      authTimeout: 10000,
-    });
-
-    const testResult = await new Promise<any>((resolve, reject) => {
-      imap.once('ready', () => {
-        imap.openBox('INBOX', true, (err, box) => {
-          if (err) {
-            imap.end();
-            reject(new Error(`Failed to open INBOX: ${err.message}`));
-            return;
-          }
-
-          // Search for IndiaMART emails in last 30 days
-          const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-          imap.search(
-            [
-              ['SINCE', since],
-              ['OR',
-                ['FROM', 'indiamart.com'],
-                ['OR',
-                  ['FROM', 'leadz@indiamart.com'],
-                  ['OR',
-                    ['FROM', 'noreply@indiamart.com'],
-                    ['FROM', 'enquiry@indiamart.com']
-                  ]
-                ]
-              ],
-            ],
-            (err, results) => {
-              imap.end();
-              resolve({
-                connected: true,
-                mailbox: box.name,
-                totalEmails: box.messages.total,
-                indiamartEmails: results ? results.length : 0,
-                email: emailConfig.email,
-                host: emailConfig.imapHost,
-              });
-            }
-          );
-        });
-      });
-
-      imap.once('error', (err) => {
-        reject(new Error(`IMAP connection failed: ${err.message}`));
-      });
-
-      imap.connect();
-    });
+    const testResult = await EmailLeadService.testConnection(emailConfig, platform as Platform);
 
     res.json({
       success: true,
-      message: 'IMAP connection successful',
-      data: testResult,
+      message: `${EmailLeadService.getPlatformName(platform as Platform)} IMAP connection successful`,
+      data: {
+        ...testResult,
+        email: emailConfig.email,
+        host: emailConfig.imapHost,
+        platform,
+      },
     });
   } catch (error: any) {
-    console.error('IndiaMART test connection error:', error);
+    console.error('Test connection error:', error);
     res.status(500).json({
       success: false,
       error: error.message,

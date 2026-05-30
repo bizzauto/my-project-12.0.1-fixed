@@ -66,11 +66,11 @@ export default function LeadGenerationPage(){
    const r = await fetch(`${API}/indiamart-email/sync`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ days: imSyncDays })
+    body: JSON.stringify({ days: imSyncDays, platform: imPlatform })
    });
    const d = await r.json();
    setSyncResult(d.data || d);
-   if (d.success) toast_(`Synced ${d.data?.newLeads || 0} new leads!`, 'success');
+   if (d.success) toast_(`Synced ${d.data?.newLeads || 0} new leads from ${imPlatform}!`, 'success');
    else toast_(d.error || 'Sync failed', 'error');
   } catch { toast_('Sync failed', 'error'); }
   setImSyncing(false);
@@ -142,6 +142,7 @@ export default function LeadGenerationPage(){
  const [imSyncing, setImSyncing] = useState(false);
  const [syncResult, setSyncResult] = useState<any>(null);
  const [imSyncDays, setImSyncDays] = useState(7);
+ const [imPlatform, setImPlatform] = useState('indiamart');
   const selc="px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm";
   const btn="flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors text-sm font-medium";
 
@@ -159,14 +160,14 @@ export default function LeadGenerationPage(){
         </div>
       </div>
 
- {/* IndiaMART Email Integration */}
- <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl shadow-sm p-4 border border-orange-200 dark:border-orange-700">
+ {/* Email Lead Integration - Multi Platform */}
+ <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl shadow-sm p-4 border border-orange-200 dark:border-orange-700 mb-4">
   <div className="flex items-center justify-between">
    <div className="flex items-center gap-3">
     <div className="p-2 bg-white/20 rounded-lg"><Zap size={24} className="text-white"/></div>
     <div>
-     <h3 className="text-white font-semibold">IndiaMART Email Leads</h3>
-     <p className="text-white/80 text-sm">{imConfig?.configured?`Connected: ${imConfig.email}`:'FREE - Connect email to auto-capture leads'}</p>
+     <h3 className="text-white font-semibold">Email Lead Capture</h3>
+     <p className="text-white/80 text-sm">{imConfig?.configured?`Connected: ${imConfig.email}`:'Connect email to auto-capture leads from IndiaMART, JustDial, TradeIndia'}</p>
     </div>
    </div>
    <div className="flex items-center gap-2">
@@ -184,8 +185,17 @@ export default function LeadGenerationPage(){
        <option value={60}>Last 60 days</option>
        <option value={90}>Last 90 days</option>
       </select>
+      <select
+       value={imPlatform || 'indiamart'}
+       onChange={e => setImPlatform(e.target.value)}
+       className="px-2 py-1.5 bg-white/20 text-white text-sm rounded-lg border border-white/30 focus:outline-none"
+      >
+       <option value="indiamart">IndiaMART</option>
+       <option value="justdial">JustDial</option>
+       <option value="tradeindia">TradeIndia</option>
+      </select>
       <button onClick={syncIndiaMART} disabled={imSyncing} className="flex items-center gap-2 px-4 py-2 bg-white text-orange-600 rounded-lg hover:bg-orange-50 text-sm font-medium">
-       <RefreshCw size={16} className={imSyncing?'animate-spin':''}/> {imSyncing?'Syncing...':'Sync Past Leads'}
+       <RefreshCw size={16} className={imSyncing?'animate-spin':''}/> {imSyncing?'Syncing...':'Sync'}
       </button>
      </div>
     )}
@@ -199,6 +209,21 @@ export default function LeadGenerationPage(){
    <div className="bg-white/10 rounded-lg p-3 text-center"><p className="text-white text-xl font-bold">{syncResult.newLeads||0}</p><p className="text-white/70 text-xs">New Leads</p></div>
    <div className="bg-white/10 rounded-lg p-3 text-center"><p className="text-white text-xl font-bold">{imConfig?.lastSyncAt?new Date(imConfig.lastSyncAt).toLocaleTimeString():'Never'}</p><p className="text-white/70 text-xs">Last Sync</p></div>
   </div>}
+ </div>
+
+ {/* Platform Stats */}
+ <div className="grid grid-cols-3 gap-3 mb-4">
+  {[
+   { name: 'IndiaMART', color: 'from-orange-500 to-red-500', icon: '🏭', count: leads.filter(l => l.source === 'indiamart').length },
+   { name: 'JustDial', color: 'from-yellow-500 to-orange-500', icon: '📞', count: leads.filter(l => l.source === 'justdial').length },
+   { name: 'TradeIndia', color: 'from-blue-500 to-indigo-500', icon: '🌐', count: leads.filter(l => l.source === 'tradeindia').length },
+  ].map(p => (
+   <div key={p.name} className={`bg-gradient-to-r ${p.color} rounded-xl p-3 text-white text-center`}>
+    <p className="text-lg">{p.icon}</p>
+    <p className="text-xl font-bold">{p.count}</p>
+    <p className="text-xs opacity-80">{p.name}</p>
+   </div>
+  ))}
  </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <SCard icon={<Users size={22}/>} label="Total Leads" value={stats.total} c="blue"/>
