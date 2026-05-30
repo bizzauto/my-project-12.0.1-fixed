@@ -5,17 +5,14 @@ import { simpleParser } from 'mailparser';
 
 /**
  * Gmail IMAP Service - Simple and Reliable
- * Directly connects to Gmail IMAP without complex parsing
+ * Directly connects to Gmail IMAP
  */
 export class GmailIMAPService {
-  /**
-   * Connect to Gmail IMAP and fetch all emails
-   */
   static async fetchAndCreateLeads(
     businessId: string,
     config: {
       email: string;
-      password: string; // App Password (16 chars, no spaces)
+      password: string;
     },
     options: {
       days?: number;
@@ -39,14 +36,12 @@ export class GmailIMAPService {
     };
 
     try {
-      // Dynamic import of imap
       const Imap = (await import('imap')).default;
-      
-      // Clean password - remove all spaces
       const cleanPassword = config.password.replace(/\s/g, '');
       
-      result.details.push(`Connecting to imap.gmail.com:993 with ${config.email}`);
-      result.details.push(`Password length: ${cleanPassword.length} chars`);
+      result.details.push(`Connecting to imap.gmail.com:993`);
+      result.details.push(`Email: ${config.email}`);
+      result.details.push(`Password length: ${cleanPassword.length}`);
 
       const imap = new Imap({
         user: config.email,
@@ -71,7 +66,7 @@ export class GmailIMAPService {
         };
 
         imap.once('ready', () => {
-          result.details.push('IMAP connected successfully!');
+          result.details.push('IMAP connected!');
           
           imap.openBox('INBOX', true, (err, box) => {
             if (err) {
@@ -80,13 +75,12 @@ export class GmailIMAPService {
               return;
             }
 
-            result.details.push(`INBOX opened. Total messages: ${box.messages.total}`);
+            result.details.push(`INBOX opened. Total: ${box.messages.total}`);
             result.totalEmails = box.messages.total;
 
-            // Search for emails from last N days
             const days = options.days || 30;
             const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-            result.details.push(`Searching emails since ${since.toDateString()}`);
+            result.details.push(`Searching since ${since.toDateString()}`);
 
             imap.search([['SINCE', since]], (err, results) => {
               if (err) {
@@ -96,137 +90,123 @@ export class GmailIMAPService {
               }
 
               if (!results || results.length === 0) {
-                result.details.push('No emails found in date range');
+                result.details.push('No emails found');
                 safeResolve(result);
                 return;
               }
 
-              result.details.push(`Found ${results.length} emails in date range`);
+              result.details.push(`Found ${results.length} emails`);
               
-              // Fetch ALL emails (not just IndiaMART ones)
-              const fetch = imap.fetch(results, { bodies: '' });
-              const emails: any[] = [];
+              // Process emails ONE BY ONE
+              let processedCount = 0;
+              const totalToProcess = results.length;
 
-              fetch.on('message', (msg, seqno) => {
-                msg.on('body', (stream) => {
-                  simpleParser(stream)
-                    .then((parsed: any) => {
-                      emails.push({
-                        from: parsed.from?.text || '',
-                        subject: parsed.subject || '',
-                        text: parsed.text || '',
-                        html: parsed.html || '',
-                        date: parsed.date,
-                      });
-                    })
-                    .catch(() => {});
-                });
-              });
-
-              fetch.once('end', async () => {
-                result.details.push(`Fetched ${emails.length} emails`);
-                
-                // Filter IndiaMART emails
-                const indiamartEmails = emails.filter(e => {
-                  const from = e.from.toLowerCase();
-                  const subject = e.subject.toLowerCase();
-                  const text = e.text.toLowerCase();
-                  return from.includes('indiamart') || 
-                         subject.includes('indiamart') ||
-                         subject.includes('enquiry') ||
-                         subject.includes('inquiry') ||
-                         text.includes('indiamart') ||
-                         text.includes('buyer name');
-                });
-
-                result.indiamartEmails = indiamartEmails.length;
-                result.details.push(`Found ${indiamartEmails.length} IndiaMART emails`);
-
-                // Create leads from each email
-                for (const email of indiamartEmails) {
-                  try {
-                    // Log email content for debugging
-                    console.log(`[GmailIMAP] Processing email: ${email.subject}`);
-                    console.log(`[GmailIMAP] From: ${email.from}`);
-                    console.log(`[GmailIMAP] Text preview: ${(email.text || '').substring(0, 500)}`);
-
-                    // Use the improved parser from EmailLeadService
-                    const leadData = EmailLeadService.parseEmail(
-                      email.html || '',
-                      email.text || '',
-                      'indiamart'
-                    );
-
-                    console.log(`[GmailIMAP] Parse result:`, leadData);
-
-                    const phone = leadData?.phone || '';
-                    const buyerEmail = leadData?.email || '';
-                    const name = leadData?.name || 'IndiaMART Customer';
-                    const product = leadData?.product || '';
-                    const city = leadData?.city || '';
-
-                    // If parser failed, try to extract phone directly from email text
-                    let finalPhone = phone;
-                    if (!finalPhone) {
-                      const phoneMatch = (email.text || '').match(/(?:\+?91[\s.-]?)?([6-9]\d{9})/);
-                      if (phoneMatch) {
-                        finalPhone = phoneMatch[1].slice(-10);
-                        console.log(`[GmailIMAP] Extracted phone directly: ${finalPhone}`);
-                      }
-                    }
-
-                    if (finalPhone || buyerEmail) {
-                      // Check duplicate
-                      const existing = finalPhone ? await prisma.contact.findFirst({
-                        where: { businessId, phone: finalPhone, source: 'indiamart' },
-                      }) : null;
-
-                      if (!existing) {
-                        await LeadCaptureService.captureIndiaMARTLead(businessId, {
-                          name,
-                          phone: finalPhone,
-                          email: buyerEmail || undefined,
-                          product,
-                          city,
-                        });
-                        result.leadsCreated++;
-                        result.details.push(`Created lead: ${name} ${finalPhone} ${buyerEmail}`);
-                      } else {
-                        result.details.push(`Skipped duplicate: ${finalPhone}`);
-                      }
-                    } else {
-                      result.details.push(`No phone/email found in: ${email.subject}`);
-                    }
-                  } catch (e: any) {
-                    result.errors.push(`Error creating lead: ${e.message}`);
-                  }
+              const processNext = (index: number) => {
+                if (index >= totalToProcess) {
+                  result.details.push(`Done! Created ${result.leadsCreated} leads`);
+                  result.success = true;
+                  safeResolve(result);
+                  return;
                 }
 
-                result.success = true;
-                result.details.push(`Done! Created ${result.leadsCreated} leads`);
-                safeResolve(result);
-              });
+                const seqno = results[index];
+                const fetch = imap.fetch([seqno], { bodies: '' });
 
-              fetch.once('error', (err) => {
-                result.errors.push(`Fetch error: ${err.message}`);
-                safeResolve(result);
-              });
+                fetch.on('message', (msg) => {
+                  msg.on('body', (stream) => {
+                    const chunks: Buffer[] = [];
+                    
+                    stream.on('data', (chunk: Buffer) => {
+                      chunks.push(chunk);
+                    });
+
+                    stream.on('end', async () => {
+                      try {
+                        const fullContent = Buffer.concat(chunks).toString();
+                        const parsed = await simpleParser(fullContent);
+                        
+                        const from = (parsed.from?.text || '').toLowerCase();
+                        const subject = (parsed.subject || '').toLowerCase();
+                        const text = (parsed.text || '').toLowerCase();
+                        
+                        processedCount++;
+                        result.details.push(`[${processedCount}/${totalToProcess}] From: ${from.substring(0, 50)}`);
+                        
+                        // Check if IndiaMART email
+                        if (from.includes('indiamart') || 
+                            subject.includes('indiamart') ||
+                            subject.includes('enquiry') ||
+                            subject.includes('buyer') ||
+                            text.includes('indiamart')) {
+                          
+                          // Parse lead
+                          const leadData = EmailLeadService.parseEmail(
+                            parsed.html || '',
+                            parsed.text || '',
+                            'indiamart'
+                          );
+
+                          let phone = leadData?.phone || '';
+                          let email = leadData?.email || '';
+                          
+                          // Fallback: extract phone directly
+                          if (!phone) {
+                            const phoneMatch = (parsed.text || '').match(/(?:\+?91[\s.-]?)?([6-9]\d{9})/);
+                            if (phoneMatch) phone = phoneMatch[1].slice(-10);
+                          }
+
+                          if (phone || email) {
+                            result.indiamartEmails++;
+                            
+                            // Check duplicate
+                            const existing = phone ? await prisma.contact.findFirst({
+                              where: { businessId, phone, source: 'indiamart' },
+                            }) : null;
+
+                            if (!existing) {
+                              await LeadCaptureService.captureIndiaMARTLead(businessId, {
+                                name: leadData?.name || 'IndiaMART Customer',
+                                phone,
+                                email: email || undefined,
+                                product: leadData?.product || '',
+                                city: leadData?.city || '',
+                              });
+                              result.leadsCreated++;
+                              result.details.push(`Created: ${leadData?.name || 'Customer'} ${phone}`);
+                            } else {
+                              result.details.push(`Duplicate: ${phone}`);
+                            }
+                          }
+                        }
+                      } catch (e: any) {
+                        result.errors.push(`Parse error: ${e.message}`);
+                      }
+                      
+                      // Process next email
+                      processNext(index + 1);
+                    });
+                  });
+                });
+
+                fetch.once('error', (err) => {
+                  result.errors.push(`Fetch error: ${err.message}`);
+                  processNext(index + 1);
+                });
+              };
+
+              // Start processing first email
+              processNext(0);
             });
           });
         });
 
         imap.once('error', (err) => {
           result.errors.push(`IMAP error: ${err.message}`);
-          result.details.push('IMAP connection failed. Check email and App Password.');
           safeResolve(result);
         });
 
-        imap.once('end', () => {
-          result.details.push('IMAP connection ended');
-        });
-
-        // Timeout after 60 seconds
         setTimeout(() => {
+          result.errors.push('Timeout after 60 seconds');
           safeResolve(result);
         }, 60000);
 
