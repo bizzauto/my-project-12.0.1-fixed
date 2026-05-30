@@ -3,6 +3,7 @@ import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
 import { IndiaMARTEmailService } from '../services/indiamart-email.service.js';
 import { EmailLeadService, Platform } from '../services/email-lead.service.js';
+import { LeadCaptureService } from '../services/lead-capture.service.js';
 import { GmailIMAPService } from '../services/gmail-imap.service.js';
 import { encrypt, decrypt } from '../utils/auth.js';
 import { simpleParser } from 'mailparser';
@@ -169,7 +170,8 @@ router.post('/debug-emails', authenticate, async (req: any, res: Response) => {
 
     const debugResult = await new Promise<any>((resolve) => {
       let resolved = false;
-      const safeResolve = (v: any) => { if (!resolved) { resolved = true; try { imap.end(); } catch {} resolve(v); } };
+      const timeoutId = setTimeout(() => safeResolve({ error: 'timeout' }), 30000);
+      const safeResolve = (v: any) => { if (!resolved) { resolved = true; clearTimeout(timeoutId); try { imap.end(); } catch {} resolve(v); } };
 
       imap.once('ready', () => {
         console.log('[Debug] IMAP connected!');
@@ -230,7 +232,6 @@ router.post('/debug-emails', authenticate, async (req: any, res: Response) => {
         safeResolve({ error: err.message });
       });
 
-      setTimeout(() => safeResolve({ error: 'timeout' }), 30000);
       imap.connect();
     });
 
@@ -282,10 +283,14 @@ router.post('/test-gmail', authenticate, async (req: any, res: Response) => {
 
     const testResult = await new Promise<any>((resolve) => {
       let resolved = false;
+      const timeoutId = setTimeout(() => {
+        safeResolve({ success: false, error: 'Connection timeout' });
+      }, 30000);
       
       const safeResolve = (value: any) => {
         if (!resolved) {
           resolved = true;
+          clearTimeout(timeoutId);
           try { imap.end(); } catch {}
           resolve(value);
         }
@@ -329,8 +334,7 @@ router.post('/test-gmail', authenticate, async (req: any, res: Response) => {
 
             fetch.on('message', (msg) => {
               msg.on('body', (stream) => {
-                const { simpleParser } = require('mailparser');
-                simpleParser(stream)
+                          simpleParser(stream)
                   .then((parsed: any) => {
                     emails.push({
                       from: parsed.from?.text || '',
@@ -370,10 +374,6 @@ router.post('/test-gmail', authenticate, async (req: any, res: Response) => {
           hint: 'Check email and App Password. For Gmail, use App Password from myaccount.google.com/apppasswords'
         });
       });
-
-      setTimeout(() => {
-        safeResolve({ success: false, error: 'Connection timeout' });
-      }, 30000);
 
       imap.connect();
     });
@@ -672,7 +672,6 @@ router.post('/import', authenticate, async (req: any, res: Response) => {
     }
 
     // Create lead directly
-    const { LeadCaptureService } = await import('../services/lead-capture.service.js');
     const contact = await LeadCaptureService.captureIndiaMARTLead(businessId, {
       name: name || `${platform} Customer`,
       phone: phone || '',
@@ -709,7 +708,6 @@ router.post('/bulk-import', authenticate, async (req: any, res: Response) => {
       });
     }
 
-    const { LeadCaptureService } = await import('../services/lead-capture.service.js');
     const results = {
       success: 0,
       failed: 0,
@@ -766,7 +764,6 @@ router.post('/test-email', authenticate, async (req: any, res: Response) => {
       });
     }
 
-    const { EmailLeadService } = await import('../services/email-lead.service.js');
     const leadData = EmailLeadService.parseEmail(html || '', text || '', platform);
 
     res.json({

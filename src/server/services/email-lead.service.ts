@@ -414,13 +414,13 @@ export class EmailLeadService {
                     if (leadData && (leadData.phone || leadData.email)) {
                       result.processed++;
 
-                      // Check duplicate - only skip if same phone exists in last 30 days
+                      // Check duplicate - use platform-specific source
                       const existing = leadData.phone
                         ? await prisma.contact.findFirst({
                             where: { 
                               businessId, 
                               phone: leadData.phone,
-                              source: 'indiamart',
+                              source: platform,
                             },
                           })
                         : null;
@@ -431,15 +431,43 @@ export class EmailLeadService {
                         return;
                       }
 
-                      // Capture lead
-                      const contact = await LeadCaptureService.captureIndiaMARTLead(businessId, {
-                        name: leadData.name || `${platformName} Customer`,
-                        phone: leadData.phone || '',
-                        email: leadData.email || undefined,
-                        product: leadData.product,
-                        requirement: leadData.requirement,
-                        city: leadData.city,
-                      });
+                      // Capture lead using platform-specific method
+                      let contact;
+                      if (platform === 'indiamart') {
+                        contact = await LeadCaptureService.captureIndiaMARTLead(businessId, {
+                          name: leadData.name || `${platformName} Customer`,
+                          phone: leadData.phone || '',
+                          email: leadData.email || undefined,
+                          product: leadData.product,
+                          requirement: leadData.requirement,
+                          city: leadData.city,
+                        });
+                      } else if (platform === 'justdial') {
+                        contact = await LeadCaptureService.captureJustDialLead(businessId, {
+                          name: leadData.name || `${platformName} Customer`,
+                          phone: leadData.phone || '',
+                          email: leadData.email || undefined,
+                          service: leadData.product,
+                          location: leadData.city,
+                          message: leadData.requirement,
+                        });
+                      } else {
+                        // tradeindia - use IndiaMART path then fix source/tags
+                        contact = await LeadCaptureService.captureIndiaMARTLead(businessId, {
+                          name: leadData.name || `${platformName} Customer`,
+                          phone: leadData.phone || '',
+                          email: leadData.email || undefined,
+                          product: leadData.product,
+                          requirement: leadData.requirement,
+                          city: leadData.city,
+                        });
+                        if (contact) {
+                          await prisma.contact.update({
+                            where: { id: contact.id },
+                            data: { source: 'tradeindia', tags: ['TradeIndia', 'Lead'] },
+                          });
+                        }
+                      }
 
                       result.newLeads++;
                       result.leads.push(contact);

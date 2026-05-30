@@ -10,7 +10,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RT,
   ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
-import { postsAPI, instagramAPI } from '../lib/api';
+import { postsAPI, instagramAPI, socialAccountsAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
 
 // Types
@@ -76,6 +76,13 @@ const SocialMediaPage: React.FC = () => {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['facebook', 'instagram']);
   const [scheduleDate, setScheduleDate] = useState('');
   const [toast, setToast] = useState<{ message: string; type: string } | null>(null);
+
+  // Social Accounts state
+  const [socialAccounts, setSocialAccounts] = useState<Array<{ platform: string; connected: boolean; details?: any }>>([]);
+  const [loadingSocialStatus, setLoadingSocialStatus] = useState(true);
+  const [connectModal, setConnectModal] = useState<{ platform: string; open: boolean } | null>(null);
+  const [connectForm, setConnectForm] = useState<Record<string, string>>({});
+  const [connecting, setConnecting] = useState(false);
 
   // Instagram-specific state
   const [igStatus, setIgStatus] = useState<{ connected: boolean; accountInfo?: any } | null>(null);
@@ -211,13 +218,22 @@ const SocialMediaPage: React.FC = () => {
   useEffect(() => {
     fetchPosts();
 
-    // Check Instagram connection status
     if (!isDemoMode) {
+      // Fetch all social accounts status
+      socialAccountsAPI.list().then(res => {
+        if (res.data.success) {
+          setSocialAccounts(res.data.data);
+        }
+      }).catch(() => {}).finally(() => setLoadingSocialStatus(false));
+
+      // Check Instagram connection status
       instagramAPI.getStatus().then(res => {
         if (res.data.success) {
           setIgStatus(res.data.data);
         }
       }).catch(() => {});
+    } else {
+      setLoadingSocialStatus(false);
     }
   }, [fetchPosts, isDemoMode]);
 
@@ -309,6 +325,87 @@ const SocialMediaPage: React.FC = () => {
       if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
       return prev.filter((_, i) => i !== index);
     });
+  };
+
+  // Social Accounts: Open connect modal
+  const openConnectModal = (platform: string) => {
+    setConnectForm({});
+    setConnectModal({ platform, open: true });
+  };
+
+  // Social Accounts: Close connect modal
+  const closeConnectModal = () => {
+    setConnectModal(null);
+    setConnectForm({});
+  };
+
+  // Social Accounts: Connect
+  const handleSocialConnect = async () => {
+    if (!connectModal) return;
+    const { platform } = connectModal;
+
+    if (platform === 'facebook' && (!connectForm.fbPageId || !connectForm.fbAccessToken)) {
+      showToast('Please enter both Facebook Page ID and Access Token', 'error');
+      return;
+    }
+    if (platform === 'linkedin' && (!connectForm.linkedinPageId || !connectForm.linkedinAccessToken)) {
+      showToast('Please enter both LinkedIn Page ID and Access Token', 'error');
+      return;
+    }
+    if (platform === 'twitter' && (!connectForm.twitterUserId || !connectForm.twitterAccessToken)) {
+      showToast('Please enter both Twitter User ID and Access Token', 'error');
+      return;
+    }
+
+    setConnecting(true);
+    try {
+      let res;
+      if (platform === 'facebook') {
+        res = await socialAccountsAPI.connectFacebook(connectForm as any);
+      } else if (platform === 'linkedin') {
+        res = await socialAccountsAPI.connectLinkedIn(connectForm as any);
+      } else if (platform === 'twitter') {
+        res = await socialAccountsAPI.connectTwitter(connectForm as any);
+      }
+
+      if (res?.data.success) {
+        showToast(`${platform.charAt(0).toUpperCase() + platform.slice(1)} connected successfully!`);
+        closeConnectModal();
+        // Refresh social accounts status
+        const statusRes = await socialAccountsAPI.list();
+        if (statusRes.data.success) setSocialAccounts(statusRes.data.data);
+      }
+    } catch (err: any) {
+      showToast(err?.response?.data?.error || `Failed to connect ${platform}`, 'error');
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  // Social Accounts: Disconnect
+  const handleSocialDisconnect = async (platform: string) => {
+    try {
+      let res;
+      if (platform === 'facebook') {
+        res = await socialAccountsAPI.disconnectFacebook();
+      } else if (platform === 'linkedin') {
+        res = await socialAccountsAPI.disconnectLinkedIn();
+      } else if (platform === 'twitter') {
+        res = await socialAccountsAPI.disconnectTwitter();
+      } else if (platform === 'google_business') {
+        window.location.href = '/app/google-business';
+        return;
+      }
+
+      if (res?.data.success) {
+        showToast(`${platform.charAt(0).toUpperCase() + platform.slice(1)} disconnected`);
+        // Refresh social accounts status
+        const statusRes = await socialAccountsAPI.list();
+        if (statusRes.data.success) setSocialAccounts(statusRes.data.data);
+      }
+    } catch (err: any) {
+      showToast(err?.response?.data?.error || `Failed to disconnect ${platform}`, 'error');
+    }
   };
 
   // Instagram: Connect account
@@ -456,6 +553,74 @@ const SocialMediaPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Connected Accounts Panel */}
+      {!loadingSocialStatus && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-4 sm:mb-6 overflow-hidden">
+          <div className="px-3 sm:px-5 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
+              <Plug size={16} className="text-blue-500" />
+              Connected Accounts
+            </h3>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {socialAccounts.filter(a => a.connected).length}/{socialAccounts.length} connected
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2 sm:gap-3 p-3 sm:p-4">
+            {[
+              { id: 'facebook', name: 'Facebook', icon: '📘', color: 'bg-blue-600' },
+              { id: 'instagram', name: 'Instagram', icon: '📷', color: 'bg-pink-600' },
+              { id: 'linkedin', name: 'LinkedIn', icon: '💼', color: 'bg-blue-700' },
+              { id: 'twitter', name: 'Twitter/X', icon: '🐦', color: 'bg-gray-900 dark:bg-gray-600' },
+              { id: 'google_business', name: 'Google Business', icon: '🏢', color: 'bg-red-600' },
+            ].map(platform => {
+              const account = socialAccounts.find(a => a.platform === platform.id);
+              const isConnected = account?.connected || false;
+
+              return (
+                <div key={platform.id} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-100 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-800 transition-all group">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-xl sm:text-2xl shrink-0">{platform.icon}</span>
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{platform.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {isConnected ? 'Connected' : 'Not connected'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="shrink-0">
+                    {isConnected ? (
+                      <button
+                        onClick={() => handleSocialDisconnect(platform.id)}
+                        className="px-2.5 py-1.5 text-xs font-medium bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      >
+                        <Unplug size={12} className="inline mr-1" />
+                        Disconnect
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          if (platform.id === 'instagram') {
+                            setShowIgConnectModal(true);
+                          } else if (platform.id === 'google_business') {
+                            window.location.href = '/app/google-business';
+                          } else {
+                            openConnectModal(platform.id);
+                          }
+                        }}
+                        className="px-2.5 py-1.5 text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                      >
+                        <Plug size={12} className="inline mr-1" />
+                        Connect
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Dashboard View */}
       {activeView === 'dashboard' && (
@@ -723,6 +888,151 @@ const SocialMediaPage: React.FC = () => {
           </div>
           <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
             <div className="bg-gradient-to-r from-pink-500 to-purple-500 h-full rounded-full animate-pulse" style={{ width: '60%' }} />
+          </div>
+        </div>
+      )}
+
+      {/* Social Accounts Connect Modal (Facebook/LinkedIn/Twitter) */}
+      {connectModal && ['facebook', 'linkedin', 'twitter'].includes(connectModal.platform) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={closeConnectModal}>
+          <div className="fixed inset-0 bg-black/50" />
+          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${
+                  connectModal.platform === 'facebook' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                  connectModal.platform === 'linkedin' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                  'bg-gray-100 dark:bg-gray-700'
+                }`}>
+                  <span className="text-xl">
+                    {connectModal.platform === 'facebook' ? '📘' :
+                     connectModal.platform === 'linkedin' ? '💼' : '🐦'}
+                  </span>
+                </div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Connect {connectModal.platform === 'facebook' ? 'Facebook' :
+                           connectModal.platform === 'linkedin' ? 'LinkedIn' : 'Twitter/X'}
+                </h2>
+              </div>
+              <button onClick={closeConnectModal} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <XCircle size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {connectModal.platform === 'facebook'
+                  ? 'Enter your Facebook Page ID and a Page Access Token with pages_manage_posts and pages_read_engagement permissions.'
+                  : connectModal.platform === 'linkedin'
+                    ? 'Enter your LinkedIn Page ID (Organization URN) and an Access Token with w_organization_social and rw_organization_admin permissions.'
+                    : 'Enter your Twitter/X User ID and Bearer Token with tweet.read and tweet.write permissions.'}
+              </p>
+
+              {connectModal.platform === 'facebook' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Facebook Page ID</label>
+                    <input
+                      type="text"
+                      value={connectForm.fbPageId || ''}
+                      onChange={e => setConnectForm(prev => ({ ...prev, fbPageId: e.target.value }))}
+                      placeholder="e.g. 123456789012345"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Facebook Page Access Token</label>
+                    <input
+                      type="password"
+                      value={connectForm.fbAccessToken || ''}
+                      onChange={e => setConnectForm(prev => ({ ...prev, fbAccessToken: e.target.value }))}
+                      placeholder="EAAB... long token"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                </>
+              )}
+
+              {connectModal.platform === 'linkedin' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">LinkedIn Page ID</label>
+                    <input
+                      type="text"
+                      value={connectForm.linkedinPageId || ''}
+                      onChange={e => setConnectForm(prev => ({ ...prev, linkedinPageId: e.target.value }))}
+                      placeholder="e.g. urn:li:organization:12345678"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">LinkedIn Access Token</label>
+                    <input
+                      type="password"
+                      value={connectForm.linkedinAccessToken || ''}
+                      onChange={e => setConnectForm(prev => ({ ...prev, linkedinAccessToken: e.target.value }))}
+                      placeholder="AQV... long token"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                </>
+              )}
+
+              {connectModal.platform === 'twitter' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Twitter/X User ID</label>
+                    <input
+                      type="text"
+                      value={connectForm.twitterUserId || ''}
+                      onChange={e => setConnectForm(prev => ({ ...prev, twitterUserId: e.target.value }))}
+                      placeholder="e.g. 1234567890"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Twitter/X Bearer Token</label>
+                    <input
+                      type="password"
+                      value={connectForm.twitterAccessToken || ''}
+                      onChange={e => setConnectForm(prev => ({ ...prev, twitterAccessToken: e.target.value }))}
+                      placeholder="AAAAAAAAA... long token"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
+                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                    <strong>How to get these credentials:</strong><br />
+                    {connectModal.platform === 'facebook'
+                      ? 'Go to Facebook Developers → Your App → Tools → Graph API Explorer. Select your Page, get a Page Access Token with pages_manage_posts permission.'
+                      : connectModal.platform === 'linkedin'
+                        ? 'Go to LinkedIn Developers → Your App → Auth → Access Tokens. Request w_organization_social permission.'
+                        : 'Go to Twitter Developer Portal → Your Project → Keys and Tokens → Generate Bearer Token with Read and Write permissions.'}
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={closeConnectModal}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSocialConnect}
+                    disabled={connecting}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 text-sm"
+                  >
+                    {connecting ? <Loader2 size={16} className="animate-spin" /> : <Plug size={16} />}
+                    {connecting ? 'Connecting...' : 'Connect'}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

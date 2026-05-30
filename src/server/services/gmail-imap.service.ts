@@ -132,18 +132,31 @@ export class GmailIMAPService {
                         processedCount++;
                         result.details.push(`[${processedCount}/${totalToProcess}] From: ${from.substring(0, 50)}`);
                         
-                        // Check if IndiaMART email
-                        if (from.includes('indiamart') || 
-                            subject.includes('indiamart') ||
-                            subject.includes('enquiry') ||
-                            subject.includes('buyer') ||
-                            text.includes('indiamart')) {
+                        // Determine platform from email content
+                        let detectedPlatform = options.platform || 'indiamart';
+                        if (from.includes('justdial') || subject.includes('justdial') || text.includes('justdial')) {
+                          detectedPlatform = 'justdial';
+                        } else if (from.includes('tradeindia') || subject.includes('tradeindia') || text.includes('tradeindia')) {
+                          detectedPlatform = 'tradeindia';
+                        }
+
+                        // Check if it's a lead-related email
+                        const isLeadEmail = 
+                          from.includes(detectedPlatform) || 
+                          subject.includes(detectedPlatform) ||
+                          subject.includes('enquiry') ||
+                          subject.includes('buyer') ||
+                          subject.includes('query') ||
+                          subject.includes('lead') ||
+                          text.includes(detectedPlatform);
+
+                        if (isLeadEmail) {
                           
-                          // Parse lead
+                          // Parse lead using detected platform
                           const leadData = EmailLeadService.parseEmail(
                             parsed.html || '',
                             parsed.text || '',
-                            'indiamart'
+                            detectedPlatform as any
                           );
 
                           let phone = leadData?.phone || '';
@@ -158,19 +171,38 @@ export class GmailIMAPService {
                           if (phone || email) {
                             result.indiamartEmails++;
                             
-                            // Check duplicate
+                            // Check duplicate using detected platform
                             const existing = phone ? await prisma.contact.findFirst({
-                              where: { businessId, phone, source: 'indiamart' },
+                              where: { businessId, phone, source: detectedPlatform },
                             }) : null;
 
                             if (!existing) {
-                              await LeadCaptureService.captureIndiaMARTLead(businessId, {
-                                name: leadData?.name || 'IndiaMART Customer',
+                              // Use platform-specific capture function
+                              let captureFn: Function;
+                              if (detectedPlatform === 'justdial') {
+                                captureFn = LeadCaptureService.captureJustDialLead;
+                              } else {
+                                captureFn = LeadCaptureService.captureIndiaMARTLead;
+                              }
+                              
+                              const payload = {
+                                name: (leadData?.name) || `${detectedPlatform.charAt(0).toUpperCase() + detectedPlatform.slice(1)} Customer`,
                                 phone,
                                 email: email || undefined,
-                                product: leadData?.product || '',
-                                city: leadData?.city || '',
-                              });
+                                product: (leadData?.product) || '',
+                                city: (leadData?.city) || '',
+                              };
+                              
+                              const contact = await captureFn(businessId, payload);
+                              
+                              // For tradeindia, fix source and tags since we reuse captureIndiaMARTLead
+                              if (detectedPlatform === 'tradeindia' && contact) {
+                                await prisma.contact.update({
+                                  where: { id: contact.id },
+                                  data: { source: 'tradeindia', tags: ['TradeIndia', 'Lead'] },
+                                });
+                              }
+                              
                               result.leadsCreated++;
                               result.details.push(`Created: ${leadData?.name || 'Customer'} ${phone}`);
                             } else {

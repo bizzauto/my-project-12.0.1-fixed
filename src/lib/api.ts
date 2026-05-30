@@ -345,6 +345,21 @@ export const googleBusinessAPI = {
   getStats: () => apiClient.get('/google-business/stats'),
 };
 
+// Social Accounts API
+export const socialAccountsAPI = {
+  list: () => apiClient.get('/social-accounts'),
+  getStatus: () => apiClient.get('/social-accounts'),
+  connectFacebook: (data: { fbPageId: string; fbAccessToken: string }) =>
+    apiClient.post('/social-accounts/facebook/connect', data),
+  disconnectFacebook: () => apiClient.delete('/social-accounts/facebook/disconnect'),
+  connectLinkedIn: (data: { linkedinPageId: string; linkedinAccessToken: string }) =>
+    apiClient.post('/social-accounts/linkedin/connect', data),
+  disconnectLinkedIn: () => apiClient.delete('/social-accounts/linkedin/disconnect'),
+  connectTwitter: (data: { twitterUserId: string; twitterAccessToken: string }) =>
+    apiClient.post('/social-accounts/twitter/connect', data),
+  disconnectTwitter: () => apiClient.delete('/social-accounts/twitter/disconnect'),
+};
+
 // Instagram API
 export const instagramAPI = {
   connect: (data: { igUserId: string; igAccessToken: string }) =>
