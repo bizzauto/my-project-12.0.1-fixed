@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { prisma } from '../index.js';
 import { CSRFService } from '../services/csrf.service.js';
 
@@ -191,6 +192,61 @@ export const requireBusinessAccess = async (
     next(error);
   }
 };
+
+/**
+ * Generate a webhook secret for lead capture endpoints
+ */
+export function generateWebhookSecret(): string {
+  return 'wh_' + crypto.randomBytes(24).toString('hex');
+}
+
+/**
+ * Validate webhook request by checking x-webhook-secret header
+ * against the business's leadWebhookSecret
+ */
+export async function validateWebhook(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const businessId = req.params.businessId || req.body?.businessId;
+    if (!businessId) {
+      res.status(400).json({ success: false, error: 'Business ID is required' });
+      return;
+    }
+
+    const webhookSecret = req.headers['x-webhook-secret'] as string;
+    if (!webhookSecret) {
+      res.status(401).json({ success: false, error: 'Missing x-webhook-secret header' });
+      return;
+    }
+
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: { leadWebhookSecret: true },
+    });
+
+    if (!business || !business.leadWebhookSecret) {
+      res.status(401).json({ success: false, error: 'Webhook not configured for this business. Generate a webhook secret in Settings > Integrations.' });
+      return;
+    }
+
+    // Constant-time comparison to prevent timing attacks
+    const expected = Buffer.from(business.leadWebhookSecret);
+    const received = Buffer.from(webhookSecret);
+    if (expected.length !== received.length || !crypto.timingSafeEqual(expected, received)) {
+      res.status(403).json({ success: false, error: 'Invalid webhook secret' });
+      return;
+    }
+
+    req.user = { businessId, isWebhook: true };
+    next();
+  } catch (error: any) {
+    console.error('Webhook validation error:', error.message);
+    res.status(500).json({ success: false, error: 'Webhook validation failed' });
+  }
+}
 
 export const checkPlanLimits = (resource: string, limit: number) => {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {

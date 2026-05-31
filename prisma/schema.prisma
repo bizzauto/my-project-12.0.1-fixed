@@ -102,6 +102,9 @@ model Business {
   gbpAccountId    String?
   gbpLocationId   String?
 
+  // Webhook Security
+  leadWebhookSecret String?
+
   // Auto Reply
   autoReplyEnabled  Boolean @default(false)
   autoReplyMessage  String?

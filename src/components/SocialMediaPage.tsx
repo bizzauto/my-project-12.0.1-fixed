@@ -91,8 +91,6 @@ const SocialMediaPage: React.FC = () => {
   const [igConnecting, setIgConnecting] = useState(false);
   const [uploadedMedia, setUploadedMedia] = useState<Array<{ url: string; type: string; file?: File; previewUrl: string }>>([]);
   const [uploadingMedia, setUploadingMedia] = useState(false);
-  const [publishingToIg, setPublishingToIg] = useState(false);
-  const [publishProgress, setPublishProgress] = useState<string>('');
 
   // Demo mode data
   const demoPosts: SocialPost[] = [
@@ -318,6 +316,162 @@ const SocialMediaPage: React.FC = () => {
     }
   };
 
+    // Instagram: Publish Modal state
+  const [igPublishModal, setIgPublishModal] = useState<{ open: boolean; post?: SocialPost }>({ open: false });
+  const [igPublishCaption, setIgPublishCaption] = useState('');
+  const [igPublishMedia, setIgPublishMedia] = useState<Array<{ url: string; type: string; file?: File; previewUrl: string }>>([]);
+  const [igPublishProgress, setIgPublishProgress] = useState<{ step: string; percent: number; status: 'idle' | 'processing' | 'success' | 'error' }>({ step: '', percent: 0, status: 'idle' });
+  const [igPublishResult, setIgPublishResult] = useState<{ mediaId?: string; url?: string } | null>(null);
+  const [igRecentMedia, setIgRecentMedia] = useState<Array<{ id: string; media_url: string; media_type: string; caption?: string; timestamp: string; like_count?: number; comments_count?: number }>>([]);
+  const [igAnalyticsLoading, setIgAnalyticsLoading] = useState(false);
+
+  // Open Instagram Publish Modal
+  const openIgPublishModal = (post: SocialPost) => {
+    const mediaUrls: Array<{ url: string; type: string; previewUrl: string }> = [];
+    if (post.image) {
+      mediaUrls.push({ url: post.image, type: 'IMAGE', previewUrl: post.image });
+    }
+    setIgPublishCaption(post.content);
+    setIgPublishMedia(mediaUrls);
+    setIgPublishProgress({ step: '', percent: 0, status: 'idle' });
+    setIgPublishResult(null);
+    setIgPublishModal({ open: true, post });
+  };
+
+  // Close Instagram Publish Modal
+  const closeIgPublishModal = () => {
+    setIgPublishModal({ open: false });
+    setIgPublishMedia([]);
+    setIgPublishProgress({ step: '', percent: 0, status: 'idle' });
+    setIgPublishResult(null);
+    setUploadedMedia([]);
+  };
+
+  // Instagram Publish: Upload media in publish modal
+  const handleIgPublishMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploadingMedia(true);
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('media', files[i]);
+    }
+    try {
+      const res = await instagramAPI.uploadMedia(formData);
+      if (res.data.success) {
+        const newMedia = res.data.data.media.map((m: any, i: number) => ({
+          url: m.url,
+          type: m.type,
+          previewUrl: URL.createObjectURL(files[i]),
+        }));
+        setIgPublishMedia(prev => [...prev, ...newMedia]);
+      }
+    } catch (err: any) {
+      showToast(err?.response?.data?.error || 'Failed to upload media', 'error');
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
+  // Instagram Publish: Remove media
+  const removeIgPublishMedia = (index: number) => {
+    setIgPublishMedia(prev => {
+      const item = prev[index];
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  // Instagram Publish: Full publish flow with progress
+  const handleIgPublishPost = async () => {
+    if (!igPublishModal.post) return;
+
+    const media = igPublishMedia.length > 0 ? igPublishMedia : uploadedMedia;
+
+    if (!media.length) {
+      showToast('📷 Instagram requires at least one image or video. Upload media first.', 'error');
+      return;
+    }
+
+    setIgPublishProgress({ step: 'Creating Instagram container...', percent: 15, status: 'processing' });
+
+    try {
+      const mediaUrls = media.map(m => m.url);
+      const mediaTypes = media.map(m => m.type);
+      const caption = igPublishCaption.trim() || igPublishModal.post.content;
+
+      setIgPublishProgress({ step: '📦 Creating media container...', percent: 25, status: 'processing' });
+
+      if (mediaUrls.length === 1) {
+        // Single media publish
+        setIgPublishProgress({ step: '⏳ Waiting for Instagram to process media...', percent: 50, status: 'processing' });
+
+        const res = await instagramAPI.publish({
+          mediaUrl: mediaUrls[0],
+          caption,
+          mediaType: mediaTypes[0],
+        });
+
+        if (res.data.success) {
+          await postsAPI.publish(igPublishModal.post.id).catch(() => {});
+          setIgPublishProgress({ step: '✅ Published successfully!', percent: 100, status: 'success' });
+          setIgPublishResult({
+            mediaId: res.data.data?.mediaId,
+          });
+          showToast('✅ Published to Instagram!');
+          fetchPosts();
+        }
+      } else {
+        // Carousel publish (multiple items)
+        setIgPublishProgress({ step: '🔄 Creating carousel containers...', percent: 30, status: 'processing' });
+
+        const res = await instagramAPI.publishCarousel({
+          children: mediaUrls.map((url, i) => ({ mediaUrl: url, mediaType: mediaTypes[i] })),
+          caption,
+        });
+
+        if (res.data.success) {
+          await postsAPI.publish(igPublishModal.post.id).catch(() => {});
+          setIgPublishProgress({ step: '✅ Carousel published successfully!', percent: 100, status: 'success' });
+          setIgPublishResult({
+            mediaId: res.data.data?.mediaId,
+          });
+          showToast('✅ Carousel published to Instagram!');
+          fetchPosts();
+        }
+      }
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.error || err?.response?.data?.details || 'Failed to publish to Instagram';
+      setIgPublishProgress({ step: `❌ ${errorMsg}`, percent: 0, status: 'error' });
+      showToast(errorMsg, 'error');
+    }
+  };
+
+  // Fetch Instagram analytics data
+  const fetchInstagramAnalytics = async () => {
+    if (!igStatus?.connected) return;
+    setIgAnalyticsLoading(true);
+    try {
+      const [mediaRes, accountRes] = await Promise.all([
+        instagramAPI.getMedia(10).catch(() => ({ data: { data: [] } })),
+        instagramAPI.getAccount().catch(() => ({ data: { data: {} } })),
+      ]);
+      if (mediaRes.data.success) {
+        setIgRecentMedia(mediaRes.data.data || []);
+      }
+      if (accountRes.data.success && accountRes.data.data) {
+        setIgStatus(prev => prev ? {
+          ...prev,
+          accountInfo: accountRes.data.data,
+        } : null);
+      }
+    } catch (err) {
+      console.error('Failed to fetch Instagram analytics:', err);
+    } finally {
+      setIgAnalyticsLoading(false);
+    }
+  };
+
   // Instagram: Remove uploaded media
   const removeIgMedia = (index: number) => {
     setUploadedMedia(prev => {
@@ -439,67 +593,6 @@ const SocialMediaPage: React.FC = () => {
       showToast('Instagram account disconnected');
     } catch (err: any) {
       showToast('Failed to disconnect', 'error');
-    }
-  };
-
-  // Instagram: Publish a post directly to Instagram
-  const handleIgPublishPost = async (post: SocialPost) => {
-    setPublishingToIg(true);
-    setPublishProgress('Creating Instagram container...');
-
-    if (!uploadedMedia.length && !post.image) {
-      showToast('Instagram requires media. Upload images first.', 'error');
-      setPublishingToIg(false);
-      return;
-    }
-
-    try {
-      let mediaUrls: string[];
-      let mediaTypes: string[];
-
-      if (uploadedMedia.length > 0) {
-        mediaUrls = uploadedMedia.map(m => m.url);
-        mediaTypes = uploadedMedia.map(m => m.type);
-      } else if (post.image) {
-        mediaUrls = [post.image];
-        mediaTypes = ['IMAGE'];
-      } else {
-        throw new Error('No media to publish');
-      }
-
-      setPublishProgress('Publishing...');
-
-      if (mediaUrls.length === 1) {
-        const res = await instagramAPI.publish({
-          mediaUrl: mediaUrls[0],
-          caption: post.content,
-          mediaType: mediaTypes[0],
-        });
-        if (res.data.success) {
-          // Update post status
-          await postsAPI.publish(post.id).catch(() => {});
-          showToast('✅ Published to Instagram!');
-          setUploadedMedia([]);
-          fetchPosts();
-        }
-      } else {
-        const res = await instagramAPI.publishCarousel({
-          children: mediaUrls.map((url, i) => ({ mediaUrl: url, mediaType: mediaTypes[i] })),
-          caption: post.content,
-        });
-        if (res.data.success) {
-          // Update post status
-          await postsAPI.publish(post.id).catch(() => {});
-          showToast('✅ Carousel published to Instagram!');
-          setUploadedMedia([]);
-          fetchPosts();
-        }
-      }
-    } catch (err: any) {
-      showToast(err?.response?.data?.error || 'Failed to publish to Instagram', 'error');
-    } finally {
-      setPublishingToIg(false);
-      setPublishProgress('');
     }
   };
 
@@ -716,12 +809,12 @@ const SocialMediaPage: React.FC = () => {
                         <div className="flex items-center gap-1">
                           {(post.platforms.includes('instagram') || post.status === 'draft') && igStatus?.connected && (
                             <button
-                              onClick={() => handleIgPublishPost(post)}
-                              disabled={publishingToIg}
-                              className="p-1.5 hover:bg-pink-50 dark:hover:bg-pink-900/30 rounded-lg"
+                              onClick={() => openIgPublishModal(post)}
+                              className="p-1.5 hover:bg-pink-100 dark:hover:bg-pink-900/40 rounded-lg transition-colors relative group"
                               title="Publish to Instagram"
                             >
-                              {publishingToIg ? <Loader2 size={14} className="text-pink-500 animate-spin" /> : <Instagram size={14} className="text-pink-500" />}
+                              <Instagram size={14} className="text-pink-500" />
+                              <span className="absolute -top-1 -right-1 w-2 h-2 bg-pink-500 rounded-full"></span>
                             </button>
                           )}
                           <button onClick={() => duplicatePost(post)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg" title="Duplicate">
@@ -871,23 +964,6 @@ const SocialMediaPage: React.FC = () => {
                 <p className="text-xs text-gray-500 dark:text-gray-400">Monday to Friday</p>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Publish Progress Bar */}
-      {publishingToIg && (
-        <div className="fixed bottom-4 right-4 z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 max-w-xs">
-          <div className="flex items-center gap-3 mb-2">
-            <Instagram size={18} className="text-pink-500" />
-            <span className="text-sm font-medium text-gray-900 dark:text-white">Publishing to Instagram...</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Loader2 size={14} className="text-pink-500 animate-spin" />
-            <span className="text-xs text-gray-500">{publishProgress}</span>
-          </div>
-          <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
-            <div className="bg-gradient-to-r from-pink-500 to-purple-500 h-full rounded-full animate-pulse" style={{ width: '60%' }} />
           </div>
         </div>
       )}
@@ -1313,6 +1389,419 @@ const SocialMediaPage: React.FC = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Instagram Publish Modal */}
+      {igPublishModal.open && igPublishModal.post && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4" onClick={closeIgPublishModal}>
+          <div className="fixed inset-0 bg-black/50" />
+          <div className="relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full sm:max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl z-10">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-pink-400 to-purple-600 rounded-lg">
+                  <Instagram size={18} className="text-white" />
+                </div>
+                <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                  Publish to Instagram
+                </h2>
+              </div>
+              <button onClick={closeIgPublishModal} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <XCircle size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="p-4 sm:p-6 space-y-5">
+              {/* Instagram Account Info */}
+              {igStatus?.connected && (
+                <div className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 border border-pink-200 dark:border-pink-800 rounded-xl p-3 sm:p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-br from-pink-400 to-purple-600 rounded-full">
+                      <Instagram size={16} className="text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {igStatus.accountInfo?.username ? `@${igStatus.accountInfo.username}` : 'Instagram Business Account'}
+                      </p>
+                      {igStatus.accountInfo && (
+                        <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                          <span>👥 {igStatus.accountInfo.followers_count?.toLocaleString() || 'N/A'} followers</span>
+                          <span>📸 {igStatus.accountInfo.media_count || 'N/A'} posts</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Original Post Preview */}
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  Original Post
+                </label>
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">{igPublishModal.post.content}</p>
+                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                    {igPublishModal.post.platforms.map(pid => {
+                      const p = platforms.find(x => x.id === pid);
+                      return p ? (
+                        <span key={pid} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${p.bgLight} ${p.textColor}`}>
+                          {p.icon} {p.name}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Instagram Caption (editable) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <span className="text-pink-500">📝</span>
+                  Caption for Instagram
+                </label>
+                <div className="relative">
+                  <textarea
+                    value={igPublishCaption}
+                    onChange={e => setIgPublishCaption(e.target.value)}
+                    placeholder="Edit your caption for Instagram..."
+                    rows={3}
+                    maxLength={2200}
+                    className="w-full px-3 sm:px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none text-sm"
+                  />
+                  <div className="absolute bottom-2 right-2 text-xs text-gray-400">
+                    {igPublishCaption.length}/2200
+                  </div>
+                </div>
+              </div>
+
+              {/* Media for Instagram */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <span className="text-pink-500">📸</span>
+                  Media {igPublishMedia.length > 1 && <span className="text-xs text-gray-400 font-normal">({igPublishMedia.length} items — Carousel)</span>}
+                </label>
+
+                {/* Media grid preview */}
+                {igPublishMedia.length > 0 && (
+                  <div className={`grid gap-2 mb-3 ${igPublishMedia.length === 1 ? 'grid-cols-1' : igPublishMedia.length <= 3 ? 'grid-cols-3' : 'grid-cols-3 sm:grid-cols-5'}`}>
+                    {igPublishMedia.map((media, i) => (
+                      <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700">
+                        {media.type === 'VIDEO' ? (
+                          <div className="w-full h-full flex items-center justify-center relative">
+                            <img src={media.previewUrl || media.url} alt={`Media ${i + 1}`} className="w-full h-full object-cover opacity-70" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="p-2 bg-black/50 rounded-full">
+                                <Film size={20} className="text-white" />
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <img src={media.previewUrl || media.url} alt={`Media ${i + 1}`} className="w-full h-full object-cover" />
+                        )}
+                        <button
+                          onClick={() => removeIgPublishMedia(i)}
+                          className="absolute top-1 right-1 p-0.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        >
+                          <XCircle size={14} />
+                        </button>
+                        <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 text-white text-[10px] rounded-full backdrop-blur-sm">
+                          {media.type === 'VIDEO' ? '🎬 Video' : '📷 Photo'}
+                          {igPublishMedia.length > 1 && <span className="ml-1">#{i + 1}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Upload more media */}
+                <div className="flex flex-wrap gap-2">
+                  <label className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-pink-400 dark:hover:border-pink-500 hover:bg-pink-50/50 dark:hover:bg-pink-900/20 text-gray-700 dark:text-gray-300 cursor-pointer text-xs sm:text-sm transition-all">
+                    {uploadingMedia ? <Loader2 size={16} className="animate-spin text-pink-500" /> : <ImagePlus size={16} className="text-pink-400" />}
+                    <span className="font-medium">{uploadingMedia ? 'Uploading...' : igPublishMedia.length > 0 ? 'Add More Media' : 'Upload Media'}</span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+                      onChange={handleIgPublishMediaUpload}
+                      className="hidden"
+                      disabled={uploadingMedia}
+                    />
+                  </label>
+                  {igPublishMedia.length > 0 && (
+                    <button
+                      onClick={() => setIgPublishMedia([])}
+                      className="px-3 py-2 text-xs text-gray-500 hover:text-red-500 transition-colors"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+
+                {igPublishMedia.length === 0 && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    Instagram requires at least one image or video. Upload JPEG, PNG, WebP, or MP4 files.
+                  </p>
+                )}
+              </div>
+
+              {/* Publish Progress */}
+              {igPublishProgress.status === 'processing' && (
+                <div className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 border border-pink-200 dark:border-pink-800 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="relative">
+                      <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-full">
+                        <Loader2 size={16} className="text-pink-500 animate-spin" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Publishing...</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{igPublishProgress.step}</p>
+                    </div>
+                  </div>
+                  <div className="w-full bg-pink-100 dark:bg-pink-900/30 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-pink-500 to-purple-500 transition-all duration-500 ease-out"
+                      style={{ width: `${igPublishProgress.percent}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-1 text-[10px] text-gray-400">
+                    <span>Container</span>
+                    <span>Processing</span>
+                    <span>Published</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Publish Success */}
+              {igPublishProgress.status === 'success' && (
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
+                      <CheckCircle size={20} className="text-green-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-green-800 dark:text-green-200">Published successfully!</p>
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">{igPublishProgress.step}</p>
+                    </div>
+                  </div>
+                  {igPublishResult && (
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={closeIgPublishModal}
+                        className="flex-1 px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        Done
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Publish Error */}
+              {igPublishProgress.status === 'error' && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
+                      <XCircle size={20} className="text-red-500" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-red-800 dark:text-red-200">Publish failed</p>
+                      <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">{igPublishProgress.step}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() => {
+                        setIgPublishProgress({ step: '', percent: 0, status: 'idle' });
+                      }}
+                      className="flex-1 px-3 py-1.5 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Retry
+                    </button>
+                    <button
+                      onClick={closeIgPublishModal}
+                      className="px-3 py-1.5 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 text-xs rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons (shown when not processing) */}
+              {igPublishProgress.status === 'idle' && (
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
+                  <button
+                    onClick={closeIgPublishModal}
+                    className="w-full sm:w-auto px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm order-2 sm:order-1"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleIgPublishPost}
+                    disabled={igPublishMedia.length === 0}
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white rounded-lg hover:from-pink-600 hover:via-purple-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium shadow-lg shadow-pink-500/20 order-1 sm:order-2"
+                  >
+                    <Instagram size={16} />
+                    {igPublishMedia.length > 1 ? 'Publish Carousel to Instagram' : 'Publish to Instagram'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Instagram Analytics Section (when Instagram is connected) */}
+      {activeView === 'analytics' && igStatus?.connected && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <Instagram size={20} className="text-pink-500" />
+              Instagram Insights
+            </h3>
+            <button
+              onClick={fetchInstagramAnalytics}
+              disabled={igAnalyticsLoading}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/50 transition-colors"
+            >
+              <RefreshCw size={12} className={igAnalyticsLoading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+          </div>
+
+          {/* Account Info Card */}
+          {igStatus.accountInfo && (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-5 mb-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                {igStatus.accountInfo.profile_picture_url ? (
+                  <img
+                    src={igStatus.accountInfo.profile_picture_url}
+                    alt="Instagram Profile"
+                    className="w-16 h-16 rounded-full border-2 border-pink-400 object-cover"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center">
+                    <Instagram size={28} className="text-white" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                    @{igStatus.accountInfo.username || 'instagram'}
+                  </h4>
+                  {igStatus.accountInfo.name && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{igStatus.accountInfo.name}</p>
+                  )}
+                  <div className="flex items-center gap-4 sm:gap-6 mt-2">
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-gray-900 dark:text-white">
+                        {igStatus.accountInfo.followers_count?.toLocaleString() || '—'}
+                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Followers</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-gray-900 dark:text-white">
+                        {igStatus.accountInfo.media_count || '—'}
+                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Posts</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-gray-900 dark:text-white">{igRecentMedia.length}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recent</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Recent Media Grid */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div className="px-4 sm:px-5 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+              <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Recent Instagram Posts</h4>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Last 10 posts</span>
+            </div>
+            {igAnalyticsLoading ? (
+              <div className="p-8 text-center">
+                <Loader2 size={24} className="animate-spin text-pink-500 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">Loading Instagram data...</p>
+              </div>
+            ) : igRecentMedia.length === 0 ? (
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                <Instagram size={40} className="mx-auto mb-3 opacity-20" />
+                <p className="text-sm">No recent posts found. Publish your first post!</p>
+                <button
+                  onClick={() => setActiveView('dashboard')}
+                  className="mt-3 text-xs text-pink-600 hover:underline"
+                >
+                  ← Go to Posts
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-px bg-gray-200 dark:bg-gray-700">
+                {igRecentMedia.map((media) => (
+                  <div key={media.id} className="relative group aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                    {media.media_type === 'VIDEO' ? (
+                      <div className="w-full h-full relative">
+                        <img
+                          src={media.thumbnail_url || media.media_url}
+                          alt={media.caption || 'Instagram post'}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="p-2 bg-black/50 rounded-full">
+                            <Film size={20} className="text-white" />
+                          </div>
+                        </div>
+                      </div>
+                    ) : media.media_type === 'CAROUSEL_ALBUM' ? (
+                      <div className="w-full h-full relative">
+                        <img
+                          src={media.media_url}
+                          alt={media.caption || 'Instagram carousel'}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/50 text-white text-[10px] rounded-full">
+                          📑
+                        </div>
+                      </div>
+                    ) : (
+                      <img
+                        src={media.media_url}
+                        alt={media.caption || 'Instagram post'}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    {/* Hover overlay with stats */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                      {media.like_count !== undefined && (
+                        <span className="flex items-center gap-1 text-white text-xs">
+                          <Heart size={14} /> {media.like_count}
+                        </span>
+                      )}
+                      {media.comments_count !== undefined && (
+                        <span className="flex items-center gap-1 text-white text-xs">
+                          <MessageCircle size={14} /> {media.comments_count}
+                        </span>
+                      )}
+                    </div>
+                    {/* Caption tooltip */}
+                    {media.caption && (
+                      <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p className="text-white text-[10px] truncate">{media.caption}</p>
+                      </div>
+                    )}
+                    {/* Timestamp */}
+                    <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-black/50 text-white text-[9px] rounded-full backdrop-blur-sm">
+                      {new Date(media.timestamp).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -43,15 +43,22 @@ router.post('/webhook/:businessId', async (req: Request, res: Response) => {
     });
 
     if (!business || !business.waWebhookSecret) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: 'Unauthorized - webhook not configured' });
     }
 
-    // Handle verification (for Meta webhook setup)
+    // Handle verification (for Meta webhook setup) — GET request
     if (req.query['hub.verify_token']) {
       if (req.query['hub.verify_token'] === business.waWebhookSecret) {
         return res.send(req.query['hub.challenge']);
       }
       return res.status(403).send('Verification failed');
+    }
+
+    // For POST (incoming messages), verify webhook secret via query param or header
+    const requestSecret = (req.query['secret'] as string) || (req.headers['x-webhook-secret'] as string);
+    if (requestSecret && requestSecret !== business.waWebhookSecret) {
+      console.warn(`[WhatsApp] Rejected webhook with invalid secret for business ${businessId}`);
+      return res.status(403).json({ error: 'Invalid webhook secret' });
     }
 
     // Process incoming messages

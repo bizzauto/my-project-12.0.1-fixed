@@ -1,7 +1,7 @@
 
 import { Router, Request, Response } from 'express';
 import { prisma } from '../index.js';
-import { authenticate, AuthRequest } from '../middleware/auth.js';
+import { authenticate, AuthRequest, validateWebhook, generateWebhookSecret } from '../middleware/auth.js';
 import { LeadCaptureService } from '../services/lead-capture.service.js';
 import { WhatsAppService } from '../services/whatsapp.service.js';
 import { EmailService } from '../services/email.service.js';
@@ -21,8 +21,9 @@ const leadCaptureLimiter = rateLimit({
 /**
  * POST /api/leads/indiamart/:businessId
  * Capture lead from IndiaMART webhook
+ * Requires x-webhook-secret header
  */
-router.post('/indiamart/:businessId', leadCaptureLimiter, async (req: Request, res: Response) => {
+router.post('/indiamart/:businessId', leadCaptureLimiter, validateWebhook, async (req: Request, res: Response) => {
   try {
     const { businessId } = req.params as { businessId: string };
     const leadData = req.body;
@@ -60,8 +61,9 @@ router.post('/indiamart/:businessId', leadCaptureLimiter, async (req: Request, r
 /**
  * POST /api/leads/justdial/:businessId
  * Capture lead from JustDial webhook
+ * Requires x-webhook-secret header
  */
-router.post('/justdial/:businessId', leadCaptureLimiter, async (req: Request, res: Response) => {
+router.post('/justdial/:businessId', leadCaptureLimiter, validateWebhook, async (req: Request, res: Response) => {
   try {
     const { businessId } = req.params as { businessId: string };
     const leadData = req.body;
@@ -96,8 +98,9 @@ router.post('/justdial/:businessId', leadCaptureLimiter, async (req: Request, re
 /**
  * POST /api/leads/facebook/:businessId
  * Capture lead from Facebook Lead Ads webhook
+ * Requires x-webhook-secret header
  */
-router.post('/facebook/:businessId', leadCaptureLimiter, async (req: Request, res: Response) => {
+router.post('/facebook/:businessId', leadCaptureLimiter, validateWebhook, async (req: Request, res: Response) => {
   try {
     const { businessId } = req.params as { businessId: string };
     const leadData = req.body;
@@ -133,8 +136,9 @@ router.post('/facebook/:businessId', leadCaptureLimiter, async (req: Request, re
 /**
  * POST /api/leads/instagram/:businessId
  * Capture lead from Instagram Lead Ads webhook
+ * Requires x-webhook-secret header
  */
-router.post('/instagram/:businessId', leadCaptureLimiter, async (req: Request, res: Response) => {
+router.post('/instagram/:businessId', leadCaptureLimiter, validateWebhook, async (req: Request, res: Response) => {
   try {
     const { businessId } = req.params as { businessId: string };
     const leadData = req.body;
@@ -413,9 +417,16 @@ router.post('/export/excel', authenticate, async (req: AuthRequest, res: Respons
     const { leadIds } = req.body;
 
     const where: any = { businessId };
-    if (leadIds?.length) where.id = { in: leadIds };
+    if (leadIds?.length) where.id = { in: leadIds };      const contacts = await prisma.contact.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: 10000, // Max 10,000 rows per export
+      });
 
-    const contacts = await prisma.contact.findMany({ where, orderBy: { createdAt: 'desc' } });
+    res.setHeader('X-Total-Count', String(contacts.length));
+    if (contacts.length >= 10000) {
+      res.setHeader('X-Warning', 'Export limited to 10,000 rows. Filter your data for complete export.');
+    }
 
     // Simple CSV with xlsx extension (most spreadsheet apps handle this)
     const headers = ['Name', 'Phone', 'Email', 'Company', 'Location', 'Product', 'Supplier', 'Requirement', 'Source', 'Tags', 'Deal Value', 'Created At'];
@@ -542,6 +553,84 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     res.json({ success: true, message: 'Lead deleted' });
   } catch (error: any) {
     console.error('Delete lead error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * POST /api/leads/webhook-secret
+ * Generate or regenerate webhook secret for lead capture endpoints
+ * Requires authentication
+ */
+router.post('/webhook-secret', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const businessId = req.user.businessId;
+    if (!businessId || businessId === 'super-admin') {
+      return res.status(400).json({ success: false, error: 'Valid business required' });
+    }
+
+    const secret = generateWebhookSecret();
+
+    await prisma.business.update({
+      where: { id: businessId },
+      data: { leadWebhookSecret: secret },
+    });
+
+    // Log the action
+    await prisma.activity.create({
+      data: {
+        businessId,
+        type: 'webhook_secret_generated',
+        title: 'Lead webhook secret regenerated',
+        content: 'Webhook secret was regenerated for lead capture endpoints',
+        createdBy: req.user.id,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: 'Webhook secret generated. Previous webhook integrations will stop working.',
+      data: { secret },
+    });
+  } catch (error: any) {
+    console.error('Generate webhook secret error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/leads/webhook-secret
+ * Get current webhook secret (masked)
+ * Requires authentication
+ */
+router.get('/webhook-secret', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const businessId = req.user.businessId;
+    if (!businessId || businessId === 'super-admin') {
+      return res.status(400).json({ success: false, error: 'Valid business required' });
+    }
+
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: { leadWebhookSecret: true },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        secret: business?.leadWebhookSecret || null,
+        isConfigured: !!business?.leadWebhookSecret,
+        endpoints: [
+          { platform: 'IndiaMART', url: `/api/leads/indiamart/${businessId}` },
+          { platform: 'JustDial', url: `/api/leads/justdial/${businessId}` },
+          { platform: 'Facebook Lead Ads', url: `/api/leads/facebook/${businessId}` },
+          { platform: 'Instagram Lead Ads', url: `/api/leads/instagram/${businessId}` },
+          { platform: 'Website Form', url: `/api/leads/capture/${businessId}` },
+        ],
+      },
+    });
+  } catch (error: any) {
+    console.error('Get webhook secret error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

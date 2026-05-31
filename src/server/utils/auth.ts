@@ -11,14 +11,65 @@ if (!JWT_SECRET) {
     console.error(msg + ' Server cannot start in production without a JWT_SECRET.');
     process.exit(1);
   }
-  console.warn('WARNING: ' + msg + ' Using insecure fallback for development only!');
+  // Dev mode: use a file-based secret so it persists across restarts
+  console.warn('WARNING: ' + msg + ' Generating persistent dev secret from hostname + project path.');
 }
-const DEV_JWT_FALLBACK = 'dev-jwt-secret-do-not-use-in-production';
+
+/**
+ * Get a deterministic dev fallback for JWT_SECRET
+ * Uses machine hostname + project path to generate a consistent key
+ * This ensures tokens don't invalidate on restart during development
+ */
+function getDevJwtSecret(): string {
+  const os = require('os');
+  const path = require('path');
+  const seed = os.hostname() + '__' + __dirname;
+  // Generate a 32-char hex from the seed
+  return crypto.createHash('sha256').update(seed).digest('hex').slice(0, 32);
+}
+const DEV_JWT_FALLBACK = getDevJwtSecret();
 
 // ── ENCRYPTION_KEY (AES-256) ──
-// In production, this MUST be set. In dev, generate a stable fallback once at module load.
+// In production, this MUST be set. In dev, persist to .encryption.key file so encrypted data survives restarts.
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 let DEV_ENC_FALLBACK: string | undefined;
+
+function loadOrGenerateDevEncryptionKey(): string {
+  const fs = require('fs');
+  const path = require('path');
+  const keyFile = path.resolve(process.cwd(), '.encryption.key');
+
+  try {
+    if (fs.existsSync(keyFile)) {
+      const existing = fs.readFileSync(keyFile, 'utf8').trim();
+      if (existing.length === 64) {
+        console.log('[Auth] Loaded existing encryption key from .encryption.key');
+        return existing;
+      }
+      console.warn('[Auth] Existing .encryption.key is invalid, generating new one...');
+    }
+  } catch (e) {
+    // Ignore - will generate new
+  }
+
+  const newKey = crypto.randomBytes(32).toString('hex');
+  try {
+    fs.writeFileSync(keyFile, newKey, 'utf8');
+    console.log('[Auth] Generated new encryption key → .encryption.key (DO NOT COMMIT)');
+    // Add to .gitignore if not already there
+    const gitignorePath = path.resolve(process.cwd(), '.gitignore');
+    if (fs.existsSync(gitignorePath)) {
+      let gitignore = fs.readFileSync(gitignorePath, 'utf8');
+      if (!gitignore.includes('.encryption.key')) {
+        fs.writeFileSync(gitignorePath, gitignore + '\n# Dev encryption key (auto-generated)\n.encryption.key\n', 'utf8');
+      }
+    }
+  } catch (e) {
+    console.warn('[Auth] Could not persist encryption key to file. Data will be lost on restart.');
+  }
+  return newKey;
+}
+
 if (!ENCRYPTION_KEY) {
   const isProd = process.env.NODE_ENV === 'production';
   const msg = `CRITICAL: ENCRYPTION_KEY environment variable is not set.`;
@@ -26,8 +77,7 @@ if (!ENCRYPTION_KEY) {
     console.error(msg + ' Server cannot start in production without an ENCRYPTION_KEY.');
     process.exit(1);
   }
-  DEV_ENC_FALLBACK = crypto.randomBytes(32).toString('hex');
-  console.warn('WARNING: ' + msg + ' Using auto-generated key for development only! Encrypted data will be lost on restart.');
+  DEV_ENC_FALLBACK = loadOrGenerateDevEncryptionKey();
 }
 function getEncryptionKey(): string {
   return ENCRYPTION_KEY || DEV_ENC_FALLBACK!;
