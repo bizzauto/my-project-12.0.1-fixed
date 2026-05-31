@@ -185,21 +185,25 @@ router.post('/debug-emails', authenticate, async (req: any, res: Response) => {
           console.log(`[Debug] INBOX opened. Total: ${box.messages.total}`);
 
           const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-          imap.search([['SINCE', since]], (err, results) => {
+          // Search for IndiaMART emails specifically
+          imap.search([
+            ['SINCE', since],
+            ['FROM', 'indiamart.com'],
+          ], (err, results) => {
             if (err) {
               console.log('[Debug] Search error:', err.message);
               safeResolve({ error: err.message });
               return;
             }
 
-            console.log(`[Debug] Found ${results ? results.length : 0} emails`);
+            console.log(`[Debug] Found ${results ? results.length : 0} IndiaMART emails`);
 
             if (!results || results.length === 0) {
               safeResolve({ totalEmails: box.messages.total, found: 0, emails: [] });
               return;
             }
 
-            const toFetch = results.slice(-3);
+            const toFetch = results.slice(-10);
             const fetch = imap.fetch(toFetch, { bodies: '' });
             const emails: any[] = [];
             const parsePromises: Promise<void>[] = [];
@@ -207,10 +211,20 @@ router.post('/debug-emails', authenticate, async (req: any, res: Response) => {
             fetch.on('message', (msg) => {
               msg.on('body', (stream) => {
                 const p = simpleParser(stream).then((parsed: any) => {
+                  const text = parsed.text || '';
+                  const html = parsed.html || '';
+                  const fromEmail = parsed.from?.value?.[0]?.address || '';
                   emails.push({
                     from: parsed.from?.text || '',
+                    fromEmail,
                     subject: parsed.subject || '',
-                    textPreview: (parsed.text || '').substring(0, 1000),
+                    date: parsed.date,
+                    hasPhone: /\d{10}/.test(text),
+                    hasTemplate: text.includes('{{.'),
+                    textLength: text.length,
+                    htmlLength: html.length,
+                    textPreview: text.substring(0, 2000),
+                    htmlPreview: html.substring(0, 2000),
                   });
                 }).catch(() => {});
                 parsePromises.push(p);
