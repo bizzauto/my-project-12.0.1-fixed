@@ -30,11 +30,20 @@ import CRMPage from './components/CRMPage';
 import LeadGenerationPage from './components/LeadGenerationPage';
 import AppointmentsPage from './components/AppointmentsPage';
 import ECommercePage from './components/ECommercePage';
+import PublicStorefront from './components/PublicStorefront';
+import CheckoutPage from './components/CheckoutPage';
+import OrderTrackingPage from './components/OrderTrackingPage';
+import StoreSharePage from './components/StoreSharePage';
+import SalesAnalyticsPage from './components/SalesAnalyticsPage';
+import CustomerAccountPage from './components/CustomerAccountPage';
+import BulkImportExport from './components/BulkImportExport';
+import ShippingSettings from './components/ShippingSettings';
 import DocumentsPage from './components/DocumentsPage';
 import SocialMediaPage from './components/SocialMediaPage';
 import GoogleBusinessPage from './components/GoogleBusinessPage';
 import AIChatbotPage from './components/AIChatbotPage';
 import VoiceCallPage from './components/VoiceCallPage';
+import DograhSettings from './components/DograhSettings';
 import CreativeGeneratorPage from './components/CreativeGeneratorPage';
 import AutomationPage from './components/AutomationPage';
 import ReportsPage from './components/ReportsPage';
@@ -210,6 +219,56 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route path="/store" element={<PublicStorefront />} />
+      <Route path="/store/:businessId" element={<PublicStorefront />} />
+      <Route path="/checkout" element={
+        <ProtectedRoute>
+          <CheckoutPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/order-tracking" element={
+        <ProtectedRoute>
+          <OrderTrackingPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/order-tracking/:orderNumber" element={
+        <ProtectedRoute>
+          <OrderTrackingPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/store-share" element={
+        <ProtectedRoute>
+          <AuthLayout>
+            <StoreSharePage />
+          </AuthLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/analytics" element={
+        <ProtectedRoute>
+          <AuthLayout>
+            <SalesAnalyticsPage />
+          </AuthLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/my-account" element={
+        <ProtectedRoute>
+          <CustomerAccountPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/bulk-import" element={
+        <ProtectedRoute>
+          <AuthLayout>
+            <BulkImportExport />
+          </AuthLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/shipping-settings" element={
+        <ProtectedRoute>
+          <AuthLayout>
+            <ShippingSettings />
+          </AuthLayout>
+        </ProtectedRoute>
+      } />
       <Route
         path="/documents"
         element={
@@ -476,6 +535,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AuthLayout>
               <MissedCallSettings />
+            </AuthLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dograh-settings"
+        element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <DograhSettings />
             </AuthLayout>
           </ProtectedRoute>
         }

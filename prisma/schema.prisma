@@ -119,6 +119,14 @@ model Business {
   aiCreditsLimit     Int @default(100)
   aiCreditsPurchased Int @default(0)
 
+  // Dograh Voice AI
+  dograhApiKey        String?
+  dograhApiUrl        String?
+  dograhEnabled       Boolean    @default(false)
+  dograhWebhookSecret String?
+  dograhDefaultAgentId Int?
+  telephonyProvider   String    @default("twilio") // "twilio" | "plivo" | "browser_only"
+
   // Relations
   users        User[]
   contacts     Contact[]
@@ -184,6 +192,18 @@ model Business {
   whatsappCatalogs    WhatsAppCatalog[]
   videoMeetings       VideoMeeting[]
   supportTickets      SupportTicket[]
+  callLogs            CallLog[]
+  wallet              Wallet?
+  carts               Cart[]
+  productReviews  ProductReview[]
+  wishlists       Wishlist[]
+  stockAlerts     StockAlert[]
+  shippingRules   ShippingRule[]
+  productBundles     ProductBundle[]
+  flashSales         FlashSale[]
+  giftCards          GiftCard[]
+  returnRequests     ReturnRequest[]
+  subscriptionPlans SubscriptionPlan[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -307,10 +327,17 @@ model Contact {
   cartRecoveries CartRecovery[]
   appointmentReminders AppointmentReminder[]
   loyaltyPoints LoyaltyPoints[]
+  callLogs     CallLog[]
   referredBy    Referral[] @relation("Referrer")
   referredUsers Referral[] @relation("Referee")
   aiFollowUps   AIFollowUp[]
   supportTickets SupportTicket[]
+  productReviews ProductReview[]
+  wishlists      Wishlist[]
+  stockAlerts    StockAlert[]
+  addresses         CustomerAddress[]
+  subscriptions     CustomerSubscription[]
+  returnRequests    ReturnRequest[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -600,8 +627,15 @@ model Product {
   wooCommerceId String?
 
   // Relations
-  variants ProductVariant[]
-  orders   OrderItem[]
+  variants  ProductVariant[]
+  orders    OrderItem[]
+  cartItems CartItem[]
+  reviews     ProductReview[]
+  wishlist    Wishlist[]
+  stockAlerts StockAlert[]
+  bundleItems     BundleItem[]
+  subscriptionPlan SubscriptionPlan?
+  recentlyViewed  RecentlyViewed[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -644,6 +678,10 @@ model Order {
   // Items
   items OrderItem[]
 
+  bundleId    String?
+  bundle      ProductBundle? @relation(fields: [bundleId], references: [id])
+  returnRequest ReturnRequest?
+
   // Shipping
   shippingAddress Json?
 
@@ -676,6 +714,341 @@ model OrderItem {
   total    Float
 
   @@index([orderId])
+}
+
+// ==================== CART ====================
+
+model Cart {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  contactId  String   // user or contact id
+
+  status String @default("active") // active, checked_out, abandoned
+
+  items CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([businessId, contactId])
+  @@index([businessId])
+  @@index([contactId])
+}
+
+model CartItem {
+  id     String @id @default(cuid())
+  cartId String
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  variantId   String?
+  variantName String?
+  variantPrice Float?
+
+  quantity Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cartId])
+  @@index([productId])
+}
+
+// ==================== PRODUCT REVIEWS ====================
+
+model ProductReview {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  contactId  String?
+  contact    Contact? @relation(fields: [contactId], references: [id])
+
+  customerName String
+  customerEmail String?
+  rating       Int      // 1-5
+  title        String?
+  comment      String?
+  isVerified   Boolean  @default(false) // purchased product
+  isApproved   Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([businessId])
+  @@index([rating])
+}
+
+// ==================== WISHLIST ====================
+
+model Wishlist {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  contactId  String
+  contact    Contact? @relation(fields: [contactId], references: [id])
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([contactId, productId])
+  @@index([contactId])
+  @@index([productId])
+}
+
+// ==================== STOCK ALERTS ====================
+
+model StockAlert {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  contactId  String?
+  contact    Contact? @relation(fields: [contactId], references: [id])
+
+  customerEmail String
+  customerPhone String?
+  status        String   @default("pending") // pending, notified, failed
+  notifiedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([businessId])
+  @@index([status])
+}
+
+// ==================== SHIPPING RULES ====================
+
+model ShippingRule {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+
+  name           String
+  minOrderAmount Float    @default(0)
+  maxOrderAmount Float?
+  shippingFee    Float    @default(0)
+  freeAbove     Float?   // free shipping above this amount
+  pincodePrefixes String[] // e.g., ["400", "401"] for Mumbai
+  states         String[]  // e.g., ["Maharashtra", "Karnataka"]
+  isActive       Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+// ==================== PRODUCT BUNDLES ====================
+
+model ProductBundle {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+
+  name        String
+  description String?
+  discountType  String  @default("percentage") // percentage, fixed
+  discountValue Float @default(0)
+  isActive      Boolean @default(true)
+
+  items  BundleItem[]
+  orders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+model BundleItem {
+  id         String  @id @default(cuid())
+  bundleId   String
+  bundle     ProductBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product @relation(fields: [productId], references: [id])
+  quantity   Int     @default(1)
+
+  @@index([bundleId])
+  @@index([productId])
+}
+
+// ==================== FLASH SALES ====================
+
+model FlashSale {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+
+  name         String
+  discountType  String  @default("percentage") // percentage, fixed
+  discountValue Float
+  startsAt     DateTime
+  endsAt       DateTime
+  isActive     Boolean @default(true)
+  productIds   String[] // products on sale
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+  @@index([startsAt, endsAt])
+}
+
+// ==================== GIFT CARDS ====================
+
+model GiftCard {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+
+  code        String   @unique
+  amount      Float
+  balance     Float    // remaining balance
+  purchaserContactId String?
+  recipientName  String?
+  recipientEmail String?
+  recipientPhone String?
+  message     String?
+  status      String   @default("active") // active, used, expired
+  expiresAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+  @@index([code])
+  @@index([status])
+}
+
+// ==================== RECENTLY VIEWED ====================
+
+model RecentlyViewed {
+  id         String   @id @default(cuid())
+  contactId  String
+  productId  String
+  product    Product @relation(fields: [productId], references: [id])
+  viewCount  Int     @default(1)
+  viewedAt   DateTime @default(now())
+
+  @@unique([contactId, productId])
+  @@index([contactId])
+  @@index([viewedAt])
+}
+
+// ==================== PRODUCT COMPARISON ====================
+
+model ProductComparison {
+  id         String   @id @default(cuid())
+  sessionId  String   // browser session
+  productIds String[] // up to 4 products to compare
+  createdAt  DateTime @default(now())
+
+  @@index([sessionId])
+}
+
+// ==================== MULTIPLE ADDRESSES ====================
+
+model CustomerAddress {
+  id         String   @id @default(cuid())
+  contactId  String
+  contact    Contact? @relation(fields: [contactId], references: [id])
+  businessId String
+
+  label       String  @default("Home") // Home, Office, Other
+  name        String
+  phone       String
+  email       String?
+  address     String
+  city        String
+  state       String
+  pincode     String
+  country     String  @default("India")
+  isDefault   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([businessId])
+}
+
+// ==================== RETURN / REFUND ====================
+
+model ReturnRequest {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  orderId    String   @unique
+  order      Order    @relation(fields: [orderId], references: [id])
+  contactId  String?
+  contact    Contact? @relation(fields: [contactId], references: [id])
+
+  reason      String
+  description String?
+  status      String   @default("pending") // pending, approved, rejected, completed
+  refundAmount Float?
+  refundMethod String?  // original, store_credit
+  images      String[] // customer uploaded images
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([businessId])
+  @@index([status])
+}
+
+// ==================== SUBSCRIPTION PRODUCTS ====================
+
+model SubscriptionPlan {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+
+  name         String
+  description  String?
+  interval     String  @default("monthly") // weekly, monthly, quarterly, yearly
+  price        Float
+  productId    String?  @unique
+  product      Product? @relation(fields: [productId], references: [id])
+  isActive     Boolean @default(true)
+  maxSubscribers Int?
+
+  subscriptions CustomerSubscription[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+model CustomerSubscription {
+  id              String   @id @default(cuid())
+  businessId      String
+  planId          String
+  plan            SubscriptionPlan @relation(fields: [planId], references: [id])
+  contactId       String
+  contact         Contact? @relation(fields: [contactId], references: [id])
+
+  status          String   @default("active") // active, paused, cancelled, expired
+  nextBillingDate DateTime?
+  lastBillingDate DateTime?
+  razorpaySubId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+  @@index([contactId])
+  @@index([status])
 }
 
 // ==================== LEDGER / ACCOUNTING ====================
@@ -2210,4 +2583,123 @@ model TicketReply {
   isInternal      Boolean  @default(false) // internal notes not visible to customer
   createdAt       DateTime @default(now())
   @@index([ticketId])
+}
+
+// ==================== VOICE AI (DOGRAH) ====================
+
+model CallLog {
+  id              String    @id @default(cuid())
+  businessId      String
+  business        Business  @relation(fields: [businessId], references: [id])
+  contactId       String?
+  contact         Contact?  @relation(fields: [contactId], references: [id])
+
+  dograhRunId     String?   @unique
+  workflowId      Int?
+  workflowName    String?
+
+  direction       String              // "inbound" | "outbound"
+  status          String    @default("completed") // ringing, active, completed, failed, missed
+  callType        String    @default("phone")     // "phone" | "browser"
+  callerNumber    String
+  calleeNumber    String?
+
+  duration        Int       @default(0)  // seconds
+  recordingUrl    String?
+  transcript      String?
+  transcriptUrl   String?
+
+  costInfo        Json?
+  gatheredContext Json?
+  annotations     Json?
+
+  startedAt       DateTime?
+  endedAt         DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  walletTransactions WalletTransaction[]
+
+  @@index([businessId])
+  @@index([businessId, contactId])
+  @@index([businessId, createdAt])
+  @@index([dograhRunId])
+}
+
+// ==================== WALLET & BILLING ====================
+
+model Wallet {
+  id          String   @id @default(cuid())
+  businessId  String   @unique
+  business    Business @relation(fields: [businessId], references: [id])
+
+  balance     Float    @default(0)  // Current balance in INR
+  currency    String   @default("INR")
+
+  // Limits
+  lowBalanceThreshold Float @default(50)  // Alert when below this
+
+  // Stats
+  totalRecharged   Float @default(0)
+  totalSpent       Float @default(0)
+  totalMarginPaid  Float @default(0)  // 10% margin to platform
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions WalletTransaction[]
+
+  @@index([businessId])
+}
+
+model WalletTransaction {
+  id          String   @id @default(cuid())
+  walletId    String
+  wallet      Wallet   @relation(fields: [walletId], references: [id])
+  businessId  String   // Denormalized for fast queries
+
+  type        String   // "recharge" | "call_deduction" | "refund" | "adjustment"
+  amount      Float    // Positive = credit, Negative = debit
+  balance     Float    // Balance after this transaction
+
+  // For call deductions
+  callLogId   String?
+  callLog     CallLog? @relation(fields: [callLogId], references: [id])
+
+  // Details
+  description String
+  metadata    Json?    // Twilio cost, duration, phone number, etc.
+
+  // Payment details (for recharges)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([walletId])
+  @@index([businessId])
+  @@index([businessId, createdAt])
+  @@index([type])
+}
+
+model PlatformEarning {
+  id          String   @id @default(cuid())
+  businessId  String   // Which business generated this
+  walletTxnId String   // Related wallet transaction
+
+  twilioCost      Float  // Original Twilio charge
+  platformMargin  Float  // Your 10% cut
+  totalCharged    Float  // What customer paid
+
+  type         String   // "call_margin" | "sms_margin"
+  callLogId    String?
+
+  status       String   @default("pending") // pending, settled
+  settledAt    DateTime?
+
+  createdAt    DateTime @default(now())
+
+  @@index([businessId])
+  @@index([createdAt])
+  @@index([status])
 }

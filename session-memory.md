@@ -1,6 +1,6 @@
 # Session Memory
 
-> **Last Updated:** May 30, 2026  
+> **Last Updated:** May 31, 2026  
 > **Next Session Prompt:** "session-memory.md padho aur wahan se continue karo"
 
 ---
@@ -107,6 +107,35 @@ ssh -o StrictHostKeyChecking=no -i /tmp/codebuff_vps_key root@87.76.169.6 'docke
 ssh -o StrictHostKeyChecking=no -i /tmp/codebuff_vps_key root@87.76.169.6 'docker exec wxxl6hhh02j9yf7m3u8452qo-172327323448 sh -c "rm -rf /app/dist && mkdir -p /app/dist && cd /app/dist && tar -xzf /tmp/bizzauto-dist.tar.gz && rm -f /tmp/bizzauto-dist.tar.gz"'
 ssh -o StrictHostKeyChecking=no -i /tmp/codebuff_vps_key root@87.76.169.6 'docker restart wxxl6hhh02j9yf7m3u8452qo-172327323448'
 ```
+
+---
+
+## 🎙️ Dograh Voice AI Integration
+
+### Status: Using Cloud (VPS CPU Incompatible)
+- VPS CPU (Common KVM processor) only supports SSE/SSE2
+- numpy 2.4.6 requires X86_V2 (SSE4.2+) — numpy 2.x hard-redirects SSE→X86_V2
+- All rebuild attempts (`cpu-baseline=min`, `disable-optimization=true`) failed
+- **Solution**: Dograh Cloud (api.dograh.com) until CPU is fixed
+
+### Traefik Reverse Proxy (Ready)
+- `voice.bizzautoai.com` → `https://api.dograh.com` (Traefik config loaded)
+- ⚠️ **DNS A record NOT set** — add `voice.bizzautoai.com` → `87.76.169.6`
+- Old Docker containers cleaned from VPS
+
+### What User Needs To Do
+1. Sign up at https://app.dograh.com
+2. Settings → API Keys → Create Key
+3. In IndiaCRM: Settings → Voice AI → configure API URL (`https://api.dograh.com`) + API Key
+4. Add DNS A record for `voice.bizzautoai.com`
+5. Later: change VPS CPU to "host" mode via provider, then switch back to self-hosted
+
+### Code Ready
+- Prisma schema: CallLog, Wallet, WalletTransaction, PlatformEarning + Business dograh fields
+- `src/server/services/dograh.service.ts`: Full Dograh API client
+- `src/server/routes/voice-calls.ts`, `dograh-webhook.ts`, `wallet.ts`
+- `src/components/VoiceCallPage.tsx`, `DograhSettings.tsx`, `WalletWidget.tsx`, `WalletHistory.tsx`, `PlatformEarnings.tsx`
+- `.env`: Updated with Dograh Cloud defaults
 
 ---
 

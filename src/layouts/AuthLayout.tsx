@@ -7,7 +7,7 @@ import {
   Zap, UserPlus, MapPin, Bot, PhoneCall,
   ShoppingCart, FileText, Clock, MoreVertical, Share2, Moon, Sun, Menu, X, Mail,
   Workflow, Link, GraduationCap, MessageCircle, FormInput, PenTool,
-  CreditCard, Building2, PhoneOff, Camera, Upload
+  CreditCard, Building2, PhoneOff, Camera, Upload, Store
 } from 'lucide-react';
 import { useAuthStore } from '../lib/authStore';
 import { useThemeStore } from '../lib/themeStore';
@@ -20,6 +20,7 @@ interface MenuItem {
   icon: React.ReactNode;
   badge?: number;
   roles?: string[];
+  isExternal?: boolean;
 }
 
 const menuItems: MenuItem[] = [
@@ -29,6 +30,7 @@ const menuItems: MenuItem[] = [
   { id: '/leads', label: 'Leads', icon: <UserPlus size={20} /> },
   { id: '/appointments', label: 'Appointments', icon: <Clock size={20} /> },
   { id: '/ecommerce', label: 'E-Commerce', icon: <ShoppingCart size={20} /> },
+  { id: '/store', label: 'Store', icon: <Store size={20} />, isExternal: true },
   { id: '/email-marketing', label: 'Email Marketing', icon: <Mail size={20} /> },
   { id: '/documents', label: 'Documents', icon: <FileText size={20} /> },
   { id: '/social', label: 'Social Media', icon: <span className="text-xl">📱</span> },
@@ -76,6 +78,7 @@ const settingsMenuItems: MenuItem[] = [
   { id: '/client-portal', label: 'Client Portal', icon: <Building2 size={20} /> },
   { id: '/agency', label: 'Agency', icon: <Users size={20} /> },
   { id: '/missed-call-settings', label: 'Missed Call', icon: <PhoneOff size={20} /> },
+  { id: '/dograh-settings', label: 'Voice AI', icon: <Bot size={20} /> },
   { id: '/snapshots', label: 'Snapshots', icon: <Camera size={20} /> },
   { id: '/profile', label: 'Profile', icon: <Shield size={20} /> },
   { id: '/settings', label: 'Settings', icon: <Settings size={20} /> },
@@ -476,7 +479,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                   {section.items.map((item) => (
                     <button
                       key={item.id}
-                      onClick={() => navigate(item.id)}
+              onClick={() => item.isExternal ? window.open(item.id, '_blank') : navigate(item.id)}
                       className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
                         isActive(item.id)
                           ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'

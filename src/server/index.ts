@@ -64,6 +64,13 @@ import liveChatRoutes from './routes/live-chat.js';
 import referralsRoutes from './routes/referrals.js';
 import videoMeetingsRoutes from './routes/video-meetings.js';
 import supportTicketsRoutes from './routes/support-tickets.js';
+import voiceCallsRoutes from './routes/voice-calls.js';
+import dograhWebhookRoutes from './routes/dograh-webhook.js';
+import walletRoutes from './routes/wallet.js';
+import loyaltyRoutes from './routes/loyalty.js';
+import storePublicRoutes from './routes/store-public.js';
+import storeFeaturesRoutes from './routes/store-features.js';
+import storeAdvancedRoutes from './routes/store-advanced.js';
 import { securityHeaders, apiSecurityHeaders } from './middleware/security.js';
 
 dotenv.config();
@@ -162,6 +169,9 @@ const globalApiLimiter = rateLimit({
 app.use('/api', globalApiLimiter);
 
 // API Routes
+
+// Public store routes (no auth required)
+app.use('/api/store', storePublicRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/analytics', analyticsRoutes);
@@ -214,6 +224,12 @@ app.use('/api/live-chat', liveChatRoutes);
 app.use('/api/referrals', referralsRoutes);
 app.use('/api/video-meetings', videoMeetingsRoutes);
 app.use('/api/support-tickets', supportTicketsRoutes);
+app.use('/api/voice-calls', voiceCallsRoutes);
+app.use('/api/dograh/webhook', dograhWebhookRoutes);
+app.use('/api/wallet', walletRoutes);
+app.use('/api/loyalty', loyaltyRoutes);
+app.use('/api/store-features', storeFeaturesRoutes);
+app.use('/api/store-advanced', storeAdvancedRoutes);
 
 // Test endpoints (development only)
 if (NODE_ENV !== 'production') {

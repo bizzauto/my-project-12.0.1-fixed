@@ -456,4 +456,34 @@ export const customFieldsAPI = {
     apiClient.post(`/custom-fields/entity/${entityType}/values`, { entityId, values }),
 };
 
+// Voice Calls API (Dograh)
+export const voiceCallsAPI = {
+  list: (params?: any) => apiClient.get('/voice-calls', { params }),
+  getStats: (params?: any) => apiClient.get('/voice-calls/stats', { params }),
+  get: (id: string) => apiClient.get(`/voice-calls/${id}`),
+  dial: (data: { phoneNumber?: string; contactId?: string; workflowId?: number; callType: 'phone' | 'browser'; context?: any }) =>
+    apiClient.post('/voice-calls/dial', data),
+  getAgents: () => apiClient.get('/voice-calls/agents'),
+  getSettings: () => apiClient.get('/voice-calls/settings'),
+  updateSettings: (data: any) => apiClient.put('/voice-calls/settings', data),
+  checkConnection: () => apiClient.get('/voice-calls/check'),
+};
+
+// Wallet API
+export const walletAPI = {
+  get: () => apiClient.get('/wallet'),
+  getTransactions: (params?: any) => apiClient.get('/wallet/transactions', { params }),
+  recharge: (data: { amount: number }) => apiClient.post('/wallet/recharge', data),
+  verifyRecharge: (data: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; amount: number }) =>
+    apiClient.post('/wallet/recharge/verify', data),
+  balanceCheck: (estimatedMinutes?: number) =>
+    apiClient.get('/wallet/balance-check', { params: { estimatedMinutes } }),
+  updateThreshold: (threshold: number) =>
+    apiClient.put('/wallet/threshold', { threshold }),
+  getEarnings: (params?: any) => apiClient.get('/wallet/earnings', { params }),
+  getEarningsByBusiness: () => apiClient.get('/wallet/earnings/by-business'),
+  settleEarnings: (earningIds: string[]) =>
+    apiClient.post('/wallet/earnings/settle', { earningIds }),
+};
+
 export default apiClient;
