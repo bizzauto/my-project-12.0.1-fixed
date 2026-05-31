@@ -71,6 +71,7 @@ import loyaltyRoutes from './routes/loyalty.js';
 import storePublicRoutes from './routes/store-public.js';
 import storeFeaturesRoutes from './routes/store-features.js';
 import storeAdvancedRoutes from './routes/store-advanced.js';
+import storeCustomizeRoutes from './routes/store-customize.js';
 import { securityHeaders, apiSecurityHeaders } from './middleware/security.js';
 
 dotenv.config();
@@ -230,6 +231,7 @@ app.use('/api/wallet', walletRoutes);
 app.use('/api/loyalty', loyaltyRoutes);
 app.use('/api/store-features', storeFeaturesRoutes);
 app.use('/api/store-advanced', storeAdvancedRoutes);
+app.use('/api/store-customize', storeCustomizeRoutes);
 
 // Test endpoints (development only)
 if (NODE_ENV !== 'production') {
