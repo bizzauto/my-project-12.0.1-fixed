@@ -202,25 +202,29 @@ router.post('/debug-emails', authenticate, async (req: any, res: Response) => {
             const toFetch = results.slice(-3);
             const fetch = imap.fetch(toFetch, { bodies: '' });
             const emails: any[] = [];
+            const parsePromises: Promise<void>[] = [];
 
             fetch.on('message', (msg) => {
               msg.on('body', (stream) => {
-                simpleParser(stream).then((parsed: any) => {
+                const p = simpleParser(stream).then((parsed: any) => {
                   emails.push({
                     from: parsed.from?.text || '',
                     subject: parsed.subject || '',
                     textPreview: (parsed.text || '').substring(0, 1000),
                   });
                 }).catch(() => {});
+                parsePromises.push(p);
               });
             });
 
             fetch.once('end', () => {
-              console.log(`[Debug] Fetched ${emails.length} emails`);
-              safeResolve({
-                totalEmails: box.messages.total,
-                found: results.length,
-                emails: emails,
+              Promise.all(parsePromises).then(() => {
+                console.log(`[Debug] Fetched ${emails.length} emails`);
+                safeResolve({
+                  totalEmails: box.messages.total,
+                  found: results.length,
+                  emails: emails,
+                });
               });
             });
           });
@@ -331,10 +335,11 @@ router.post('/test-gmail', authenticate, async (req: any, res: Response) => {
             const toFetch = results.slice(-5);
             const fetch = imap.fetch(toFetch, { bodies: '' });
             const emails: any[] = [];
+            const parsePromises: Promise<void>[] = [];
 
             fetch.on('message', (msg) => {
               msg.on('body', (stream) => {
-                          simpleParser(stream)
+                const p = simpleParser(stream)
                   .then((parsed: any) => {
                     emails.push({
                       from: parsed.from?.text || '',
@@ -344,18 +349,21 @@ router.post('/test-gmail', authenticate, async (req: any, res: Response) => {
                     });
                   })
                   .catch(() => {});
+                parsePromises.push(p);
               });
             });
 
             fetch.once('end', () => {
-              console.log(`[TestGmail] Sample emails:`, emails);
-              safeResolve({
-                success: true,
-                connected: true,
-                totalEmails: box.messages.total,
-                recentEmails: results.length,
-                sampleEmails: emails,
-                message: `Found ${results.length} emails. ${emails.length} sampled.`
+              Promise.all(parsePromises).then(() => {
+                console.log(`[TestGmail] Sample emails:`, emails);
+                safeResolve({
+                  success: true,
+                  connected: true,
+                  totalEmails: box.messages.total,
+                  recentEmails: results.length,
+                  sampleEmails: emails,
+                  message: `Found ${results.length} emails. ${emails.length} sampled.`
+                });
               });
             });
 
