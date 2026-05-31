@@ -41,20 +41,24 @@ export class EmailLeadService {
     const result: ParsedLead = { name: '', phone: '', email: '', product: '', requirement: '', city: '', source: 'indiamart' };
 
     // Name - multiple patterns for IndiaMART format
+    // Order matters: more specific patterns first, generic last
     const namePatterns = [
-      /(?:Dear\s+)?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
-      /Query\s+from\s+([^\n]+)/i,
+      // Pattern for 'Buyer\'s Contact Details:' format (actual IndiaMART email)
+      /Buyer'?s Contact Details:[\s\S]*?\n([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\n/i,
       /Buyer\s+Name[:\s]*([^\n]+)/i,
       /Customer\s+Name[:\s]*([^\n]+)/i,
       /Contact\s+Person[:\s]*([^\n]+)/i,
       /Enquiry\s+from[:\s]*([^\n]+)/i,
+      /Query\s+from\s+([^\n]+)/i,
       /Hi[,!\s]+([A-Z][a-z]+)/i,
+      // Generic fallback - last resort
+      /(?:Dear\s+)?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
     ];
     for (const pattern of namePatterns) {
       const match = content.match(pattern);
       if (match && match[1]) {
         const name = match[1].trim();
-        if (name.length > 2 && name.length < 50 && !name.toLowerCase().includes('indiamart')) {
+        if (name.length > 2 && name.length < 50 && !name.toLowerCase().includes('indiamart') && name.toLowerCase() !== 'india') {
           result.name = name;
           break;
         }
@@ -95,6 +99,8 @@ export class EmailLeadService {
 
     // Product - multiple patterns
     const productPatterns = [
+      // 'Buylead Details:' format (actual IndiaMART email)
+      /Buylead\s+Details:\s*\n\s*\n?\s*([^\n]+)/i,
       /Requirement\s+for[:\s]*([^\n]+)/i,
       /Inquiry\s+for[:\s]*([^\n]+)/i,
       /Interested\s+in[:\s]*([^\n]+)/i,
@@ -111,14 +117,18 @@ export class EmailLeadService {
       }
     }
 
-    // Requirement/Message
+    // Requirement/Message - capture details from the product section
     const reqPatterns = [
+      // First try to capture all details after Buylead Details
+      /Buylead\s+Details:[\s\S]*?(Output[\s\S]*?)(?:Reply|Email:|Call|Visit|IndiaMART recommends)/i,
       /Requirement[:\s]*([^\n]+)/i,
       /Query[:\s]*([^\n]+)/i,
-      /Message[:\s]*([^\n]+)/i,
+      /Customer\s+Requirement[:\s]*([^\n]+)/i,
       /Description[:\s]*([^\n]+)/i,
       /Details[:\s]*([^\n]+)/i,
-      /Customer\s+Requirement[:\s]*([^\n]+)/i,
+      // Message pattern - NOTE: must have at least one sep character after 'Message'
+      /Message\s+[:\s]*([^\n]+)/i,
+      /Message[:\s]+([^\n]+)/i,
     ];
     for (const pattern of reqPatterns) {
       const match = content.match(pattern);
@@ -130,6 +140,9 @@ export class EmailLeadService {
 
     // City - multiple patterns
     const cityPatterns = [
+      // 'City - Pincode' format (actual IndiaMART email: 'Surat - 395013')
+      // Use [^\S\n] (non-newline whitespace) to prevent matching across lines
+      /([A-Z][a-z]+(?:[^\S\n]+[A-Z][a-z]+)*)[^\S\n]*-\s*\d{5,6}/i,
       /City[:\s]*([A-Za-z\s]+?)(?:\n|$)/i,
       /Location[:\s]*([A-Za-z\s]+?)(?:\n|$)/i,
       /From[:\s]*([A-Za-z\s]+?)(?:\n|$)/i,
@@ -496,6 +509,10 @@ export class EmailLeadService {
                         console.log(`[${platformName}] New lead: ${name} ${phone}`);
                       } else {
                         console.log(`[${platformName}] No phone/email in email from: ${fromAddress}`);
+                        console.log(`[${platformName}] TEXT (first 500 chars):`, (emailText || '').substring(0, 500));
+                        if (!emailText) {
+                          console.log(`[${platformName}] HTML (first 500 chars):`, (emailHtml || '').substring(0, 500));
+                        }
                       }
                     } catch (e: any) {
                       result.errors.push(`Parse error: ${e.message}`);
