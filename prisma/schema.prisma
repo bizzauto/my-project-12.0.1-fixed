@@ -102,6 +102,14 @@ model Business {
   gbpAccountId   String?
   gbpLocationId  String?
 
+  // GBP Auto-Post Configuration
+  gbpAutoPostEnabled     Boolean @default(false)
+  gbpAutoPostTime        String  @default("09:00") // HH:mm format
+  gbpAutoPostTimezone    String  @default("Asia/Kolkata")
+  gbpAutoPostDays        Json    @default("[\"monday\",\"tuesday\",\"wednesday\",\"thursday\",\"friday\"]") // Days to post
+  gbpAutoPostTemplates   Json    @default("[]") // Array of post templates
+  gbpAutoPostLastPosted  DateTime?
+
   // Webhook Security
   leadWebhookSecret String?
 

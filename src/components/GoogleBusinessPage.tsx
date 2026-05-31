@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { MapPin, Star, Phone, Clock, Globe, Camera, Edit3, MessageSquare, Eye, Plus, CheckCircle, XCircle, AlertCircle, BarChart3, Share2, Search, ExternalLink, RefreshCw, Loader2 } from 'lucide-react';
+import { MapPin, Star, Phone, Clock, Globe, Camera, Edit3, MessageSquare, Eye, Plus, CheckCircle, XCircle, AlertCircle, BarChart3, Share2, Search, ExternalLink, RefreshCw, Loader2, Zap, Calendar, Trash2, Edit } from 'lucide-react';
 import { googleBusinessAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
 
 interface Review { id: string; author: string; rating: number; text: string; date: string; replied: boolean; replyText?: string; }
 interface BusinessPost { id: string; type: string; title: string; content: string; startDate: string; status: string; views: number; clicks: number; }
+interface AutoPostTemplate { id: string; name: string; content: string; mediaUrl?: string; callToAction?: { type: string; url?: string }; tags?: string[]; }
+interface AutoPostConfig { enabled: boolean; time: string; timezone: string; days: string[]; templates: AutoPostTemplate[]; }
 
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const DAY_LABELS: Record<string, string> = { monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu', friday: 'Fri', saturday: 'Sat', sunday: 'Sun' };
 
 const Stars: React.FC<{ r: number; sz?: number }> = ({ r, sz = 18 }) => (
   <div className="flex items-center justify-center gap-1">
@@ -16,7 +19,7 @@ const Stars: React.FC<{ r: number; sz?: number }> = ({ r, sz = 18 }) => (
 
 const GoogleBusinessPage: React.FC = () => {
   const { business } = useAuthStore();
-  const [view, setView] = useState<'profile' | 'reviews' | 'posts' | 'insights'>('profile');
+  const [view, setView] = useState<'profile' | 'reviews' | 'posts' | 'insights' | 'auto-post'>('profile');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [posts, setPosts] = useState<BusinessPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +33,14 @@ const GoogleBusinessPage: React.FC = () => {
   const [creating, setCreating] = useState(false);
   const [editForm, setEditForm] = useState({ name: business?.name || '', phone: business?.phone || '', website: business?.website || '', description: '' });
   const [toast, setToast] = useState<{ m: string; t: string } | null>(null);
+  
+  // Auto-Post State
+  const [autoPostConfig, setAutoPostConfig] = useState<AutoPostConfig>({ enabled: false, time: '09:00', timezone: 'Asia/Kolkata', days: [], templates: [] });
+  const [autoPostLoading, setAutoPostLoading] = useState(false);
+  const [templateOpen, setTemplateOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<AutoPostTemplate | null>(null);
+  const [templateForm, setTemplateForm] = useState({ name: '', content: '', mediaUrl: '' });
+  const [savingConfig, setSavingConfig] = useState(false);
 
   const toast_ = (m: string, t = 'success') => { setToast({ m, t }); setTimeout(() => setToast(null), 3000); };
 
@@ -70,6 +81,15 @@ const GoogleBusinessPage: React.FC = () => {
         } catch {
           setPosts([]);
         }
+        // Fetch auto-post config
+        try {
+          const autoPostRes = await googleBusinessAPI.getAutoPostConfig();
+          if (autoPostRes.data?.success) {
+            setAutoPostConfig(autoPostRes.data.data);
+          }
+        } catch {
+          // Auto-post not configured yet
+        }
       } else {
         setConnected(false);
         setReviews([]);
@@ -100,6 +120,86 @@ const GoogleBusinessPage: React.FC = () => {
     } catch (err: any) { toast_(err?.response?.data?.error || 'Failed to create post', 'error'); } finally { setCreating(false); }
   };
 
+  // Auto-Post Functions
+  const handleSaveAutoPostConfig = async () => {
+    setSavingConfig(true);
+    try {
+      await googleBusinessAPI.updateAutoPostConfig({
+        enabled: autoPostConfig.enabled,
+        time: autoPostConfig.time,
+        timezone: autoPostConfig.timezone,
+        days: autoPostConfig.days,
+      });
+      toast_('Auto-post settings saved!');
+    } catch (err: any) {
+      toast_(err?.response?.data?.error || 'Failed to save settings', 'error');
+    } finally {
+      setSavingConfig(false);
+    }
+  };
+
+  const handleToggleDay = (day: string) => {
+    setAutoPostConfig(prev => ({
+      ...prev,
+      days: prev.days.includes(day) ? prev.days.filter(d => d !== day) : [...prev.days, day],
+    }));
+  };
+
+  const handleSaveTemplate = async () => {
+    if (!templateForm.name.trim() || !templateForm.content.trim()) return;
+    try {
+      if (editingTemplate) {
+        await googleBusinessAPI.updateAutoPostTemplate(editingTemplate.id, templateForm);
+        setAutoPostConfig(prev => ({
+          ...prev,
+          templates: prev.templates.map(t => t.id === editingTemplate.id ? { ...t, ...templateForm } : t),
+        }));
+        toast_('Template updated!');
+      } else {
+        const res = await googleBusinessAPI.addAutoPostTemplate(templateForm);
+        if (res.data?.success) {
+          setAutoPostConfig(prev => ({
+            ...prev,
+            templates: [...prev.templates, res.data.data],
+          }));
+          toast_('Template added!');
+        }
+      }
+      setTemplateOpen(false);
+      setEditingTemplate(null);
+      setTemplateForm({ name: '', content: '', mediaUrl: '' });
+    } catch (err: any) {
+      toast_(err?.response?.data?.error || 'Failed to save template', 'error');
+    }
+  };
+
+  const handleDeleteTemplate = async (templateId: string) => {
+    if (!confirm('Delete this template?')) return;
+    try {
+      await googleBusinessAPI.deleteAutoPostTemplate(templateId);
+      setAutoPostConfig(prev => ({
+        ...prev,
+        templates: prev.templates.filter(t => t.id !== templateId),
+      }));
+      toast_('Template deleted!');
+    } catch (err: any) {
+      toast_(err?.response?.data?.error || 'Failed to delete template', 'error');
+    }
+  };
+
+  const handleTriggerAutoPost = async () => {
+    try {
+      const res = await googleBusinessAPI.triggerAutoPost();
+      if (res.data?.success) {
+        toast_('Auto-post triggered successfully!');
+      } else {
+        toast_(res.data?.data?.message || 'Failed to trigger auto-post', 'error');
+      }
+    } catch (err: any) {
+      toast_(err?.response?.data?.error || 'Failed to trigger auto-post', 'error');
+    }
+  };
+
   const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : '0';
   const repliedCount = reviews.filter(r => r.replied).length;
 
@@ -117,12 +217,13 @@ const GoogleBusinessPage: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your business on Google Search & Maps</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {(['profile', 'reviews', 'posts', 'insights'] as const).map(v => (
+          {(['profile', 'reviews', 'posts', 'insights', 'auto-post'] as const).map(v => (
             <button key={v} onClick={() => setView(v)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === v ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
               {v === 'profile' && <><MapPin size={14} className="inline mr-1" />Profile</>}
               {v === 'reviews' && <><Star size={14} className="inline mr-1" />Reviews</>}
               {v === 'posts' && <><MessageSquare size={14} className="inline mr-1" />Posts</>}
               {v === 'insights' && <><BarChart3 size={14} className="inline mr-1" />Insights</>}
+              {v === 'auto-post' && <><Zap size={14} className="inline mr-1" />Auto-Post</>}
             </button>
           ))}
         </div>
@@ -277,6 +378,197 @@ const GoogleBusinessPage: React.FC = () => {
         </div>
       )}
 
+      {view === 'auto-post' && (
+        <div className="space-y-6">
+          {!connected ? (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center">
+              <Zap size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+              <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">Auto-Post Unavailable</h3>
+              <p className="text-sm text-gray-400">Connect your Google Business Profile first to enable auto-posting.</p>
+            </div>
+          ) : (
+            <>
+              {/* Auto-Post Settings */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Zap size={20} className="text-yellow-500" /> Auto-Post Settings
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Automatically post to Google Business Profile daily</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={autoPostConfig.enabled}
+                      onChange={e => setAutoPostConfig(prev => ({ ...prev, enabled: e.target.checked }))}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {autoPostConfig.enabled ? 'Enabled' : 'Disabled'}
+                    </span>
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Time Settings */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <Clock size={14} className="inline mr-1" /> Post Time
+                    </label>
+                    <input
+                      type="time"
+                      value={autoPostConfig.time}
+                      onChange={e => setAutoPostConfig(prev => ({ ...prev, time: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+
+                  {/* Timezone */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <Globe size={14} className="inline mr-1" /> Timezone
+                    </label>
+                    <select
+                      value={autoPostConfig.timezone}
+                      onChange={e => setAutoPostConfig(prev => ({ ...prev, timezone: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    >
+                      <option value="Asia/Kolkata">India (IST)</option>
+                      <option value="America/New_York">US Eastern (ET)</option>
+                      <option value="America/Chicago">US Central (CT)</option>
+                      <option value="America/Los_Angeles">US Pacific (PT)</option>
+                      <option value="Europe/London">UK (GMT)</option>
+                      <option value="Asia/Dubai">Dubai (GST)</option>
+                      <option value="Asia/Singapore">Singapore (SGT)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Days Selection */}
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <Calendar size={14} className="inline mr-1" /> Posting Days
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {DAYS.map(day => (
+                      <button
+                        key={day}
+                        onClick={() => handleToggleDay(day)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          autoPostConfig.days.includes(day)
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'
+                            : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                        }`}
+                      >
+                        {DAY_LABELS[day]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Save Button */}
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={handleSaveAutoPostConfig}
+                    disabled={savingConfig}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {savingConfig && <Loader2 size={14} className="animate-spin" />}
+                    Save Settings
+                  </button>
+                </div>
+              </div>
+
+              {/* Post Templates */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <MessageSquare size={18} className="inline mr-2" /> Post Templates
+                  </h3>
+                  <button
+                    onClick={() => { setEditingTemplate(null); setTemplateForm({ name: '', content: '', mediaUrl: '' }); setTemplateOpen(true); }}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                  >
+                    <Plus size={16} /> Add Template
+                  </button>
+                </div>
+
+                {autoPostConfig.templates.length === 0 ? (
+                  <div className="text-center py-8 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <MessageSquare size={40} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                    <p className="text-gray-500 dark:text-gray-400">No templates yet. Add your first template to start auto-posting!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {autoPostConfig.templates.map((template, index) => (
+                      <div key={template.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 px-2 py-0.5 rounded-full">
+                                #{index + 1}
+                              </span>
+                              <h4 className="font-medium text-gray-900 dark:text-white">{template.name}</h4>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{template.content}</p>
+                            {template.mediaUrl && (
+                              <p className="text-xs text-gray-400 mt-1">📎 Has media attachment</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 ml-4">
+                            <button
+                              onClick={() => {
+                                setEditingTemplate(template);
+                                setTemplateForm({ name: template.name, content: template.content, mediaUrl: template.mediaUrl || '' });
+                                setTemplateOpen(true);
+                              }}
+                              className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg"
+                            >
+                              <Edit size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTemplate(template.id)}
+                              className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={handleTriggerAutoPost}
+                    disabled={!autoPostConfig.enabled || autoPostConfig.templates.length === 0}
+                    className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Zap size={16} /> Post Now
+                  </button>
+                  <button
+                    onClick={() => setView('posts')}
+                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                  >
+                    <Eye size={16} /> View Posts
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 mt-3">
+                  💡 Tip: Create multiple templates and they will rotate daily for variety!
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       {editOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setEditOpen(false)}>
           <div className="fixed inset-0 bg-black/50" />
@@ -337,6 +629,64 @@ const GoogleBusinessPage: React.FC = () => {
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
                 <button onClick={() => setPostOpen(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                 <button onClick={handleCreatePost} disabled={creating || !newPost.title.trim()} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">{creating && <Loader2 size={14} className="animate-spin" />} Create Post</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Template Modal */}
+      {templateOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setTemplateOpen(false)}>
+          <div className="fixed inset-0 bg-black/50" />
+          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
+            <div className="border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {editingTemplate ? 'Edit Template' : 'Add Template'}
+              </h2>
+              <button onClick={() => setTemplateOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><XCircle size={20} className="text-gray-500" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template Name</label>
+                <input
+                  type="text"
+                  value={templateForm.name}
+                  onChange={e => setTemplateForm({ ...templateForm, name: e.target.value })}
+                  placeholder="e.g., Morning Motivation, Product Showcase"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Post Content</label>
+                <textarea
+                  value={templateForm.content}
+                  onChange={e => setTemplateForm({ ...templateForm, content: e.target.value })}
+                  rows={4}
+                  placeholder="Write your post content here. Use {business_name} for dynamic content..."
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+                />
+                <p className="text-xs text-gray-400 mt-1">Max 200 characters for Google Business posts</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Media URL (Optional)</label>
+                <input
+                  type="text"
+                  value={templateForm.mediaUrl}
+                  onChange={e => setTemplateForm({ ...templateForm, mediaUrl: e.target.value })}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <button onClick={() => setTemplateOpen(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
+                <button
+                  onClick={handleSaveTemplate}
+                  disabled={!templateForm.name.trim() || !templateForm.content.trim()}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {editingTemplate ? 'Update' : 'Add'} Template
+                </button>
               </div>
             </div>
           </div>

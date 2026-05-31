@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { prisma } from '../index.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
+import { GBPAutoPostService } from '../services/gbp-auto-post.service.js';
 
 const router = Router();
 
@@ -338,6 +339,138 @@ router.get('/stats', authenticate, async (req: AuthRequest, res: Response) => {
   } catch (error: any) {
     console.error('GBP stats fetch error:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch statistics', details: error.message });
+  }
+});
+
+// ==================== AUTO-POST ENDPOINTS ====================
+
+// Get auto-post configuration
+router.get('/auto-post/config', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const config = await GBPAutoPostService.getConfig(req.user.businessId);
+    res.json({ success: true, data: config });
+  } catch (error: any) {
+    console.error('GBP auto-post config error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get config', details: error.message });
+  }
+});
+
+// Update auto-post configuration
+router.put('/auto-post/config', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { enabled, time, timezone, days } = req.body;
+    const config = await GBPAutoPostService.updateConfig(req.user.businessId, {
+      enabled,
+      time,
+      timezone,
+      days,
+    });
+    res.json({ success: true, data: config });
+  } catch (error: any) {
+    console.error('GBP auto-post config update error:', error);
+    res.status(500).json({ success: false, error: 'Failed to update config', details: error.message });
+  }
+});
+
+// Get auto-post templates
+router.get('/auto-post/templates', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const config = await GBPAutoPostService.getConfig(req.user.businessId);
+    res.json({ success: true, data: config.templates });
+  } catch (error: any) {
+    console.error('GBP auto-post templates error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get templates', details: error.message });
+  }
+});
+
+// Add auto-post template
+router.post('/auto-post/templates', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { name, content, mediaUrl, callToAction, tags } = req.body;
+
+    if (!name || !content) {
+      return res.status(400).json({
+        success: false,
+        error: 'name and content are required',
+      });
+    }
+
+    const template = await GBPAutoPostService.addTemplate(req.user.businessId, {
+      name,
+      content,
+      mediaUrl,
+      callToAction,
+      tags,
+    });
+
+    res.json({ success: true, data: template });
+  } catch (error: any) {
+    console.error('GBP auto-post template add error:', error);
+    res.status(500).json({ success: false, error: 'Failed to add template', details: error.message });
+  }
+});
+
+// Update auto-post template
+router.put('/auto-post/templates/:templateId', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { name, content, mediaUrl, callToAction, tags } = req.body;
+    const template = await GBPAutoPostService.updateTemplate(
+      req.user.businessId,
+      req.params.templateId,
+      { name, content, mediaUrl, callToAction, tags }
+    );
+    res.json({ success: true, data: template });
+  } catch (error: any) {
+    console.error('GBP auto-post template update error:', error);
+    res.status(500).json({ success: false, error: 'Failed to update template', details: error.message });
+  }
+});
+
+// Delete auto-post template
+router.delete('/auto-post/templates/:templateId', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    await GBPAutoPostService.deleteTemplate(req.user.businessId, req.params.templateId);
+    res.json({ success: true, message: 'Template deleted successfully' });
+  } catch (error: any) {
+    console.error('GBP auto-post template delete error:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete template', details: error.message });
+  }
+});
+
+// Manually trigger auto-post (for testing)
+router.post('/auto-post/trigger', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const result = await GBPAutoPostService.executeAutoPost(req.user.businessId);
+    res.json({ success: true, data: result });
+  } catch (error: any) {
+    console.error('GBP auto-post trigger error:', error);
+    res.status(500).json({ success: false, error: 'Failed to trigger auto-post', details: error.message });
+  }
+});
+
+// Get auto-post status
+router.get('/auto-post/status', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const config = await GBPAutoPostService.getConfig(req.user.businessId);
+    const business = await prisma.business.findUnique({
+      where: { id: req.user.businessId },
+      select: { gbpAutoPostLastPosted: true },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        enabled: config.enabled,
+        time: config.time,
+        timezone: config.timezone,
+        days: config.days,
+        templatesCount: config.templates.length,
+        lastPosted: business?.gbpAutoPostLastPosted || null,
+      },
+    });
+  } catch (error: any) {
+    console.error('GBP auto-post status error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get status', details: error.message });
   }
 });
 

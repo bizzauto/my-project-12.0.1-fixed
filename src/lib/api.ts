@@ -343,6 +343,15 @@ export const googleBusinessAPI = {
   createPost: (data: any) => apiClient.post('/google-business/posts', data),
   deletePost: (id: string) => apiClient.delete(`/google-business/posts/${id}`),
   getStats: () => apiClient.get('/google-business/stats'),
+  // Auto-Post endpoints
+  getAutoPostConfig: () => apiClient.get('/google-business/auto-post/config'),
+  updateAutoPostConfig: (data: any) => apiClient.put('/google-business/auto-post/config', data),
+  getAutoPostTemplates: () => apiClient.get('/google-business/auto-post/templates'),
+  addAutoPostTemplate: (data: any) => apiClient.post('/google-business/auto-post/templates', data),
+  updateAutoPostTemplate: (id: string, data: any) => apiClient.put(`/google-business/auto-post/templates/${id}`, data),
+  deleteAutoPostTemplate: (id: string) => apiClient.delete(`/google-business/auto-post/templates/${id}`),
+  triggerAutoPost: () => apiClient.post('/google-business/auto-post/trigger'),
+  getAutoPostStatus: () => apiClient.get('/google-business/auto-post/status'),
 };
 
 // Social Accounts API

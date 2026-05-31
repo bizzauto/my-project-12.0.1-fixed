@@ -4,6 +4,7 @@ import { WhatsAppService } from '../services/whatsapp.service.js';
 import { EmailService } from '../services/email.service.js';
 import { GoogleSheetsService } from '../services/google-sheets.service.js';
 import { LeadCaptureService } from '../services/lead-capture.service.js';
+import { GBPAutoPostService } from '../services/gbp-auto-post.service.js';
 import { prisma } from '../index.js';
 
 // Redis connection
@@ -22,6 +23,7 @@ export const queues = {
   googleSheetsSync: new Queue('google-sheets-sync', { connection: redisConnection }),
   leadProcessing: new Queue('lead-processing', { connection: redisConnection }),
   campaignScheduler: new Queue('campaign-scheduler', { connection: redisConnection }),
+  gbpAutoPost: new Queue('gbp-auto-post', { connection: redisConnection }),
 };
 
 /**
@@ -653,6 +655,61 @@ async function publishToGBP(businessId: string, post: any) {
   return { success: true, postId: response.data.name };
 }
 
+// GBP Auto-Post Worker
+const gbpAutoPostWorker = new Worker(
+  'gbp-auto-post',
+  async (job: Job) => {
+    const { type, businessId } = job.data;
+
+    if (type === 'check-and-post') {
+      // Get all businesses with GBP auto-post enabled
+      const businesses = await prisma.business.findMany({
+        where: {
+          gbpAutoPostEnabled: true,
+          gbpAccessToken: { not: null },
+          gbpAccountId: { not: null },
+          gbpLocationId: { not: null },
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+
+      const results: any[] = [];
+
+      for (const business of businesses) {
+        try {
+          const result = await GBPAutoPostService.executeAutoPost(business.id);
+          results.push({
+            businessId: business.id,
+            businessName: business.name,
+            ...result,
+          });
+        } catch (error: any) {
+          console.error(`Error processing auto-post for business ${business.id}:`, error.message);
+          results.push({
+            businessId: business.id,
+            businessName: business.name,
+            success: false,
+            message: error.message,
+          });
+        }
+      }
+
+      return { checked: businesses.length, results };
+    }
+
+    if (type === 'post-business' && businessId) {
+      return await GBPAutoPostService.executeAutoPost(businessId);
+    }
+  },
+  {
+    connection: redisConnection,
+    concurrency: 5,
+  }
+);
+
 /**
  * Export workers
  */
@@ -663,6 +720,7 @@ export const workers = {
   googleSheetsSync: googleSheetsSyncWorker,
   leadProcessing: leadProcessingWorker,
   campaignScheduler: campaignSchedulerWorker,
+  gbpAutoPost: gbpAutoPostWorker,
 };
 
 /**
@@ -678,6 +736,7 @@ export async function shutdownWorkers() {
     googleSheetsSyncWorker.close(),
     leadProcessingWorker.close(),
     campaignSchedulerWorker.close(),
+    gbpAutoPostWorker.close(),
   ]);
 
   await redisConnection.quit();
