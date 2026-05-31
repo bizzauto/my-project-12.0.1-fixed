@@ -1,9 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import os from 'os';
-import path from 'path';
-import fs from 'fs';
 
 // ── JWT_SECRET ──
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -24,6 +21,8 @@ if (!JWT_SECRET) {
  * This ensures tokens don't invalidate on restart during development
  */
 function getDevJwtSecret(): string {
+  const os = require('os');
+  const path = require('path');
   const seed = os.hostname() + '__' + __dirname;
   // Generate a 32-char hex from the seed
   return crypto.createHash('sha256').update(seed).digest('hex').slice(0, 32);
@@ -36,6 +35,8 @@ const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 let DEV_ENC_FALLBACK: string | undefined;
 
 function loadOrGenerateDevEncryptionKey(): string {
+  const fs = require('fs');
+  const path = require('path');
   const keyFile = path.resolve(process.cwd(), '.encryption.key');
 
   try {
