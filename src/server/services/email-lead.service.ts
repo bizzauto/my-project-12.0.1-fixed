@@ -264,7 +264,7 @@ export class EmailLeadService {
    */
   static getSearchDomains(platform: Platform): string[] {
     const domains: Record<Platform, string[]> = {
-      indiamart: ['indiamart.com', 'leadz@indiamart.com', 'noreply@indiamart.com', 'enquiry@indiamart.com'],
+      indiamart: ['indiamart.com', 'leadz@indiamart.com', 'noreply@indiamart.com', 'enquiry@indiamart.com', 'buyershelp+enq@indiamart.com', 'buyershelp@indiamart.com', 'buyershelpdesk@indiamart.com', 'buyleads@indiamart.com'],
       justdial: ['justdial.com', 'noreply@justdial.com', 'leads@justdial.com', 'enquiry@justdial.com'],
       tradeindia: ['tradeindia.com', 'noreply@tradeindia.com', 'leads@tradeindia.com', 'enquiry@tradeindia.com'],
     };
@@ -281,6 +281,45 @@ export class EmailLeadService {
       tradeindia: 'TradeIndia',
     };
     return names[platform];
+  }
+
+  /**
+   * URL-decode email content - IndiaMART sometimes sends URL-encoded content
+   * where %20 = space, %7B%7B = {{, %0A = newline, etc.
+   */
+  static decodeContent(content: string): string {
+    try {
+      // Only decode if contains percent-encoded characters
+      if (content.includes('%')) {
+        const decoded = decodeURIComponent(content);
+        return decoded;
+      }
+    } catch {
+      // If decode fails, try manually replacing common patterns
+      try {
+        return content
+          .replace(/%20/g, ' ')
+          .replace(/%7B%7B/g, '{{')
+          .replace(/%7D%7D/g, '}}')
+          .replace(/%0A/g, '\n')
+          .replace(/%0D/g, '\r')
+          .replace(/%2C/g, ',')
+          .replace(/%3A/g, ':')
+          .replace(/%2F/g, '/')
+          .replace(/%40/g, '@')
+          .replace(/%2E/g, '.')
+          .replace(/%2D/g, '-')
+          .replace(/%5F/g, '_')
+          .replace(/%2B/g, '+')
+          .replace(/%23/g, '#')
+          .replace(/%3F/g, '?')
+          .replace(/%3D/g, '=')
+          .replace(/%26/g, '&');
+      } catch {
+        return content;
+      }
+    }
+    return content;
   }
 
   /**
@@ -364,16 +403,16 @@ export class EmailLeadService {
 
             console.log(`[${platformName}] Searching emails since ${since.toISOString()}`);
 
-            // FIX 1: Add FROM filter for platform-specific domains (same pattern as testConnection)
+            // Build OR query dynamically for ALL search domains (handles any number of domains)
             const searchQuery: any[] = [['SINCE', since]];
             if (searchDomains.length === 1) {
               searchQuery.push(['FROM', searchDomains[0]]);
-            } else if (searchDomains.length === 2) {
-              searchQuery.push(['OR', ['FROM', searchDomains[0]], ['FROM', searchDomains[1]]]);
-            } else if (searchDomains.length === 3) {
-              searchQuery.push(['OR', ['FROM', searchDomains[0]], ['OR', ['FROM', searchDomains[1]], ['FROM', searchDomains[2]]]]);
             } else {
-              searchQuery.push(['OR', ['FROM', searchDomains[0]], ['OR', ['FROM', searchDomains[1]], ['OR', ['FROM', searchDomains[2]], ['FROM', searchDomains[3]]]]]);
+              let orQuery: any = ['FROM', searchDomains[0]];
+              for (let i = 1; i < searchDomains.length; i++) {
+                orQuery = ['OR', orQuery, ['FROM', searchDomains[i]]];
+              }
+              searchQuery.push(orQuery);
             }
 
             imap.search(searchQuery, async (err, results) => {
@@ -422,32 +461,65 @@ export class EmailLeadService {
                       matchCount++;
                       console.log(`[${platformName}] #${matchCount}: From: ${fromAddress}, Sub: ${(parsed as any).subject}`);
 
-                      // Try parsing via platform parser first
-                      let leadData = this.parseEmail(emailHtml, emailText, platform);
+                      // CRITICAL: URL-decode email text (IndiaMART sends URL-encoded content)
+                      const decodedText = this.decodeContent(emailText);
+                      const decodedHtml = emailHtml ? this.htmlToText(this.decodeContent(emailHtml)) : '';
+
+                      // Try parsing via platform parser first (try decoded text, then HTML)
+                      let leadData = this.parseEmail('', decodedText, platform);
+                      
+                      // If parsing fails, try HTML version (has rendered buyer data)
+                      if (!leadData && decodedHtml) {
+                        console.log(`[${platformName}] Text parsing failed, trying HTML...`);
+                        leadData = this.parseEmail('', decodedHtml, platform);
+                      }
+                      
+                      // Last resort: try original raw HTML->text conversion
+                      if (!leadData && emailHtml) {
+                        const rawHtmlText = this.htmlToText(emailHtml);
+                        leadData = this.parseEmail('', rawHtmlText, platform);
+                      }
+
                       let phone = leadData?.phone || '';
                       let email = leadData?.email || '';
 
                       // FIX 3: Fallback phone extraction (was missing - if parser failed, no lead created)
+                      // Use DECODED text for fallback extraction
                       if (!phone) {
-                        const phoneMatch = emailText.match(/(?:\+?91[\s.-]?)?([6-9]\d{9})/);
+                        const phoneMatch = decodedText.match(/(?:\+?91[\s.-]?)?([6-9]\d{9})/);
                         if (phoneMatch) {
                           phone = phoneMatch[1].slice(-10);
                           console.log(`[${platformName}] Fallback phone extraction: ${phone}`);
                         }
                       }
+                      if (!phone && decodedHtml) {
+                        const phoneMatch = decodedHtml.match(/(?:\+?91[\s.-]?)?([6-9]\d{9})/);
+                        if (phoneMatch) {
+                          phone = phoneMatch[1].slice(-10);
+                          console.log(`[${platformName}] HTML fallback phone extraction: ${phone}`);
+                        }
+                      }
                       if (!phone) {
-                        const phoneMatch = emailText.match(/[6-9]\d{9}/);
+                        const phoneMatch = decodedText.match(/[6-9]\d{9}/);
                         if (phoneMatch) {
                           phone = phoneMatch[0];
                           console.log(`[${platformName}] Loose phone extraction: ${phone}`);
                         }
                       }
-                      // Fallback email extraction
+                      // Fallback email extraction (on decoded content)
                       if (!email) {
-                        const emailMatch = emailText.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-                        if (emailMatch && !emailMatch[1].includes('indiamart.com')) {
+                        const emailMatch = decodedText.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+                        if (emailMatch && !emailMatch[1].includes('indiamart.com') && !emailMatch[1].includes('buyershelp')) {
                           email = emailMatch[1];
                           console.log(`[${platformName}] Fallback email extraction: ${email}`);
+                        }
+                      }
+                      // Fallback email from HTML
+                      if (!email && decodedHtml) {
+                        const emailMatch = decodedHtml.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+                        if (emailMatch && !emailMatch[1].includes('indiamart.com') && !emailMatch[1].includes('buyershelp')) {
+                          email = emailMatch[1];
+                          console.log(`[${platformName}] HTML fallback email extraction: ${email}`);
                         }
                       }
 
@@ -516,10 +588,8 @@ export class EmailLeadService {
                         console.log(`[${platformName}] New lead: ${name} ${phone}`);
                       } else {
                         console.log(`[${platformName}] No phone/email in email from: ${fromAddress}`);
-                        console.log(`[${platformName}] TEXT (first 500 chars):`, (emailText || '').substring(0, 500));
-                        if (!emailText) {
-                          console.log(`[${platformName}] HTML (first 500 chars):`, (emailHtml || '').substring(0, 500));
-                        }
+                        console.log(`[${platformName}] RAW TEXT (first 300 chars):`, (emailText || '').substring(0, 300));
+                        console.log(`[${platformName}] DECODED TEXT (first 300 chars):`, (decodedText || '').substring(0, 300));
                       }
                     } catch (e: any) {
                       result.errors.push(`Parse error: ${e.message}`);
@@ -611,7 +681,11 @@ export class EmailLeadService {
           if (searchDomains.length === 1) {
             searchQuery.push(['FROM', searchDomains[0]]);
           } else {
-            searchQuery.push(['OR', ['FROM', searchDomains[0]], ['OR', ['FROM', searchDomains[1]], ['OR', ['FROM', searchDomains[2]], ['FROM', searchDomains[3]]]]]);
+            let orQuery: any = ['FROM', searchDomains[0]];
+            for (let i = 1; i < searchDomains.length; i++) {
+              orQuery = ['OR', orQuery, ['FROM', searchDomains[i]]];
+            }
+            searchQuery.push(orQuery);
           }
 
           imap.search(searchQuery, (err, results) => {
