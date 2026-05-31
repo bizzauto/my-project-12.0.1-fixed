@@ -11,6 +11,25 @@ if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir, { recursive: true });
 }
 
+/** Common external packages for both server and worker */
+const commonExternals = [
+  // Node.js built-ins (must be external for ESM)
+  'os', 'path', 'fs', 'crypto', 'url', 'stream', 'util', 'buffer',
+  'http', 'https', 'net', 'tls', 'zlib', 'events', 'assert',
+  // npm packages
+  '@prisma/client',
+  'bcryptjs',
+  'jsonwebtoken',
+  'openai',
+  'googleapis',
+  'nodemailer',
+  'razorpay',
+  'sharp',
+  'speakeasy',
+  'bullmq',
+  'ioredis',
+];
+
 // Build main server
 await esbuild.build({
   entryPoints: ['src/server/index.ts'],
@@ -18,23 +37,10 @@ await esbuild.build({
   platform: 'node',
   target: 'node20',
   outfile: 'dist/server/index.js',
-  external: [
-    '@prisma/client',
-    'bcryptjs',
-    'jsonwebtoken',
-    'openai',
-    'googleapis',
-    'nodemailer',
-    'razorpay',
-    'sharp',
-    'speakeasy',
-    'bullmq',
-    'ioredis',
-  ],
+  external: commonExternals,
   format: 'esm',
   sourcemap: true,
   minify: false,
-  packages: 'external',
 });
 console.log('✅ Server built successfully');
 
@@ -45,22 +51,9 @@ await esbuild.build({
   platform: 'node',
   target: 'node20',
   outfile: 'dist/server/worker.js',
-  external: [
-    '@prisma/client',
-    'bcryptjs',
-    'jsonwebtoken',
-    'openai',
-    'googleapis',
-    'nodemailer',
-    'razorpay',
-    'sharp',
-    'speakeasy',
-    'bullmq',
-    'ioredis',
-  ],
+  external: commonExternals,
   format: 'esm',
   sourcemap: true,
   minify: false,
-  packages: 'external',
 });
 console.log('✅ Worker built successfully');

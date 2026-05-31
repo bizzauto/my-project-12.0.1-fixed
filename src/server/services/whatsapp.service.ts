@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import axios from 'axios';
 import { prisma } from '../index.js';
 import { decrypt, encrypt } from '../utils/auth.js';
@@ -508,7 +509,6 @@ export class WhatsAppService {
     signature: string,
     secret: string
   ): boolean {
-    const crypto = require('crypto');
     const expected = crypto
       .createHmac('sha256', secret)
       .update(payload)
