@@ -327,7 +327,6 @@ export class EmailLeadService {
       });
 
       const since = options.since || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const limit = 100;
       const platformName = this.getPlatformName(platform);
       const searchDomains = this.getSearchDomains(platform);
 
@@ -345,8 +344,17 @@ export class EmailLeadService {
 
             console.log(`[${platformName}] Searching emails since ${since.toISOString()}`);
 
-            // Simple search - just get recent emails, filter manually
+            // FIX 1: Add FROM filter for platform-specific domains (same pattern as testConnection)
             const searchQuery: any[] = [['SINCE', since]];
+            if (searchDomains.length === 1) {
+              searchQuery.push(['FROM', searchDomains[0]]);
+            } else if (searchDomains.length === 2) {
+              searchQuery.push(['OR', ['FROM', searchDomains[0]], ['FROM', searchDomains[1]]]);
+            } else if (searchDomains.length === 3) {
+              searchQuery.push(['OR', ['FROM', searchDomains[0]], ['OR', ['FROM', searchDomains[1]], ['FROM', searchDomains[2]]]]);
+            } else {
+              searchQuery.push(['OR', ['FROM', searchDomains[0]], ['OR', ['FROM', searchDomains[1]], ['OR', ['FROM', searchDomains[2]], ['FROM', searchDomains[3]]]]]);
+            }
 
             imap.search(searchQuery, async (err, results) => {
               if (err) {
@@ -357,135 +365,158 @@ export class EmailLeadService {
               }
 
               if (!results || results.length === 0) {
-                console.log(`[${platformName}] No emails found in INBOX`);
+                console.log(`[${platformName}] No emails found for ${platformName}`);
                 imap.end();
                 resolve();
                 return;
               }
 
-              console.log(`[${platformName}] Found ${results.length} total emails, filtering for ${platformName}...`);
+              console.log(`[${platformName}] Found ${results.length} emails from ${platformName} domains`);
 
-              const toFetch = results.slice(-limit);
+              // FIX 2: Process ALL emails, not just last 100! (was `results.slice(-limit)` which missed Indiamart emails)
+              const toFetch = results; // Process ALL matching emails
               const fetch = imap.fetch(toFetch, { bodies: '', struct: true });
 
               let emailCount = 0;
               let matchCount = 0;
+              const processPromises: Promise<void>[] = [];
 
-              fetch.on('message', async (msg) => {
-                msg.on('body', async (stream) => {
-                  try {
-                    const parsed = await simpleParser(stream);
-                    const fromAddress = ((parsed as any).from?.[0]?.address || '').toLowerCase();
-                    const subject = ((parsed as any).subject || '').toLowerCase();
-                    const text = ((parsed as any).text || '').toLowerCase();
-                    emailCount++;
+              fetch.on('message', (msg) => {
+                msg.on('body', (stream) => {
+                  const p = (async () => {
+                    try {
+                      const parsed = await simpleParser(stream);
+                      const fromAddress = ((parsed as any).from?.[0]?.address || '').toLowerCase();
+                      const subject = ((parsed as any).subject || '').toLowerCase();
+                      const emailText = (parsed as any).text || '';
+                      const emailHtml = (parsed as any).html || '';
+                      emailCount++;
 
-                    // Check if this email is from the platform (very lenient)
-                    const isMatch = 
-                      fromAddress.includes('indiamart') ||
-                      fromAddress.includes('justdial') ||
-                      fromAddress.includes('tradeindia') ||
-                      subject.includes('indiamart') ||
-                      subject.includes('justdial') ||
-                      subject.includes('tradeindia') ||
-                      subject.includes('enquiry') ||
-                      subject.includes('inquiry') ||
-                      subject.includes('lead') ||
-                      subject.includes('buyer') ||
-                      subject.includes('query') ||
-                      text.includes('indiamart') ||
-                      text.includes('buyer name') ||
-                      text.includes('buyer details');
-
-                    if (!isMatch) {
-                      console.log(`[${platformName}] Skipping email: ${fromAddress} - ${subject}`);
-                      return; // Skip non-platform emails
-                    }
-
-                    matchCount++;
-                    console.log(`[${platformName}] Match #${matchCount}: From: ${fromAddress}, Subject: ${(parsed as any).subject}`);
-
-                    const leadData = this.parseEmail(
-                      (parsed as any).html || '',
-                      (parsed as any).text || '',
-                      platform
-                    );
-
-                    if (leadData && (leadData.phone || leadData.email)) {
-                      result.processed++;
-
-                      // Check duplicate - use platform-specific source
-                      const existing = leadData.phone
-                        ? await prisma.contact.findFirst({
-                            where: { 
-                              businessId, 
-                              phone: leadData.phone,
-                              source: platform,
-                            },
-                          })
-                        : null;
-
-                      if (existing) {
-                        result.skipped++;
-                        console.log(`[${platformName}] Skipping duplicate: ${leadData.phone} (${leadData.name})`);
+                      // Check if this email is from the platform
+                      const found = searchDomains.some(d => fromAddress.includes(d.replace('@', '').split('.')[0]));
+                      if (!found) {
+                        console.log(`[${platformName}] Skipping non-platform email: ${fromAddress}`);
                         return;
                       }
 
-                      // Capture lead using platform-specific method
-                      let contact;
-                      if (platform === 'indiamart') {
-                        contact = await LeadCaptureService.captureIndiaMARTLead(businessId, {
-                          name: leadData.name || `${platformName} Customer`,
-                          phone: leadData.phone || '',
-                          email: leadData.email || undefined,
-                          product: leadData.product,
-                          requirement: leadData.requirement,
-                          city: leadData.city,
-                        });
-                      } else if (platform === 'justdial') {
-                        contact = await LeadCaptureService.captureJustDialLead(businessId, {
-                          name: leadData.name || `${platformName} Customer`,
-                          phone: leadData.phone || '',
-                          email: leadData.email || undefined,
-                          service: leadData.product,
-                          location: leadData.city,
-                          message: leadData.requirement,
-                        });
-                      } else {
-                        // tradeindia - use IndiaMART path then fix source/tags
-                        contact = await LeadCaptureService.captureIndiaMARTLead(businessId, {
-                          name: leadData.name || `${platformName} Customer`,
-                          phone: leadData.phone || '',
-                          email: leadData.email || undefined,
-                          product: leadData.product,
-                          requirement: leadData.requirement,
-                          city: leadData.city,
-                        });
-                        if (contact) {
-                          await prisma.contact.update({
-                            where: { id: contact.id },
-                            data: { source: 'tradeindia', tags: ['TradeIndia', 'Lead'] },
-                          });
+                      matchCount++;
+                      console.log(`[${platformName}] #${matchCount}: From: ${fromAddress}, Sub: ${(parsed as any).subject}`);
+
+                      // Try parsing via platform parser first
+                      let leadData = this.parseEmail(emailHtml, emailText, platform);
+                      let phone = leadData?.phone || '';
+                      let email = leadData?.email || '';
+
+                      // FIX 3: Fallback phone extraction (was missing - if parser failed, no lead created)
+                      if (!phone) {
+                        const phoneMatch = emailText.match(/(?:\+?91[\s.-]?)?([6-9]\d{9})/);
+                        if (phoneMatch) {
+                          phone = phoneMatch[1].slice(-10);
+                          console.log(`[${platformName}] Fallback phone extraction: ${phone}`);
+                        }
+                      }
+                      if (!phone) {
+                        const phoneMatch = emailText.match(/[6-9]\d{9}/);
+                        if (phoneMatch) {
+                          phone = phoneMatch[0];
+                          console.log(`[${platformName}] Loose phone extraction: ${phone}`);
+                        }
+                      }
+                      // Fallback email extraction
+                      if (!email) {
+                        const emailMatch = emailText.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+                        if (emailMatch && !emailMatch[1].includes('indiamart.com')) {
+                          email = emailMatch[1];
+                          console.log(`[${platformName}] Fallback email extraction: ${email}`);
                         }
                       }
 
-                      result.newLeads++;
-                      result.leads.push(contact);
-                      console.log(`[${platformName}] New lead: ${leadData.name} ${leadData.phone}`);
-                    } else {
-                      console.log(`[${platformName}] Could not parse lead from email: ${fromAddress}`);
+                      if (phone || email) {
+                        result.processed++;
+
+                        // Check duplicate
+                        const existing = phone
+                          ? await prisma.contact.findFirst({
+                              where: { 
+                                businessId, 
+                                phone,
+                                source: platform,
+                              },
+                            })
+                          : null;
+
+                        if (existing) {
+                          result.skipped++;
+                          console.log(`[${platformName}] Duplicate: ${phone}`);
+                          return;
+                        }
+
+                        // Use name from parser or fallback display name
+                        const name = leadData?.name || emailText.match(/Buyer\s+Name[^\n]+/i)?.[0]?.replace(/Buyer\s+Name[\s:]*/i, '').trim() || `${platformName} Customer`;
+
+                        // Capture lead
+                        let contact;
+                        if (platform === 'indiamart') {
+                          contact = await LeadCaptureService.captureIndiaMARTLead(businessId, {
+                            name,
+                            phone,
+                            email: email || undefined,
+                            product: leadData?.product || '',
+                            requirement: leadData?.requirement || '',
+                            city: leadData?.city || '',
+                          });
+                        } else if (platform === 'justdial') {
+                          contact = await LeadCaptureService.captureJustDialLead(businessId, {
+                            name,
+                            phone,
+                            email: email || undefined,
+                            service: leadData?.product || '',
+                            location: leadData?.city || '',
+                            message: leadData?.requirement || '',
+                          });
+                        } else {
+                          contact = await LeadCaptureService.captureIndiaMARTLead(businessId, {
+                            name,
+                            phone,
+                            email: email || undefined,
+                            product: leadData?.product || '',
+                            requirement: leadData?.requirement || '',
+                            city: leadData?.city || '',
+                          });
+                          if (contact) {
+                            await prisma.contact.update({
+                              where: { id: contact.id },
+                              data: { source: 'tradeindia', tags: ['TradeIndia', 'Lead'] },
+                            });
+                          }
+                        }
+
+                        result.newLeads++;
+                        result.leads.push(contact);
+                        console.log(`[${platformName}] New lead: ${name} ${phone}`);
+                      } else {
+                        console.log(`[${platformName}] No phone/email in email from: ${fromAddress}`);
+                      }
+                    } catch (e: any) {
+                      result.errors.push(`Parse error: ${e.message}`);
+                      console.error(`[${platformName}] Parse error:`, e.message);
                     }
-                  } catch (e: any) {
-                    result.errors.push(`Parse error: ${e.message}`);
-                    console.error(`[${platformName}] Parse error:`, e.message);
-                  }
+                  })();
+                  processPromises.push(p);
                 });
               });
 
               fetch.once('end', () => {
-                console.log(`[${platformName}] Done. Processed: ${result.processed}, New: ${result.newLeads}`);
-                imap.end();
-                resolve();
+                // FIX 4: Wait for ALL async operations to complete before resolving
+                Promise.all(processPromises).then(() => {
+                  console.log(`[${platformName}] Done. Processed: ${result.processed}, New: ${result.newLeads}`);
+                  imap.end();
+                  resolve();
+                }).catch((err) => {
+                  console.error(`[${platformName}] Async error:`, err);
+                  imap.end();
+                  resolve();
+                });
               });
 
               fetch.once('error', (err) => {
