@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User, Phone, Building2, Eye, EyeOff, ArrowRight, Check, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../lib/authStore';
-import { GoogleLogin } from '@react-oauth/google';
+import GoogleLoginButton from './GoogleLoginButton';
 import AppleLogin from './AppleLogin';
 
 const RegisterPage: React.FC = () => {
@@ -139,25 +139,10 @@ const RegisterPage: React.FC = () => {
               </div>
 
               <div className="flex flex-col items-center gap-3">
-                <GoogleLogin
-                  onSuccess={async (credentialResponse) => {
-                    if (credentialResponse.credential) {
-                      try {
-                        setError('');
-                        await useAuthStore.getState().googleLogin(credentialResponse.credential);
-                        navigate('/onboarding', { replace: true });
-                      } catch (err: any) {
-                        setError(err.message || 'Google sign-in failed');
-                      }
-                    }
-                  }}
-                  onError={() => {
-                    setError('Google sign-in failed. Please try again.');
-                  }}
-                  theme="outline"
-                  size="large"
-                  text="signin_with"
-                  shape="rectangular"
+                <GoogleLoginButton
+                  text="signup_with"
+                  label="Sign up with Google"
+                  onError={(msg) => setError(msg)}
                 />
                 <AppleLogin
                   onError={(err) => setError(err)}

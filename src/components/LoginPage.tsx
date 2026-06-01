@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Shield, Zap, AlertCircle, ArrowLeft, TrendingUp, Users, MessageSquare, BarChart3, CheckCircle, Star, Brain, ShoppingCart, Phone, Share2, Activity, Sparkles, Wand2, Crown, Rocket, Bot, Globe, Target, FileText, Calendar, CreditCard, Heart, Megaphone, Layers, Send, Instagram, Facebook, Twitter, Youtube, Image as ImageIcon, Mic, Briefcase, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '../lib/authStore';
 import { useTranslation } from 'react-i18next';
-import { GoogleLogin } from '@react-oauth/google';
+import GoogleLoginButton from './GoogleLoginButton';
 import AppleLogin from './AppleLogin';
 
 const LoginPage: React.FC = () => {
@@ -348,33 +348,10 @@ const LoginPage: React.FC = () => {
 
               {/* Social Sign-In Buttons */}
               <div className="flex flex-col items-center gap-3">
-                <GoogleLogin
-                  onSuccess={async (credentialResponse) => {
-                    if (credentialResponse.credential) {
-                      try {
-                        setIsLoading(true);
-                        setError('');
-                        await useAuthStore.getState().googleLogin(credentialResponse.credential);
-                        const role = useAuthStore.getState().user?.role;
-                        if (role === 'SUPER_ADMIN') {
-                          navigate('/admin');
-                        } else {
-                          navigate('/dashboard');
-                        }
-                      } catch (err: any) {
-                        setError(err.message || 'Google sign-in failed');
-                      } finally {
-                        setIsLoading(false);
-                      }
-                    }
-                  }}
-                  onError={() => {
-                    setError('Google sign-in failed. Please try again.');
-                  }}
-                  theme="outline"
-                  size="large"
+                <GoogleLoginButton
                   text="signin_with"
-                  shape="rectangular"
+                  label="Sign in with Google"
+                  onError={(msg) => setError(msg)}
                 />
                 <AppleLogin
                   onError={(err) => setError(err)}

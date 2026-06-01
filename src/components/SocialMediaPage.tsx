@@ -29,11 +29,11 @@ interface SocialPost {
 }
 
 const platforms = [
-  { id: 'facebook', name: 'Facebook', icon: 'ðŸ“˜', color: 'bg-blue-600', textColor: 'text-blue-600', bgLight: 'bg-blue-50 dark:bg-blue-900/30' },
-  { id: 'instagram', name: 'Instagram', icon: 'ðŸ“·', color: 'bg-pink-600', textColor: 'text-pink-600', bgLight: 'bg-pink-50 dark:bg-pink-900/30' },
-  { id: 'linkedin', name: 'LinkedIn', icon: 'ðŸ’¼', color: 'bg-blue-700', textColor: 'text-blue-700', bgLight: 'bg-blue-50 dark:bg-blue-900/30' },
-  { id: 'twitter', name: 'Twitter/X', icon: 'ðŸ¦', color: 'bg-black', textColor: 'text-gray-900 dark:text-white', bgLight: 'bg-gray-50 dark:bg-gray-700' },
-  { id: 'youtube', name: 'YouTube', icon: 'ðŸ“º', color: 'bg-red-600', textColor: 'text-red-600', bgLight: 'bg-red-50 dark:bg-red-900/30' },
+  { id: 'facebook', name: 'Facebook', icon: '📘', color: 'bg-blue-600', textColor: 'text-blue-600', bgLight: 'bg-blue-50 dark:bg-blue-900/30' },
+  { id: 'instagram', name: 'Instagram', icon: '📷', color: 'bg-pink-600', textColor: 'text-pink-600', bgLight: 'bg-pink-50 dark:bg-pink-900/30' },
+  { id: 'linkedin', name: 'LinkedIn', icon: '💼', color: 'bg-blue-700', textColor: 'text-blue-700', bgLight: 'bg-blue-50 dark:bg-blue-900/30' },
+  { id: 'twitter', name: 'Twitter/X', icon: '🐦', color: 'bg-black', textColor: 'text-gray-900 dark:text-white', bgLight: 'bg-gray-50 dark:bg-gray-700' },
+  { id: 'youtube', name: 'YouTube', icon: '📺', color: 'bg-red-600', textColor: 'text-red-600', bgLight: 'bg-red-50 dark:bg-red-900/30' },
 ];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
@@ -152,11 +152,11 @@ const SocialMediaPage: React.FC = () => {
 
   // Demo platform stats
   const platformStats = [
-    { platform: 'Facebook', icon: 'ðŸ“˜', posts: 45, followers: 12500, engagement: 4.8 },
-    { platform: 'Instagram', icon: 'ðŸ“·', posts: 38, followers: 8900, engagement: 5.2 },
-    { platform: 'LinkedIn', icon: 'ðŸ’¼', posts: 28, followers: 4200, engagement: 3.9 },
-    { platform: 'Twitter/X', icon: 'ðŸ¦', posts: 26, followers: 3100, engagement: 4.1 },
-    { platform: 'YouTube', icon: 'ðŸ“º', posts: 15, followers: 5600, engagement: 6.8 },
+    { platform: 'Facebook', icon: '📘', posts: 45, followers: 12500, engagement: 4.8 },
+    { platform: 'Instagram', icon: '📷', posts: 38, followers: 8900, engagement: 5.2 },
+    { platform: 'LinkedIn', icon: '💼', posts: 28, followers: 4200, engagement: 3.9 },
+    { platform: 'Twitter/X', icon: '🐦', posts: 26, followers: 3100, engagement: 4.1 },
+    { platform: 'YouTube', icon: '📺', posts: 15, followers: 5600, engagement: 6.8 },
   ];
 
   // Demo analytics data
@@ -661,11 +661,11 @@ const SocialMediaPage: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2 sm:gap-3 p-3 sm:p-4">
             {[
-              { id: 'facebook', name: 'Facebook', icon: 'ðŸ“˜', color: 'bg-blue-600' },
-              { id: 'instagram', name: 'Instagram', icon: 'ðŸ“·', color: 'bg-pink-600' },
-              { id: 'linkedin', name: 'LinkedIn', icon: 'ðŸ’¼', color: 'bg-blue-700' },
-              { id: 'twitter', name: 'Twitter/X', icon: 'ðŸ¦', color: 'bg-gray-900 dark:bg-gray-600' },
-              { id: 'google_business', name: 'Google Business', icon: 'ðŸ¢', color: 'bg-red-600' },
+              { id: 'facebook', name: 'Facebook', icon: '📘', color: 'bg-blue-600' },
+              { id: 'instagram', name: 'Instagram', icon: '📷', color: 'bg-pink-600' },
+              { id: 'linkedin', name: 'LinkedIn', icon: '💼', color: 'bg-blue-700' },
+              { id: 'twitter', name: 'Twitter/X', icon: '🐦', color: 'bg-gray-900 dark:bg-gray-600' },
+              { id: 'google_business', name: 'Google Business', icon: '🏢', color: 'bg-red-600' },
             ].map(platform => {
               const account = socialAccounts.find(a => a.platform === platform.id);
               const isConnected = account?.connected || false;
@@ -981,8 +981,8 @@ const SocialMediaPage: React.FC = () => {
                   'bg-gray-100 dark:bg-gray-700'
                 }`}>
                   <span className="text-xl">
-                    {connectModal.platform === 'facebook' ? 'ðŸ“˜' :
-                     connectModal.platform === 'linkedin' ? 'ðŸ’¼' : 'ðŸ¦'}
+                    {connectModal.platform === 'facebook' ? '📘' :
+                     connectModal.platform === 'linkedin' ? '💼' : '🐦'}
                   </span>
                 </div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
