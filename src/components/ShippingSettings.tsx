@@ -11,7 +11,7 @@ interface ShippingRule {
   minOrderAmount: number;
   maxOrderAmount: number | null;
   shippingFee: number;
-  freeAboveAmount: number | null;
+  freeAbove: number | null;
   pincodePrefixes: string[];
   states: string[];
   isActive: boolean;
@@ -22,7 +22,7 @@ const emptyRule: Omit<ShippingRule, 'id'> = {
   minOrderAmount: 0,
   maxOrderAmount: null,
   shippingFee: 0,
-  freeAboveAmount: null,
+  freeAbove: null,
   pincodePrefixes: [],
   states: [],
   isActive: true,

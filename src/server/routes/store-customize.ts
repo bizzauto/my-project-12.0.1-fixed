@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import prisma from '../index.js';
+import { prisma } from '../index.js';
 import { authenticate, requireRole, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
@@ -223,7 +223,7 @@ const emailTemplatesRouter = Router();
 emailTemplatesRouter.get('/', authenticate, async (req: AuthRequest, res) => {
   try {
     const businessId = req.user!.businessId;
-    const templates = await (prisma as any).emailTemplate.findMany({
+    const templates = await (prisma as any).newEmailTemplate.findMany({
       where: { businessId },
       orderBy: { createdAt: 'desc' },
     });
@@ -238,12 +238,12 @@ emailTemplatesRouter.post('/', authenticate, async (req: AuthRequest, res) => {
   try {
     const businessId = req.user!.businessId;
     const { name, subject, htmlBody, variables, category } = req.body;
-    const template = await (prisma as any).emailTemplate.create({
+    const template = await (prisma as any).newEmailTemplate.create({
       data: {
         businessId,
         name,
         subject,
-        htmlContent: htmlBody,
+        htmlBody,
         category: category || 'general',
         variables: variables || [],
       },
@@ -259,12 +259,12 @@ emailTemplatesRouter.put('/:id', authenticate, async (req: AuthRequest, res) => 
   try {
     const { id } = req.params;
     const { name, subject, htmlBody, variables, category } = req.body;
-    const template = await (prisma as any).emailTemplate.update({
+    const template = await (prisma as any).newEmailTemplate.update({
       where: { id },
       data: {
         name,
         subject,
-        htmlContent: htmlBody,
+        htmlBody,
         category,
         variables,
       },
@@ -279,7 +279,7 @@ emailTemplatesRouter.put('/:id', authenticate, async (req: AuthRequest, res) => 
 emailTemplatesRouter.delete('/:id', authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    await (prisma as any).emailTemplate.delete({ where: { id } });
+    await (prisma as any).newEmailTemplate.delete({ where: { id } });
     res.json({ message: 'Email template deleted' });
   } catch (error) {
     console.error('Error deleting email template:', error);
@@ -291,7 +291,7 @@ emailTemplatesRouter.post('/:id/test', authenticate, async (req: AuthRequest, re
   try {
     const { id } = req.params;
     const { toEmail } = req.body;
-    const template = await (prisma as any).emailTemplate.findUnique({
+    const template = await (prisma as any).newEmailTemplate.findUnique({
       where: { id },
     });
     if (!template) return res.status(404).json({ error: 'Template not found' });
@@ -343,10 +343,17 @@ pushRouter.post('/send', authenticate, async (req: AuthRequest, res) => {
     const { title, body, url } = req.body;
     const businessId = req.user!.businessId;
 
+    // Get all contact IDs for this business
+    const contacts = await (prisma as any).contact.findMany({
+      where: { businessId },
+      select: { id: true },
+    });
+    const contactIds = contacts.map((c: any) => c.id);
+
     // Get all active push subscriptions for this business's contacts
     const subscriptions = await (prisma as any).pushSubscription.findMany({
       where: {
-        contact: { businessId },
+        contactId: { in: contactIds },
       },
     });
 
@@ -365,9 +372,14 @@ pushRouter.post('/send', authenticate, async (req: AuthRequest, res) => {
 pushRouter.get('/stats', authenticate, async (req: AuthRequest, res) => {
   try {
     const businessId = req.user!.businessId;
+    const contacts = await (prisma as any).contact.findMany({
+      where: { businessId },
+      select: { id: true },
+    });
+    const contactIds = contacts.map((c: any) => c.id);
     const count = await (prisma as any).pushSubscription.count({
       where: {
-        contact: { businessId },
+        contactId: { in: contactIds },
       },
     });
     res.json({ totalSubscribers: count });
@@ -655,7 +667,7 @@ lowStockRouter.post('/check', authenticate, async (req: AuthRequest, res) => {
             businessId,
             productId: product.id,
             category: product.category || 'uncategorized',
-            currentQuantity: product.quantity,
+            currentQty: product.quantity,
             threshold,
             status: 'active',
           },
@@ -925,8 +937,7 @@ i18nRouter.get('/:businessId', async (req, res) => {
     // Group by language
     const grouped: Record<string, any> = {};
     for (const t of translations) {
-      if (!grouped[t.language]) grouped[t.language] = {};
-      grouped[t.language][t.key] = t.value;
+      grouped[t.language] = t.translations;
     }
 
     res.json(grouped);
@@ -945,28 +956,14 @@ i18nRouter.post('/', authenticate, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Language and translations object are required' });
     }
 
-    // Upsert each translation key
-    const results = [];
-    for (const [key, value] of Object.entries(translations)) {
-      const existing = await (prisma as any).storeTranslation.findFirst({
-        where: { businessId, language, key },
-      });
+    // Upsert translations for the language
+    const result = await (prisma as any).storeTranslation.upsert({
+      where: { businessId_language: { businessId, language } },
+      update: { translations },
+      create: { businessId, language, translations },
+    });
 
-      if (existing) {
-        const updated = await (prisma as any).storeTranslation.update({
-          where: { id: existing.id },
-          data: { value: value as string },
-        });
-        results.push(updated);
-      } else {
-        const created = await (prisma as any).storeTranslation.create({
-          data: { businessId, language, key, value: value as string },
-        });
-        results.push(created);
-      }
-    }
-
-    res.json({ message: `Saved ${results.length} translations for ${language}`, count: results.length });
+    res.json({ message: `Saved translations for ${language}`, count: 1 });
   } catch (error) {
     console.error('Error saving translations:', error);
     res.status(500).json({ error: 'Failed to save translations' });

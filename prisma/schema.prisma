@@ -217,6 +217,10 @@ model Business {
   newEmailTemplates      NewEmailTemplate[]
   customerSegments       CustomerSegment[]
   lowStockAlerts         LowStockAlert[]
+  storeTranslations      StoreTranslation[]
+  analyticsIntegration   AnalyticsIntegration?
+  discountRules          DiscountRule[]
+  orderNotifications     OrderNotification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -351,6 +355,8 @@ model Contact {
   addresses            CustomerAddress[]
   subscriptions        CustomerSubscription[]
   returnRequests       ReturnRequest[]
+  segmentMembers       SegmentMember[]
+  pushSubscriptions    PushSubscription[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -708,6 +714,9 @@ model Order {
   // Notes
   notes String?
 
+  // Notifications
+  orderNotifications OrderNotification[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -829,7 +838,7 @@ model StockAlert {
   contactId  String?
   contact    Contact? @relation(fields: [contactId], references: [id])
 
-  customerEmail String
+  customerEmail String?
   customerPhone String?
   status        String    @default("pending") // pending, notified, failed
   notifiedAt    DateTime?
@@ -967,6 +976,7 @@ model ProductComparison {
   sessionId  String // browser session
   productIds String[] // up to 4 products to compare
   createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([sessionId])
 }
@@ -1147,17 +1157,19 @@ model NewEmailTemplate {
 // ==================== PUSH NOTIFICATIONS ====================
 
 model PushSubscription {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   contactId String?
-  endpoint  String
+  contact   Contact? @relation(fields: [contactId], references: [id])
+  endpoint  String @unique
   p256dh    String
   auth      String
   userAgent String?
-  isActive  Boolean @default(true)
+  isActive  Boolean  @default(true)
 
   createdAt DateTime @default(now())
 
   @@index([endpoint])
+  @@index([contactId])
 }
 
 // ==================== CUSTOMER SEGMENTATION ====================
@@ -1174,6 +1186,8 @@ model CustomerSegment {
   icon        String  @default("star")
   isActive    Boolean @default(true)
   memberCount Int     @default(0)
+
+  members SegmentMember[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1207,16 +1221,111 @@ model LowStockAlert {
   productId  String
   product    Product  @relation(fields: [productId], references: [id])
 
-  threshold  Int
-  currentQty Int
-  status     String    @default("active") // active, acknowledged, resolved
-  notifiedAt DateTime?
+  category       String?
+  threshold      Int
+  currentQty     Int
+  status         String    @default("active") // active, acknowledged, resolved
+  notifiedAt     DateTime?
+  acknowledgedAt DateTime?
+  resolvedAt     DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([businessId])
   @@index([status])
+}
+
+// ==================== SEGMENT MEMBERS ====================
+
+model SegmentMember {
+  id         String          @id @default(cuid())
+  segmentId  String
+  segment    CustomerSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  contactId  String
+  contact    Contact?        @relation(fields: [contactId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([segmentId, contactId])
+  @@index([segmentId])
+  @@index([contactId])
+}
+
+// ==================== STORE TRANSLATIONS (i18n) ====================
+
+model StoreTranslation {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+
+  language     String // "hi", "en", etc.
+  translations Json // { "checkout": "चेकआउट", "cart": "कार्ट", ... }
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([businessId, language])
+  @@index([businessId])
+}
+
+// ==================== ANALYTICS INTEGRATION ====================
+
+model AnalyticsIntegration {
+  id         String   @id @default(cuid())
+  businessId String   @unique
+  business   Business @relation(fields: [businessId], references: [id])
+
+  gaTrackingId        String?
+  facebookPixelId     String?
+  googleTagManagerId  String?
+  hotjarId            String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==================== DISCOUNT RULES ====================
+
+model DiscountRule {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+
+  name        String
+  type        String   // PERCENTAGE, FIXED, BUY_X_GET_Y, BULK_DISCOUNT
+  value       Float    // discount value
+  minQuantity Int?     // for bulk discount
+  buyX        Int?     // for buy x get y
+  getY        Int?     // for buy x get y
+  productIds  String[] // applicable products (empty = all)
+  isActive    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+// ==================== ORDER NOTIFICATIONS ====================
+
+model OrderNotification {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  orderId    String?
+  order      Order?   @relation(fields: [orderId], references: [id])
+
+  type    String  // order_placed, payment_received, order_shipped, order_delivered
+  title   String
+  message String
+  read    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([businessId])
+  @@index([orderId])
+  @@index([read])
 }
 
 // ==================== LEDGER / ACCOUNTING ====================

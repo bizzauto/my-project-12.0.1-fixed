@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import prisma from '../index.js';
+import { prisma } from '../index.js';
 import { authenticate, requireRole, AuthRequest } from '../middleware/auth.js';
 import crypto from 'crypto';
 
@@ -21,11 +21,12 @@ bundlesRouter.get('/public/:businessId', async (req, res) => {
   }
 });
 
-bundlesRouter.get('/:id', async (req, res) => {
+bundlesRouter.get('/:id', authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const bundle = await prisma.productBundle.findUnique({
-      where: { id },
+    const businessId = req.user!.businessId;
+    const bundle = await prisma.productBundle.findFirst({
+      where: { id, businessId },
       include: { items: { include: { product: true } } },
     });
     if (!bundle) return res.status(404).json({ error: 'Bundle not found' });
@@ -93,7 +94,6 @@ bundlesRouter.put('/:id', authenticate, async (req: AuthRequest, res) => {
 bundlesRouter.delete('/:id', authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    await prisma.productBundleItem.deleteMany({ where: { bundleId: id } });
     await prisma.productBundle.delete({ where: { id } });
     res.json({ message: 'Bundle deleted' });
   } catch (error) {
@@ -104,7 +104,6 @@ bundlesRouter.delete('/:id', authenticate, async (req: AuthRequest, res) => {
 bundlesRouter.post('/:id/order', authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user!.id;
     const businessId = req.user!.businessId;
 
     const bundle = await prisma.productBundle.findUnique({
@@ -135,11 +134,11 @@ bundlesRouter.post('/:id/order', authenticate, async (req: AuthRequest, res) => 
 
     const order = await prisma.order.create({
       data: {
-        userId,
+        contactId: req.user!.id,
         businessId,
         total,
-        discount,
-        status: 'PENDING',
+        discountAmount: discount,
+        status: 'pending',
         items: { create: orderItems },
       },
       include: { items: true },
@@ -167,7 +166,6 @@ flashSalesRouter.get('/public/:businessId', async (req, res) => {
         startsAt: { lte: now },
         endsAt: { gte: now },
       },
-      include: { products: true },
     });
     res.json(sales);
   } catch (error) {
@@ -184,23 +182,8 @@ flashSalesRouter.get('/active', async (req, res) => {
         startsAt: { lte: now },
         endsAt: { gte: now },
       },
-      include: { products: true },
     });
-
-    const salesWithDiscounts = sales.map((sale) => {
-      const products = sale.products.map((product: any) => {
-        let discountedPrice = product.price;
-        if (sale.discountType === 'PERCENTAGE') {
-          discountedPrice = product.price - (product.price * sale.discountValue) / 100;
-        } else {
-          discountedPrice = Math.max(0, product.price - sale.discountValue);
-        }
-        return { ...product, discountedPrice };
-      });
-      return { ...sale, products };
-    });
-
-    res.json(salesWithDiscounts);
+    res.json(sales);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch active flash sales' });
   }
@@ -209,9 +192,9 @@ flashSalesRouter.get('/active', async (req, res) => {
 flashSalesRouter.get('/:id', authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const sale = await prisma.flashSale.findUnique({
-      where: { id },
-      include: { products: true },
+    const businessId = req.user!.businessId;
+    const sale = await prisma.flashSale.findFirst({
+      where: { id, businessId },
     });
     if (!sale) return res.status(404).json({ error: 'Flash sale not found' });
     res.json(sale);
@@ -233,11 +216,8 @@ flashSalesRouter.post('/', authenticate, async (req: AuthRequest, res) => {
         endsAt: new Date(endsAt),
         businessId,
         isActive: true,
-        products: {
-          connect: productIds.map((id: string) => ({ id })),
-        },
+        productIds,
       },
-      include: { products: true },
     });
     res.status(201).json(sale);
   } catch (error) {
@@ -257,13 +237,8 @@ flashSalesRouter.put('/:id', authenticate, async (req: AuthRequest, res) => {
         discountValue,
         startsAt: startsAt ? new Date(startsAt) : undefined,
         endsAt: endsAt ? new Date(endsAt) : undefined,
-        ...(productIds && {
-          products: {
-            set: productIds.map((pid: string) => ({ id: pid })),
-          },
-        }),
+        ...(productIds && { productIds }),
       },
-      include: { products: true },
     });
     res.json(sale);
   } catch (error) {
@@ -292,7 +267,7 @@ const giftCardsRouter = Router();
 giftCardsRouter.post('/create', authenticate, async (req: AuthRequest, res) => {
   try {
     const { amount, recipientName, recipientEmail, recipientPhone, message } = req.body;
-    const userId = req.user!.id;
+    const purchaserContactId = req.user!.id;
     const businessId = req.user!.businessId;
     const code = `gift-${crypto.randomBytes(4).toString('hex')}`;
 
@@ -305,7 +280,7 @@ giftCardsRouter.post('/create', authenticate, async (req: AuthRequest, res) => {
         recipientEmail,
         recipientPhone,
         message,
-        userId,
+        purchaserContactId,
         businessId,
       },
     });
@@ -353,7 +328,6 @@ giftCardsRouter.get('/', authenticate, async (req: AuthRequest, res) => {
     const businessId = req.user!.businessId;
     const giftCards = await prisma.giftCard.findMany({
       where: { businessId },
-      include: { user: { select: { id: true, name: true, email: true } } },
     });
     res.json(giftCards);
   } catch (error) {
@@ -363,9 +337,9 @@ giftCardsRouter.get('/', authenticate, async (req: AuthRequest, res) => {
 
 giftCardsRouter.get('/my', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
+    const purchaserContactId = req.user!.id;
     const giftCards = await prisma.giftCard.findMany({
-      where: { userId },
+      where: { purchaserContactId },
     });
     res.json(giftCards);
   } catch (error) {
@@ -380,11 +354,11 @@ const recentlyViewedRouter = Router();
 
 recentlyViewedRouter.post('/', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
+    const contactId = req.user!.id;
     const { productId } = req.body;
 
     const existing = await prisma.recentlyViewed.findUnique({
-      where: { userId_productId: { userId, productId } },
+      where: { contactId_productId: { contactId, productId } },
     });
 
     if (existing) {
@@ -394,7 +368,7 @@ recentlyViewedRouter.post('/', authenticate, async (req: AuthRequest, res) => {
       });
     } else {
       await prisma.recentlyViewed.create({
-        data: { userId, productId, viewCount: 1 },
+        data: { contactId, productId, viewCount: 1 },
       });
     }
 
@@ -406,11 +380,11 @@ recentlyViewedRouter.post('/', authenticate, async (req: AuthRequest, res) => {
 
 recentlyViewedRouter.get('/', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
+    const contactId = req.user!.id;
     const items = await prisma.recentlyViewed.findMany({
-      where: { userId },
+      where: { contactId },
       include: { product: true },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { viewedAt: 'desc' },
       take: 20,
     });
     res.json(items);
@@ -421,10 +395,10 @@ recentlyViewedRouter.get('/', authenticate, async (req: AuthRequest, res) => {
 
 recentlyViewedRouter.delete('/:productId', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
+    const contactId = req.user!.id;
     const { productId } = req.params;
     await prisma.recentlyViewed.deleteMany({
-      where: { userId, productId },
+      where: { contactId, productId },
     });
     res.json({ message: 'Removed from recently viewed' });
   } catch (error) {
@@ -439,11 +413,11 @@ const compareRouter = Router();
 
 compareRouter.post('/save', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
+    const sessionId = req.user!.id;
     const { productIds } = req.body;
 
     const existing = await prisma.productComparison.findFirst({
-      where: { userId },
+      where: { sessionId },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -455,7 +429,7 @@ compareRouter.post('/save', authenticate, async (req: AuthRequest, res) => {
       res.json({ message: 'Comparison updated', id: existing.id });
     } else {
       const comparison = await prisma.productComparison.create({
-        data: { userId, productIds },
+        data: { sessionId, productIds },
       });
       res.status(201).json(comparison);
     }
@@ -466,9 +440,9 @@ compareRouter.post('/save', authenticate, async (req: AuthRequest, res) => {
 
 compareRouter.get('/latest', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
+    const sessionId = req.user!.id;
     const comparison = await prisma.productComparison.findFirst({
-      where: { userId },
+      where: { sessionId },
       orderBy: { createdAt: 'desc' },
     });
     if (!comparison) return res.status(404).json({ error: 'No comparison found' });
@@ -499,9 +473,9 @@ const addressesRouter = Router();
 
 addressesRouter.get('/', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
-    const addresses = await prisma.address.findMany({
-      where: { userId },
+    const contactId = req.user!.id;
+    const addresses = await prisma.customerAddress.findMany({
+      where: { contactId },
       orderBy: { isDefault: 'desc' },
     });
     res.json(addresses);
@@ -512,18 +486,18 @@ addressesRouter.get('/', authenticate, async (req: AuthRequest, res) => {
 
 addressesRouter.post('/', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
+    const contactId = req.user!.id;
     const { label, name, phone, email, address, city, state, pincode, isDefault } = req.body;
 
     if (isDefault) {
-      await prisma.address.updateMany({
-        where: { userId, isDefault: true },
+      await prisma.customerAddress.updateMany({
+        where: { contactId, isDefault: true },
         data: { isDefault: false },
       });
     }
 
-    const newAddress = await prisma.address.create({
-      data: { label, name, phone, email, address, city, state, pincode, isDefault, userId },
+    const newAddress = await prisma.customerAddress.create({
+      data: { label, name, phone, email, address, city, state, pincode, isDefault, contactId },
     });
     res.status(201).json(newAddress);
   } catch (error) {
@@ -537,16 +511,16 @@ addressesRouter.put('/:id', authenticate, async (req: AuthRequest, res) => {
     const { label, name, phone, email, address, city, state, pincode, isDefault } = req.body;
 
     if (isDefault) {
-      const existing = await prisma.address.findUnique({ where: { id } });
+      const existing = await prisma.customerAddress.findUnique({ where: { id } });
       if (existing) {
-        await prisma.address.updateMany({
-          where: { userId: existing.userId, isDefault: true },
+        await prisma.customerAddress.updateMany({
+          where: { contactId: existing.contactId, isDefault: true },
           data: { isDefault: false },
         });
       }
     }
 
-    const updated = await prisma.address.update({
+    const updated = await prisma.customerAddress.update({
       where: { id },
       data: { label, name, phone, email, address, city, state, pincode, isDefault },
     });
@@ -559,7 +533,7 @@ addressesRouter.put('/:id', authenticate, async (req: AuthRequest, res) => {
 addressesRouter.delete('/:id', authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    await prisma.address.delete({ where: { id } });
+    await prisma.customerAddress.delete({ where: { id } });
     res.json({ message: 'Address deleted' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete address' });
@@ -569,15 +543,15 @@ addressesRouter.delete('/:id', authenticate, async (req: AuthRequest, res) => {
 addressesRouter.patch('/:id/default', authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const address = await prisma.address.findUnique({ where: { id } });
+    const address = await prisma.customerAddress.findUnique({ where: { id } });
     if (!address) return res.status(404).json({ error: 'Address not found' });
 
-    await prisma.address.updateMany({
-      where: { userId: address.userId, isDefault: true },
+    await prisma.customerAddress.updateMany({
+      where: { contactId: address.contactId, isDefault: true },
       data: { isDefault: false },
     });
 
-    const updated = await prisma.address.update({
+    const updated = await prisma.customerAddress.update({
       where: { id },
       data: { isDefault: true },
     });
@@ -594,19 +568,19 @@ const returnsRouter = Router();
 
 returnsRouter.post('/', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
+    const contactId = req.user!.id;
     const businessId = req.user!.businessId;
     const { orderId, reason, description, images } = req.body;
 
     const returnRequest = await prisma.returnRequest.create({
       data: {
         orderId,
-        userId,
+        contactId,
         businessId,
         reason,
         description,
         images: images || [],
-        status: 'PENDING',
+        status: 'pending',
       },
     });
     res.status(201).json(returnRequest);
@@ -620,7 +594,6 @@ returnsRouter.get('/', authenticate, async (req: AuthRequest, res) => {
     const businessId = req.user!.businessId;
     const returns = await prisma.returnRequest.findMany({
       where: { businessId },
-      include: { user: { select: { id: true, name: true, email: true } } },
       orderBy: { createdAt: 'desc' },
     });
     res.json(returns);
@@ -631,9 +604,9 @@ returnsRouter.get('/', authenticate, async (req: AuthRequest, res) => {
 
 returnsRouter.get('/my', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
+    const contactId = req.user!.id;
     const returns = await prisma.returnRequest.findMany({
-      where: { userId },
+      where: { contactId },
       orderBy: { createdAt: 'desc' },
     });
     res.json(returns);
@@ -666,7 +639,6 @@ returnsRouter.get('/:id', authenticate, async (req: AuthRequest, res) => {
     const { id } = req.params;
     const returnRequest = await prisma.returnRequest.findUnique({
       where: { id },
-      include: { user: { select: { id: true, name: true, email: true } } },
     });
     if (!returnRequest) return res.status(404).json({ error: 'Return request not found' });
     res.json(returnRequest);
@@ -747,7 +719,8 @@ subscriptionsRouter.delete('/plans/:id', authenticate, async (req: AuthRequest, 
 
 subscriptionsRouter.post('/subscribe', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
+    const contactId = req.user!.id;
+    const businessId = req.user!.businessId;
     const { planId } = req.body;
 
     const plan = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
@@ -762,14 +735,14 @@ subscriptionsRouter.post('/subscribe', authenticate, async (req: AuthRequest, re
       nextBillingDate.setFullYear(nextBillingDate.getFullYear() + 1);
     }
 
-    const subscription = await prisma.subscription.create({
+    const subscription = await prisma.customerSubscription.create({
       data: {
-        userId,
+        contactId,
         planId,
-        status: 'ACTIVE',
+        businessId,
+        status: 'active',
         nextBillingDate,
       },
-      include: { plan: { include: { product: true } } },
     });
     res.status(201).json(subscription);
   } catch (error) {
@@ -780,9 +753,9 @@ subscriptionsRouter.post('/subscribe', authenticate, async (req: AuthRequest, re
 subscriptionsRouter.patch('/:id/cancel', authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const subscription = await prisma.subscription.update({
+    const subscription = await prisma.customerSubscription.update({
       where: { id },
-      data: { status: 'CANCELLED' },
+      data: { status: 'cancelled' },
     });
     res.json(subscription);
   } catch (error) {
@@ -792,10 +765,9 @@ subscriptionsRouter.patch('/:id/cancel', authenticate, async (req: AuthRequest, 
 
 subscriptionsRouter.get('/my', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
-    const subscriptions = await prisma.subscription.findMany({
-      where: { userId },
-      include: { plan: { include: { product: true } } },
+    const contactId = req.user!.id;
+    const subscriptions = await prisma.customerSubscription.findMany({
+      where: { contactId },
       orderBy: { createdAt: 'desc' },
     });
     res.json(subscriptions);
@@ -816,8 +788,8 @@ invoicesRouter.get('/:orderId/pdf', authenticate, async (req: AuthRequest, res) 
       where: { id: orderId },
       include: {
         items: { include: { product: true } },
-        user: { select: { name: true, email: true, phone: true } },
         business: true,
+        contact: true,
       },
     });
 
@@ -841,9 +813,9 @@ invoicesRouter.get('/:orderId/pdf', authenticate, async (req: AuthRequest, res) 
         taxId: order.business?.taxId || '',
       },
       customer: {
-        name: order.user?.name || '',
-        email: order.user?.email || '',
-        phone: order.user?.phone || '',
+        name:         order.contact?.name || '',
+        email: order.contact?.email || '',
+        phone: order.contact?.phone || '',
       },
       items: order.items.map((item: any) => ({
         productName: item.product?.name || 'Unknown',
@@ -852,7 +824,7 @@ invoicesRouter.get('/:orderId/pdf', authenticate, async (req: AuthRequest, res) 
         total: item.price * item.quantity,
       })),
       subtotal,
-      discount: order.discount || 0,
+      discount: order.discountAmount || 0,
       taxRate,
       taxAmount,
       total: order.total,
@@ -874,9 +846,9 @@ socialProofRouter.get('/recent-purchases/:businessId', async (req, res) => {
   try {
     const { businessId } = req.params;
     const orders = await prisma.order.findMany({
-      where: { businessId, status: 'COMPLETED' },
+      where: { businessId, status: 'completed' },
       include: {
-        user: { select: { name: true } },
+        contact: { select: { name: true } },
         items: { include: { product: { select: { name: true } } } },
       },
       orderBy: { createdAt: 'desc' },
@@ -885,7 +857,7 @@ socialProofRouter.get('/recent-purchases/:businessId', async (req, res) => {
 
     const purchases = orders.flatMap((order: any) =>
       order.items.map((item: any) => {
-        const fullName = order.user?.name || 'Customer';
+        const fullName =         order.contact?.name || 'Customer';
         const nameParts = fullName.split(' ');
         const firstName = nameParts[0] || fullName;
         const lastInitial = nameParts.length > 1 ? ` ${nameParts[nameParts.length - 1][0]}.` : '';
@@ -923,7 +895,7 @@ socialProofRouter.get('/product-stats/:productId', async (req, res) => {
     });
 
     const purchaseCount = await prisma.orderItem.count({
-      where: { productId, order: { status: 'COMPLETED' } },
+      where: { productId, order: { status: 'completed' } },
     });
 
     res.json({

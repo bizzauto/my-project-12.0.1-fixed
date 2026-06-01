@@ -208,7 +208,7 @@ wishlistRouter.use(authenticate);
 wishlistRouter.get('/', async (req: AuthRequest, res: Response) => {
   try {
     const wishlist = await prisma.wishlist.findMany({
-      where: { userId: req.user.id },
+      where: { contactId: req.user.id },
       include: {
         product: {
           select: {
@@ -242,7 +242,7 @@ wishlistRouter.post('/', async (req: AuthRequest, res: Response) => {
     }
 
     const existing = await prisma.wishlist.findFirst({
-      where: { userId: req.user.id, productId },
+      where: { contactId: req.user.id, productId },
     });
     if (existing) {
       return res.status(400).json({ success: false, error: 'Product already in wishlist' });
@@ -250,7 +250,7 @@ wishlistRouter.post('/', async (req: AuthRequest, res: Response) => {
 
     const item = await prisma.wishlist.create({
       data: {
-        userId: req.user.id,
+        contactId: req.user.id,
         productId,
         businessId: product.businessId,
       },
@@ -267,7 +267,7 @@ wishlistRouter.post('/', async (req: AuthRequest, res: Response) => {
 wishlistRouter.delete('/:productId', async (req: AuthRequest, res: Response) => {
   try {
     const existing = await prisma.wishlist.findFirst({
-      where: { userId: req.user.id, productId: req.params.productId },
+      where: { contactId: req.user.id, productId: req.params.productId },
     });
     if (!existing) {
       return res.status(404).json({ success: false, error: 'Item not found in wishlist' });
@@ -284,7 +284,7 @@ wishlistRouter.delete('/:productId', async (req: AuthRequest, res: Response) => 
 wishlistRouter.get('/check/:productId', async (req: AuthRequest, res: Response) => {
   try {
     const item = await prisma.wishlist.findFirst({
-      where: { userId: req.user.id, productId: req.params.productId },
+      where: { contactId: req.user.id, productId: req.params.productId },
     });
 
     res.json({ success: true, data: { isWishlisted: !!item } });
@@ -316,7 +316,7 @@ stockAlertsRouter.post('/', async (req, res: Response) => {
     }
 
     const existing = await prisma.stockAlert.findFirst({
-      where: { businessId, productId, customerEmail: customerEmail || null, customerPhone: customerPhone || null, notified: false },
+      where: { businessId, productId, customerEmail: customerEmail || null,       customerPhone: customerPhone || null, status: 'pending' },
     });
     if (existing) {
       return res.status(400).json({ success: false, error: 'Already registered for this stock alert' });
@@ -328,7 +328,7 @@ stockAlertsRouter.post('/', async (req, res: Response) => {
         productId,
         customerEmail: customerEmail || null,
         customerPhone: customerPhone || null,
-        notified: false,
+        status: 'pending',
       },
     });
 
@@ -367,7 +367,7 @@ stockAlertsRouter.post('/:id/notify', authenticate, async (req: AuthRequest, res
 
     const updated = await prisma.stockAlert.update({
       where: { id: req.params.id },
-      data: { notified: true, notifiedAt: new Date() },
+      data: { status: 'notified', notifiedAt: new Date() },
     });
 
     res.json({ success: true, data: updated });
@@ -899,14 +899,12 @@ notificationsRouter.post('/order-status', async (req: AuthRequest, res: Response
 
     const notification = await prisma.orderNotification.create({
       data: {
-        orderId,
         businessId: order.businessId,
-        channel,
-        status,
+        orderId,
+        type: status,
+        title: `Order ${order.orderNumber} - ${status.charAt(0).toUpperCase() + status.slice(1)}`,
         message,
-        recipientEmail: order.contact?.email || null,
-        recipientPhone: order.contact?.phone || null,
-        sent: false,
+        read: false,
       },
     });
 
@@ -920,7 +918,6 @@ notificationsRouter.post('/order-status', async (req: AuthRequest, res: Response
           html: `<p>Hi ${order.contact.name || 'Customer'},</p><p>${message}</p><p>Total: ₹${order.total}</p>`,
           businessId: order.businessId,
         });
-        await prisma.orderNotification.update({ where: { id: notification.id }, data: { sent: true, sentAt: new Date() } });
       } catch (e) {
         // Email service unavailable, don't fail
       }
@@ -934,7 +931,6 @@ notificationsRouter.post('/order-status', async (req: AuthRequest, res: Response
           message,
           businessId: order.businessId,
         });
-        await prisma.orderNotification.update({ where: { id: notification.id }, data: { sent: true, sentAt: new Date() } });
       } catch (e) {
         // WhatsApp service unavailable, don't fail
       }
@@ -966,7 +962,7 @@ notificationsRouter.post('/stock-alert-notify', async (req: AuthRequest, res: Re
       return res.status(404).json({ success: false, error: 'Stock alert not found' });
     }
 
-    if (alert.notified) {
+    if (alert.status === 'notified') {
       return res.status(400).json({ success: false, error: 'Customer already notified' });
     }
 
@@ -1003,7 +999,7 @@ notificationsRouter.post('/stock-alert-notify', async (req: AuthRequest, res: Re
 
     await prisma.stockAlert.update({
       where: { id: stockAlertId },
-      data: { notified: true, notifiedAt: new Date() },
+      data: { status: 'notified', notifiedAt: new Date() },
     });
 
     res.json({ success: true, message: 'Customer notified successfully' });
@@ -1087,15 +1083,10 @@ discountsRouter.post('/validate', async (req, res: Response) => {
     // Check discount rules for the business
     const discountRules = await prisma.discountRule.findMany({
       where: { businessId, isActive: true },
-      orderBy: { priority: 'desc' },
     });
 
     for (const rule of discountRules) {
-      if (rule.minOrderAmount && cartTotal < rule.minOrderAmount) continue;
-
-      if (rule.expiresAt && new Date(rule.expiresAt) < new Date()) continue;
-
-      if (rule.maxUses !== null && rule.usedCount >= rule.maxUses) continue;
+      if (rule.minQuantity && enrichedItems.reduce((sum, i) => sum + i.quantity, 0) < rule.minQuantity) continue;
 
       switch (rule.type) {
         case 'PERCENTAGE': {
@@ -1137,15 +1128,16 @@ discountsRouter.post('/validate', async (req, res: Response) => {
           break;
         }
         case 'BUY_X_GET_Y': {
-          const config = rule.config as any;
-          if (!config || !config.buyProductId || !config.buyQuantity || !config.getProductId || !config.getQuantity) break;
+          const buyProductId = rule.productIds?.[0];
+          const getProductId = rule.productIds?.[1];
+          if (!buyProductId || !getProductId || !rule.buyX || !rule.getY) break;
 
-          const buyProductItems = enrichedItems.filter((i) => i.productId === config.buyProductId);
+          const buyProductItems = enrichedItems.filter((i) => i.productId === buyProductId);
           const totalBuyQty = buyProductItems.reduce((sum, i) => sum + i.quantity, 0);
 
-          if (totalBuyQty >= config.buyQuantity) {
-            const freeGetItems = Math.floor(totalBuyQty / config.buyQuantity) * config.getQuantity;
-            const getProduct = enrichedItems.find((i) => i.productId === config.getProductId);
+          if (totalBuyQty >= rule.buyX) {
+            const freeGetItems = Math.floor(totalBuyQty / rule.buyX) * rule.getY;
+            const getProduct = enrichedItems.find((i) => i.productId === getProductId);
             if (getProduct) {
               const freeDiscount = Math.min(freeGetItems, getProduct.quantity) * getProduct.price;
               if (freeDiscount > 0) {
@@ -1155,7 +1147,7 @@ discountsRouter.post('/validate', async (req, res: Response) => {
                   ruleId: rule.id,
                   name: rule.name,
                   discount: freeDiscount,
-                  description: `Buy ${config.buyQuantity} get ${config.getQuantity} free`,
+                  description: `Buy ${rule.buyX} get ${rule.getY} free`,
                 });
               }
             }
@@ -1163,8 +1155,7 @@ discountsRouter.post('/validate', async (req, res: Response) => {
           break;
         }
         case 'BULK_DISCOUNT': {
-          const config = rule.config as any;
-          const minQty = config?.minQuantity || 5;
+          const minQty = rule.minQuantity || 5;
           const totalQty = enrichedItems.reduce((sum, i) => sum + i.quantity, 0);
 
           if (totalQty >= minQty) {
