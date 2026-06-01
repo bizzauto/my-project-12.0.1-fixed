@@ -145,7 +145,7 @@ const TeamManagement: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-4 sm:p-5 md:p-6 md:p-8">
+      <div className="p-4 sm:p-5 md:p-6 md:p-8">
         <div className="p-12 text-center">
           <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-gray-500">Loading team...</p>
@@ -155,7 +155,7 @@ const TeamManagement: React.FC = () => {
   }
 
   return (
-    <div className="p-4 sm:p-4 sm:p-5 md:p-6 md:p-8">
+    <div className="p-4 sm:p-5 md:p-6 md:p-8">
       {/* Toast */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
@@ -169,7 +169,7 @@ const TeamManagement: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl sm:text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Team Management</h1>
+          <h1 className="text-xl sm:text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Team Management</h1>
           <p className="text-gray-600">Manage users, roles, and permissions</p>
         </div>
         <div className="flex gap-3">
@@ -306,7 +306,7 @@ const TeamManagement: React.FC = () => {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -390,7 +390,7 @@ const TeamManagement: React.FC = () => {
 
       {/* Change Role Modal */}
       {showRoleModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Change Role</h2>

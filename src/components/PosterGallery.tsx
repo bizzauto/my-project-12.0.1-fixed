@@ -160,7 +160,7 @@ const PosterGallery: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl sm:text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+          <h1 className="text-xl sm:text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
               <ImageOff size={20} className="text-white" />
             </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Search, MoreVertical, Trash2, Edit3, Eye, Copy, BarChart3,
   Settings, ChevronDown, ChevronRight, GripVertical, X, Check,
@@ -691,11 +691,11 @@ export default function SurveyBuilder() {
           </div>
 
           <div
-            className="flex-1 overflow-y-auto bg-slate-100/50 p-6"
+            className="flex-1 overflow-y-auto bg-slate-100/50 p-4 sm:p-5 md:p-6"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
-            <div className="max-w-xl mx-auto bg-white rounded-xl border border-slate-200 shadow-sm p-6 min-h-[400px]">
+            <div className="max-w-xl mx-auto bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5 md:p-6 min-h-[400px]">
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-slate-800">{activeSurvey.name}</h2>
                 <p className="text-sm text-slate-400 mt-1">{activeSurvey.questions.length} questions</p>
@@ -750,15 +750,15 @@ export default function SurveyBuilder() {
 
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="text-3xl font-bold text-slate-800">{activeSurvey.submissionCount.toLocaleString()}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-slate-800">{activeSurvey.submissionCount.toLocaleString()}</div>
             <div className="text-sm text-slate-500 mt-1">Total Submissions</div>
           </div>
           <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="text-3xl font-bold text-slate-800">{activeSurvey.completionRate}%</div>
+            <div className="text-2xl sm:text-3xl font-bold text-slate-800">{activeSurvey.completionRate}%</div>
             <div className="text-sm text-slate-500 mt-1">Completion Rate</div>
           </div>
           <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="text-3xl font-bold text-slate-800">{responses.length}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-slate-800">{responses.length}</div>
             <div className="text-sm text-slate-500 mt-1">Recent Responses</div>
           </div>
         </div>
@@ -813,7 +813,7 @@ export default function SurveyBuilder() {
 
   return (
     <div className="h-screen flex flex-col bg-slate-50">
-      <div className="flex-1 overflow-hidden p-6">
+      <div className="flex-1 overflow-hidden p-4 sm:p-5 md:p-6">
         {view === 'list' && renderListView()}
         {view === 'editor' && renderEditor()}
         {view === 'responses' && renderResponses()}

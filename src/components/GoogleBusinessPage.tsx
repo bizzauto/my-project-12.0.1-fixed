@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { MapPin, Star, Phone, Clock, Globe, Camera, Edit3, MessageSquare, Eye, Plus, CheckCircle, XCircle, AlertCircle, BarChart3, Share2, Search, ExternalLink, RefreshCw, Loader2, Zap, Calendar, Trash2, Edit } from 'lucide-react';
 import { googleBusinessAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
@@ -204,11 +204,11 @@ const GoogleBusinessPage: React.FC = () => {
   const repliedCount = reviews.filter(r => r.replied).length;
 
   if (loading) {
-    return <div className="p-8 flex items-center justify-center min-h-[400px]"><div className="text-center"><RefreshCw size={48} className="text-blue-500 animate-spin mx-auto mb-4" /><p className="text-gray-500">Loading Google Business data...</p></div></div>;
+    return <div className="p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[400px]"><div className="text-center"><RefreshCw size={48} className="text-blue-500 animate-spin mx-auto mb-4" /><p className="text-gray-500">Loading Google Business data...</p></div></div>;
   }
 
   return (
-    <div className="p-4 sm:p-5 md:p-6 lg:p-8">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-4 sm:p-6 md:p-8">
       {toast && <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${toast.t === 'error' ? 'bg-red-500' : 'bg-green-500'}`}>{toast.m}</div>}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
@@ -232,21 +232,21 @@ const GoogleBusinessPage: React.FC = () => {
       {!connected ? (
         <div className="mb-6 p-4 rounded-xl flex items-center gap-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
           <AlertCircle className="text-yellow-600 dark:text-yellow-400" size={24} />
-          <div><p className="font-medium text-yellow-800 dark:text-yellow-300">Google Business Not Connected</p><p className="text-sm text-yellow-600 dark:text-yellow-400">Connect your Google Business Profile in Settings → Integrations to manage reviews, posts, and insights.</p></div>
+          <div><p className="font-medium text-yellow-800 dark:text-yellow-300">Google Business Not Connected</p><p className="text-sm text-yellow-600 dark:text-yellow-400">Connect your Google Business Profile in Settings â†’ Integrations to manage reviews, posts, and insights.</p></div>
         </div>
       ) : (
         <div className="mb-6 p-4 rounded-xl flex items-center gap-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
           <CheckCircle className="text-green-600 dark:text-green-400" size={24} />
-          <div><p className="font-medium text-green-800 dark:text-green-300">Business Verified ✓</p><p className="text-sm text-green-600 dark:text-green-400">Your Google Business Profile is connected</p></div>
+          <div><p className="font-medium text-green-800 dark:text-green-300">Business Verified âœ“</p><p className="text-sm text-green-600 dark:text-green-400">Your Google Business Profile is connected</p></div>
         </div>
       )}
 
       {view === 'profile' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
               <div className="flex items-start justify-between mb-4">
-                <div><h2 className="text-2xl font-bold text-gray-900 dark:text-white">{business?.name || 'Your Business'}</h2><p className="text-gray-500 dark:text-gray-400">{business?.type || 'Business'}</p></div>
+                <div><h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{business?.name || 'Your Business'}</h2><p className="text-gray-500 dark:text-gray-400">{business?.type || 'Business'}</p></div>
                 <button onClick={() => setEditOpen(true)} className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"><Edit3 size={14} /> Edit</button>
               </div>
               <p className="text-gray-700 dark:text-gray-300 mb-4">{editForm.description || `${business?.name || 'Your business'} - powered by BizzAuto`}</p>
@@ -257,20 +257,20 @@ const GoogleBusinessPage: React.FC = () => {
                 <div className="flex items-start gap-3"><Camera size={18} className="text-gray-400 mt-0.5 shrink-0" /><div><p className="text-sm font-medium text-gray-900 dark:text-white">Photos</p><p className="text-sm text-gray-500 dark:text-gray-400">Manage via Google Business</p></div></div>
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Clock size={18} /> Business Hours</h3>
               <div className="space-y-2">{DAYS.map(d => <div key={d} className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-gray-700 last:border-0"><span className="text-sm font-medium text-gray-900 dark:text-white w-16">{d}</span><span className="text-sm text-gray-600 dark:text-gray-400">09:00 - 18:00</span></div>)}</div>
               <p className="text-xs text-gray-400 mt-3">Configure hours in Google Business Profile settings</p>
             </div>
           </div>
           <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 text-center">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700 text-center">
               <div className="text-5xl font-bold text-gray-900 dark:text-white mb-1">{avgRating}</div>
               <Stars r={Math.round(Number(avgRating))} />
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{reviews.length} reviews</p>
-              {reviews.length > 0 && <button onClick={() => setView('reviews')} className="mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline">View all reviews →</button>}
+              {reviews.length > 0 && <button onClick={() => setView('reviews')} className="mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline">View all reviews â†’</button>}
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
               <div className="space-y-2">
                 <button onClick={() => setPostOpen(true)} className="w-full flex items-center gap-2 px-4 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 text-sm font-medium"><Plus size={16} /> Create Post</button>
@@ -285,7 +285,7 @@ const GoogleBusinessPage: React.FC = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-gray-700 text-center">
-              <div className="text-4xl font-bold text-gray-900 dark:text-white">{avgRating}</div>
+              <div className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">{avgRating}</div>
               <Stars r={Math.round(Number(avgRating))} />
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{reviews.length} total reviews</p>
             </div>
@@ -294,13 +294,13 @@ const GoogleBusinessPage: React.FC = () => {
               {[5, 4, 3, 2, 1].map(r => {
                 const count = reviews.filter(rv => rv.rating === r).length;
                 const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
-                return <div key={r} className="flex items-center gap-2 mb-1.5"><span className="text-xs text-gray-600 dark:text-gray-400 w-6">{r}⭐</span><div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2"><div className="bg-blue-500 h-2 rounded-full" style={{ width: `${pct}%` }} /></div><span className="text-xs text-gray-500 dark:text-gray-400 w-6">{count}</span></div>;
+                return <div key={r} className="flex items-center gap-2 mb-1.5"><span className="text-xs text-gray-600 dark:text-gray-400 w-6">{r}â­</span><div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2"><div className="bg-blue-500 h-2 rounded-full" style={{ width: `${pct}%` }} /></div><span className="text-xs text-gray-500 dark:text-gray-400 w-6">{count}</span></div>;
               })}
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-gray-700">
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Response Rate</h4>
-              <div className="text-center"><div className="text-4xl font-bold text-green-600 dark:text-green-400">{reviews.length > 0 ? Math.round((repliedCount / reviews.length) * 100) : 0}%</div><p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{repliedCount} of {reviews.length} replied</p></div>
-              {reviews.filter(r => !r.replied).length > 0 && <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"><p className="text-xs text-yellow-700 dark:text-yellow-400">⚠️ {reviews.filter(r => !r.replied).length} review(s) awaiting reply</p></div>}
+              <div className="text-center"><div className="text-3xl sm:text-4xl font-bold text-green-600 dark:text-green-400">{reviews.length > 0 ? Math.round((repliedCount / reviews.length) * 100) : 0}%</div><p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{repliedCount} of {reviews.length} replied</p></div>
+              {reviews.filter(r => !r.replied).length > 0 && <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"><p className="text-xs text-yellow-700 dark:text-yellow-400">âš ï¸ {reviews.filter(r => !r.replied).length} review(s) awaiting reply</p></div>}
             </div>
           </div>
           {reviews.length === 0 ? (
@@ -346,7 +346,7 @@ const GoogleBusinessPage: React.FC = () => {
               {posts.map(p => (
                 <div key={p.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-gray-700">
                   <div className="flex items-center justify-between mb-3">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${p.type === 'offer' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : p.type === 'event' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'}`}>{p.type === 'offer' ? '🏷️ Offer' : p.type === 'event' ? '📅 Event' : '📝 Update'}</span>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${p.type === 'offer' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : p.type === 'event' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'}`}>{p.type === 'offer' ? 'ðŸ·ï¸ Offer' : p.type === 'event' ? 'ðŸ“… Event' : 'ðŸ“ Update'}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${p.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>{p.status}</span>
                   </div>
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-2">{p.title}</h4>
@@ -389,7 +389,7 @@ const GoogleBusinessPage: React.FC = () => {
           ) : (
             <>
               {/* Auto-Post Settings */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
@@ -473,7 +473,7 @@ const GoogleBusinessPage: React.FC = () => {
                   <button
                     onClick={handleSaveAutoPostConfig}
                     disabled={savingConfig}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                    className="px-4 sm:px-5 md:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                   >
                     {savingConfig && <Loader2 size={14} className="animate-spin" />}
                     Save Settings
@@ -482,7 +482,7 @@ const GoogleBusinessPage: React.FC = () => {
               </div>
 
               {/* Post Templates */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     <MessageSquare size={18} className="inline mr-2" /> Post Templates
@@ -496,7 +496,7 @@ const GoogleBusinessPage: React.FC = () => {
                 </div>
 
                 {autoPostConfig.templates.length === 0 ? (
-                  <div className="text-center py-8 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div className="text-center py-4 sm:py-6 md:py-8 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <MessageSquare size={40} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
                     <p className="text-gray-500 dark:text-gray-400">No templates yet. Add your first template to start auto-posting!</p>
                   </div>
@@ -514,7 +514,7 @@ const GoogleBusinessPage: React.FC = () => {
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{template.content}</p>
                             {template.mediaUrl && (
-                              <p className="text-xs text-gray-400 mt-1">📎 Has media attachment</p>
+                              <p className="text-xs text-gray-400 mt-1">ðŸ“Ž Has media attachment</p>
                             )}
                           </div>
                           <div className="flex items-center gap-2 ml-4">
@@ -543,7 +543,7 @@ const GoogleBusinessPage: React.FC = () => {
               </div>
 
               {/* Quick Actions */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
                 <div className="flex flex-wrap gap-3">
                   <button
@@ -561,7 +561,7 @@ const GoogleBusinessPage: React.FC = () => {
                   </button>
                 </div>
                 <p className="text-xs text-gray-400 mt-3">
-                  💡 Tip: Create multiple templates and they will rotate daily for variety!
+                  ðŸ’¡ Tip: Create multiple templates and they will rotate daily for variety!
                 </p>
               </div>
             </>
@@ -572,19 +572,19 @@ const GoogleBusinessPage: React.FC = () => {
       {editOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setEditOpen(false)}>
           <div className="fixed inset-0 bg-black/50" />
-          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between rounded-t-xl z-10">
+          <div className="relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-4 flex items-center justify-between rounded-t-xl z-10">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Business Profile</h2>
               <button onClick={() => setEditOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><XCircle size={20} className="text-gray-500" /></button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-5 md:p-6 space-y-4">
               <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Name</label><input type="text" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" /></div>
               <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label><input type="text" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" /></div>
               <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Website</label><input type="text" value={editForm.website} onChange={e => setEditForm({ ...editForm, website: e.target.value })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" /></div>
               <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label><textarea value={editForm.description} onChange={e => setEditForm({ ...editForm, description: e.target.value })} rows={3} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none" /></div>
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
                 <button onClick={() => setEditOpen(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
-                <button onClick={() => { setEditOpen(false); toast_('Profile updated!'); }} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
+                <button onClick={() => { setEditOpen(false); toast_('Profile updated!'); }} className="px-4 sm:px-5 md:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
               </div>
             </div>
           </div>
@@ -594,20 +594,20 @@ const GoogleBusinessPage: React.FC = () => {
       {replyOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setReplyOpen(null)}>
           <div className="fixed inset-0 bg-black/50" />
-          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+          <div className="relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="border-b border-gray-100 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Reply to Review</h2>
               <button onClick={() => setReplyOpen(null)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><XCircle size={20} className="text-gray-500" /></button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-5 md:p-6 space-y-4">
               <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <p className="text-sm text-gray-700 dark:text-gray-300">{reviews.find(r => r.id === replyOpen)?.text}</p>
-                <p className="text-xs text-gray-400 mt-1">— {reviews.find(r => r.id === replyOpen)?.author}</p>
+                <p className="text-xs text-gray-400 mt-1">â€” {reviews.find(r => r.id === replyOpen)?.author}</p>
               </div>
               <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your Reply</label><textarea value={replyTxt} onChange={e => setReplyTxt(e.target.value)} rows={3} placeholder="Write your response..." className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none" /></div>
               <div className="flex justify-end gap-3">
                 <button onClick={() => setReplyOpen(null)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
-                <button onClick={() => handleReply(replyOpen)} disabled={replying || !replyTxt.trim()} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">{replying && <Loader2 size={14} className="animate-spin" />} Post Reply</button>
+                <button onClick={() => handleReply(replyOpen)} disabled={replying || !replyTxt.trim()} className="px-4 sm:px-5 md:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">{replying && <Loader2 size={14} className="animate-spin" />} Post Reply</button>
               </div>
             </div>
           </div>
@@ -617,18 +617,18 @@ const GoogleBusinessPage: React.FC = () => {
       {postOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setPostOpen(false)}>
           <div className="fixed inset-0 bg-black/50" />
-          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
-            <div className="border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+          <div className="relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
+            <div className="border-b border-gray-100 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Create Post</h2>
               <button onClick={() => setPostOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><XCircle size={20} className="text-gray-500" /></button>
             </div>
-            <div className="p-6 space-y-4">
-              <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Post Type</label><select value={newPost.type} onChange={e => setNewPost({ ...newPost, type: e.target.value })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"><option value="update">📝 Update</option><option value="offer">🏷️ Offer</option><option value="event">📅 Event</option></select></div>
+            <div className="p-4 sm:p-5 md:p-6 space-y-4">
+              <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Post Type</label><select value={newPost.type} onChange={e => setNewPost({ ...newPost, type: e.target.value })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"><option value="update">ðŸ“ Update</option><option value="offer">ðŸ·ï¸ Offer</option><option value="event">ðŸ“… Event</option></select></div>
               <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label><input type="text" value={newPost.title} onChange={e => setNewPost({ ...newPost, title: e.target.value })} placeholder="Post title" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" /></div>
               <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label><textarea value={newPost.content} onChange={e => setNewPost({ ...newPost, content: e.target.value })} rows={3} placeholder="Write your post content..." className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none" /></div>
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
                 <button onClick={() => setPostOpen(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
-                <button onClick={handleCreatePost} disabled={creating || !newPost.title.trim()} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">{creating && <Loader2 size={14} className="animate-spin" />} Create Post</button>
+                <button onClick={handleCreatePost} disabled={creating || !newPost.title.trim()} className="px-4 sm:px-5 md:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">{creating && <Loader2 size={14} className="animate-spin" />} Create Post</button>
               </div>
             </div>
           </div>
@@ -639,14 +639,14 @@ const GoogleBusinessPage: React.FC = () => {
       {templateOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setTemplateOpen(false)}>
           <div className="fixed inset-0 bg-black/50" />
-          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
-            <div className="border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+          <div className="relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
+            <div className="border-b border-gray-100 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {editingTemplate ? 'Edit Template' : 'Add Template'}
               </h2>
               <button onClick={() => setTemplateOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><XCircle size={20} className="text-gray-500" /></button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-5 md:p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template Name</label>
                 <input
@@ -683,7 +683,7 @@ const GoogleBusinessPage: React.FC = () => {
                 <button
                   onClick={handleSaveTemplate}
                   disabled={!templateForm.name.trim() || !templateForm.content.trim()}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                  className="px-4 sm:px-5 md:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                 >
                   {editingTemplate ? 'Update' : 'Add'} Template
                 </button>

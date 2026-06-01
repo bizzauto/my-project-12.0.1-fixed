@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+﻿import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search, Plus, Filter, Download, MoreVertical, Mail, Phone, Tag, Edit3, Trash2, Eye, UserPlus, Upload, DollarSign,
   TrendingUp, Calendar, Clock, MessageSquare, FileText, Bell, CheckCircle, X, Star, Activity, ArrowUp, ArrowDown,
@@ -215,7 +215,7 @@ const demoContacts: Contact[] = [
   },
   { id: '2', name: 'Priya Patel', phone: '+91 87654 32109', email: 'priya@example.com', company: 'Digital Marketing Co', tags: ['New', 'Startup'], stage: 'New Lead', dealValue: 45000, lastActivity: '5 hours ago', avatar: 'PP', createdAt: '1/12/2024', leadScore: 'warm', source: 'IndiaMART', address: 'Delhi, India', website: 'digitalmarketing.co' },
   { id: '3', name: 'Amit Kumar', phone: '+91 76543 21098', email: 'amit@example.com', company: 'Global Traders', tags: ['Follow up', 'Decision Maker'], stage: 'Contacted', dealValue: 120000, lastActivity: '1 day ago', avatar: 'AK', createdAt: '1/5/2024', leadScore: 'hot', source: 'Referral' },
-  { id: '4', name: 'Sneha Gupta', phone: '+91 65432 10987', email: 'sneha@example.com', company: 'Fashion Hub', tags: ['Urgent', 'High Value'], stage: 'Negotiation', dealValue: 200000, lastActivity: '3 hours ago', avatar: 'SG', createdAt: '12/28/2023', leadScore: 'hot', source: 'Website', customFields: [{ key: 'Annual Revenue', value: '₹5Cr+' }] },
+  { id: '4', name: 'Sneha Gupta', phone: '+91 65432 10987', email: 'sneha@example.com', company: 'Fashion Hub', tags: ['Urgent', 'High Value'], stage: 'Negotiation', dealValue: 200000, lastActivity: '3 hours ago', avatar: 'SG', createdAt: '12/28/2023', leadScore: 'hot', source: 'Website', customFields: [{ key: 'Annual Revenue', value: 'â‚¹5Cr+' }] },
   { id: '5', name: 'Vikram Singh', phone: '+91 54321 09876', email: 'vikram@example.com', company: 'Auto Parts Ltd', tags: ['Partner'], stage: 'Won', dealValue: 350000, lastActivity: '1 week ago', avatar: 'VS', createdAt: '12/15/2023', leadScore: 'warm', source: 'Google Ads' },
   { id: '6', name: 'Neha Joshi', phone: '+91 43210 98765', email: 'neha@example.com', company: 'HealthFirst Clinic', tags: ['New'], stage: 'New Lead', dealValue: 65000, lastActivity: '30 min ago', avatar: 'NJ', createdAt: '1/20/2024', leadScore: 'warm', source: 'JustDial' },
 ];
@@ -513,7 +513,7 @@ export default function CRMPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="p-4 sm:p-5 md:p-6 space-y-6">
       {/* Toast */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white flex items-center gap-2 ${
@@ -547,14 +547,14 @@ export default function CRMPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-3">
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-gray-500 mb-1"><DollarSign size={14} /><span className="text-xs">Pipeline</span></div>
-          <p className="text-xl font-bold text-gray-900 dark:text-white">₹{(totalDealValue / 100000).toFixed(1)}L</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-white">â‚¹{(totalDealValue / 100000).toFixed(1)}L</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-green-500 mb-1"><TrendingUp size={14} /><span className="text-xs">Won</span></div>
-          <p className="text-xl font-bold text-green-600">₹{(wonDeals / 100000).toFixed(1)}L</p>
+          <p className="text-xl font-bold text-green-600">â‚¹{(wonDeals / 100000).toFixed(1)}L</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-blue-500 mb-1"><Users size={14} /><span className="text-xs">Contacts</span></div>
@@ -562,11 +562,11 @@ export default function CRMPage() {
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-green-500 mb-1"><BarChart3 size={14} /><span className="text-xs">Revenue</span></div>
-          <p className="text-xl font-bold text-green-600">₹{(totalRevenue / 100000).toFixed(1)}L</p>
+          <p className="text-xl font-bold text-green-600">â‚¹{(totalRevenue / 100000).toFixed(1)}L</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-red-500 mb-1"><ArrowDown size={14} /><span className="text-xs">Expenses</span></div>
-          <p className="text-xl font-bold text-red-600">₹{(totalExpenses / 100000).toFixed(1)}L</p>
+          <p className="text-xl font-bold text-red-600">â‚¹{(totalExpenses / 100000).toFixed(1)}L</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-purple-500 mb-1"><Target size={14} /><span className="text-xs">Goals</span></div>
@@ -674,13 +674,13 @@ export default function CRMPage() {
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">{contact.name}</p>
-                              <p className="text-xs text-gray-500">{contact.email} • {contact.phone}</p>
+                              <p className="text-xs text-gray-500">{contact.email} â€¢ {contact.phone}</p>
                             </div>
                           </div>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 hidden md:table-cell">{contact.company}</td>
                         <td className="px-4 py-3"><StageBadge stage={contact.stage} /></td>
-                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">₹{contact.dealValue.toLocaleString()}</td>
+                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">â‚¹{contact.dealValue.toLocaleString()}</td>
                         <td className="px-4 py-3 hidden lg:table-cell"><LeadScoreBadge score={contact.leadScore} /></td>
                         <td className="px-4 py-3 hidden lg:table-cell">
                           <span className="text-xs text-gray-500">{contact.source || 'Direct'}</span>
@@ -733,7 +733,7 @@ export default function CRMPage() {
                   <div className="space-y-1.5 text-sm text-gray-600 dark:text-gray-400 mb-3">
                     <p className="flex items-center gap-1.5"><Mail size={13} /> {contact.email}</p>
                     <p className="flex items-center gap-1.5"><Phone size={13} /> {contact.phone}</p>
-                    <p className="flex items-center gap-1.5"><DollarSign size={13} /> ₹{contact.dealValue.toLocaleString()}</p>
+                    <p className="flex items-center gap-1.5"><DollarSign size={13} /> â‚¹{contact.dealValue.toLocaleString()}</p>
                   </div>
                   <div className="flex items-center justify-between">
                     <StageBadge stage={contact.stage} />
@@ -757,7 +757,7 @@ export default function CRMPage() {
                     <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{stage.name}</h3>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-gray-500">{stage.deals.length}</span>
-                      <span className="text-xs text-gray-400">₹{stage.total.toLocaleString()}</span>
+                      <span className="text-xs text-gray-400">â‚¹{stage.total.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -781,7 +781,7 @@ export default function CRMPage() {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-gray-900 dark:text-white truncate flex-1">{deal.title}</span>
-                        <span className="text-xs font-bold text-green-600 ml-2">₹{deal.value.toLocaleString()}</span>
+                        <span className="text-xs font-bold text-green-600 ml-2">â‚¹{deal.value.toLocaleString()}</span>
                       </div>
                       <p className="text-xs text-gray-500 mb-2">{deal.contactName}</p>
                       <div className="flex items-center justify-between">
@@ -823,7 +823,7 @@ export default function CRMPage() {
                 <p className="text-sm text-gray-500 mb-2">{deal.contactName}</p>
                 {deal.notes && <p className="text-xs text-gray-400 mb-3 italic">{deal.notes}</p>}
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
-                  <span className="text-xl font-bold text-green-600">₹{deal.value.toLocaleString()}</span>
+                  <span className="text-xl font-bold text-green-600">â‚¹{deal.value.toLocaleString()}</span>
                   <span className="text-xs text-gray-400">Close: {new Date(deal.expectedClose).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                 </div>
                 {deal.products && (
@@ -831,8 +831,8 @@ export default function CRMPage() {
                     <p className="text-xs font-medium text-gray-500 mb-1">Products:</p>
                     {deal.products.map((p, i) => (
                       <div key={i} className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                        <span>{p.name} × {p.quantity}</span>
-                        <span>₹{p.price.toLocaleString()}</span>
+                        <span>{p.name} Ã— {p.quantity}</span>
+                        <span>â‚¹{p.price.toLocaleString()}</span>
                       </div>
                     ))}
                   </div>
@@ -871,10 +871,10 @@ export default function CRMPage() {
                         {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500">{invoice.customerName} • {invoice.customerEmail}</p>
+                    <p className="text-sm text-gray-500">{invoice.customerName} â€¢ {invoice.customerEmail}</p>
                   </div>
                 </div>
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">₹{invoice.total.toLocaleString()}</span>
+                <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">â‚¹{invoice.total.toLocaleString()}</span>
               </div>
 
               {/* Items */}
@@ -893,15 +893,15 @@ export default function CRMPage() {
                       <tr key={i}>
                         <td className="py-2 text-gray-700 dark:text-gray-300">{item.description}</td>
                         <td className="py-2 text-center text-gray-600">{item.quantity}</td>
-                        <td className="py-2 text-right text-gray-600">₹{item.rate.toLocaleString()}</td>
-                        <td className="py-2 text-right font-medium">₹{item.amount.toLocaleString()}</td>
+                        <td className="py-2 text-right text-gray-600">â‚¹{item.rate.toLocaleString()}</td>
+                        <td className="py-2 text-right font-medium">â‚¹{item.amount.toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot className="border-t-2 border-gray-300 dark:border-gray-500">
-                    <tr><td colSpan={3} className="pt-2 text-right text-gray-500">Subtotal:</td><td className="pt-2 text-right">₹{invoice.subtotal.toLocaleString()}</td></tr>
-                    <tr><td colSpan={3} className="text-right text-gray-500">Tax:</td><td className="text-right">₹{invoice.tax.toLocaleString()}</td></tr>
-                    <tr className="font-bold"><td colSpan={3} className="text-right text-gray-900 dark:text-white">Total:</td><td className="text-right text-gray-900 dark:text-white">₹{invoice.total.toLocaleString()}</td></tr>
+                    <tr><td colSpan={3} className="pt-2 text-right text-gray-500">Subtotal:</td><td className="pt-2 text-right">â‚¹{invoice.subtotal.toLocaleString()}</td></tr>
+                    <tr><td colSpan={3} className="text-right text-gray-500">Tax:</td><td className="text-right">â‚¹{invoice.tax.toLocaleString()}</td></tr>
+                    <tr className="font-bold"><td colSpan={3} className="text-right text-gray-900 dark:text-white">Total:</td><td className="text-right text-gray-900 dark:text-white">â‚¹{invoice.total.toLocaleString()}</td></tr>
                   </tfoot>
                 </table>
               </div>
@@ -941,17 +941,17 @@ export default function CRMPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-5 rounded-xl border border-green-200 dark:border-green-800">
               <p className="text-sm text-green-600 dark:text-green-400 mb-1">Total Income</p>
-              <p className="text-3xl font-bold text-green-600">₹{totalRevenue.toLocaleString()}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-green-600">â‚¹{totalRevenue.toLocaleString()}</p>
               <p className="text-xs text-green-500 mt-1 flex items-center gap-1"><ArrowUp size={12} /> 12% vs last month</p>
             </div>
             <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 p-5 rounded-xl border border-red-200 dark:border-red-800">
               <p className="text-sm text-red-600 dark:text-red-400 mb-1">Total Expenses</p>
-              <p className="text-3xl font-bold text-red-600">₹{totalExpenses.toLocaleString()}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-red-600">â‚¹{totalExpenses.toLocaleString()}</p>
               <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><ArrowUp size={12} /> 5% vs last month</p>
             </div>
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-5 rounded-xl border border-blue-200 dark:border-blue-800">
               <p className="text-sm text-blue-600 dark:text-blue-400 mb-1">Net Profit</p>
-              <p className="text-3xl font-bold text-blue-600">₹{(totalRevenue - totalExpenses).toLocaleString()}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-blue-600">â‚¹{(totalRevenue - totalExpenses).toLocaleString()}</p>
               <p className="text-xs text-blue-500 mt-1 flex items-center gap-1">Profit Margin: {totalRevenue > 0 ? Math.round(((totalRevenue - totalExpenses) / totalRevenue) * 100) : 0}%</p>
             </div>
           </div>
@@ -973,16 +973,16 @@ export default function CRMPage() {
                       <p className="font-medium text-gray-900 dark:text-white">{entry.description}</p>
                       <div className="flex items-center gap-2 text-xs text-gray-500">
                         <span>{entry.category}</span>
-                        <span>•</span>
+                        <span>â€¢</span>
                         <span>{entry.date}</span>
-                        {entry.paymentMethod && <><span>•</span><span className="capitalize">{entry.paymentMethod}</span></>}
-                        {entry.recurring && <><span>•</span><span className="text-blue-500">🔄 Recurring</span></>}
+                        {entry.paymentMethod && <><span>â€¢</span><span className="capitalize">{entry.paymentMethod}</span></>}
+                        {entry.recurring && <><span>â€¢</span><span className="text-blue-500">ðŸ”„ Recurring</span></>}
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className={`font-bold ${entry.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                      {entry.type === 'income' ? '+' : '-'}₹{entry.amount.toLocaleString()}
+                      {entry.type === 'income' ? '+' : '-'}â‚¹{entry.amount.toLocaleString()}
                     </p>
                     {entry.reference && <p className="text-xs text-gray-400">Ref: {entry.reference}</p>}
                   </div>
@@ -1060,7 +1060,7 @@ export default function CRMPage() {
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{goal.title}</h3>
                   <p className="text-sm text-gray-500 mb-3 capitalize">{goal.period} target</p>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-500">₹{goal.current.toLocaleString()} / ₹{goal.target.toLocaleString()}</span>
+                    <span className="text-sm text-gray-500">â‚¹{goal.current.toLocaleString()} / â‚¹{goal.target.toLocaleString()}</span>
                     <span className="text-xs text-gray-400">{goal.progress}%</span>
                   </div>
                   <div className="w-full h-2.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
@@ -1090,7 +1090,7 @@ export default function CRMPage() {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white">{rule.name}</p>
-                      <p className="text-sm text-gray-500">"{rule.trigger}" → {rule.action}</p>
+                      <p className="text-sm text-gray-500">"{rule.trigger}" â†’ {rule.action}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -1120,7 +1120,7 @@ export default function CRMPage() {
 
       {/* ================== QUICK NOTE MODAL ================== */}
       {showQuickNoteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">Quick Note</h2>
@@ -1165,17 +1165,17 @@ const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = 
   const [activeTab, setActiveTab] = useState<'overview' | 'notes' | 'tasks' | 'activities' | 'deals'>('overview');
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] sm:max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 sm:p-5 md:p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-2xl">
                 {contact.avatar}
               </div>
               <div className="text-white">
-                <h2 className="text-2xl font-bold">{contact.name}</h2>
+                <h2 className="text-xl sm:text-2xl font-bold">{contact.name}</h2>
                 <p className="text-blue-100">{contact.company}</p>
               </div>
             </div>
@@ -1186,7 +1186,7 @@ const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = 
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 dark:border-gray-700 px-6">
+        <div className="border-b border-gray-200 dark:border-gray-700 px-4 sm:px-5 md:px-6">
           <div className="flex gap-4">
             {(['overview', 'notes', 'tasks', 'activities', 'deals'] as const).map(tab => (
               <button
@@ -1204,7 +1204,7 @@ const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = 
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-5 md:p-6">
           {activeTab === 'overview' && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
@@ -1212,7 +1212,7 @@ const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = 
                 <div><p className="text-xs text-gray-500 uppercase mb-1">Phone</p><p className="font-medium flex items-center gap-1"><Phone size={14} /> {contact.phone}</p></div>
                 {contact.address && <div><p className="text-xs text-gray-500 uppercase mb-1">Address</p><p className="font-medium flex items-center gap-1"><MapPin size={14} /> {contact.address}</p></div>}
                 {contact.website && <div><p className="text-xs text-gray-500 uppercase mb-1">Website</p><p className="font-medium flex items-center gap-1"><Globe size={14} /> {contact.website}</p></div>}
-                <div><p className="text-xs text-gray-500 uppercase mb-1">Deal Value</p><p className="font-bold text-green-600 text-xl">₹{contact.dealValue.toLocaleString()}</p></div>
+                <div><p className="text-xs text-gray-500 uppercase mb-1">Deal Value</p><p className="font-bold text-green-600 text-xl">â‚¹{contact.dealValue.toLocaleString()}</p></div>
                 <div><p className="text-xs text-gray-500 uppercase mb-1">Lead Score</p><LeadScoreBadge score={contact.leadScore} /></div>
                 <div><p className="text-xs text-gray-500 uppercase mb-1">Source</p><p className="font-medium">{contact.source || 'Direct'}</p></div>
                 <div><p className="text-xs text-gray-500 uppercase mb-1">Created</p><p className="font-medium">{contact.createdAt}</p></div>
@@ -1264,7 +1264,7 @@ const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = 
                   <p className="text-sm text-gray-700 dark:text-gray-300">{note.content}</p>
                 </div>
               )) : (
-                <p className="text-center text-gray-500 py-8">No notes yet</p>
+                <p className="text-center text-gray-500 py-4 sm:py-6 md:py-8">No notes yet</p>
               )}
             </div>
           )}
@@ -1284,8 +1284,8 @@ const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = 
                         }`}>
                           <Flag size={10} /> {task.priority}
                         </span>
-                        {task.category && <span>• {task.category}</span>}
-                        <span>• Due: {task.dueDate}</span>
+                        {task.category && <span>â€¢ {task.category}</span>}
+                        <span>â€¢ Due: {task.dueDate}</span>
                       </div>
                     </div>
                   </div>
@@ -1294,7 +1294,7 @@ const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = 
                   </div>
                 </div>
               )) : (
-                <p className="text-center text-gray-500 py-8">No tasks assigned</p>
+                <p className="text-center text-gray-500 py-4 sm:py-6 md:py-8">No tasks assigned</p>
               )}
             </div>
           )}
@@ -1316,18 +1316,18 @@ const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = 
                     {act.description && <p className="text-xs text-gray-500 mt-0.5">{act.description}</p>}
                     <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
                       <span>{act.date}</span>
-                      {act.duration && <><span>•</span><span>{act.duration}</span></>}
+                      {act.duration && <><span>â€¢</span><span>{act.duration}</span></>}
                     </div>
                   </div>
                 </div>
               )) : (
-                <p className="text-center text-gray-500 py-8">No activity recorded</p>
+                <p className="text-center text-gray-500 py-4 sm:py-6 md:py-8">No activity recorded</p>
               )}
             </div>
           )}
 
           {activeTab === 'deals' && (
-            <p className="text-center text-gray-500 py-8">Deal history for this contact</p>
+            <p className="text-center text-gray-500 py-4 sm:py-6 md:py-8">Deal history for this contact</p>
           )}
         </div>
       </div>
@@ -1355,8 +1355,8 @@ const AddContactModal: React.FC<{ onClose: () => void; onAdd: (contact: any) => 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-800 rounded-t-2xl">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Add New Contact</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={20} /></button>
@@ -1379,10 +1379,10 @@ const AddContactModal: React.FC<{ onClose: () => void; onAdd: (contact: any) => 
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><label className="block text-sm font-medium mb-1">Stage</label><select value={form.stage} onChange={e => setForm({ ...form, stage: e.target.value })} className="w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-gray-700">{['New Lead','Contacted','Qualified','Proposal','Negotiation','Won','Lost'].map(s => <option key={s}>{s}</option>)}</select></div>
-            <div><label className="block text-sm font-medium mb-1">Lead Score</label><select value={form.leadScore} onChange={e => setForm({ ...form, leadScore: e.target.value })} className="w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-gray-700"><option value="hot">🔥 Hot</option><option value="warm">💡 Warm</option><option value="cold">❄️ Cold</option></select></div>
+            <div><label className="block text-sm font-medium mb-1">Lead Score</label><select value={form.leadScore} onChange={e => setForm({ ...form, leadScore: e.target.value })} className="w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-gray-700"><option value="hot">ðŸ”¥ Hot</option><option value="warm">ðŸ’¡ Warm</option><option value="cold">â„ï¸ Cold</option></select></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="block text-sm font-medium mb-1">Deal Value (₹)</label><input type="number" value={form.dealValue} onChange={e => setForm({ ...form, dealValue: e.target.value })} className="w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-gray-700" /></div>
+            <div><label className="block text-sm font-medium mb-1">Deal Value (â‚¹)</label><input type="number" value={form.dealValue} onChange={e => setForm({ ...form, dealValue: e.target.value })} className="w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-gray-700" /></div>
             <div><label className="block text-sm font-medium mb-1">Website</label><input type="text" value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} className="w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-gray-700" /></div>
           </div>
           <div><label className="block text-sm font-medium mb-1">Address</label><input type="text" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className="w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-gray-700" /></div>
@@ -1420,8 +1420,8 @@ const AddDealModal: React.FC<{ contacts: any[]; onClose: () => void; onAdd: (dea
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <h2 className="text-lg font-bold">New Deal</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X size={20} /></button>
@@ -1430,7 +1430,7 @@ const AddDealModal: React.FC<{ contacts: any[]; onClose: () => void; onAdd: (dea
           <div><label className="text-sm font-medium mb-1 block">Deal Title *</label><input type="text" value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full px-3 py-2.5 border rounded-xl" /></div>
           <div><label className="text-sm font-medium mb-1 block">Contact</label><select value={form.contactId} onChange={e => setForm({...form, contactId: e.target.value})} className="w-full px-3 py-2.5 border rounded-xl"><option value="">Select contact</option>{contacts.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-sm font-medium mb-1 block">Value (₹) *</label><input type="number" value={form.value} onChange={e => setForm({...form, value: e.target.value})} className="w-full px-3 py-2.5 border rounded-xl" /></div>
+            <div><label className="text-sm font-medium mb-1 block">Value (â‚¹) *</label><input type="number" value={form.value} onChange={e => setForm({...form, value: e.target.value})} className="w-full px-3 py-2.5 border rounded-xl" /></div>
             <div><label className="text-sm font-medium mb-1 block">Probability %</label><input type="number" min={0} max={100} value={form.probability} onChange={e => setForm({...form, probability: parseInt(e.target.value)})} className="w-full px-3 py-2.5 border rounded-xl" /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -1467,8 +1467,8 @@ const InvoiceModal: React.FC<{ contacts: any[]; onClose: () => void; onCreate: (
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-800 rounded-t-2xl">
           <h2 className="text-lg font-bold">Create Invoice</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X size={20} /></button>
@@ -1482,7 +1482,7 @@ const InvoiceModal: React.FC<{ contacts: any[]; onClose: () => void; onCreate: (
                 <input type="text" placeholder="Description" value={item.description} onChange={e => updateItem(i, 'description', e.target.value)} className="col-span-5 px-3 py-2 border rounded-lg text-sm" />
                 <input type="number" placeholder="Qty" value={item.quantity} onChange={e => updateItem(i, 'quantity', parseInt(e.target.value) || 1)} className="col-span-2 px-3 py-2 border rounded-lg text-sm" />
                 <input type="number" placeholder="Rate" value={item.rate} onChange={e => updateItem(i, 'rate', parseFloat(e.target.value) || 0)} className="col-span-3 px-3 py-2 border rounded-lg text-sm" />
-                <span className="col-span-2 flex items-center justify-end font-semibold text-sm">₹{(item.quantity * item.rate).toLocaleString()}</span>
+                <span className="col-span-2 flex items-center justify-end font-semibold text-sm">â‚¹{(item.quantity * item.rate).toLocaleString()}</span>
               </div>
             ))}
           </div>
@@ -1491,9 +1491,9 @@ const InvoiceModal: React.FC<{ contacts: any[]; onClose: () => void; onCreate: (
             <div><label className="text-sm font-medium mb-1 block">Notes</label><input type="text" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} className="w-full px-3 py-2 border rounded-xl" /></div>
           </div>
           <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-            <div className="flex justify-between text-sm text-gray-600 mb-1"><span>Subtotal:</span><span>₹{subtotal.toLocaleString()}</span></div>
-            <div className="flex justify-between text-sm text-gray-600 mb-1"><span>Tax ({form.taxRate}%):</span><span>₹{tax.toLocaleString()}</span></div>
-            <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white border-t pt-2 mt-2"><span>Total:</span><span>₹{total.toLocaleString()}</span></div>
+            <div className="flex justify-between text-sm text-gray-600 mb-1"><span>Subtotal:</span><span>â‚¹{subtotal.toLocaleString()}</span></div>
+            <div className="flex justify-between text-sm text-gray-600 mb-1"><span>Tax ({form.taxRate}%):</span><span>â‚¹{tax.toLocaleString()}</span></div>
+            <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white border-t pt-2 mt-2"><span>Total:</span><span>â‚¹{total.toLocaleString()}</span></div>
           </div>
         </div>
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
@@ -1534,8 +1534,8 @@ const AppointmentModal: React.FC<{ contacts: any[]; onClose: () => void; onCreat
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <h2 className="text-lg font-bold">Book Appointment</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X size={20} /></button>
@@ -1572,8 +1572,8 @@ const GoalModal: React.FC<{ onClose: () => void; onAdd: (goal: any) => void }> =
   const [form, setForm] = useState({ title: '', type: 'revenue', target: '', current: '0', period: 'monthly' });
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <h2 className="text-lg font-bold">New Goal</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X size={20} /></button>
@@ -1605,3 +1605,4 @@ const GoalModal: React.FC<{ onClose: () => void; onAdd: (goal: any) => void }> =
     </div>
   );
 };
+

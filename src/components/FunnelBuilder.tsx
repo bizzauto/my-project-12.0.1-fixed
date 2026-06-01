@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, GripVertical, Eye, Trash2, Copy, Layout } from 'lucide-react';
 
@@ -14,7 +14,7 @@ export default function FunnelBuilder() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
@@ -28,7 +28,7 @@ export default function FunnelBuilder() {
           </button>
         </div>
       </div>
-      <div className="p-6">
+      <div className="p-4 sm:p-5 md:p-6">
         <div className="grid gap-4">
           {funnels.map((funnel) => (
             <div key={funnel.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 flex items-center gap-4 hover:shadow-md transition-all">
@@ -38,7 +38,7 @@ export default function FunnelBuilder() {
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900 dark:text-white">{funnel.name}</h3>
-                <p className="text-sm text-gray-500">{funnel.steps} steps • {funnel.conversions} conversions</p>
+                <p className="text-sm text-gray-500">{funnel.steps} steps â€¢ {funnel.conversions} conversions</p>
               </div>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${funnel.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}`}>
                 {funnel.status}

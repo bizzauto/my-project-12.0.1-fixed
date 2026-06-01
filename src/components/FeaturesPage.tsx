@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   MessageCircle, Users, Calendar, ShoppingCart, FileText, 
@@ -97,7 +97,7 @@ export default function FeaturesPage() {
               <span className="bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent"> Grow Your Business</span>
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-8">
-              All-in-one platform with WhatsApp CRM, AI automation, marketing tools, and more — built for modern businesses.
+              All-in-one platform with WhatsApp CRM, AI automation, marketing tools, and more â€” built for modern businesses.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/register" className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold px-8 py-4 rounded-xl hover:shadow-xl hover:shadow-emerald-500/25 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
@@ -159,7 +159,7 @@ export default function FeaturesPage() {
               </div>
               <span className="font-bold text-gray-900 dark:text-white">BizzAuto</span>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">© 2026 BizzAuto. All rights reserved.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Â© 2026 BizzAuto. All rights reserved.</p>
           </div>
         </footer>
       </div>

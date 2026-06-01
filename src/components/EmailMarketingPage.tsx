@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Mail, Send, Clock, BarChart3, Users, Plus, Play, Pause, Eye, Trash2, Zap,
   MessageSquare, Settings, CheckCircle, XCircle, AlertCircle, RefreshCw,
@@ -13,7 +13,7 @@ import {
 import { emailAPI, campaignsAPI, analyticsAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface EmailTemplate {
   id: string;
   name: string;
@@ -110,7 +110,7 @@ interface SmtpConfig {
   provider: 'smtp' | 'sendgrid' | 'mailgun' | 'ses';
 }
 
-// ─── Color Constants ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Color Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
@@ -120,18 +120,18 @@ const STATUS_COLORS: Record<string, string> = {
   paused: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
 };
 
-// ─── Static Data ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ Static Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const DEMO_TEMPLATES: EmailTemplate[] = [
   { id: 't1', name: 'Welcome Series', subject: 'Welcome to {{business}}!', preview: 'Beautiful welcome email with brand intro', category: 'Onboarding', variables: ['business', 'name'], isDragEnabled: true, blocks: [] },
-  { id: 't2', name: 'Promotional', subject: '🔥 {{discount}}% Off - Limited Time!', preview: 'Eye-catching promotional campaign', category: 'Marketing', variables: ['discount', 'business'], isDragEnabled: true, blocks: [] },
+  { id: 't2', name: 'Promotional', subject: 'ðŸ”¥ {{discount}}% Off - Limited Time!', preview: 'Eye-catching promotional campaign', category: 'Marketing', variables: ['discount', 'business'], isDragEnabled: true, blocks: [] },
   { id: 't3', name: 'Newsletter', subject: '{{business}} Monthly Update', preview: 'Monthly newsletter with updates and offers', category: 'Content', variables: ['business', 'month'], isDragEnabled: true, blocks: [] },
   { id: 't4', name: 'Re-engagement', subject: 'We Miss You, {{name}}!', preview: 'Win back inactive customers', category: 'Retention', variables: ['name', 'business'], isDragEnabled: true, blocks: [] },
-  { id: 't5', name: 'Abandoned Cart', subject: 'Your Cart is Waiting! 🛒', preview: 'Recover abandoned carts with urgency', category: 'E-Commerce', variables: ['name', 'items', 'business'], isDragEnabled: true, blocks: [] },
+  { id: 't5', name: 'Abandoned Cart', subject: 'Your Cart is Waiting! ðŸ›’', preview: 'Recover abandoned carts with urgency', category: 'E-Commerce', variables: ['name', 'items', 'business'], isDragEnabled: true, blocks: [] },
   { id: 't6', name: 'Invoice/Receipt', subject: 'Receipt for {{business}} Order', preview: 'Professional invoice template', category: 'Transactional', variables: ['business', 'order', 'amount'], isDragEnabled: true, blocks: [] },
 ];
 
 const DEMO_CAMPAIGNS: EmailCampaign[] = [
-  { id: 'c1', name: 'New Year Mega Sale', subject: '🎉 New Year Special - Up to 50% Off!', previewText: 'Start the year with amazing deals', status: 'sent', recipients: 2450, sent: 2450, delivered: 2352, opened: 857, clicked: 284, bounced: 48, unsubscribed: 12, complaints: 2, sentAt: '2025-01-01T10:00:00Z' },
+  { id: 'c1', name: 'New Year Mega Sale', subject: 'ðŸŽ‰ New Year Special - Up to 50% Off!', previewText: 'Start the year with amazing deals', status: 'sent', recipients: 2450, sent: 2450, delivered: 2352, opened: 857, clicked: 284, bounced: 48, unsubscribed: 12, complaints: 2, sentAt: '2025-01-01T10:00:00Z' },
   { id: 'c2', name: 'Product Launch', subject: 'Introducing Our New Feature', previewText: 'Check out what we built', status: 'scheduled', recipients: 3800, scheduledAt: '2025-02-15T09:00:00Z' },
   { id: 'c3', name: 'Monthly Newsletter', subject: 'February Updates Inside', previewText: 'News, tips, and exclusive offers', status: 'draft', recipients: 4200 },
   { id: 'c4', name: 'Re-engagement Campaign', subject: 'We Miss You! Come Back for 20% Off', previewText: 'Exclusive offer for loyal customers', status: 'sending', recipients: 1800, sent: 523, delivered: 510, opened: 89, clicked: 34 },
@@ -149,18 +149,18 @@ const DEMO_DRIPS: DripSequence[] = [
   { id: 'd1', name: 'New Lead Nurture', trigger: 'signup', emails: [
     { id: 'de1', subject: 'Welcome! Here\'s What to Expect', delay: 0, content: 'Welcome email content...' },
     { id: 'de2', subject: 'Tip: Get the Most Out of Our Platform', delay: 24, content: 'Tip content...' },
-    { id: 'de3', subject: 'Special Offer Inside 🎁', delay: 72, content: 'Offer content...' },
+    { id: 'de3', subject: 'Special Offer Inside ðŸŽ', delay: 72, content: 'Offer content...' },
   ], isActive: true, stats: { sent: 892, opened: 345, clicked: 123 } },
   { id: 'd2', name: 'Cart Abandonment', trigger: 'order_placed', emails: [
     { id: 'de4', subject: 'You Left Something Behind!', delay: 1, content: 'Reminder content...' },
     { id: 'de5', subject: 'Still Thinking? Here\'s 10% Off', delay: 24, content: 'Discount content...' },
   ], isActive: true, stats: { sent: 445, opened: 178, clicked: 67 } },
   { id: 'd3', name: 'Birthday Wishes', trigger: 'custom', triggerValue: 'birthday', emails: [
-    { id: 'de6', subject: 'Happy Birthday from {{business}}! 🎂', delay: 0, content: 'Birthday content...' },
+    { id: 'de6', subject: 'Happy Birthday from {{business}}! ðŸŽ‚', delay: 0, content: 'Birthday content...' },
   ], isActive: false, stats: { sent: 0, opened: 0, clicked: 0 } },
 ];
 
-// ─── Components ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; color: string }> = ({ icon, label, value, color }) => {
   const bgMap: Record<string, string> = {
@@ -175,12 +175,12 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string |
         <span className="text-sm font-medium opacity-80">{label}</span>
         {icon}
       </div>
-      <p className="text-2xl font-bold">{value}</p>
+      <p className="text-xl sm:text-2xl font-bold">{value}</p>
     </div>
   );
 };
 
-// ─── Main Page ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const EmailMarketingPage: React.FC = () => {
   const { isDemoMode } = useAuthStore();
@@ -208,7 +208,7 @@ const EmailMarketingPage: React.FC = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // ── Load data ─────────────────────────────────────────────────────
+  // â”€â”€ Load data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -256,7 +256,7 @@ const EmailMarketingPage: React.FC = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // ── Computed stats ─────────────────────────────────────────────────
+  // â”€â”€ Computed stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const emailStats = useMemo(() => {
     const totalSent = campaigns.reduce((s, c) => s + (c.sent || 0), 0);
     const totalDelivered = campaigns.reduce((s, c) => s + (c.delivered || 0), 0);
@@ -286,7 +286,7 @@ const EmailMarketingPage: React.FC = () => {
     l.name.toLowerCase().includes(searchQuery.toLowerCase())
   ), [emailLists, searchQuery]);
 
-  // ── Campaign actions ───────────────────────────────────────────────
+  // â”€â”€ Campaign actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const sendCampaign = async (id: string) => {
     setCampaigns(prev => prev.map(c => c.id === id ? { ...c, status: 'sending' } : c));
     try {
@@ -321,12 +321,12 @@ const EmailMarketingPage: React.FC = () => {
     setDrips(prev => prev.map(d => d.id === id ? { ...d, isActive: !d.isActive } : d));
   };
 
-  // ── Formatting ─────────────────────────────────────────────────────
+  // â”€â”€ Formatting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const formatPct = (v: number) => `${v.toFixed(1)}%`;
 
-  // ── Render ─────────────────────────────────────────────────────────
+  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (loading) return (
-    <div className="p-8 flex items-center justify-center min-h-[60vh]">
+    <div className="p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[60vh]">
       <div className="flex flex-col items-center gap-3">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
         <p className="text-gray-500 dark:text-gray-400">Loading email marketing...</p>
@@ -335,17 +335,17 @@ const EmailMarketingPage: React.FC = () => {
   );
 
   return (
-    <div className="p-4 md:p-8 animate-fade-in-up">
+    <div className="p-4 md:p-4 sm:p-6 md:p-8 animate-fade-in-up">
       {toast && (
         <div className={`fixed top-4 right-4 z-[100] flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white ${toast.t === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
           {toast.t === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}{toast.m}
         </div>
       )}
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+          <h1 className="text-2xl md:text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <Mail className="text-blue-600" size={28} /> Email Marketing
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Create campaigns, templates, automation sequences & track performance</p>
@@ -361,7 +361,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Stats ── */}
+      {/* â”€â”€ Stats â”€â”€ */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
         <StatCard icon={<Send size={18} />} label="Total Sent" value={(totalSent || totalRecipients).toLocaleString()} color="blue" />
         <StatCard icon={<Eye size={18} />} label="Open Rate" value={`${avgOpenRate}%`} color="green" />
@@ -371,7 +371,7 @@ const EmailMarketingPage: React.FC = () => {
         <StatCard icon={<TrendingUp size={18} />} label="Campaigns" value={campaigns.length} color="green" />
       </div>
 
-      {/* ── Tabs ── */}
+      {/* â”€â”€ Tabs â”€â”€ */}
       <div className="border-b border-gray-200 dark:border-gray-700 mb-6 overflow-x-auto">
         <div className="flex gap-1 min-w-max">
           {[
@@ -392,7 +392,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Search ── */}
+      {/* â”€â”€ Search â”€â”€ */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
         <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
@@ -400,7 +400,7 @@ const EmailMarketingPage: React.FC = () => {
           className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
       </div>
 
-      {/* ══════════════════ CAMPAIGNS ══════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CAMPAIGNS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {activeTab === 'campaigns' && (
         <div className="space-y-4">
           {filteredCampaigns.length === 0 ? (
@@ -408,7 +408,7 @@ const EmailMarketingPage: React.FC = () => {
               <Send size={48} className="mx-auto text-gray-300 mb-3" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Campaigns Yet</h3>
               <p className="text-gray-500 dark:text-gray-400 mb-4">Create your first email campaign</p>
-              <button onClick={() => setShowComposeModal(true)} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create Campaign</button>
+              <button onClick={() => setShowComposeModal(true)} className="px-4 sm:px-5 md:px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create Campaign</button>
             </div>
           ) : filteredCampaigns.map(campaign => {
             const stats = campaign.stats || {
@@ -474,7 +474,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       )}
 
-      {/* ══════════════════ TEMPLATES ══════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TEMPLATES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {activeTab === 'templates' && (
         <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -503,7 +503,7 @@ const EmailMarketingPage: React.FC = () => {
               </div>
             ))}
             {/* Add template card */}
-            <button onClick={() => setShowTemplateEditor(true)} className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 flex flex-col items-center justify-center text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-all h-full min-h-[200px]">
+            <button onClick={() => setShowTemplateEditor(true)} className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-all h-full min-h-[200px]">
               <Plus size={32} className="mb-2" />
               <span className="text-sm font-medium">Create Template</span>
               <span className="text-xs mt-1">Drag & drop editor</span>
@@ -512,7 +512,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       )}
 
-      {/* ══════════════════ LISTS ══════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LISTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {activeTab === 'lists' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredLists.map(list => (
@@ -522,7 +522,7 @@ const EmailMarketingPage: React.FC = () => {
                   <Users size={20} className="text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-2xl font-bold text-gray-900 dark:text-white">{list.contactCount.toLocaleString()}</span>
+                  <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{list.contactCount.toLocaleString()}</span>
                 </div>
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{list.name}</h3>
@@ -538,14 +538,14 @@ const EmailMarketingPage: React.FC = () => {
               </div>
             </div>
           ))}
-          <button className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 flex flex-col items-center justify-center text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-all">
+          <button className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-all">
             <Plus size={32} className="mb-2" />
             <span className="text-sm font-medium">Create List</span>
           </button>
         </div>
       )}
 
-      {/* ══════════════════ AUTOMATION (Drip Sequences) ══════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• AUTOMATION (Drip Sequences) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {activeTab === 'automation' && (
         <div className="space-y-4">
           {drips.map(drip => (
@@ -558,7 +558,7 @@ const EmailMarketingPage: React.FC = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-white">{drip.name}</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Trigger: {drip.trigger.replace('_', ' ')} {drip.triggerValue ? `(${drip.triggerValue})` : ''} • {drip.emails.length} emails
+                      Trigger: {drip.trigger.replace('_', ' ')} {drip.triggerValue ? `(${drip.triggerValue})` : ''} â€¢ {drip.emails.length} emails
                     </p>
                   </div>
                 </div>
@@ -594,13 +594,13 @@ const EmailMarketingPage: React.FC = () => {
               </div>
             </div>
           ))}
-          <button className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 flex items-center justify-center text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-all">
+          <button className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4 sm:p-5 md:p-6 flex items-center justify-center text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-all">
             <Plus size={20} className="mr-2" /> Create Automation Sequence
           </button>
         </div>
       )}
 
-      {/* ══════════════════ ANALYTICS ══════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ANALYTICS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {activeTab === 'analytics' && (
         <div className="space-y-6">
           {/* Date range selector */}
@@ -612,7 +612,7 @@ const EmailMarketingPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
             {/* Delivery Performance */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><BarChart3 size={18} className="text-blue-600" /> Campaign Performance</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={[
@@ -632,7 +632,7 @@ const EmailMarketingPage: React.FC = () => {
             </div>
 
             {/* Engagement Over Time */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><TrendingUp size={18} className="text-green-600" /> Engagement Trends</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <AreaChart data={[
@@ -653,7 +653,7 @@ const EmailMarketingPage: React.FC = () => {
             </div>
 
             {/* Device breakdown */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Smartphone size={18} className="text-purple-600" /> Device Breakdown</h3>
               <ResponsiveContainer width="100%" height={220}>
                 <RePie>
@@ -670,7 +670,7 @@ const EmailMarketingPage: React.FC = () => {
             </div>
 
             {/* Best Time */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Clock size={18} className="text-orange-600" /> Best Time to Send</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
@@ -698,11 +698,11 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       )}
 
-      {/* ══════════════════ SETTINGS ══════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SETTINGS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {activeTab === 'settings' && (
         <div className="max-w-2xl space-y-6">
           {/* SMTP Configuration */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Settings size={20} className="text-blue-600" /> SMTP Configuration</h3>
             <div className="space-y-4">
               <div>
@@ -739,7 +739,7 @@ const EmailMarketingPage: React.FC = () => {
           </div>
 
           {/* Default Settings */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Lock size={20} className="text-purple-600" /> Default Campaign Settings</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -778,7 +778,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       )}
 
-      {/* ══════════════════ COMPOSE MODAL ══════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• COMPOSE MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {showComposeModal && (
         <ComposeModal
           onClose={() => setShowComposeModal(false)}
@@ -803,7 +803,7 @@ const EmailMarketingPage: React.FC = () => {
   );
 };
 
-// ─── Compose Modal ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Compose Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ComposeModal: React.FC<{
   onClose: () => void;
   onSend: (data: any) => void;
@@ -828,7 +828,7 @@ const ComposeModal: React.FC<{
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50" onClick={onClose}>
       <div className="relative bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl max-h-[95vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">New Campaign</h2>
             <div className="flex items-center gap-1">
@@ -839,7 +839,7 @@ const ComposeModal: React.FC<{
           </div>
           <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><XCircle size={20} className="text-gray-500" /></button>
         </div>
-        <div className="p-6 space-y-5">
+        <div className="p-4 sm:p-5 md:p-6 space-y-5">
           {step === 1 && (
             <>
               <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Campaign Name *</label><input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. February Newsletter" className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-sm" /></div>
@@ -898,7 +898,7 @@ const ComposeModal: React.FC<{
                   <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Write your email content here... Use {{name}}, {{business}} for personalization." rows={8} className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none resize-none text-sm" />
                 </div>
                 <div className="flex items-center justify-between mt-2">
-                  <button onClick={() => showToast('AI content generation coming soon')} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1"><Zap size={12} /> ✨ Generate with AI</button>
+                  <button onClick={() => showToast('AI content generation coming soon')} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1"><Zap size={12} /> âœ¨ Generate with AI</button>
                   <span className="text-xs text-gray-400">{content.length} chars</span>
                 </div>
               </div>
@@ -929,8 +929,8 @@ const ComposeModal: React.FC<{
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Campaign Summary</h4>
                 <div className="space-y-1.5 text-sm">
-                  <p className="flex justify-between"><span className="text-gray-500">Name:</span><span className="font-medium text-gray-900 dark:text-white">{name || '—'}</span></p>
-                  <p className="flex justify-between"><span className="text-gray-500">Subject:</span><span className="font-medium text-gray-900 dark:text-white">{subject || '—'}</span></p>
+                  <p className="flex justify-between"><span className="text-gray-500">Name:</span><span className="font-medium text-gray-900 dark:text-white">{name || 'â€”'}</span></p>
+                  <p className="flex justify-between"><span className="text-gray-500">Subject:</span><span className="font-medium text-gray-900 dark:text-white">{subject || 'â€”'}</span></p>
                   <p className="flex justify-between"><span className="text-gray-500">Recipients:</span><span className="font-medium text-gray-900 dark:text-white">{selectedList ? `${selectedList} list` : 'All Contacts'}</span></p>
                   <p className="flex justify-between"><span className="text-gray-500">Delivery:</span><span className="font-medium text-gray-900 dark:text-white">{scheduledAt ? `Scheduled ${new Date(scheduledAt).toLocaleString()}` : 'Immediate'}</span></p>
                 </div>
@@ -945,9 +945,9 @@ const ComposeModal: React.FC<{
             </div>
             <div className="flex items-center gap-3">
               {step < 3 ? (
-                <button onClick={() => setStep((step + 1) as 1 | 2 | 3)} disabled={step === 1 && (!name || !subject)} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm">Continue</button>
+                <button onClick={() => setStep((step + 1) as 1 | 2 | 3)} disabled={step === 1 && (!name || !subject)} className="px-4 sm:px-5 md:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm">Continue</button>
               ) : (
-                <button onClick={handleSubmit} disabled={!name || !subject} className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 text-sm">
+                <button onClick={handleSubmit} disabled={!name || !subject} className="px-4 sm:px-5 md:px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 text-sm">
                   {scheduledAt ? 'Schedule Campaign' : 'Send Campaign'}
                 </button>
               )}

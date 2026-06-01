@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   MessageCircle, Search, Filter, Send, X, User, Users, Clock, CheckCircle,
   AlertCircle, Star, RefreshCw, ChevronDown, Loader, Phone, Mail, Globe,
@@ -386,7 +386,7 @@ export default function LiveChatManager() {
               </div>
               <div className="text-center p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20">
                 <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
-                  {stats.averageSatisfaction ? stats.averageSatisfaction.toFixed(1) : '–'}
+                  {stats.averageSatisfaction ? stats.averageSatisfaction.toFixed(1) : 'â€“'}
                 </p>
                 <p className="text-[10px] text-purple-600/70 dark:text-purple-400/70 font-medium">Rating</p>
               </div>
@@ -494,7 +494,7 @@ export default function LiveChatManager() {
                       </div>
                       {session.lastMessage && (
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
-                          {session.lastMessage.senderType === 'visitor' ? '' : '🤖 '}
+                          {session.lastMessage.senderType === 'visitor' ? '' : 'ðŸ¤– '}
                           {session.lastMessage.content}
                         </p>
                       )}
@@ -513,7 +513,7 @@ export default function LiveChatManager() {
       <div className={`${mobileView === 'list' ? 'hidden md:flex' : 'flex'} flex-1 flex-col min-w-0`}>
         {!selectedSession ? (
           /* Empty State */
-          <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-5 md:px-6">
             <div className="w-20 h-20 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-4">
               <MessageCircle className="w-10 h-10 text-indigo-500 dark:text-indigo-400" />
             </div>
@@ -616,7 +616,7 @@ export default function LiveChatManager() {
                               className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1"
                               style={{ backgroundColor: isBot ? '#6B7280' : '#6366F1' }}
                             >
-                              {isBot ? '🤖' : getInitials(selectedSession.visitorName || 'V')}
+                              {isBot ? 'ðŸ¤–' : getInitials(selectedSession.visitorName || 'V')}
                             </div>
                           )}
                           <div
@@ -909,7 +909,7 @@ export default function LiveChatManager() {
       ========================================== */}
       {showAssignModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <h3 className="text-base font-semibold text-gray-900 dark:text-white">Assign Agent</h3>
               <button

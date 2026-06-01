@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Star, MessageSquare, ThumbsUp, Filter, RefreshCw, ExternalLink, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '../lib/authStore';
 import { reviewsAPI } from '../lib/api';
@@ -108,7 +108,7 @@ export default function ReviewsPage() {
   };
 
   return (
-    <div className="p-4 sm:p-5 md:p-6 lg:p-8 animate-fade-in-up">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-4 sm:p-6 md:p-8 animate-fade-in-up">
       {toast && (
         <div className={`fixed top-4 right-4 z-[100] flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white ${toast.t === 'success' ? 'bg-green-500' : 'bg-red-500'
           }`}>
@@ -121,7 +121,7 @@ export default function ReviewsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Reviews</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">{business?.name || 'Your Business'} — Manage customer reviews</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">{business?.name || 'Your Business'} â€” Manage customer reviews</p>
         </div>
         <button onClick={fetchReviews} className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
           <RefreshCw size={16} /> Sync Reviews
@@ -136,9 +136,9 @@ export default function ReviewsPage() {
       ) : (
         <>
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 stagger-children">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 stagger-children">
             {/* Average Rating */}
-            <div className="modern-card rounded-xl p-6 text-center">
+            <div className="modern-card rounded-xl p-4 sm:p-5 md:p-6 text-center">
               <div className="text-5xl font-bold text-gray-900 dark:text-white mb-2">{avgRating}</div>
               <div className="flex items-center justify-center gap-1 mb-2">
                 {[1, 2, 3, 4, 5].map(s => (
@@ -149,7 +149,7 @@ export default function ReviewsPage() {
             </div>
 
             {/* Rating Distribution */}
-            <div className="modern-card rounded-xl p-6">
+            <div className="modern-card rounded-xl p-4 sm:p-5 md:p-6">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Rating Distribution</h3>
               <div className="space-y-2">
                 {ratingDist.map(r => (
@@ -166,7 +166,7 @@ export default function ReviewsPage() {
             </div>
 
             {/* Quick Stats */}
-            <div className="modern-card rounded-xl p-6">
+            <div className="modern-card rounded-xl p-4 sm:p-5 md:p-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500 dark:text-gray-400">Unreplied</span>

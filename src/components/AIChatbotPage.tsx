@@ -79,7 +79,7 @@ const AIChatbotPage: React.FC = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-80px)] animate-fade-in-up">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+      <div className="flex items-center justify-between px-4 sm:px-5 md:px-6 py-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
             <Bot size={20} className="text-white" />
@@ -144,7 +144,7 @@ const AIChatbotPage: React.FC = () => {
 
       {/* Suggestions */}
       {messages.length <= 2 && (
-        <div className="px-6 py-3 border-t border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="px-4 sm:px-5 md:px-6 py-3 border-t border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="flex items-center gap-2 mb-2"><Sparkles size={14} className="text-purple-500" /><span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Suggested prompts</span></div>
           <div className="flex flex-wrap gap-2">
             {SUGGESTIONS.map(s => (
@@ -157,7 +157,7 @@ const AIChatbotPage: React.FC = () => {
       )}
 
       {/* Input */}
-      <div className="px-6 py-4 border-t border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+      <div className="px-4 sm:px-5 md:px-6 py-4 border-t border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <button onClick={toggleVoice} className={`p-2.5 rounded-xl transition-all ${isListening ? 'bg-red-100 dark:bg-red-900/40 text-red-600 animate-pulse' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`} title="Voice input">
             {isListening ? <MicOff size={20} /> : <Mic size={20} />}

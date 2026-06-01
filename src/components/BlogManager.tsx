@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Plus, Search, FileText, Edit3, Trash2, Eye, EyeOff, Tag, Clock,
   MessageSquare, CheckCircle, XCircle, AlertCircle, RefreshCw, Loader2,
@@ -422,7 +422,7 @@ export default function BlogManager() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {view !== 'posts' && (
@@ -471,13 +471,13 @@ export default function BlogManager() {
       </div>
 
       {view === 'posts' && (
-        <div className="p-6">
+        <div className="p-4 sm:p-5 md:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Total Posts</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats?.totalPosts ?? posts.length}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats?.totalPosts ?? posts.length}</p>
                 </div>
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><FileText size={20} className="text-blue-600 dark:text-blue-400" /></div>
               </div>
@@ -486,7 +486,7 @@ export default function BlogManager() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Published</p>
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{stats?.publishedPosts ?? posts.filter(p => p.status === 'published').length}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{stats?.publishedPosts ?? posts.filter(p => p.status === 'published').length}</p>
                 </div>
                 <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"><Globe size={20} className="text-green-600 dark:text-green-400" /></div>
               </div>
@@ -495,7 +495,7 @@ export default function BlogManager() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Total Views</p>
-                  <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">{(stats?.totalViews ?? 0).toLocaleString()}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">{(stats?.totalViews ?? 0).toLocaleString()}</p>
                 </div>
                 <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg"><Eye size={20} className="text-purple-600 dark:text-purple-400" /></div>
               </div>
@@ -504,7 +504,7 @@ export default function BlogManager() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Pending Comments</p>
-                  <p className="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">{stats?.pendingComments ?? 0}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">{stats?.pendingComments ?? 0}</p>
                 </div>
                 <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg"><MessageSquare size={20} className="text-orange-600 dark:text-orange-400" /></div>
               </div>
@@ -563,19 +563,19 @@ export default function BlogManager() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
-                      <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Post</th>
-                      <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                      <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
-                      <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Views</th>
-                      <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reading</th>
-                      <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                      <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                      <th className="text-left px-4 sm:px-5 md:px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Post</th>
+                      <th className="text-left px-4 sm:px-5 md:px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                      <th className="text-left px-4 sm:px-5 md:px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                      <th className="text-left px-4 sm:px-5 md:px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Views</th>
+                      <th className="text-left px-4 sm:px-5 md:px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reading</th>
+                      <th className="text-left px-4 sm:px-5 md:px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                      <th className="text-right px-4 sm:px-5 md:px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredPosts.map(post => (
                       <tr key={post.id} className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-5 md:px-6 py-4">
                           <div className="flex items-start gap-3">
                             {post.featuredImage ? (
                               <img src={post.featuredImage} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
@@ -598,7 +598,7 @@ export default function BlogManager() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-5 md:px-6 py-4">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
                             post.status === 'published'
                               ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
@@ -608,23 +608,23 @@ export default function BlogManager() {
                             {post.status === 'published' ? 'Published' : 'Draft'}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-5 md:px-6 py-4">
                           <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {categories.find(c => c.id === post.categoryId)?.name || '—'}
+                            {categories.find(c => c.id === post.categoryId)?.name || 'â€”'}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-5 md:px-6 py-4">
                           <span className="text-sm text-gray-600 dark:text-gray-400">{(post.viewCount || 0).toLocaleString()}</span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-5 md:px-6 py-4">
                           <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <Clock size={14} /> {post.readingTime || calcReadingTime(post.content)} min
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-5 md:px-6 py-4">
                           <span className="text-sm text-gray-500 dark:text-gray-400">{formatTimeAgo(post.createdAt)}</span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-5 md:px-6 py-4">
                           <div className="flex items-center justify-end gap-1">
                             <button onClick={() => openEditor(post)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Edit">
                               <Edit3 size={15} className="text-gray-500 dark:text-gray-400" />
@@ -651,10 +651,10 @@ export default function BlogManager() {
       )}
 
       {view === 'editor' && (
-        <div className="p-6">
+        <div className="p-4 sm:p-5 md:p-6">
           <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
                 <input
                   type="text"
@@ -689,7 +689,7 @@ export default function BlogManager() {
                 />
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Excerpt</label>
                 <textarea
                   value={editorForm.excerpt}
@@ -702,7 +702,7 @@ export default function BlogManager() {
             </div>
 
             <div className="space-y-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Publishing</h3>
                 <div className="space-y-3">
                   <div>
@@ -749,7 +749,7 @@ export default function BlogManager() {
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Tags</h3>
                 <div className="flex gap-2 mb-2">
                   <input
@@ -774,7 +774,7 @@ export default function BlogManager() {
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Globe size={16} /> SEO Settings
                 </h3>
@@ -833,8 +833,8 @@ export default function BlogManager() {
       )}
 
       {view === 'categories' && (
-        <div className="p-6 max-w-3xl mx-auto">
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div className="p-4 sm:p-5 md:p-6 max-w-3xl mx-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6 mb-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{editingCategory ? 'Edit Category' : 'New Category'}</h3>
             <div className="space-y-4">
               <div>
@@ -885,18 +885,18 @@ export default function BlogManager() {
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="px-4 sm:px-5 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">All Categories</h3>
             </div>
             {categories.length === 0 ? (
-              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              <div className="p-4 sm:p-6 md:p-8 text-center text-gray-500 dark:text-gray-400">
                 <Tag size={32} className="mx-auto mb-2 text-gray-300 dark:text-gray-600" />
                 <p>No categories yet</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {categories.map(cat => (
-                  <div key={cat.id} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-750">
+                  <div key={cat.id} className="flex items-center justify-between px-4 sm:px-5 md:px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-750">
                     <div className="flex items-center gap-3">
                       <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.color || '#3B82F6' }} />
                       <div>
@@ -918,9 +918,9 @@ export default function BlogManager() {
       )}
 
       {view === 'comments' && (
-        <div className="p-6 max-w-3xl mx-auto">
+        <div className="p-4 sm:p-5 md:p-6 max-w-3xl mx-auto">
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="px-4 sm:px-5 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Comments</h3>
                 <div className="flex gap-3 text-sm">
@@ -940,7 +940,7 @@ export default function BlogManager() {
             ) : (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {comments.map(comment => (
-                  <div key={comment.id} className={`px-6 py-4 ${comment.status === 'rejected' ? 'opacity-50' : ''}`}>
+                  <div key={comment.id} className={`px-4 sm:px-5 md:px-6 py-4 ${comment.status === 'rejected' ? 'opacity-50' : ''}`}>
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">

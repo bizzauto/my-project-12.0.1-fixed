@@ -50,7 +50,7 @@ const WalletHistory: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center p-4 sm:p-4 sm:p-5 md:p-6 md:p-8">
+        <div className="flex items-center justify-center p-4 sm:p-5 md:p-6 md:p-8">
           <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
         </div>
       ) : transactions.length === 0 ? (

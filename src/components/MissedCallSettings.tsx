@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '../lib/authStore';
 import { useToast } from '../components/Toast';
 import { businessAPI } from '../lib/api';
@@ -184,7 +184,7 @@ export default function MissedCallSettings() {
   }
 
   return (
-    <div className="p-4 sm:p-5 md:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-4 sm:p-6 md:p-8 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
@@ -205,7 +205,7 @@ export default function MissedCallSettings() {
             </div>
             <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Missed</span>
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalMissedCalls.toLocaleString()}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stats.totalMissedCalls.toLocaleString()}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3 mb-3">
@@ -214,7 +214,7 @@ export default function MissedCallSettings() {
             </div>
             <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Auto-Replies Sent</span>
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.autoRepliesSent.toLocaleString()}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stats.autoRepliesSent.toLocaleString()}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3 mb-3">
@@ -223,12 +223,12 @@ export default function MissedCallSettings() {
             </div>
             <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Response Rate</span>
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.responseRate}%</p>
+          <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stats.responseRate}%</p>
         </div>
       </div>
 
       {/* Enable/Disable Toggle */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
@@ -262,7 +262,7 @@ export default function MissedCallSettings() {
           <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-start gap-3">
             <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
             <p className="text-sm text-green-800 dark:text-green-200">
-              Active — missed calls will receive an auto-reply via{' '}
+              Active â€” missed calls will receive an auto-reply via{' '}
               <strong>{settings.responseChannel === 'whatsapp' ? 'WhatsApp' : 'SMS'}</strong>.
             </p>
           </div>
@@ -270,7 +270,7 @@ export default function MissedCallSettings() {
       </div>
 
       {/* Message Template */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
           <MessageSquare className="text-blue-600" size={20} />
           Auto-Reply Message
@@ -341,7 +341,7 @@ export default function MissedCallSettings() {
       {/* Response Delay & Channel */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
         {/* Response Delay */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <Clock className="text-purple-600" size={20} />
             Response Delay
@@ -371,7 +371,7 @@ export default function MissedCallSettings() {
         </div>
 
         {/* Response Channel */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <Send className="text-emerald-600" size={20} />
             Response Channel
@@ -429,7 +429,7 @@ export default function MissedCallSettings() {
       </div>
 
       {/* Business Hours Filter */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
           <Calendar className="text-orange-600" size={20} />
           Business Hours Filter
@@ -517,7 +517,7 @@ export default function MissedCallSettings() {
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <button
           onClick={() => setShowActivity(!showActivity)}
-          className="w-full flex items-center justify-between p-6 text-left"
+          className="w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
         >
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             <Activity className="text-cyan-600" size={20} />
@@ -536,7 +536,7 @@ export default function MissedCallSettings() {
         {showActivity && (
           <div className="border-t border-gray-200 dark:border-gray-700">
             {activityLog.length === 0 ? (
-              <div className="p-8 text-center">
+              <div className="p-4 sm:p-6 md:p-8 text-center">
                 <PhoneMissed className="mx-auto text-gray-300 dark:text-gray-600 mb-3" size={40} />
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
                   No auto-replies sent yet. Activity will appear here once enabled.
@@ -545,7 +545,7 @@ export default function MissedCallSettings() {
             ) : (
               <div className="divide-y divide-gray-100 dark:divide-gray-700/50 max-h-[400px] overflow-y-auto">
                 {activityLog.map((entry) => (
-                  <div key={entry.id} className="px-6 py-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <div key={entry.id} className="px-4 sm:px-5 md:px-6 py-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
                       entry.status === 'sent'
                         ? 'bg-green-100 dark:bg-green-900/30'
@@ -594,7 +594,7 @@ export default function MissedCallSettings() {
         <button
           type="button"
           onClick={() => setSettings(DEFAULT_SETTINGS)}
-          className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+          className="px-4 sm:px-5 md:px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
         >
           <RotateCcw size={16} />
           Reset
@@ -602,7 +602,7 @@ export default function MissedCallSettings() {
         <button
           onClick={handleSave}
           disabled={loading}
-          className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 flex items-center gap-2"
+          className="px-4 sm:px-5 md:px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 flex items-center gap-2"
         >
           {loading ? (
             <Loader2 size={18} className="animate-spin" />

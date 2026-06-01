@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Building2, Users, DollarSign, Globe, Palette, Image,
   Plus, Trash2, RefreshCw, ArrowUpRight, ArrowDownRight,
@@ -135,7 +135,7 @@ const StatCard: React.FC<{
   change?: string;
   positive?: boolean;
 }> = ({ title, value, icon, color, change, positive }) => (
-  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200">
+  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 hover:shadow-md transition-all duration-200">
     <div className="flex items-center justify-between mb-4">
       <div className={`p-3 rounded-xl ${color}`}>{icon}</div>
       {change && (
@@ -146,7 +146,7 @@ const StatCard: React.FC<{
       )}
     </div>
     <h3 className="text-gray-500 text-sm font-medium mb-1">{title}</h3>
-    <p className="text-2xl font-bold text-gray-900">{value}</p>
+    <p className="text-xl sm:text-2xl font-bold text-gray-900">{value}</p>
   </div>
 );
 
@@ -162,7 +162,7 @@ const ConfirmDialog: React.FC<{
   if (!open) return null;
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-5 md:p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className={`p-2 rounded-full ${danger ? 'bg-red-100' : 'bg-amber-100'}`}>
             <AlertTriangle className={danger ? 'text-red-600' : 'text-amber-600'} size={20} />
@@ -481,7 +481,7 @@ const AgencyDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <RefreshCw size={48} className="text-indigo-500 animate-spin mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading Agency Dashboard</h2>
@@ -497,7 +497,7 @@ const AgencyDashboard: React.FC = () => {
 
   if (!agency && !showCreateAgency) {
     return (
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-8">
         <div className="max-w-2xl mx-auto text-center py-20">
           <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Building2 className="text-indigo-600" size={36} />
@@ -508,7 +508,7 @@ const AgencyDashboard: React.FC = () => {
           </p>
           <button
             onClick={() => setShowCreateAgency(true)}
-            className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
+            className="px-4 sm:px-6 md:px-8 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
           >
             Create Your Agency
           </button>
@@ -524,7 +524,7 @@ const AgencyDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-5">
+      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 md:px-8 py-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
@@ -570,12 +570,12 @@ const AgencyDashboard: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="p-8 max-w-7xl mx-auto">
+      <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto">
         {/* ========== OVERVIEW TAB ========== */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
             {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               <StatCard
                 title="Sub-Accounts"
                 value={stats?.totalSubAccounts ?? subAccounts.length}
@@ -608,7 +608,7 @@ const AgencyDashboard: React.FC = () => {
 
             {/* Agency Overview */}
             {agency && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-semibold text-gray-900">Agency Details</h2>
                   <button onClick={startEditAgency} className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium">
@@ -655,15 +655,15 @@ const AgencyDashboard: React.FC = () => {
             )}
 
             {/* Recent Sub-Accounts */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">Recent Sub-Accounts</h2>
                 <button onClick={() => setActiveTab('sub-accounts')} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                  View All →
+                  View All â†’
                 </button>
               </div>
               {subAccounts.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No sub-accounts yet. Create your first one!</p>
+                <p className="text-gray-500 text-center py-4 sm:py-6 md:py-8">No sub-accounts yet. Create your first one!</p>
               ) : (
                 <div className="space-y-3">
                   {subAccounts.slice(0, 5).map((sa) => (
@@ -722,7 +722,7 @@ const AgencyDashboard: React.FC = () => {
                 <p className="text-gray-500 mb-6">Create your first sub-account to get started.</p>
                 <button
                   onClick={() => setShowCreateSubAccount(true)}
-                  className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+                  className="px-4 sm:px-5 md:px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
                 >
                   Create Sub-Account
                 </button>
@@ -730,7 +730,7 @@ const AgencyDashboard: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 {subAccounts.map((sa) => (
-                  <div key={sa.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all">
+                  <div key={sa.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 hover:shadow-md transition-all">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
@@ -806,7 +806,7 @@ const AgencyDashboard: React.FC = () => {
               )}
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 space-y-6">
               {/* Colors */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 <div>
@@ -967,7 +967,7 @@ const AgencyDashboard: React.FC = () => {
               )}
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 space-y-6">
               {/* Enable White Label */}
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                 <div className="flex items-center gap-3">
@@ -1063,7 +1063,7 @@ const AgencyDashboard: React.FC = () => {
               <p className="text-gray-500 text-sm mt-1">Manage your agency profile and plan.</p>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 space-y-6">
               {/* Agency Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Agency Name</label>
@@ -1166,7 +1166,7 @@ const AgencyDashboard: React.FC = () => {
       {/* ========== CREATE AGENCY MODAL ========== */}
       {showCreateAgency && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-4 sm:p-5 md:p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-indigo-100 rounded-xl">
@@ -1247,7 +1247,7 @@ const AgencyDashboard: React.FC = () => {
       {/* ========== CREATE SUB-ACCOUNT MODAL ========== */}
       {showCreateSubAccount && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-5 md:p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-indigo-100 rounded-xl">

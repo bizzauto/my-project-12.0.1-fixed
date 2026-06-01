@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, CheckCircle, Clock, Loader2, Download } from 'lucide-react';
 import { walletAPI } from '../lib/api';
 
@@ -64,7 +64,7 @@ const PlatformEarnings: React.FC = () => {
               <TrendingUp size={20} className="text-green-500" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">₹{summary.totalPlatformMargin.toFixed(2)}</p>
+          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">â‚¹{summary.totalPlatformMargin.toFixed(2)}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Platform Earnings (10%)</p>
         </div>
 
@@ -74,7 +74,7 @@ const PlatformEarnings: React.FC = () => {
               <DollarSign size={20} className="text-blue-500" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">₹{summary.totalCharged.toFixed(2)}</p>
+          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">â‚¹{summary.totalCharged.toFixed(2)}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Total Collected</p>
         </div>
 
@@ -84,7 +84,7 @@ const PlatformEarnings: React.FC = () => {
               <DollarSign size={20} className="text-purple-500" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">₹{summary.totalTwilioCost.toFixed(2)}</p>
+          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">â‚¹{summary.totalTwilioCost.toFixed(2)}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Twilio Pass-through</p>
         </div>
       </div>
@@ -105,11 +105,11 @@ const PlatformEarnings: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center p-4 sm:p-6 md:p-8">
+          <div className="flex items-center justify-center p-4 sm:p-5 md:p-6 lg:p-8">
             <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
           </div>
         ) : earnings.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">
+          <div className="p-4 sm:p-6 md:p-8 text-center text-gray-400">
             <p>No earnings yet</p>
           </div>
         ) : (
@@ -131,9 +131,9 @@ const PlatformEarnings: React.FC = () => {
                       <td className="p-4 text-sm text-gray-900 dark:text-white">
                         {new Date(e.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </td>
-                      <td className="p-4 text-sm text-gray-700 dark:text-gray-300">₹{e.twilioCost.toFixed(2)}</td>
-                      <td className="p-4 text-sm font-medium text-green-600 dark:text-green-400">₹{e.platformMargin.toFixed(2)}</td>
-                      <td className="p-4 text-sm font-medium text-gray-900 dark:text-white">₹{e.totalCharged.toFixed(2)}</td>
+                      <td className="p-4 text-sm text-gray-700 dark:text-gray-300">â‚¹{e.twilioCost.toFixed(2)}</td>
+                      <td className="p-4 text-sm font-medium text-green-600 dark:text-green-400">â‚¹{e.platformMargin.toFixed(2)}</td>
+                      <td className="p-4 text-sm font-medium text-gray-900 dark:text-white">â‚¹{e.totalCharged.toFixed(2)}</td>
                       <td className="p-4">
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
                           e.status === 'settled'

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Package, Clock, CheckCircle, Truck, XCircle, ArrowLeft, Copy, MapPin, CreditCard } from 'lucide-react';
 import apiClient from '../lib/api';
@@ -104,7 +104,7 @@ const OrderTrackingPage: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 py-4 sm:py-5 md:py-6">
         {/* Search */}
         <form onSubmit={handleSearch} className="mb-8">
           <div className="flex gap-2">
@@ -115,7 +115,7 @@ const OrderTrackingPage: React.FC = () => {
               placeholder="Enter order number (e.g. ORD-123456-ABC)"
               className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
             />
-            <button type="submit" className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors">
+            <button type="submit" className="px-4 sm:px-5 md:px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors">
               Track
             </button>
           </div>
@@ -135,7 +135,7 @@ const OrderTrackingPage: React.FC = () => {
         ) : (
           <div className="space-y-6">
             {/* Order Header */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ const OrderTrackingPage: React.FC = () => {
 
             {/* Progress Tracker */}
             {!isCancelled && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between">
                   {statusSteps.map((step, i) => (
                     <React.Fragment key={step.key}>
@@ -187,7 +187,7 @@ const OrderTrackingPage: React.FC = () => {
             )}
 
             {isCancelled && (
-              <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-6 border border-red-200 dark:border-red-800">
+              <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 sm:p-5 md:p-6 border border-red-200 dark:border-red-800">
                 <div className="flex items-center gap-3">
                   <XCircle size={24} className="text-red-600" />
                   <div>
@@ -199,7 +199,7 @@ const OrderTrackingPage: React.FC = () => {
             )}
 
             {/* Items */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <h3 className="font-bold text-gray-900 dark:text-white mb-4">Order Items</h3>
               <div className="space-y-3">
                 {order.items.map(item => (
@@ -213,9 +213,9 @@ const OrderTrackingPage: React.FC = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{item.name}</p>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity} × ₹{item.price}</p>
+                      <p className="text-xs text-gray-500">Qty: {item.quantity} Ã— â‚¹{item.price}</p>
                     </div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">₹{item.total.toLocaleString()}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">â‚¹{item.total.toLocaleString()}</p>
                   </div>
                 ))}
               </div>
@@ -223,13 +223,13 @@ const OrderTrackingPage: React.FC = () => {
 
             {/* Summary & Shipping */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><CreditCard size={16} /> Payment Summary</h3>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span className="text-gray-900 dark:text-white">₹{order.subtotal.toLocaleString()}</span></div>
-                  {order.discountAmount > 0 && <div className="flex justify-between text-green-600"><span>Discount</span><span>-₹{order.discountAmount.toLocaleString()}</span></div>}
+                  <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span className="text-gray-900 dark:text-white">â‚¹{order.subtotal.toLocaleString()}</span></div>
+                  {order.discountAmount > 0 && <div className="flex justify-between text-green-600"><span>Discount</span><span>-â‚¹{order.discountAmount.toLocaleString()}</span></div>}
                   <div className="flex justify-between"><span className="text-gray-500">Shipping</span><span className="text-green-600">Free</span></div>
-                  <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200 dark:border-gray-700"><span>Total</span><span>₹{order.total.toLocaleString()}</span></div>
+                  <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200 dark:border-gray-700"><span>Total</span><span>â‚¹{order.total.toLocaleString()}</span></div>
                 </div>
                 {order.gateway && (
                   <p className="text-xs text-gray-400 mt-3">Payment via: {order.gateway === 'cod' ? 'Cash on Delivery' : 'Razorpay'}</p>
@@ -237,7 +237,7 @@ const OrderTrackingPage: React.FC = () => {
               </div>
 
               {order.shippingAddress && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><MapPin size={16} /> Shipping Address</h3>
                   <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                     <p className="font-medium text-gray-900 dark:text-white">{order.shippingAddress.name}</p>

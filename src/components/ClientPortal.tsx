@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Shield, Users, Key, Clock, CheckCircle, XCircle, Plus, Search, RefreshCw, Copy, Check,
   ExternalLink, Loader2, X, Eye, EyeOff, Calendar, DollarSign, FileText, TrendingUp,
@@ -564,7 +564,7 @@ const ClientPortal: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Client Portal</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-2">Enter your access token to view your account</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-gray-700">
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Portal Token</label>
@@ -608,7 +608,7 @@ const ClientPortal: React.FC = () => {
 
     return (
       <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col min-h-screen">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-4 sm:p-5 md:p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
               <Shield size={20} className="text-white" />
@@ -667,14 +667,14 @@ const ClientPortal: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {stats.invoices && (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
                   <DollarSign size={20} className="text-green-600 dark:text-green-400" />
                 </div>
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Invoices</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">${stats.invoices.totalAmount.toLocaleString()}</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">${stats.invoices.totalAmount.toLocaleString()}</p>
               <div className="flex gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
                 <span className="text-green-600 dark:text-green-400">Paid: ${stats.invoices.paidAmount.toLocaleString()}</span>
                 <span className="text-yellow-600 dark:text-yellow-400">Pending: ${stats.invoices.pendingAmount.toLocaleString()}</span>
@@ -683,14 +683,14 @@ const ClientPortal: React.FC = () => {
           )}
 
           {stats.appointments && (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
                   <Calendar size={20} className="text-blue-600 dark:text-blue-400" />
                 </div>
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Appointments</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.appointments.upcoming}</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.appointments.upcoming}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {stats.appointments.completed} completed
               </p>
@@ -698,14 +698,14 @@ const ClientPortal: React.FC = () => {
           )}
 
           {stats.deals && (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
                   <TrendingUp size={20} className="text-purple-600 dark:text-purple-400" />
                 </div>
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Deal Value</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">${(stats.deals.dealValue || 0).toLocaleString()}</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">${(stats.deals.dealValue || 0).toLocaleString()}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{stats.deals.dealStage || 'No stage'}</p>
             </div>
           )}
@@ -714,7 +714,7 @@ const ClientPortal: React.FC = () => {
         {/* Recent Invoices */}
         {dashboardInvoices.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div className="p-4 sm:p-5 md:p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <h3 className="font-semibold text-gray-900 dark:text-white">Recent Invoices</h3>
               {clientPermissions.includes('view_invoices') && (
                 <button onClick={() => navigateClientView('invoices')} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">View All</button>
@@ -722,7 +722,7 @@ const ClientPortal: React.FC = () => {
             </div>
             <div className="divide-y divide-gray-100 dark:divide-gray-700">
               {dashboardInvoices.slice(0, 5).map((inv) => (
-                <div key={inv.id} className="px-6 py-4 flex items-center justify-between">
+                <div key={inv.id} className="px-4 sm:px-5 md:px-6 py-4 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{inv.documentNumber || inv.title}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(inv.createdAt).toLocaleDateString()}</p>
@@ -742,7 +742,7 @@ const ClientPortal: React.FC = () => {
         {/* Upcoming Appointments */}
         {dashboardAppointments.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div className="p-4 sm:p-5 md:p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <h3 className="font-semibold text-gray-900 dark:text-white">Upcoming Appointments</h3>
               {clientPermissions.includes('view_appointments') && (
                 <button onClick={() => navigateClientView('appointments')} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">View All</button>
@@ -750,7 +750,7 @@ const ClientPortal: React.FC = () => {
             </div>
             <div className="divide-y divide-gray-100 dark:divide-gray-700">
               {dashboardAppointments.slice(0, 5).map((apt) => (
-                <div key={apt.id} className="px-6 py-4 flex items-center justify-between">
+                <div key={apt.id} className="px-4 sm:px-5 md:px-6 py-4 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{apt.title}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -806,25 +806,25 @@ const ClientPortal: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Invoice</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
-                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Amount</th>
-                <th className="text-center px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                <th className="text-left px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Invoice</th>
+                <th className="text-left px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
+                <th className="text-right px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Amount</th>
+                <th className="text-center px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {invoices.map((inv) => (
                 <tr key={inv.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-5 md:px-6 py-4">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{inv.documentNumber || inv.title}</p>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                  <td className="px-4 sm:px-5 md:px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                     {new Date(inv.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white text-right">
+                  <td className="px-4 sm:px-5 md:px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white text-right">
                     ${inv.amount.toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-4 sm:px-5 md:px-6 py-4 text-center">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${INVOICE_STATUS_COLORS[inv.status] || 'bg-gray-100 text-gray-600'}`}>
                       {inv.status}
                     </span>
@@ -875,27 +875,27 @@ const ClientPortal: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Appointment</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date & Time</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Location</th>
-                <th className="text-center px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                <th className="text-left px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Appointment</th>
+                <th className="text-left px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date & Time</th>
+                <th className="text-left px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Location</th>
+                <th className="text-center px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {appointments.map((apt) => (
                 <tr key={apt.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-5 md:px-6 py-4">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{apt.title}</p>
                     {apt.description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{apt.description}</p>}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                  <td className="px-4 sm:px-5 md:px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                     <div>{new Date(apt.startTime).toLocaleDateString()}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
                       {new Date(apt.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(apt.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{apt.location || '-'}</td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-4 sm:px-5 md:px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{apt.location || '-'}</td>
+                  <td className="px-4 sm:px-5 md:px-6 py-4 text-center">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${APPOINTMENT_STATUS_COLORS[apt.status] || 'bg-gray-100 text-gray-600'}`}>
                       {apt.status}
                     </span>
@@ -927,7 +927,7 @@ const ClientPortal: React.FC = () => {
       ) : (
         <>
           {/* Deal Info Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900 dark:text-white">{deals.contactName}</h3>
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
@@ -937,7 +937,7 @@ const ClientPortal: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Deal Value</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">${(deals.dealValue || 0).toLocaleString()}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">${(deals.dealValue || 0).toLocaleString()}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Pipeline</p>
@@ -973,12 +973,12 @@ const ClientPortal: React.FC = () => {
           {/* Deal Activity */}
           {dealActivities.length > 0 && (
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="p-4 sm:p-5 md:p-6 border-b border-gray-200 dark:border-gray-700">
                 <h3 className="font-semibold text-gray-900 dark:text-white">Deal Activity</h3>
               </div>
               <div className="divide-y divide-gray-100 dark:divide-gray-700">
                 {dealActivities.map((act: any) => (
-                  <div key={act.id} className="px-6 py-4">
+                  <div key={act.id} className="px-4 sm:px-5 md:px-6 py-4">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{act.title}</p>
                     {act.description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{act.description}</p>}
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{new Date(act.createdAt).toLocaleString()}</p>
@@ -1004,7 +1004,7 @@ const ClientPortal: React.FC = () => {
     return (
       <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
         {renderClientSidebar()}
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto">
           {clientView === 'dashboard' && renderClientDashboard()}
           {clientView === 'invoices' && renderClientInvoices()}
           {clientView === 'appointments' && renderClientAppointments()}
@@ -1023,14 +1023,14 @@ const ClientPortal: React.FC = () => {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between p-4 sm:p-5 md:p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Create Portal Access</h2>
             <button onClick={() => { setShowCreateModal(false); setSelectedContactId(''); }} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
               <X size={20} />
             </button>
           </div>
-          <div className="p-6 space-y-6">
+          <div className="p-4 sm:p-5 md:p-6 space-y-6">
             {/* Contact selector */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contact</label>
@@ -1079,7 +1079,7 @@ const ClientPortal: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-end gap-3 p-4 sm:p-5 md:p-6 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={() => { setShowCreateModal(false); setSelectedContactId(''); }}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all"
@@ -1089,7 +1089,7 @@ const ClientPortal: React.FC = () => {
             <button
               onClick={handleCreatePortal}
               disabled={creating || !selectedContactId}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 flex items-center gap-2"
+              className="px-4 sm:px-5 md:px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 flex items-center gap-2"
             >
               {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
               {creating ? 'Creating...' : 'Create Access'}
@@ -1109,16 +1109,16 @@ const ClientPortal: React.FC = () => {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md">
+          <div className="flex items-center justify-between p-4 sm:p-5 md:p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              Permissions — {editingPortal.contact?.name}
+              Permissions â€” {editingPortal.contact?.name}
             </h2>
             <button onClick={() => setEditingPortal(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
               <X size={20} />
             </button>
           </div>
-          <div className="p-6 space-y-3">
+          <div className="p-4 sm:p-5 md:p-6 space-y-3">
             {PERMISSION_OPTIONS.map((perm) => {
               const enabled = selectedPermissions.includes(perm.key);
               return (
@@ -1142,7 +1142,7 @@ const ClientPortal: React.FC = () => {
               );
             })}
           </div>
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-end gap-3 p-4 sm:p-5 md:p-6 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setEditingPortal(null)}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all"
@@ -1151,7 +1151,7 @@ const ClientPortal: React.FC = () => {
             </button>
             <button
               onClick={handleUpdatePermissions}
-              className="px-6 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2"
+              className="px-4 sm:px-5 md:px-6 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2"
             >
               <Check size={16} />
               Save Permissions
@@ -1170,7 +1170,7 @@ const ClientPortal: React.FC = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-6 py-4 sm:py-5 md:py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
@@ -1212,7 +1212,7 @@ const ClientPortal: React.FC = () => {
       </div>
 
       {/* Portal list */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-6 py-4 sm:py-5 md:py-6">
         {adminLoading ? (
           <div className="flex justify-center py-16">
             <Loader2 size={32} className="animate-spin text-blue-500" />
@@ -1235,18 +1235,18 @@ const ClientPortal: React.FC = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
-                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Contact</th>
-                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Token</th>
-                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Permissions</th>
-                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Last Login</th>
-                  <th className="text-center px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                  <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+                  <th className="text-left px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Contact</th>
+                  <th className="text-left px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Token</th>
+                  <th className="text-left px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Permissions</th>
+                  <th className="text-left px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Last Login</th>
+                  <th className="text-center px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                  <th className="text-right px-4 sm:px-5 md:px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                 {portals.map((portal) => (
                   <tr key={portal.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-5 md:px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
                           {portal.contact?.name?.charAt(0) || '?'}
@@ -1257,7 +1257,7 @@ const ClientPortal: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-5 md:px-6 py-4">
                       <div className="flex items-center gap-2">
                         <code className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded font-mono text-gray-600 dark:text-gray-300 max-w-[120px] truncate">
                           {portal.token.substring(0, 12)}...
@@ -1271,7 +1271,7 @@ const ClientPortal: React.FC = () => {
                         </button>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-5 md:px-6 py-4">
                       <div className="flex flex-wrap gap-1">
                         {portal.permissions.map((p) => (
                           <span key={p} className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-[10px] font-medium">
@@ -1280,7 +1280,7 @@ const ClientPortal: React.FC = () => {
                         ))}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                    <td className="px-4 sm:px-5 md:px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                       {portal.lastLoginAt ? (
                         <div className="flex items-center gap-1">
                           <Clock size={14} />
@@ -1290,7 +1290,7 @@ const ClientPortal: React.FC = () => {
                         <span className="text-gray-400 dark:text-gray-500">Never</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-4 sm:px-5 md:px-6 py-4 text-center">
                       <button
                         onClick={() => handleToggleActive(portal)}
                         className="inline-flex items-center gap-1"
@@ -1308,7 +1308,7 @@ const ClientPortal: React.FC = () => {
                         )}
                       </button>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-5 md:px-6 py-4">
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => { setEditingPortal(portal); setSelectedPermissions(portal.permissions); }}

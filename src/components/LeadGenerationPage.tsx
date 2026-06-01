@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Users, Search, Download, MessageSquare, Mail, Phone, Plus, X, Eye, Send, Trash2, MapPin, Package, Truck, CheckCircle, AlertCircle, RefreshCw, ArrowUpRight, TrendingUp, UserPlus, Settings, Upload, Zap, MailOpen, Shield } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RT, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -10,12 +10,12 @@ const STC:Record<string,string>={new:'#3B82F6',contacted:'#F59E0B',qualified:'#8
 const EF:FormData={name:'',phone:'',email:'',company:'',location:'',product:'',supplier:'',requirement:'',source:'manual',tags:''};
 // Mock leads removed - data comes from real API
 const tagToStatus=(tags:string[]):Lead['status']=>{const l=tags.map(t=>t.toLowerCase());if(l.includes('won'))return'won';if(l.includes('qualified'))return'qualified';if(l.includes('contacted'))return'contacted';if(l.includes('lost'))return'lost';return'new';};
-const SCard:React.FC<{icon:React.ReactNode;label:string;value:string|number;c:string}>=({icon,label,value,c})=>{const m:Record<string,string>={blue:'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',green:'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400',purple:'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',orange:'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'};return(<div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-gray-700"><div className="flex items-center justify-between mb-3"><div className={`p-2.5 rounded-lg ${m[c]||m.blue}`}>{icon}</div></div><p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p><p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</p></div>);};
+const SCard:React.FC<{icon:React.ReactNode;label:string;value:string|number;c:string}>=({icon,label,value,c})=>{const m:Record<string,string>={blue:'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',green:'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400',purple:'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',orange:'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'};return(<div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-gray-700"><div className="flex items-center justify-between mb-3"><div className={`p-2.5 rounded-lg ${m[c]||m.blue}`}>{icon}</div></div><p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{value}</p><p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</p></div>);};
 
 const Modal: React.FC<{open:boolean;onClose:()=>void;title:string;children:React.ReactNode;size?:'sm'|'md'|'lg'|'xl'}>=({open,onClose,title,children,size='md'})=>{
   if(!open)return null;
   const sw:Record<string,string>={sm:'max-w-md',md:'max-w-lg',lg:'max-w-2xl',xl:'max-w-4xl'};
-  return(<div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}><div className="fixed inset-0 bg-black/50"/><div className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full ${sw[size]} max-h-[90vh] overflow-y-auto`} onClick={e=>e.stopPropagation()}><div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between rounded-t-xl"><h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2><button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={20} className="text-gray-500"/></button></div><div className="p-6">{children}</div></div></div>);
+  return(<div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}><div className="fixed inset-0 bg-black/50"/><div className={`relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full ${sw[size]} max-h-[95vh] sm:max-h-[90vh] overflow-y-auto`} onClick={e=>e.stopPropagation()}><div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-4 flex items-center justify-between rounded-t-xl"><h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2><button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={20} className="text-gray-500"/></button></div><div className="p-4 sm:p-5 md:p-6">{children}</div></div></div>);
 };
 
 export default function LeadGenerationPage(){
@@ -197,7 +197,7 @@ export default function LeadGenerationPage(){
   const btn="flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors text-sm font-medium";
 
   return(
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-5 md:p-6 space-y-6">
       {toast&&<div className={`fixed top-4 right-4 z-[100] flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white ${toast.t==='success'?'bg-green-500':'bg-red-500'}`}>{toast.t==='success'?<CheckCircle size={18}/>:<AlertCircle size={18}/>}{toast.m}</div>}
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -268,9 +268,9 @@ export default function LeadGenerationPage(){
  {/* Platform Stats */}
  <div className="grid grid-cols-3 gap-3 mb-4">
   {[
-   { name: 'IndiaMART', color: 'from-orange-500 to-red-500', icon: '🏭', count: leads.filter(l => l.source === 'indiamart').length },
-   { name: 'JustDial', color: 'from-yellow-500 to-orange-500', icon: '📞', count: leads.filter(l => l.source === 'justdial').length },
-   { name: 'TradeIndia', color: 'from-blue-500 to-indigo-500', icon: '🌐', count: leads.filter(l => l.source === 'tradeindia').length },
+   { name: 'IndiaMART', color: 'from-orange-500 to-red-500', icon: 'ðŸ­', count: leads.filter(l => l.source === 'indiamart').length },
+   { name: 'JustDial', color: 'from-yellow-500 to-orange-500', icon: 'ðŸ“ž', count: leads.filter(l => l.source === 'justdial').length },
+   { name: 'TradeIndia', color: 'from-blue-500 to-indigo-500', icon: 'ðŸŒ', count: leads.filter(l => l.source === 'tradeindia').length },
   ].map(p => (
    <div key={p.name} className={`bg-gradient-to-r ${p.color} rounded-xl p-3 text-white text-center`}>
     <p className="text-lg">{p.icon}</p>
@@ -326,12 +326,12 @@ export default function LeadGenerationPage(){
               <td className="px-4 py-3"><input type="checkbox" checked={sel.has(l.id)} onChange={()=>tog(l.id)} className="rounded border-gray-300 text-blue-600"/></td>
               <td className="px-4 py-3"><div className="flex items-center gap-2"><div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">{l.name?.charAt(0)?.toUpperCase()||'?'}</div><div><p className="font-medium text-gray-900 dark:text-white">{l.name||'Unknown'}</p>{l.company&&<p className="text-xs text-gray-500">{l.company}</p>}</div></div></td>
               <td className="px-4 py-3"><p className="text-gray-900 dark:text-white">{l.phone}</p>{l.email&&<p className="text-xs text-gray-500">{l.email}</p>}</td>
-              <td className="px-4 py-3">{l.location?<span className="flex items-center gap-1 text-gray-700 dark:text-gray-300"><MapPin size={12} className="text-gray-400"/>{l.location}</span>:<span className="text-gray-400">—</span>}</td>
-              <td className="px-4 py-3">{l.product?<span className="flex items-center gap-1 text-gray-700 dark:text-gray-300"><Package size={12} className="text-gray-400"/>{l.product}</span>:<span className="text-gray-400">—</span>}</td>
-              <td className="px-4 py-3">{l.supplier?<span className="flex items-center gap-1 text-gray-700 dark:text-gray-300"><Truck size={12} className="text-gray-400"/>{l.supplier}</span>:<span className="text-gray-400">—</span>}</td>
+              <td className="px-4 py-3">{l.location?<span className="flex items-center gap-1 text-gray-700 dark:text-gray-300"><MapPin size={12} className="text-gray-400"/>{l.location}</span>:<span className="text-gray-400">â€”</span>}</td>
+              <td className="px-4 py-3">{l.product?<span className="flex items-center gap-1 text-gray-700 dark:text-gray-300"><Package size={12} className="text-gray-400"/>{l.product}</span>:<span className="text-gray-400">â€”</span>}</td>
+              <td className="px-4 py-3">{l.supplier?<span className="flex items-center gap-1 text-gray-700 dark:text-gray-300"><Truck size={12} className="text-gray-400"/>{l.supplier}</span>:<span className="text-gray-400">â€”</span>}</td>
               <td className="px-4 py-3"><span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" style={{backgroundColor:SC[l.source]||'#6B7280'}}>{l.source.replace('_',' ')}</span></td>
               <td className="px-4 py-3"><span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style={{backgroundColor:`${STC[l.status]||'#6B7280'}20`,color:STC[l.status]||'#6B7280'}}>{l.status}</span></td>
-              <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{l.dealValue?`₹${l.dealValue.toLocaleString()}`:'—'}</td>
+              <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{l.dealValue?`â‚¹${l.dealValue.toLocaleString()}`:'â€”'}</td>
               <td className="px-4 py-3"><div className="flex items-center gap-1">
                 <button onClick={()=>setDetail(l)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="View"><Eye size={14}/></button>
                 <button onClick={()=>quickReply(l,'whatsapp')} className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded" title="WhatsApp"><MessageSquare size={14}/></button>
@@ -389,14 +389,14 @@ export default function LeadGenerationPage(){
       {/* Lead Detail Modal */}
       <Modal open={!!detail} onClose={()=>setDetail(null)} title="Lead Details" size="lg">
         {detail&&(<div className="space-y-6">
-          <div className="flex items-start gap-4"><div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">{detail.name?.charAt(0)?.toUpperCase()||'?'}</div><div className="flex-1"><h3 className="text-xl font-semibold text-gray-900 dark:text-white">{detail.name||'Unknown'}</h3>{detail.company&&<p className="text-gray-500 dark:text-gray-400">{detail.company}</p>}<div className="flex gap-2 mt-2"><span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium text-white" style={{backgroundColor:SC[detail.source]||'#6B7280'}}>{detail.source.replace('_',' ')}</span><span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style={{backgroundColor:`${STC[detail.status]||'#6B7280'}20`,color:STC[detail.status]||'#6B7280'}}>{detail.status}</span></div></div></div>
+          <div className="flex items-start gap-4"><div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold">{detail.name?.charAt(0)?.toUpperCase()||'?'}</div><div className="flex-1"><h3 className="text-xl font-semibold text-gray-900 dark:text-white">{detail.name||'Unknown'}</h3>{detail.company&&<p className="text-gray-500 dark:text-gray-400">{detail.company}</p>}<div className="flex gap-2 mt-2"><span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium text-white" style={{backgroundColor:SC[detail.source]||'#6B7280'}}>{detail.source.replace('_',' ')}</span><span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style={{backgroundColor:`${STC[detail.status]||'#6B7280'}20`,color:STC[detail.status]||'#6B7280'}}>{detail.status}</span></div></div></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
             <div><p className="text-sm text-gray-500 dark:text-gray-400">Phone</p><p className="font-medium text-gray-900 dark:text-white flex items-center gap-2"><Phone size={14}/>{detail.phone}</p></div>
-            <div><p className="text-sm text-gray-500 dark:text-gray-400">Email</p><p className="font-medium text-gray-900 dark:text-white">{detail.email||'—'}</p></div>
-            <div><p className="text-sm text-gray-500 dark:text-gray-400">Location</p><p className="font-medium text-gray-900 dark:text-white flex items-center gap-2"><MapPin size={14}/>{detail.location||'—'}</p></div>
-            <div><p className="text-sm text-gray-500 dark:text-gray-400">Deal Value</p><p className="font-medium text-gray-900 dark:text-white">{detail.dealValue?`₹${detail.dealValue.toLocaleString()}`:'—'}</p></div>
-            <div><p className="text-sm text-gray-500 dark:text-gray-400">Product</p><p className="font-medium text-gray-900 dark:text-white flex items-center gap-2"><Package size={14}/>{detail.product||'—'}</p></div>
-            <div><p className="text-sm text-gray-500 dark:text-gray-400">Supplier</p><p className="font-medium text-gray-900 dark:text-white flex items-center gap-2"><Truck size={14}/>{detail.supplier||'—'}</p></div>
+            <div><p className="text-sm text-gray-500 dark:text-gray-400">Email</p><p className="font-medium text-gray-900 dark:text-white">{detail.email||'â€”'}</p></div>
+            <div><p className="text-sm text-gray-500 dark:text-gray-400">Location</p><p className="font-medium text-gray-900 dark:text-white flex items-center gap-2"><MapPin size={14}/>{detail.location||'â€”'}</p></div>
+            <div><p className="text-sm text-gray-500 dark:text-gray-400">Deal Value</p><p className="font-medium text-gray-900 dark:text-white">{detail.dealValue?`â‚¹${detail.dealValue.toLocaleString()}`:'â€”'}</p></div>
+            <div><p className="text-sm text-gray-500 dark:text-gray-400">Product</p><p className="font-medium text-gray-900 dark:text-white flex items-center gap-2"><Package size={14}/>{detail.product||'â€”'}</p></div>
+            <div><p className="text-sm text-gray-500 dark:text-gray-400">Supplier</p><p className="font-medium text-gray-900 dark:text-white flex items-center gap-2"><Truck size={14}/>{detail.supplier||'â€”'}</p></div>
           </div>
           {detail.requirement&&<div><p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Requirement</p><p className="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/30 rounded-lg p-3">{detail.requirement}</p></div>}
           {detail.tags&&detail.tags.length>0&&<div><p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Tags</p><div className="flex flex-wrap gap-2">{detail.tags.map((t,i)=><span key={i} className="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">{t}</span>)}</div></div>}

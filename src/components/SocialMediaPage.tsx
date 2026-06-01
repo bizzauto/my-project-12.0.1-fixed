@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Calendar, Plus, Image, Zap, Send, Clock, MoreVertical,
   BarChart3, TrendingUp, Eye, Heart, MessageCircle, Share2,
@@ -29,11 +29,11 @@ interface SocialPost {
 }
 
 const platforms = [
-  { id: 'facebook', name: 'Facebook', icon: '📘', color: 'bg-blue-600', textColor: 'text-blue-600', bgLight: 'bg-blue-50 dark:bg-blue-900/30' },
-  { id: 'instagram', name: 'Instagram', icon: '📷', color: 'bg-pink-600', textColor: 'text-pink-600', bgLight: 'bg-pink-50 dark:bg-pink-900/30' },
-  { id: 'linkedin', name: 'LinkedIn', icon: '💼', color: 'bg-blue-700', textColor: 'text-blue-700', bgLight: 'bg-blue-50 dark:bg-blue-900/30' },
-  { id: 'twitter', name: 'Twitter/X', icon: '🐦', color: 'bg-black', textColor: 'text-gray-900 dark:text-white', bgLight: 'bg-gray-50 dark:bg-gray-700' },
-  { id: 'youtube', name: 'YouTube', icon: '📺', color: 'bg-red-600', textColor: 'text-red-600', bgLight: 'bg-red-50 dark:bg-red-900/30' },
+  { id: 'facebook', name: 'Facebook', icon: 'ðŸ“˜', color: 'bg-blue-600', textColor: 'text-blue-600', bgLight: 'bg-blue-50 dark:bg-blue-900/30' },
+  { id: 'instagram', name: 'Instagram', icon: 'ðŸ“·', color: 'bg-pink-600', textColor: 'text-pink-600', bgLight: 'bg-pink-50 dark:bg-pink-900/30' },
+  { id: 'linkedin', name: 'LinkedIn', icon: 'ðŸ’¼', color: 'bg-blue-700', textColor: 'text-blue-700', bgLight: 'bg-blue-50 dark:bg-blue-900/30' },
+  { id: 'twitter', name: 'Twitter/X', icon: 'ðŸ¦', color: 'bg-black', textColor: 'text-gray-900 dark:text-white', bgLight: 'bg-gray-50 dark:bg-gray-700' },
+  { id: 'youtube', name: 'YouTube', icon: 'ðŸ“º', color: 'bg-red-600', textColor: 'text-red-600', bgLight: 'bg-red-50 dark:bg-red-900/30' },
 ];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
@@ -96,7 +96,7 @@ const SocialMediaPage: React.FC = () => {
   const demoPosts: SocialPost[] = [
     {
       id: '1',
-      content: '🚀 Exciting news! We are launching our new product next week. Stay tuned for updates! #Launch #NewProduct',
+      content: 'ðŸš€ Exciting news! We are launching our new product next week. Stay tuned for updates! #Launch #NewProduct',
       platforms: ['facebook', 'instagram', 'linkedin'],
       status: 'published',
       publishedAt: '2024-01-15T10:30:00Z',
@@ -107,7 +107,7 @@ const SocialMediaPage: React.FC = () => {
     },
     {
       id: '2',
-      content: '📢 Special offer: Get 20% off on all services this weekend only! Limited time offer. #SpecialOffer #WeekendSale',
+      content: 'ðŸ“¢ Special offer: Get 20% off on all services this weekend only! Limited time offer. #SpecialOffer #WeekendSale',
       platforms: ['facebook', 'instagram'],
       status: 'scheduled',
       scheduledAt: '2024-01-20T09:00:00Z',
@@ -118,7 +118,7 @@ const SocialMediaPage: React.FC = () => {
     },
     {
       id: '3',
-      content: '💡 Did you know? Our platform helps businesses automate their workflows and save up to 10 hours per week! #Productivity #Automation',
+      content: 'ðŸ’¡ Did you know? Our platform helps businesses automate their workflows and save up to 10 hours per week! #Productivity #Automation',
       platforms: ['linkedin', 'twitter'],
       status: 'published',
       publishedAt: '2024-01-12T14:00:00Z',
@@ -129,7 +129,7 @@ const SocialMediaPage: React.FC = () => {
     },
     {
       id: '4',
-      content: '🎉 Thank you to our amazing customers! We reached 10,000 users today! #Milestone #ThankYou',
+      content: 'ðŸŽ‰ Thank you to our amazing customers! We reached 10,000 users today! #Milestone #ThankYou',
       platforms: ['facebook', 'instagram', 'twitter'],
       status: 'draft',
       likes: 0,
@@ -139,7 +139,7 @@ const SocialMediaPage: React.FC = () => {
     },
     {
       id: '5',
-      content: '📸 Behind the scenes: Our team working hard to bring you the best features! #TeamWork #BehindTheScenes',
+      content: 'ðŸ“¸ Behind the scenes: Our team working hard to bring you the best features! #TeamWork #BehindTheScenes',
       platforms: ['instagram'],
       status: 'published',
       publishedAt: '2024-01-10T16:45:00Z',
@@ -152,11 +152,11 @@ const SocialMediaPage: React.FC = () => {
 
   // Demo platform stats
   const platformStats = [
-    { platform: 'Facebook', icon: '📘', posts: 45, followers: 12500, engagement: 4.8 },
-    { platform: 'Instagram', icon: '📷', posts: 38, followers: 8900, engagement: 5.2 },
-    { platform: 'LinkedIn', icon: '💼', posts: 28, followers: 4200, engagement: 3.9 },
-    { platform: 'Twitter/X', icon: '🐦', posts: 26, followers: 3100, engagement: 4.1 },
-    { platform: 'YouTube', icon: '📺', posts: 15, followers: 5600, engagement: 6.8 },
+    { platform: 'Facebook', icon: 'ðŸ“˜', posts: 45, followers: 12500, engagement: 4.8 },
+    { platform: 'Instagram', icon: 'ðŸ“·', posts: 38, followers: 8900, engagement: 5.2 },
+    { platform: 'LinkedIn', icon: 'ðŸ’¼', posts: 28, followers: 4200, engagement: 3.9 },
+    { platform: 'Twitter/X', icon: 'ðŸ¦', posts: 26, followers: 3100, engagement: 4.1 },
+    { platform: 'YouTube', icon: 'ðŸ“º', posts: 15, followers: 5600, engagement: 6.8 },
   ];
 
   // Demo analytics data
@@ -389,7 +389,7 @@ const SocialMediaPage: React.FC = () => {
     const media = igPublishMedia.length > 0 ? igPublishMedia : uploadedMedia;
 
     if (!media.length) {
-      showToast('📷 Instagram requires at least one image or video. Upload media first.', 'error');
+      showToast('ðŸ“· Instagram requires at least one image or video. Upload media first.', 'error');
       return;
     }
 
@@ -400,11 +400,11 @@ const SocialMediaPage: React.FC = () => {
       const mediaTypes = media.map(m => m.type);
       const caption = igPublishCaption.trim() || igPublishModal.post.content;
 
-      setIgPublishProgress({ step: '📦 Creating media container...', percent: 25, status: 'processing' });
+      setIgPublishProgress({ step: 'ðŸ“¦ Creating media container...', percent: 25, status: 'processing' });
 
       if (mediaUrls.length === 1) {
         // Single media publish
-        setIgPublishProgress({ step: '⏳ Waiting for Instagram to process media...', percent: 50, status: 'processing' });
+        setIgPublishProgress({ step: 'â³ Waiting for Instagram to process media...', percent: 50, status: 'processing' });
 
         const res = await instagramAPI.publish({
           mediaUrl: mediaUrls[0],
@@ -414,16 +414,16 @@ const SocialMediaPage: React.FC = () => {
 
         if (res.data.success) {
           await postsAPI.publish(igPublishModal.post.id).catch(() => {});
-          setIgPublishProgress({ step: '✅ Published successfully!', percent: 100, status: 'success' });
+          setIgPublishProgress({ step: 'âœ… Published successfully!', percent: 100, status: 'success' });
           setIgPublishResult({
             mediaId: res.data.data?.mediaId,
           });
-          showToast('✅ Published to Instagram!');
+          showToast('âœ… Published to Instagram!');
           fetchPosts();
         }
       } else {
         // Carousel publish (multiple items)
-        setIgPublishProgress({ step: '🔄 Creating carousel containers...', percent: 30, status: 'processing' });
+        setIgPublishProgress({ step: 'ðŸ”„ Creating carousel containers...', percent: 30, status: 'processing' });
 
         const res = await instagramAPI.publishCarousel({
           children: mediaUrls.map((url, i) => ({ mediaUrl: url, mediaType: mediaTypes[i] })),
@@ -432,17 +432,17 @@ const SocialMediaPage: React.FC = () => {
 
         if (res.data.success) {
           await postsAPI.publish(igPublishModal.post.id).catch(() => {});
-          setIgPublishProgress({ step: '✅ Carousel published successfully!', percent: 100, status: 'success' });
+          setIgPublishProgress({ step: 'âœ… Carousel published successfully!', percent: 100, status: 'success' });
           setIgPublishResult({
             mediaId: res.data.data?.mediaId,
           });
-          showToast('✅ Carousel published to Instagram!');
+          showToast('âœ… Carousel published to Instagram!');
           fetchPosts();
         }
       }
     } catch (err: any) {
       const errorMsg = err?.response?.data?.error || err?.response?.data?.details || 'Failed to publish to Instagram';
-      setIgPublishProgress({ step: `❌ ${errorMsg}`, percent: 0, status: 'error' });
+      setIgPublishProgress({ step: `âŒ ${errorMsg}`, percent: 0, status: 'error' });
       showToast(errorMsg, 'error');
     }
   };
@@ -603,7 +603,7 @@ const SocialMediaPage: React.FC = () => {
   });
 
   return (
-    <div className="p-3 sm:p-5 md:p-6 lg:p-8">
+    <div className="p-3 sm:p-5 md:p-4 sm:p-5 md:p-6 lg:p-4 sm:p-6 md:p-8">
       {/* Toast */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
@@ -661,11 +661,11 @@ const SocialMediaPage: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2 sm:gap-3 p-3 sm:p-4">
             {[
-              { id: 'facebook', name: 'Facebook', icon: '📘', color: 'bg-blue-600' },
-              { id: 'instagram', name: 'Instagram', icon: '📷', color: 'bg-pink-600' },
-              { id: 'linkedin', name: 'LinkedIn', icon: '💼', color: 'bg-blue-700' },
-              { id: 'twitter', name: 'Twitter/X', icon: '🐦', color: 'bg-gray-900 dark:bg-gray-600' },
-              { id: 'google_business', name: 'Google Business', icon: '🏢', color: 'bg-red-600' },
+              { id: 'facebook', name: 'Facebook', icon: 'ðŸ“˜', color: 'bg-blue-600' },
+              { id: 'instagram', name: 'Instagram', icon: 'ðŸ“·', color: 'bg-pink-600' },
+              { id: 'linkedin', name: 'LinkedIn', icon: 'ðŸ’¼', color: 'bg-blue-700' },
+              { id: 'twitter', name: 'Twitter/X', icon: 'ðŸ¦', color: 'bg-gray-900 dark:bg-gray-600' },
+              { id: 'google_business', name: 'Google Business', icon: 'ðŸ¢', color: 'bg-red-600' },
             ].map(platform => {
               const account = socialAccounts.find(a => a.platform === platform.id);
               const isConnected = account?.connected || false;
@@ -770,7 +770,7 @@ const SocialMediaPage: React.FC = () => {
             </div>
             <div className="divide-y divide-gray-100 dark:divide-gray-700">
               {filteredPosts.length === 0 ? (
-                <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                <div className="p-4 sm:p-6 md:p-8 text-center text-gray-500 dark:text-gray-400">
                   <Send size={40} className="mx-auto mb-3 opacity-30" />
                   <p>No posts found</p>
                 </div>
@@ -874,8 +874,8 @@ const SocialMediaPage: React.FC = () => {
                       <div className="mt-1 space-y-1">
                         {Array.from({ length: Math.min(d.posts, 2) }).map((_, j) => (
                           <div key={j} className="px-1 sm:px-2 py-0.5 sm:py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs rounded truncate">
-                            <span className="hidden sm:inline">📱 Post {j + 1}</span>
-                            <span className="sm:hidden">📱</span>
+                            <span className="hidden sm:inline">ðŸ“± Post {j + 1}</span>
+                            <span className="sm:hidden">ðŸ“±</span>
                           </div>
                         ))}
                         {d.posts > 2 && <p className="text-xs text-gray-400">+{d.posts - 2}</p>}
@@ -893,7 +893,7 @@ const SocialMediaPage: React.FC = () => {
       {activeView === 'analytics' && (
         <div className="space-y-4 sm:space-y-6">
           {/* Engagement Chart */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-6 border border-gray-100 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">Weekly Engagement</h3>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={engagementData}>
@@ -910,7 +910,7 @@ const SocialMediaPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {/* Platform Distribution */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-6 border border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">Posts by Platform</h3>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
@@ -923,7 +923,7 @@ const SocialMediaPage: React.FC = () => {
             </div>
 
             {/* Follower Growth */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-6 border border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">Follower Growth</h3>
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={[
@@ -945,8 +945,8 @@ const SocialMediaPage: React.FC = () => {
           </div>
 
           {/* Best Time to Post */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-6 border border-gray-100 dark:border-gray-700">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">⏰ Best Time to Post</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">â° Best Time to Post</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Facebook</p>
@@ -972,7 +972,7 @@ const SocialMediaPage: React.FC = () => {
       {connectModal && ['facebook', 'linkedin', 'twitter'].includes(connectModal.platform) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={closeConnectModal}>
           <div className="fixed inset-0 bg-black/50" />
-          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+          <div className="relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full max-w-md p-4 sm:p-5 md:p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${
@@ -981,8 +981,8 @@ const SocialMediaPage: React.FC = () => {
                   'bg-gray-100 dark:bg-gray-700'
                 }`}>
                   <span className="text-xl">
-                    {connectModal.platform === 'facebook' ? '📘' :
-                     connectModal.platform === 'linkedin' ? '💼' : '🐦'}
+                    {connectModal.platform === 'facebook' ? 'ðŸ“˜' :
+                     connectModal.platform === 'linkedin' ? 'ðŸ’¼' : 'ðŸ¦'}
                   </span>
                 </div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -1084,10 +1084,10 @@ const SocialMediaPage: React.FC = () => {
                   <p className="text-xs text-blue-700 dark:text-blue-300">
                     <strong>How to get these credentials:</strong><br />
                     {connectModal.platform === 'facebook'
-                      ? 'Go to Facebook Developers → Your App → Tools → Graph API Explorer. Select your Page, get a Page Access Token with pages_manage_posts permission.'
+                      ? 'Go to Facebook Developers â†’ Your App â†’ Tools â†’ Graph API Explorer. Select your Page, get a Page Access Token with pages_manage_posts permission.'
                       : connectModal.platform === 'linkedin'
-                        ? 'Go to LinkedIn Developers → Your App → Auth → Access Tokens. Request w_organization_social permission.'
-                        : 'Go to Twitter Developer Portal → Your Project → Keys and Tokens → Generate Bearer Token with Read and Write permissions.'}
+                        ? 'Go to LinkedIn Developers â†’ Your App â†’ Auth â†’ Access Tokens. Request w_organization_social permission.'
+                        : 'Go to Twitter Developer Portal â†’ Your Project â†’ Keys and Tokens â†’ Generate Bearer Token with Read and Write permissions.'}
                   </p>
                 </div>
 
@@ -1117,7 +1117,7 @@ const SocialMediaPage: React.FC = () => {
       {showIgConnectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowIgConnectModal(false)}>
           <div className="fixed inset-0 bg-black/50" />
-          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+          <div className="relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full max-w-md p-4 sm:p-5 md:p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
@@ -1199,26 +1199,26 @@ const SocialMediaPage: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4" onClick={() => setShowComposeModal(false)}>
           <div className="fixed inset-0 bg-black/50" />
           <div className="relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl">
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl">
               <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Create New Post</h2>
               <button onClick={() => setShowComposeModal(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 <XCircle size={20} className="text-gray-500" />
               </button>
             </div>
-            <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
+            <div className="p-4 sm:p-5 md:p-6 space-y-4 sm:space-y-5">
               {/* Content */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Post Content</label>
                 <textarea
                   value={composeContent}
                   onChange={e => setComposeContent(e.target.value)}
-                  placeholder="Write your post or click ✨ Generate with AI..."
+                  placeholder="Write your post or click âœ¨ Generate with AI..."
                   rows={4}
                   className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm sm:text-base"
                 />
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-2">
                   <button className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg text-xs sm:text-sm hover:bg-purple-100 dark:hover:bg-purple-900/50">
-                    <Zap size={14} /> ✨ Generate with AI
+                    <Zap size={14} /> âœ¨ Generate with AI
                   </button>
                   <span className="text-xs text-gray-400">{composeContent.length} characters</span>
                 </div>
@@ -1290,7 +1290,7 @@ const SocialMediaPage: React.FC = () => {
                             <XCircle size={14} />
                           </button>
                           <span className="absolute bottom-1 left-1 px-1 py-0.5 bg-black/50 text-white text-[10px] rounded">
-                            {media.type === 'VIDEO' ? '🎬' : '📷'}
+                            {media.type === 'VIDEO' ? 'ðŸŽ¬' : 'ðŸ“·'}
                           </span>
                         </div>
                       ))}
@@ -1383,7 +1383,7 @@ const SocialMediaPage: React.FC = () => {
                 <button onClick={() => setShowComposeModal(false)} className="w-full sm:w-auto px-4 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm">
                   Cancel
                 </button>
-                <button onClick={handleCreatePost} className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                <button onClick={handleCreatePost} className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 md:px-6 py-2.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
                   <Send size={16} />
                   {scheduleDate ? 'Schedule Post' : 'Save Draft'}
                 </button>
@@ -1399,7 +1399,7 @@ const SocialMediaPage: React.FC = () => {
           <div className="fixed inset-0 bg-black/50" />
           <div className="relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full sm:max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             {/* Header */}
-            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl z-10">
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl z-10">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-br from-pink-400 to-purple-600 rounded-lg">
                   <Instagram size={18} className="text-white" />
@@ -1413,7 +1413,7 @@ const SocialMediaPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="p-4 sm:p-6 space-y-5">
+            <div className="p-4 sm:p-5 md:p-6 space-y-5">
               {/* Instagram Account Info */}
               {igStatus?.connected && (
                 <div className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 border border-pink-200 dark:border-pink-800 rounded-xl p-3 sm:p-4">
@@ -1427,8 +1427,8 @@ const SocialMediaPage: React.FC = () => {
                       </p>
                       {igStatus.accountInfo && (
                         <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                          <span>👥 {igStatus.accountInfo.followers_count?.toLocaleString() || 'N/A'} followers</span>
-                          <span>📸 {igStatus.accountInfo.media_count || 'N/A'} posts</span>
+                          <span>ðŸ‘¥ {igStatus.accountInfo.followers_count?.toLocaleString() || 'N/A'} followers</span>
+                          <span>ðŸ“¸ {igStatus.accountInfo.media_count || 'N/A'} posts</span>
                         </div>
                       )}
                     </div>
@@ -1459,7 +1459,7 @@ const SocialMediaPage: React.FC = () => {
               {/* Instagram Caption (editable) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <span className="text-pink-500">📝</span>
+                  <span className="text-pink-500">ðŸ“</span>
                   Caption for Instagram
                 </label>
                 <div className="relative">
@@ -1480,8 +1480,8 @@ const SocialMediaPage: React.FC = () => {
               {/* Media for Instagram */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <span className="text-pink-500">📸</span>
-                  Media {igPublishMedia.length > 1 && <span className="text-xs text-gray-400 font-normal">({igPublishMedia.length} items — Carousel)</span>}
+                  <span className="text-pink-500">ðŸ“¸</span>
+                  Media {igPublishMedia.length > 1 && <span className="text-xs text-gray-400 font-normal">({igPublishMedia.length} items â€” Carousel)</span>}
                 </label>
 
                 {/* Media grid preview */}
@@ -1508,7 +1508,7 @@ const SocialMediaPage: React.FC = () => {
                           <XCircle size={14} />
                         </button>
                         <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 text-white text-[10px] rounded-full backdrop-blur-sm">
-                          {media.type === 'VIDEO' ? '🎬 Video' : '📷 Photo'}
+                          {media.type === 'VIDEO' ? 'ðŸŽ¬ Video' : 'ðŸ“· Photo'}
                           {igPublishMedia.length > 1 && <span className="ml-1">#{i + 1}</span>}
                         </div>
                       </div>
@@ -1643,7 +1643,7 @@ const SocialMediaPage: React.FC = () => {
                   <button
                     onClick={handleIgPublishPost}
                     disabled={igPublishMedia.length === 0}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white rounded-lg hover:from-pink-600 hover:via-purple-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium shadow-lg shadow-pink-500/20 order-1 sm:order-2"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-5 md:px-6 py-2.5 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white rounded-lg hover:from-pink-600 hover:via-purple-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium shadow-lg shadow-pink-500/20 order-1 sm:order-2"
                   >
                     <Instagram size={16} />
                     {igPublishMedia.length > 1 ? 'Publish Carousel to Instagram' : 'Publish to Instagram'}
@@ -1698,13 +1698,13 @@ const SocialMediaPage: React.FC = () => {
                   <div className="flex items-center gap-4 sm:gap-6 mt-2">
                     <div className="text-center">
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
-                        {igStatus.accountInfo.followers_count?.toLocaleString() || '—'}
+                        {igStatus.accountInfo.followers_count?.toLocaleString() || 'â€”'}
                       </p>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Followers</p>
                     </div>
                     <div className="text-center">
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
-                        {igStatus.accountInfo.media_count || '—'}
+                        {igStatus.accountInfo.media_count || 'â€”'}
                       </p>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Posts</p>
                     </div>
@@ -1725,19 +1725,19 @@ const SocialMediaPage: React.FC = () => {
               <span className="text-xs text-gray-500 dark:text-gray-400">Last 10 posts</span>
             </div>
             {igAnalyticsLoading ? (
-              <div className="p-8 text-center">
+              <div className="p-4 sm:p-6 md:p-8 text-center">
                 <Loader2 size={24} className="animate-spin text-pink-500 mx-auto mb-2" />
                 <p className="text-sm text-gray-500">Loading Instagram data...</p>
               </div>
             ) : igRecentMedia.length === 0 ? (
-              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              <div className="p-4 sm:p-6 md:p-8 text-center text-gray-500 dark:text-gray-400">
                 <Instagram size={40} className="mx-auto mb-3 opacity-20" />
                 <p className="text-sm">No recent posts found. Publish your first post!</p>
                 <button
                   onClick={() => setActiveView('dashboard')}
                   className="mt-3 text-xs text-pink-600 hover:underline"
                 >
-                  ← Go to Posts
+                  â† Go to Posts
                 </button>
               </div>
             ) : (
@@ -1765,7 +1765,7 @@ const SocialMediaPage: React.FC = () => {
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/50 text-white text-[10px] rounded-full">
-                          📑
+                          ðŸ“‘
                         </div>
                       </div>
                     ) : (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Zap, Plus, Play, Pause, Trash2, Edit3, Clock,
@@ -9,14 +9,14 @@ import { automationAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
 
 const templates = [
-  { id: 't1', name: 'WhatsApp Auto-Reply', description: 'Instantly reply to WhatsApp messages with AI-generated responses', icon: '💬', category: 'Messaging', triggerType: 'whatsapp_message' },
-  { id: 't2', name: 'Lead Auto-Capture', description: 'Capture leads from IndiaMART, JustDial, Facebook & auto-reply', icon: '👤', category: 'Leads', triggerType: 'new_lead' },
-  { id: 't3', name: 'Review Responder', description: 'AI-powered auto-replies to Google reviews', icon: '⭐', category: 'Reviews', triggerType: 'new_review' },
-  { id: 't4', name: 'Drip Campaign', description: 'Multi-step follow-up sequence via WhatsApp & Email', icon: '📧', category: 'Marketing', triggerType: 'contact_stage_change' },
-  { id: 't5', name: 'Appointment Reminder', description: 'Send WhatsApp reminders before appointments', icon: '📅', category: 'Scheduling', triggerType: 'appointment_scheduled' },
-  { id: 't6', name: 'Order Status Update', description: 'Auto-notify customers about order status changes', icon: '📦', category: 'E-Commerce', triggerType: 'order_status_change' },
-  { id: 't7', name: 'Payment Reminder', description: 'Send payment reminders via WhatsApp', icon: '💳', category: 'Billing', triggerType: 'payment_due' },
-  { id: 't8', name: 'Feedback Collection', description: 'Auto-send feedback forms after service', icon: '📝', category: 'Feedback', triggerType: 'appointment_completed' },
+  { id: 't1', name: 'WhatsApp Auto-Reply', description: 'Instantly reply to WhatsApp messages with AI-generated responses', icon: 'ðŸ’¬', category: 'Messaging', triggerType: 'whatsapp_message' },
+  { id: 't2', name: 'Lead Auto-Capture', description: 'Capture leads from IndiaMART, JustDial, Facebook & auto-reply', icon: 'ðŸ‘¤', category: 'Leads', triggerType: 'new_lead' },
+  { id: 't3', name: 'Review Responder', description: 'AI-powered auto-replies to Google reviews', icon: 'â­', category: 'Reviews', triggerType: 'new_review' },
+  { id: 't4', name: 'Drip Campaign', description: 'Multi-step follow-up sequence via WhatsApp & Email', icon: 'ðŸ“§', category: 'Marketing', triggerType: 'contact_stage_change' },
+  { id: 't5', name: 'Appointment Reminder', description: 'Send WhatsApp reminders before appointments', icon: 'ðŸ“…', category: 'Scheduling', triggerType: 'appointment_scheduled' },
+  { id: 't6', name: 'Order Status Update', description: 'Auto-notify customers about order status changes', icon: 'ðŸ“¦', category: 'E-Commerce', triggerType: 'order_status_change' },
+  { id: 't7', name: 'Payment Reminder', description: 'Send payment reminders via WhatsApp', icon: 'ðŸ’³', category: 'Billing', triggerType: 'payment_due' },
+  { id: 't8', name: 'Feedback Collection', description: 'Auto-send feedback forms after service', icon: 'ðŸ“', category: 'Feedback', triggerType: 'appointment_completed' },
 ];
 
 interface AutomationRule {
@@ -44,7 +44,7 @@ interface AutomationSettings {
 
 const defaultSettings: AutomationSettings = {
   autoReplyEnabled: false,
-  autoReplyMessage: 'Thank you for contacting us! We\'ll get back to you shortly. 😊',
+  autoReplyMessage: 'Thank you for contacting us! We\'ll get back to you shortly. ðŸ˜Š',
   businessHours: { enabled: false, start: '09:00', end: '18:00' },
   aiReplyEnabled: false,
   aiProvider: 'openrouter',
@@ -96,7 +96,7 @@ const AutomationPage: React.FC = () => {
 
   const demoSettings: AutomationSettings = {
     autoReplyEnabled: true,
-    autoReplyMessage: 'Thank you for contacting us! We\'ll get back to you shortly. 😊',
+    autoReplyMessage: 'Thank you for contacting us! We\'ll get back to you shortly. ðŸ˜Š',
     businessHours: { enabled: true, start: '09:00', end: '18:00' },
     aiReplyEnabled: true,
     aiProvider: 'openrouter',
@@ -242,16 +242,16 @@ const AutomationPage: React.FC = () => {
 
   const getCategoryIcon = (triggerType: string) => {
     const map: Record<string, string> = {
-      whatsapp_message: '💬',
-      new_lead: '👤',
-      new_review: '⭐',
-      contact_stage_change: '📋',
-      appointment_scheduled: '📅',
-      order_status_change: '📦',
-      payment_due: '💳',
-      appointment_completed: '📝',
+      whatsapp_message: 'ðŸ’¬',
+      new_lead: 'ðŸ‘¤',
+      new_review: 'â­',
+      contact_stage_change: 'ðŸ“‹',
+      appointment_scheduled: 'ðŸ“…',
+      order_status_change: 'ðŸ“¦',
+      payment_due: 'ðŸ’³',
+      appointment_completed: 'ðŸ“',
     };
-    return map[triggerType] || '⚡';
+    return map[triggerType] || 'âš¡';
   };
 
   const getStatusColor = (isActive: boolean) =>
@@ -259,7 +259,7 @@ const AutomationPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
           <p className="text-gray-500">Loading automations...</p>
@@ -269,7 +269,7 @@ const AutomationPage: React.FC = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8">
       {/* Toast */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
@@ -306,11 +306,11 @@ const AutomationPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
           <p className="text-sm text-gray-500 mb-1">Active Automations</p>
-          <p className="text-2xl font-bold text-green-600">{automations.filter(a => a.isActive).length}</p>
+          <p className="text-xl sm:text-2xl font-bold text-green-600">{automations.filter(a => a.isActive).length}</p>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
           <p className="text-sm text-gray-500 mb-1">Total Automations</p>
-          <p className="text-2xl font-bold text-blue-600">{automations.length}</p>
+          <p className="text-xl sm:text-2xl font-bold text-blue-600">{automations.length}</p>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
           <p className="text-sm text-gray-500 mb-1">n8n Status</p>
@@ -359,7 +359,7 @@ const AutomationPage: React.FC = () => {
       {activeView === 'automations' && (
         <div className="space-y-4">
           {automations.map(auto => (
-            <div key={auto.id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+            <div key={auto.id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 bg-gray-50 rounded-lg flex items-center justify-center text-2xl">
@@ -373,7 +373,7 @@ const AutomationPage: React.FC = () => {
                         {auto.triggerValue || getTriggerLabel(auto.triggerType)}
                       </span>
                       {auto.description && (
-                        <span className="text-sm text-gray-400">• {auto.description}</span>
+                        <span className="text-sm text-gray-400">â€¢ {auto.description}</span>
                       )}
                     </div>
                   </div>
@@ -424,7 +424,7 @@ const AutomationPage: React.FC = () => {
               <p className="text-gray-500 mb-6">Start by choosing a template or create your own</p>
               <button
                 onClick={() => setShowTemplateModal(true)}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 sm:px-5 md:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 Browse Templates
               </button>
@@ -439,10 +439,10 @@ const AutomationPage: React.FC = () => {
           {templates.map(template => (
             <div
               key={template.id}
-              className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
+              className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
               onClick={() => useTemplate(template)}
             >
-              <div className="text-4xl mb-3">{template.icon}</div>
+              <div className="text-3xl sm:text-4xl mb-3">{template.icon}</div>
               <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">{template.name}</h3>
               <p className="text-sm text-gray-500 mb-3">{template.description}</p>
               <div className="flex items-center justify-between">
@@ -458,7 +458,7 @@ const AutomationPage: React.FC = () => {
       {activeView === 'settings' && (
         <div className="max-w-3xl space-y-6">
           {/* Auto-Reply */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 md:p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <MessageSquare size={20} className="text-green-600" />
               WhatsApp Auto-Reply
@@ -537,7 +537,7 @@ const AutomationPage: React.FC = () => {
           </div>
 
           {/* Business Hours */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 md:p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Clock size={20} className="text-blue-600" />
               Business Hours
@@ -592,7 +592,7 @@ const AutomationPage: React.FC = () => {
           </div>
 
           {/* n8n Connection */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 md:p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Bot size={20} className="text-purple-600" />
               n8n Integration
@@ -622,7 +622,7 @@ const AutomationPage: React.FC = () => {
             </div>
 
             <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
-              <p className="font-medium text-gray-900 mb-2">💡 How it works:</p>
+              <p className="font-medium text-gray-900 mb-2">ðŸ’¡ How it works:</p>
               <ol className="list-decimal list-inside space-y-1">
                 <li>Create workflows in n8n Dashboard</li>
                 <li>Use webhooks to trigger from WhatsApp, leads, reviews</li>
@@ -635,7 +635,7 @@ const AutomationPage: React.FC = () => {
           <button
             onClick={saveSettings}
             disabled={saving}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+            className="px-4 sm:px-5 md:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
           >
             {saving ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
             {saving ? 'Saving...' : 'Save Settings'}
@@ -645,12 +645,12 @@ const AutomationPage: React.FC = () => {
 
       {/* Template Modal */}
       {showTemplateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] overflow-y-auto p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] overflow-y-auto p-4 sm:p-5 md:p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Choose Automation Template</h2>
               <button onClick={() => setShowTemplateModal(false)} className="text-gray-400 hover:text-gray-600">
-                ✕
+                âœ•
               </button>
             </div>
 

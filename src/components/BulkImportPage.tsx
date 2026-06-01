@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+﻿import React, { useState, useCallback } from 'react';
 import { Upload, Download, FileSpreadsheet, CheckCircle, AlertCircle, X, Loader2, Users } from 'lucide-react';
 import { useToast } from './Toast';
 
@@ -55,7 +55,7 @@ const BulkImportPage: React.FC = () => {
   const reset = () => { setStep('upload'); setFile(null); setContacts([]); setStats({ total: 0, success: 0, duplicates: 0, failed: 0 }); };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"><Users className="text-blue-600" size={32} />Bulk Import Contacts</h1>
@@ -84,7 +84,7 @@ const BulkImportPage: React.FC = () => {
             <Upload size={48} className="mx-auto text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Drop your file here</h3>
             <p className="text-gray-500 mb-4">Supports CSV and Excel files (.csv, .xlsx)</p>
-            <label className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 cursor-pointer">
+            <label className="inline-block px-4 sm:px-5 md:px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 cursor-pointer">
               Browse Files
               <input type="file" accept=".csv,.xlsx" onChange={handleFileUpload} className="hidden" />
             </label>
@@ -123,7 +123,7 @@ const BulkImportPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <FileSpreadsheet size={20} className="text-blue-600" />
               <span className="font-medium text-gray-900">{file?.name}</span>
-              <span className="text-sm text-gray-500">• {contacts.length} contacts found</span>
+              <span className="text-sm text-gray-500">â€¢ {contacts.length} contacts found</span>
             </div>
             <div className="flex gap-2">
               <button onClick={reset} className="px-4 py-2 border border-gray-300 rounded-lg text-sm">Change File</button>
@@ -160,17 +160,17 @@ const BulkImportPage: React.FC = () => {
       {/* Done Step */}
       {step === 'done' && (
         <div className="max-w-lg mx-auto">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-8 text-center">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8 text-center">
             <CheckCircle size={64} className="mx-auto text-green-500 mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Import Complete!</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Import Complete!</h3>
             <p className="text-gray-600 mb-6">Here's what happened:</p>
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-green-50 rounded-lg p-4"><p className="text-2xl font-bold text-green-600">{stats.success}</p><p className="text-sm text-green-700">Imported</p></div>
-              <div className="bg-yellow-50 rounded-lg p-4"><p className="text-2xl font-bold text-yellow-600">{stats.duplicates}</p><p className="text-sm text-yellow-700">Duplicates</p></div>
-              <div className="bg-red-50 rounded-lg p-4"><p className="text-2xl font-bold text-red-600">{stats.failed}</p><p className="text-sm text-red-700">Failed</p></div>
-              <div className="bg-blue-50 rounded-lg p-4"><p className="text-2xl font-bold text-blue-600">{stats.total}</p><p className="text-sm text-blue-700">Total Processed</p></div>
+              <div className="bg-green-50 rounded-lg p-4"><p className="text-xl sm:text-2xl font-bold text-green-600">{stats.success}</p><p className="text-sm text-green-700">Imported</p></div>
+              <div className="bg-yellow-50 rounded-lg p-4"><p className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.duplicates}</p><p className="text-sm text-yellow-700">Duplicates</p></div>
+              <div className="bg-red-50 rounded-lg p-4"><p className="text-xl sm:text-2xl font-bold text-red-600">{stats.failed}</p><p className="text-sm text-red-700">Failed</p></div>
+              <div className="bg-blue-50 rounded-lg p-4"><p className="text-xl sm:text-2xl font-bold text-blue-600">{stats.total}</p><p className="text-sm text-blue-700">Total Processed</p></div>
             </div>
-            <button onClick={reset} className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Import Another File</button>
+            <button onClick={reset} className="px-4 sm:px-5 md:px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Import Another File</button>
           </div>
         </div>
       )}

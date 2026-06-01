@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Calendar, Clock, Plus, ChevronLeft, ChevronRight, User, MapPin, Phone, X, Check,
   Settings, Bell, Repeat, Video, Mail, RefreshCw, AlertCircle, CheckCircle, Loader2, Globe
@@ -52,7 +52,7 @@ const statusColors: Record<string, string> = {
 };
 
 const typeIcons: Record<string, string> = {
-  call: '📞', meeting: '🤝', demo: '💻', 'follow-up': '🔄', consultation: '💡', service: '🔧',
+  call: 'ðŸ“ž', meeting: 'ðŸ¤', demo: 'ðŸ’»', 'follow-up': 'ðŸ”„', consultation: 'ðŸ’¡', service: 'ðŸ”§',
 };
 
 const SERVICE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
@@ -231,7 +231,7 @@ const AppointmentsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[400px]">
+      <div className="p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-500 dark:text-gray-400">Loading appointments...</p>
@@ -241,7 +241,7 @@ const AppointmentsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-4 sm:p-6 md:p-8">
       {toast && (
         <div className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white ${toast.type === 'error' ? 'bg-red-500' : 'bg-green-500'}`}>
           {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle size={18} />}
@@ -251,7 +251,7 @@ const AppointmentsPage: React.FC = () => {
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Appointments</h1>
+          <h1 className="text-2xl md:text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Appointments</h1>
           <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">Schedule, manage, and automate your meetings & services</p>
         </div>
         <div className="flex items-center gap-3">
@@ -284,15 +284,15 @@ const AppointmentsPage: React.FC = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
         {[
-          { label: 'Today', count: appointments.filter(a => a.date === todayStr).length, icon: '📅', color: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
-          { label: 'This Week', count: thisWeekCount, icon: '📊', color: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' },
-          { label: 'Confirmed', count: appointments.filter(a => a.status === 'confirmed').length, icon: '✅', color: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' },
-          { label: 'Pending', count: appointments.filter(a => a.status === 'scheduled').length, icon: '⏳', color: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' },
+          { label: 'Today', count: appointments.filter(a => a.date === todayStr).length, icon: 'ðŸ“…', color: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
+          { label: 'This Week', count: thisWeekCount, icon: 'ðŸ“Š', color: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' },
+          { label: 'Confirmed', count: appointments.filter(a => a.status === 'confirmed').length, icon: 'âœ…', color: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' },
+          { label: 'Pending', count: appointments.filter(a => a.status === 'scheduled').length, icon: 'â³', color: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' },
         ].map(stat => (
           <div key={stat.label} className={`${stat.color} border rounded-xl p-3 md:p-4`}>
             <div className="flex items-center justify-between">
               <span className="text-lg md:text-2xl">{stat.icon}</span>
-              <span className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stat.count}</span>
+              <span className="text-xl md:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stat.count}</span>
             </div>
             <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-1">{stat.label}</p>
           </div>
@@ -302,7 +302,7 @@ const AppointmentsPage: React.FC = () => {
       {/* CALENDAR VIEW */}
       {view === 'calendar' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 md:p-6">
+          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
             <div className="flex items-center justify-between mb-4">
               <button onClick={prevMonth} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 <ChevronLeft size={20} className="text-gray-600 dark:text-gray-400" />
@@ -341,12 +341,12 @@ const AppointmentsPage: React.FC = () => {
           </div>
 
           {/* Selected Day Appointments */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 md:p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-sm md:text-base">
               {selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' }) : 'Select a date'}
             </h3>
             {selectedAppts.length === 0 ? (
-              <div className="text-center py-8">
+              <div className="text-center py-4 sm:py-6 md:py-8">
                 <Calendar size={40} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
                 <p className="text-gray-500 dark:text-gray-400 text-sm">No appointments for this day</p>
                 <button onClick={() => setShowBookingModal(true)} className="mt-3 text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline">
@@ -366,7 +366,7 @@ const AppointmentsPage: React.FC = () => {
                     </div>
                     <div className="space-y-1.5 text-xs md:text-sm text-gray-500 dark:text-gray-400">
                       <div className="flex items-center gap-2"><User size={12} /> {appt.contactName}</div>
-                      <div className="flex items-center gap-2"><Clock size={12} /> {appt.time} • {appt.duration} min</div>
+                      <div className="flex items-center gap-2"><Clock size={12} /> {appt.time} â€¢ {appt.duration} min</div>
                       {appt.location && <div className="flex items-center gap-2"><MapPin size={12} /> {appt.location}</div>}
                       {appt.meetingUrl && (
                         <a href={appt.meetingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
@@ -514,7 +514,7 @@ const AppointmentsPage: React.FC = () => {
                     <span className="text-xl">{typeIcons[appt.type]}</span>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white text-sm">{appt.title}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{appt.contactName} • {appt.duration}m</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{appt.contactName} â€¢ {appt.duration}m</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-auto">
@@ -546,7 +546,7 @@ const AppointmentsPage: React.FC = () => {
           </div>
 
           {services.map((service, idx) => (
-            <div key={service.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 md:p-6">
+            <div key={service.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
               <div className="flex flex-col md:flex-row md:items-center gap-4">
                 <div className="flex items-center gap-3 flex-1">
                   <input type="color" value={service.color} onChange={e => {
@@ -577,7 +577,7 @@ const AppointmentsPage: React.FC = () => {
                     }} className="w-20 px-2 py-1 border border-gray-200 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700" />
                   </div>
                   <div>
-                    <label className="text-[10px] text-gray-500 block">Price (₹)</label>
+                    <label className="text-[10px] text-gray-500 block">Price (â‚¹)</label>
                     <input type="number" value={service.price} onChange={e => {
                       const updated = [...services];
                       updated[idx] = { ...updated[idx], price: parseInt(e.target.value) || 0 };
@@ -603,15 +603,15 @@ const AppointmentsPage: React.FC = () => {
 
       {/* SETTINGS MODAL */}
       {showSettings && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 sm:p-5 md:p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">Appointment Settings</h2>
               <button onClick={() => setShowSettings(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 <X size={20} className="text-gray-500" />
               </button>
             </div>
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-5 md:p-6 space-y-6">
               {/* Availability */}
               <div>
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -798,9 +798,9 @@ const BookingModal: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-4 sm:p-5 md:p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-base md:text-lg font-bold text-gray-900 dark:text-white">Book Appointment</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
             <X size={20} className="text-gray-500" />
@@ -809,7 +809,7 @@ const BookingModal: React.FC<{
 
         {/* Service Quick Select */}
         {services.length > 0 && (
-          <div className="px-4 md:px-6 pt-4">
+          <div className="px-4 md:px-4 sm:px-5 md:px-6 pt-4">
             <p className="text-xs text-gray-500 mb-2">Quick select a service:</p>
             <div className="flex flex-wrap gap-2">
               {services.filter(s => s.active).map(s => (
@@ -822,7 +822,7 @@ const BookingModal: React.FC<{
           </div>
         )}
 
-        <div className="p-4 md:p-6 space-y-4">
+        <div className="p-4 sm:p-5 md:p-6 space-y-4">
           <div>
             <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Title *</label>
             <input type="text" value={title} onChange={e => setTitle(e.target.value)}
@@ -843,12 +843,12 @@ const BookingModal: React.FC<{
               <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Type</label>
               <select value={type} onChange={e => setType(e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                <option value="call">📞 Call</option>
-                <option value="meeting">🤝 Meeting</option>
-                <option value="demo">💻 Demo</option>
-                <option value="consultation">💡 Consultation</option>
-                <option value="follow-up">🔄 Follow-up</option>
-                <option value="service">🔧 Service</option>
+                <option value="call">ðŸ“ž Call</option>
+                <option value="meeting">ðŸ¤ Meeting</option>
+                <option value="demo">ðŸ’» Demo</option>
+                <option value="consultation">ðŸ’¡ Consultation</option>
+                <option value="follow-up">ðŸ”„ Follow-up</option>
+                <option value="service">ðŸ”§ Service</option>
               </select>
             </div>
             <div>
@@ -920,7 +920,7 @@ const BookingModal: React.FC<{
           </div>
         </div>
 
-        <div className="flex gap-3 p-4 md:p-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex gap-3 p-4 sm:p-5 md:p-6 border-t border-gray-200 dark:border-gray-700">
           <button onClick={onClose} className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 text-sm">
             Cancel
           </button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, Search, Package, ShoppingCart, TrendingUp, Eye, Edit, Trash2, Share2, X, MessageSquare, Upload, AlertTriangle, Tag, Percent, Trash, Minus, Plus as PlusIcon, Check, Clock, Truck, CreditCard, ExternalLink, Store, Copy, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../lib/api';
@@ -330,7 +330,7 @@ const ECommercePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[400px]">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-8 flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-500 dark:text-gray-400">Loading e-commerce data...</p>
@@ -340,11 +340,11 @@ const ECommercePage: React.FC = () => {
   }
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-4 sm:p-5 md:p-6 lg:p-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">E-Commerce</h1>
+          <h1 className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">E-Commerce</h1>
           <p className="text-gray-500 dark:text-gray-400">Manage products, orders, and coupons</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
@@ -440,19 +440,19 @@ const ECommercePage: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><TrendingUp size={16} /><span className="text-sm">Revenue</span></div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">₹{totalRevenue.toLocaleString()}</p>
+          <p className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">â‚¹{totalRevenue.toLocaleString()}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><Package size={16} /><span className="text-sm">Total Orders</span></div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalOrders}</p>
+          <p className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{totalOrders}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><ShoppingCart size={16} /><span className="text-sm">Pending Orders</span></div>
-          <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{pendingOrders}</p>
+          <p className="text-xl sm:text-xl sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400">{pendingOrders}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><Package size={16} /><span className="text-sm">Active Products</span></div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">{activeProducts}</p>
+          <p className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{activeProducts}</p>
         </div>
       </div>
 
@@ -482,7 +482,7 @@ const ECommercePage: React.FC = () => {
             <div className="text-center py-12">
               <Package size={48} className="mx-auto text-gray-400 mb-4" />
               <p className="text-gray-500 dark:text-gray-400 mb-4">{searchQuery ? 'No products found' : 'No products yet'}</p>
-              <button onClick={() => { setEditingProduct(null); setShowProductModal(true); }} className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors">Add Your First Product</button>
+              <button onClick={() => { setEditingProduct(null); setShowProductModal(true); }} className="px-4 sm:px-5 md:px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors">Add Your First Product</button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -509,9 +509,9 @@ const ECommercePage: React.FC = () => {
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg font-bold text-gray-900 dark:text-white">₹{product.price}</span>
+                      <span className="text-lg font-bold text-gray-900 dark:text-white">â‚¹{product.price}</span>
                       {(product.comparePrice || product.compareAtPrice) && (
-                        <span className="text-sm text-gray-400 line-through">₹{product.comparePrice || product.compareAtPrice}</span>
+                        <span className="text-sm text-gray-400 line-through">â‚¹{product.comparePrice || product.compareAtPrice}</span>
                       )}
                       {(product.comparePrice || product.compareAtPrice) && (
                         <span className="text-xs bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400 px-2 py-0.5 rounded-full">
@@ -563,18 +563,18 @@ const ECommercePage: React.FC = () => {
                           {orderStatusConfig[order.status]?.label || order.status}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{order.contact?.name || order.customerName || 'N/A'} • {order.contact?.phone || order.phone || ''}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{order.contact?.name || order.customerName || 'N/A'} â€¢ {order.contact?.phone || order.phone || ''}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-500">
                         {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : order.date || ''}
-                        {order.gateway && ` • ${order.gateway === 'cod' ? 'COD' : 'Online'}`}
+                        {order.gateway && ` â€¢ ${order.gateway === 'cod' ? 'COD' : 'Online'}`}
                       </p>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
                         <p className="text-sm text-gray-500 dark:text-gray-400">{order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}</p>
-                        <p className="text-lg font-bold text-gray-900 dark:text-white">₹{order.total.toLocaleString()}</p>
+                        <p className="text-lg font-bold text-gray-900 dark:text-white">â‚¹{order.total.toLocaleString()}</p>
                         {(order.discountAmount || 0) > 0 && (
-                          <p className="text-xs text-green-600 dark:text-green-400">-₹{order.discountAmount} discount</p>
+                          <p className="text-xs text-green-600 dark:text-green-400">-â‚¹{order.discountAmount} discount</p>
                         )}
                       </div>
                       <select
@@ -622,8 +622,8 @@ const ECommercePage: React.FC = () => {
                     <div>
                       <p className="font-semibold text-gray-900 dark:text-white">{coupon.code}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {(coupon.type === 'percentage' || coupon.type === 'PERCENTAGE') ? `${coupon.value}% off` : `₹${coupon.value} off`}
-                        {coupon.minOrder && coupon.minOrder > 0 && ` • Min order ₹${coupon.minOrder}`}
+                        {(coupon.type === 'percentage' || coupon.type === 'PERCENTAGE') ? `${coupon.value}% off` : `â‚¹${coupon.value} off`}
+                        {coupon.minOrder && coupon.minOrder > 0 && ` â€¢ Min order â‚¹${coupon.minOrder}`}
                       </p>
                       {coupon.maxUses && (
                         <p className="text-xs text-gray-400">{coupon.usedCount || 0}/{coupon.maxUses} used</p>
@@ -736,7 +736,7 @@ const AddProductModal: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">{product ? 'Edit Product' : 'Add Product'}</h2>
@@ -768,11 +768,11 @@ const AddProductModal: React.FC<{
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price (₹) *</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price (â‚¹) *</label>
               <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="499" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Compare Price (₹)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Compare Price (â‚¹)</label>
               <input type="number" value={comparePrice} onChange={e => setComparePrice(e.target.value)} placeholder="699" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
             </div>
           </div>
@@ -805,7 +805,7 @@ const AddProductModal: React.FC<{
         </div>
         <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
           <button onClick={onClose} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
-          <button onClick={handleSubmit} disabled={!name || !price} className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 transition-all">
+          <button onClick={handleSubmit} disabled={!name || !price} className="px-4 sm:px-5 md:px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 transition-all">
             {product ? 'Update Product' : 'Add Product'}
           </button>
         </div>
@@ -824,7 +824,7 @@ const CartModal: React.FC<{
   onCheckout: () => void;
 }> = ({ cart, subtotal, onUpdateQuantity, onRemove, onClose, onCheckout }) => {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Shopping Cart ({cart.length})</h2>
@@ -832,7 +832,7 @@ const CartModal: React.FC<{
         </div>
         <div className="p-4">
           {cart.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-4 sm:py-6 md:py-8">
               <ShoppingCart size={48} className="mx-auto text-gray-400 mb-4" />
               <p className="text-gray-500 dark:text-gray-400">Your cart is empty</p>
             </div>
@@ -851,7 +851,7 @@ const CartModal: React.FC<{
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{item.product.name}</p>
                       {item.variantName && <p className="text-xs text-gray-500">{item.variantName}</p>}
-                      <p className="text-sm font-semibold text-blue-600">₹{(item.variantPrice || item.product.price).toLocaleString()}</p>
+                      <p className="text-sm font-semibold text-blue-600">â‚¹{(item.variantPrice || item.product.price).toLocaleString()}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       {item.id && (
@@ -869,11 +869,11 @@ const CartModal: React.FC<{
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
                 <div className="flex justify-between text-lg font-bold">
                   <span className="text-gray-900 dark:text-white">Total</span>
-                  <span className="text-gray-900 dark:text-white">₹{subtotal.toLocaleString()}</span>
+                  <span className="text-gray-900 dark:text-white">â‚¹{subtotal.toLocaleString()}</span>
                 </div>
               </div>
               <button onClick={onCheckout} className="w-full mt-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all">
-                Checkout • ₹{subtotal.toLocaleString()}
+                Checkout â€¢ â‚¹{subtotal.toLocaleString()}
               </button>
             </>
           )}
@@ -889,7 +889,7 @@ const CouponDisplayModal: React.FC<{
   onClose: () => void;
 }> = ({ coupons, onClose }) => {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Available Coupons</h2>
@@ -909,13 +909,13 @@ const CouponDisplayModal: React.FC<{
                     <div>
                       <p className="font-semibold text-gray-900 dark:text-white">{coupon.code}</p>
                       <p className="text-sm text-gray-500">
-                        {(coupon.type === 'percentage' || coupon.type === 'PERCENTAGE') ? `${coupon.value}% off` : `₹${coupon.value} off`}
+                        {(coupon.type === 'percentage' || coupon.type === 'PERCENTAGE') ? `${coupon.value}% off` : `â‚¹${coupon.value} off`}
                       </p>
                     </div>
                   </div>
                   <button onClick={() => { navigator.clipboard.writeText(coupon.code); }} className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">Copy</button>
                 </div>
-                {coupon.minOrder && coupon.minOrder > 0 && <p className="text-xs text-gray-500 mt-2">Min order: ₹{coupon.minOrder}</p>}
+                {coupon.minOrder && coupon.minOrder > 0 && <p className="text-xs text-gray-500 mt-2">Min order: â‚¹{coupon.minOrder}</p>}
                 {coupon.expiresAt && <p className="text-xs text-gray-400 mt-1">Expires: {new Date(coupon.expiresAt).toLocaleDateString()}</p>}
               </div>
             ))
@@ -953,7 +953,7 @@ const AddCouponModal: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Add Coupon</h2>
@@ -969,7 +969,7 @@ const AddCouponModal: React.FC<{
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type *</label>
               <select value={type} onChange={e => setType(e.target.value as any)} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <option value="PERCENTAGE">Percentage (%)</option>
-                <option value="FIXED">Fixed Amount (₹)</option>
+                <option value="FIXED">Fixed Amount (â‚¹)</option>
               </select>
             </div>
             <div>
@@ -979,7 +979,7 @@ const AddCouponModal: React.FC<{
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Min Order (₹)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Min Order (â‚¹)</label>
               <input type="number" value={minOrder} onChange={e => setMinOrder(e.target.value)} placeholder="500" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
             </div>
             <div>
@@ -998,7 +998,7 @@ const AddCouponModal: React.FC<{
         </div>
         <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
           <button onClick={onClose} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
-          <button onClick={handleSubmit} disabled={!code || !value} className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 transition-all">Create Coupon</button>
+          <button onClick={handleSubmit} disabled={!code || !value} className="px-4 sm:px-5 md:px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 transition-all">Create Coupon</button>
         </div>
       </div>
     </div>
@@ -1006,3 +1006,4 @@ const AddCouponModal: React.FC<{
 };
 
 export default ECommercePage;
+

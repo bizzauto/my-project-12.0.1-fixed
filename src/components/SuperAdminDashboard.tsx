@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Building2, Users, MessageSquare, TrendingUp,
   ArrowUpRight, ArrowDownRight, Eye, Shield, DollarSign, RefreshCw,
@@ -99,7 +99,7 @@ const StatCard: React.FC<{
   change?: string;
   positive?: boolean;
 }> = ({ title, value, icon, color, change, positive }) => (
-  <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow">
+  <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100 hover:shadow-md transition-shadow">
     <div className="flex items-center justify-between mb-4">
       <div className={`p-3 rounded-lg ${color}`}>{icon}</div>
       {change && (
@@ -110,7 +110,7 @@ const StatCard: React.FC<{
       )}
     </div>
     <h3 className="text-gray-500 text-sm font-medium mb-1">{title}</h3>
-    <p className="text-2xl font-bold text-gray-900">{value}</p>
+    <p className="text-xl sm:text-2xl font-bold text-gray-900">{value}</p>
   </div>
 );
 
@@ -236,7 +236,7 @@ const SuperAdminDashboard: React.FC = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <RefreshCw size={48} className="text-purple-500 animate-spin mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading Dashboard</h2>
@@ -247,16 +247,16 @@ const SuperAdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8">
       {/* Tab Navigation */}
       <div className="flex items-center gap-2 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
         <button onClick={() => setActiveTab('dashboard')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'dashboard' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-          📊 Dashboard
+          ðŸ“Š Dashboard
         </button>
         <button onClick={() => { setActiveTab('backgrounds'); fetchBackgrounds(); }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'backgrounds' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-          🖼️ Poster Backgrounds
+          ðŸ–¼ï¸ Poster Backgrounds
         </button>
       </div>
 
@@ -315,7 +315,7 @@ const SuperAdminDashboard: React.FC = () => {
       {stats && (
         <>
           {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8">
             <StatCard
               title="Total Businesses"
               value={stats.totalBusinesses > 0 ? stats.totalBusinesses.toString() : '0'}
@@ -353,7 +353,7 @@ const SuperAdminDashboard: React.FC = () => {
           {/* Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-8">
             {/* Growth Trend */}
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <TrendingUp size={20} className="text-blue-600" />
                 Growth Trend {growthData.length > 0 ? '(Last 7 Months)' : '(No Data)'}
@@ -378,7 +378,7 @@ const SuperAdminDashboard: React.FC = () => {
             </div>
 
             {/* Revenue Chart */}
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <DollarSign size={20} className="text-green-600" />
                 Monthly Revenue {growthData.length > 0 ? '(\u20B9)' : '(No Data)'}
@@ -403,7 +403,7 @@ const SuperAdminDashboard: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-8">
             {/* Plan Distribution */}
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Plan Distribution</h3>
               {planData.length > 0 ? (
                 <>
@@ -446,20 +446,20 @@ const SuperAdminDashboard: React.FC = () => {
             </div>
 
             {/* Quick Stats */}
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100 lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100 lg:col-span-2">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Health</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-green-50 rounded-lg">
                   <p className="text-sm text-green-600 mb-1">Active Subscriptions</p>
-                  <p className="text-2xl font-bold text-green-700">{stats.activeSubscriptions > 0 ? stats.activeSubscriptions : '0'}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-700">{stats.activeSubscriptions > 0 ? stats.activeSubscriptions : '0'}</p>
                 </div>
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-600 mb-1">Total Contacts</p>
-                  <p className="text-2xl font-bold text-blue-700">{stats.totalContacts > 0 ? (stats.totalContacts / 1000).toFixed(1) + 'K' : '0'}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-700">{stats.totalContacts > 0 ? (stats.totalContacts / 1000).toFixed(1) + 'K' : '0'}</p>
                 </div>
                 <div className="p-4 bg-purple-50 rounded-lg">
                   <p className="text-sm text-purple-600 mb-1">Avg Revenue/Business</p>
-                  <p className="text-2xl font-bold text-purple-700">
+                  <p className="text-xl sm:text-2xl font-bold text-purple-700">
                     {stats.activeSubscriptions > 0 && stats.totalRevenue > 0
                       ? formatCurrency(Math.round(stats.totalRevenue / stats.activeSubscriptions))
                       : '\u20B90'}
@@ -467,7 +467,7 @@ const SuperAdminDashboard: React.FC = () => {
                 </div>
                 <div className="p-4 bg-yellow-50 rounded-lg">
                   <p className="text-sm text-yellow-600 mb-1">Users per Business</p>
-                  <p className="text-2xl font-bold text-yellow-700">
+                  <p className="text-xl sm:text-2xl font-bold text-yellow-700">
                     {stats.totalBusinesses > 0 && stats.totalUsers > 0
                       ? (stats.totalUsers / stats.totalBusinesses).toFixed(1)
                       : '0'}
@@ -479,7 +479,7 @@ const SuperAdminDashboard: React.FC = () => {
 
           {/* Recent Businesses */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+            <div className="p-4 sm:p-5 md:p-6 border-b border-gray-100 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Recent Businesses</h3>
               <button className="text-blue-600 text-sm font-medium hover:underline flex items-center gap-1">
                 View All <Eye size={16} />
@@ -490,19 +490,19 @@ const SuperAdminDashboard: React.FC = () => {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Users</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contacts</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Messages</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                      <th className="px-4 sm:px-5 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
+                      <th className="px-4 sm:px-5 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                      <th className="px-4 sm:px-5 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+                      <th className="px-4 sm:px-5 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Users</th>
+                      <th className="px-4 sm:px-5 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contacts</th>
+                      <th className="px-4 sm:px-5 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Messages</th>
+                      <th className="px-4 sm:px-5 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {businesses.map((biz) => (
                       <tr key={biz.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-5 md:px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                               {biz.name.charAt(0)}
@@ -510,8 +510,8 @@ const SuperAdminDashboard: React.FC = () => {
                             <span className="font-medium text-gray-900">{biz.name}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600 capitalize">{biz.type}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-5 md:px-6 py-4 text-sm text-gray-600 capitalize">{biz.type}</td>
+                        <td className="px-4 sm:px-5 md:px-6 py-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             biz.plan === 'FREE' ? 'bg-gray-100 text-gray-700' :
                             biz.plan === 'STARTER' ? 'bg-blue-100 text-blue-700' :
@@ -522,10 +522,10 @@ const SuperAdminDashboard: React.FC = () => {
                             {biz.plan}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">{biz.users}</td>
-                        <td className="px-6 py-4 text-sm text-gray-600">{biz.contacts}</td>
-                        <td className="px-6 py-4 text-sm text-gray-600">{biz.messages.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{biz.createdAt}</td>
+                        <td className="px-4 sm:px-5 md:px-6 py-4 text-sm text-gray-600">{biz.users}</td>
+                        <td className="px-4 sm:px-5 md:px-6 py-4 text-sm text-gray-600">{biz.contacts}</td>
+                        <td className="px-4 sm:px-5 md:px-6 py-4 text-sm text-gray-600">{biz.messages.toLocaleString()}</td>
+                        <td className="px-4 sm:px-5 md:px-6 py-4 text-sm text-gray-500">{biz.createdAt}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -547,7 +547,7 @@ const SuperAdminDashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">🖼️ Poster Backgrounds</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">ðŸ–¼ï¸ Poster Backgrounds</h2>
               <p className="text-gray-500 text-sm mt-1">Upload background images that users can use in Creative Studio</p>
             </div>
             <button onClick={() => setShowAddBg(true)}
@@ -558,8 +558,8 @@ const SuperAdminDashboard: React.FC = () => {
 
           {/* Add Background Modal */}
           {showAddBg && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setShowAddBg(false)}>
-              <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4" onClick={() => setShowAddBg(false)}>
+              <div className="bg-white rounded-2xl p-4 sm:p-5 md:p-6 max-w-lg w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-gray-900">Add Poster Background</h3>
                   <button onClick={() => setShowAddBg(false)} className="text-gray-400 hover:text-gray-600"><Trash2 size={18} /></button>
@@ -648,7 +648,7 @@ const SuperAdminDashboard: React.FC = () => {
                   </div>
                   <div className="p-3">
                     <h3 className="text-sm font-semibold text-gray-900 truncate">{bg.name}</h3>
-                    <p className="text-[10px] text-gray-500 mt-0.5">{bg.category} · {bg.usageCount || 0} uses</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5">{bg.category} Â· {bg.usageCount || 0} uses</p>
                     {bg.expiresAt && (
                       <p className="text-[10px] text-amber-500 mt-0.5 flex items-center gap-1">
                         <Calendar size={10} /> Expires {new Date(bg.expiresAt).toLocaleDateString()}

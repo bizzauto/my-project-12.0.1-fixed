@@ -86,14 +86,14 @@ const ContactImportModal: React.FC<ContactImportModalProps> = ({ isOpen, onClose
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleClose}>
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4" onClick={handleClose}>
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 sm:p-5 md:p-6 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-900">Import Contacts</h2>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-5 md:p-6">
           {result ? (
             <div className="text-center">
               <CheckCircle size={64} className="text-green-500 mx-auto mb-4" />
@@ -112,7 +112,7 @@ const ContactImportModal: React.FC<ContactImportModalProps> = ({ isOpen, onClose
                   <p className="text-xs text-red-600">Failed</p>
                 </div>
               </div>
-              <button onClick={handleClose} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Done</button>
+              <button onClick={handleClose} className="px-4 sm:px-5 md:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Done</button>
             </div>
           ) : (
             <>
@@ -121,7 +121,7 @@ const ContactImportModal: React.FC<ContactImportModalProps> = ({ isOpen, onClose
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-lg p-4 sm:p-6 md:p-8 text-center cursor-pointer transition-colors ${
+                className={`border-2 border-dashed rounded-lg p-4 sm:p-5 md:p-6 lg:p-8 text-center cursor-pointer transition-colors ${
                   dragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
                 }`}
               >
@@ -165,7 +165,7 @@ const ContactImportModal: React.FC<ContactImportModalProps> = ({ isOpen, onClose
         </div>
 
         {!result && (
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+          <div className="px-4 sm:px-5 md:px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
             <button onClick={handleClose} className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
             <button onClick={handleImport} disabled={!file || importing}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   ArrowLeft, DollarSign, ShoppingCart, TrendingUp, BarChart3,
   Loader2, RefreshCw, Package, CreditCard, PieChart as PieChartIcon,
@@ -80,10 +80,10 @@ const SalesAnalyticsPage: React.FC = () => {
     fetchAnalytics();
   }, [fetchAnalytics]);
 
-  const formatCurrency = (val: number) => `₹${val.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  const formatCurrency = (val: number) => `â‚¹${val.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-5 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -143,7 +143,7 @@ const SalesAnalyticsPage: React.FC = () => {
         )}
 
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 sm:p-5 md:p-6 text-center">
             <p className="text-red-600 dark:text-red-400">{error}</p>
             <button onClick={fetchAnalytics} className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm">
               Retry
@@ -160,28 +160,28 @@ const SalesAnalyticsPage: React.FC = () => {
                   <span className="text-sm text-gray-500 dark:text-gray-400">Total Revenue</span>
                   <DollarSign size={20} className="text-green-600" />
                 </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(data.totalRevenue)}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(data.totalRevenue)}</p>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm text-gray-500 dark:text-gray-400">Total Orders</span>
                   <ShoppingCart size={20} className="text-blue-600" />
                 </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{data.totalOrders}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{data.totalOrders}</p>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm text-gray-500 dark:text-gray-400">Avg Order Value</span>
                   <TrendingUp size={20} className="text-purple-600" />
                 </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(data.averageOrderValue)}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(data.averageOrderValue)}</p>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm text-gray-500 dark:text-gray-400">Revenue Growth</span>
                   <TrendingUp size={20} className={data.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'} />
                 </div>
-                <p className={`text-2xl font-bold ${data.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <p className={`text-xl sm:text-2xl font-bold ${data.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {data.revenueGrowth >= 0 ? '+' : ''}{data.revenueGrowth.toFixed(1)}%
                 </p>
               </div>
@@ -189,7 +189,7 @@ const SalesAnalyticsPage: React.FC = () => {
 
             {/* Revenue Chart */}
             {data.dailyRevenue?.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 mb-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Revenue Trend</h3>
                 <ResponsiveContainer width="100%" height={350}>
                   <AreaChart data={data.dailyRevenue}>
@@ -217,7 +217,7 @@ const SalesAnalyticsPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-6">
               {/* Top Products */}
               {data.topProducts?.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                     <Package size={18} className="text-blue-600" />
                     Top Products
@@ -249,7 +249,7 @@ const SalesAnalyticsPage: React.FC = () => {
 
               {/* Category Breakdown */}
               {data.categories?.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                     <PieChartIcon size={18} className="text-purple-600" />
                     Categories
@@ -279,7 +279,7 @@ const SalesAnalyticsPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
               {/* Orders by Status */}
               {data.ordersByStatus?.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Orders by Status</h3>
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={data.ordersByStatus}>
@@ -299,7 +299,7 @@ const SalesAnalyticsPage: React.FC = () => {
 
               {/* Payment Methods */}
               {data.paymentMethods?.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                     <CreditCard size={18} className="text-green-600" />
                     Payment Methods

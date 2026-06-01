@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   Search, Filter, MessageSquare, Mail, Star, Phone, Tag, Clock,
   Send, Paperclip, Smile, ArrowLeft, RefreshCw, Archive, MoreVertical,
@@ -474,7 +474,7 @@ export default function ConversationsPage() {
             </h2>
             <p className="text-[11px] text-gray-500">
               {(CHANNEL_CONFIG[selectedConversation.channel] || CHANNEL_CONFIG.whatsapp).label}
-              {selectedConversation.contactPhone && ` · ${selectedConversation.contactPhone}`}
+              {selectedConversation.contactPhone && ` Â· ${selectedConversation.contactPhone}`}
             </p>
           </div>
           <div className="flex items-center gap-1">
@@ -664,7 +664,7 @@ export default function ConversationsPage() {
     return (
       <div className="w-72 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 h-full overflow-y-auto flex-shrink-0 hidden lg:block">
         {/* Avatar section */}
-        <div className="p-6 text-center border-b border-gray-200 dark:border-gray-700">
+        <div className="p-4 sm:p-5 md:p-6 text-center border-b border-gray-200 dark:border-gray-700">
           {conv.contactAvatar ? (
             <img src={conv.contactAvatar} alt="" className="w-16 h-16 rounded-full mx-auto object-cover" />
           ) : (

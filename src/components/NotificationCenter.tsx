@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Bell, Check, CheckCheck, Trash2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
 import { notificationsAPI } from '../lib/api';
 
@@ -91,7 +91,7 @@ const NotificationCenter: React.FC<{ onNavigate?: (tab: string) => void; onClose
 	if (loading) {
 		return (
 			<div className="w-96 max-h-[500px] flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-				<div className="flex items-center justify-center p-4 sm:p-6 md:p-8">
+				<div className="flex items-center justify-center p-4 sm:p-5 md:p-6 lg:p-8">
 					<div className="flex flex-col items-center gap-2">
 						<div className="w-6 h-6 border-2 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
 						<p className="text-xs text-gray-400">Loading...</p>
@@ -142,7 +142,7 @@ const NotificationCenter: React.FC<{ onNavigate?: (tab: string) => void; onClose
 
 			<div className="flex-1 overflow-y-auto">
 				{filtered.length === 0 ? (
-					<div className="p-8 text-center">
+					<div className="p-4 sm:p-6 md:p-8 text-center">
 						<Bell size={32} className="mx-auto text-gray-300 dark:text-gray-600 mb-2" />
 						<p className="text-gray-500 dark:text-gray-400 text-sm">No notifications</p>
 					</div>

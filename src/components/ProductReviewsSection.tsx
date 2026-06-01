@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Star, Send, Loader2, MessageSquare } from 'lucide-react';
 import apiClient from '../lib/api';
 
@@ -70,7 +70,7 @@ const ProductReviewsSection: React.FC<Props> = ({ businessId, productId, product
   const maxDistCount = Math.max(...(data?.distribution?.map((d) => d.count) || [1]), 1);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <MessageSquare size={18} className="text-blue-600" />
         Reviews for {productName}
@@ -86,7 +86,7 @@ const ProductReviewsSection: React.FC<Props> = ({ businessId, productId, product
           <div className="flex flex-col sm:flex-row gap-6">
             {/* Average Rating */}
             <div className="text-center sm:text-left shrink-0">
-              <p className="text-4xl font-bold text-gray-900 dark:text-white">{data.averageRating.toFixed(1)}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">{data.averageRating.toFixed(1)}</p>
               <div className="flex items-center gap-0.5 mt-1 justify-center sm:justify-start">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <Star

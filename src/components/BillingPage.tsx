@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { CreditCard, Download, CheckCircle, ArrowUpRight, FileText, RefreshCw, Loader2, AlertCircle, Bell } from 'lucide-react';
 import { billingAPI, subscriptionsAPI, analyticsAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
@@ -18,7 +18,7 @@ const BillingPage: React.FC = () => {
 
   const currentPlan = subscription?.plan || {
     name: business?.plan || 'STARTER',
-    price: business?.plan === 'PRO' ? '₹2,999' : business?.plan === 'ENTERPRISE' ? '₹9,999' : '₹1,499',
+    price: business?.plan === 'PRO' ? 'â‚¹2,999' : business?.plan === 'ENTERPRISE' ? 'â‚¹9,999' : 'â‚¹1,499',
     nextBilling: subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
     status: subscription?.status || 'Active',
   };
@@ -100,7 +100,7 @@ const BillingPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
           <p className="text-gray-500">Loading billing info...</p>
@@ -121,8 +121,8 @@ const BillingPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="p-4 sm:p-6 md:p-8">
-        <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-6 text-center">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-8">
+        <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 sm:p-5 md:p-6 text-center">
           <AlertCircle className="mx-auto text-red-500 mb-3" size={40} />
           <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
           <button onClick={loadBilling} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Try Again</button>
@@ -132,7 +132,7 @@ const BillingPage: React.FC = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8">
       {toastEl}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -144,11 +144,11 @@ const BillingPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white mb-6">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 sm:p-5 md:p-6 text-white mb-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-blue-100 text-sm mb-1">Current Plan</p>
-            <h2 className="text-3xl font-bold mb-2">{currentPlan.name}</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-2">{currentPlan.name}</h2>
             <p className="text-blue-100">{currentPlan.price}/month - Next billing: {currentPlan.nextBilling}</p>
           </div>
           <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full">
@@ -159,7 +159,7 @@ const BillingPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6">
-        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Usage This Month</h3>
           {usage.length > 0 ? (
             <div className="space-y-4">
@@ -184,7 +184,7 @@ const BillingPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h3>
           {subscription?.paymentMethod ? (
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
@@ -229,7 +229,7 @@ const BillingPage: React.FC = () => {
       />
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-        <div className="p-6 border-b border-gray-100">
+        <div className="p-4 sm:p-5 md:p-6 border-b border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900">Invoice History</h3>
         </div>
         {invoices.length > 0 ? (
@@ -255,7 +255,7 @@ const BillingPage: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center text-gray-400">
+          <div className="p-4 sm:p-6 md:p-8 text-center text-gray-400">
             <FileText size={40} className="mx-auto mb-3 opacity-30" />
             <p>No invoices yet</p>
           </div>

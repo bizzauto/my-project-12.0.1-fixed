@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp, Users, MessageSquare, DollarSign, ArrowUpRight,
   Download, FileText, BarChart3, Clock, Eye, Zap, Target, RefreshCw,
@@ -200,10 +200,10 @@ const ReportsPage: React.FC = () => {
   }, [fetchData]);
 
   const formatCurrency = (val: number) => {
-    if (val >= 10000000) return '₹' + (val / 10000000).toFixed(1) + 'Cr';
-    if (val >= 100000) return '₹' + (val / 100000).toFixed(1) + 'L';
-    if (val >= 1000) return '₹' + (val / 1000).toFixed(1) + 'K';
-    return '₹' + val;
+    if (val >= 10000000) return 'â‚¹' + (val / 10000000).toFixed(1) + 'Cr';
+    if (val >= 100000) return 'â‚¹' + (val / 100000).toFixed(1) + 'L';
+    if (val >= 1000) return 'â‚¹' + (val / 1000).toFixed(1) + 'K';
+    return 'â‚¹' + val;
   };
 
   const getScoreColor = (score: number) =>
@@ -213,7 +213,7 @@ const ReportsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
@@ -232,7 +232,7 @@ const ReportsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
@@ -277,7 +277,7 @@ const ReportsPage: React.FC = () => {
               { label: 'Revenue', value: formatCurrency(overviewData?.totalRevenue || 0), icon: <DollarSign size={20} />, color: 'bg-purple-50 text-purple-600', change: '+22%' },
               { label: 'Conversion Rate', value: (overviewData?.conversionRate || 0) + '%', icon: <TrendingUp size={20} />, color: 'bg-orange-50 text-orange-600', change: '+5%' },
             ].map((stat, i) => (
-              <div key={i} className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+              <div key={i} className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100">
                 <div className="flex items-center justify-between mb-4">
                   <div className={`p-3 rounded-lg ${stat.color}`}>{stat.icon}</div>
                   <span className="text-sm font-medium text-green-600 flex items-center gap-1">
@@ -285,14 +285,14 @@ const ReportsPage: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mb-1">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stat.value}</p>
               </div>
             ))}
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-6">
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <TrendingUp size={20} className="text-blue-600" />Weekly Performance
               </h3>
@@ -315,7 +315,7 @@ const ReportsPage: React.FC = () => {
               )}
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <DollarSign size={20} className="text-green-600" />Revenue Trend
               </h3>
@@ -369,7 +369,7 @@ const ReportsPage: React.FC = () => {
               { label: 'Cold', count: leadScores?.cold || 0, color: 'bg-gray-400', textColor: 'text-gray-600' },
               { label: 'Average', count: leadScores?.averageScore || 0, color: 'bg-blue-500', textColor: 'text-blue-600', isAvg: true },
             ].map((item, i) => (
-              <div key={i} className="bg-white rounded-lg shadow-sm p-6 border border-gray-100 text-center">
+              <div key={i} className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100 text-center">
                 <div className={`w-16 h-16 ${item.color} rounded-full mx-auto mb-3 flex items-center justify-center text-white text-xl font-bold`}>
                   {item.count}{item.isAvg && ''}
                 </div>
@@ -381,7 +381,7 @@ const ReportsPage: React.FC = () => {
 
           {/* Top Leads Table */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-            <div className="p-6 border-b border-gray-100">
+            <div className="p-4 sm:p-5 md:p-6 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <Target size={20} className="text-red-600" />
                 Top Scoring Leads
@@ -409,7 +409,7 @@ const ReportsPage: React.FC = () => {
                   </div>
                 </div>
               )) : (
-                <div className="p-8 text-center text-gray-500">
+                <div className="p-4 sm:p-6 md:p-8 text-center text-gray-500">
                   No leads data available
                 </div>
               )}
@@ -421,22 +421,22 @@ const ReportsPage: React.FC = () => {
       {/* ROI TRACKING */}
       {activeTab === 'roi' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <DollarSign size={20} className="text-green-600" />ROI by Channel
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="p-4 bg-green-50 rounded-xl">
                 <p className="text-sm text-green-600 font-medium">Total Spend</p>
-                <p className="text-2xl font-bold text-green-700">{formatCurrency(demoRoiData.reduce((s, r) => s + r.spend, 0))}</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-700">{formatCurrency(demoRoiData.reduce((s, r) => s + r.spend, 0))}</p>
               </div>
               <div className="p-4 bg-blue-50 rounded-xl">
                 <p className="text-sm text-blue-600 font-medium">Total Revenue</p>
-                <p className="text-2xl font-bold text-blue-700">{formatCurrency(demoRoiData.reduce((s, r) => s + r.revenue, 0))}</p>
+                <p className="text-xl sm:text-2xl font-bold text-blue-700">{formatCurrency(demoRoiData.reduce((s, r) => s + r.revenue, 0))}</p>
               </div>
               <div className="p-4 bg-purple-50 rounded-xl">
                 <p className="text-sm text-purple-600 font-medium">Average ROI</p>
-                <p className="text-2xl font-bold text-purple-700">{Math.round(demoRoiData.reduce((s, r) => s + r.roi, 0) / demoRoiData.length)}%</p>
+                <p className="text-xl sm:text-2xl font-bold text-purple-700">{Math.round(demoRoiData.reduce((s, r) => s + r.roi, 0) / demoRoiData.length)}%</p>
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -474,7 +474,7 @@ const ReportsPage: React.FC = () => {
       {/* SALES FUNNEL */}
       {activeTab === 'funnel' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
               <TrendingUp size={20} className="text-blue-600" />Sales Funnel Visualization
             </h3>
@@ -485,7 +485,7 @@ const ReportsPage: React.FC = () => {
                 return (
                   <div key={stage.stage} className="text-center" style={{ width: `${width}%` }}>
                     <div
-                      className="py-4 px-6 rounded-lg text-white font-semibold text-sm transition-all hover:opacity-90 cursor-pointer"
+                      className="py-4 px-4 sm:px-5 md:px-6 rounded-lg text-white font-semibold text-sm transition-all hover:opacity-90 cursor-pointer"
                       style={{ backgroundColor: stage.color }}
                     >
                       {stage.stage}: {stage.count.toLocaleString()}
@@ -500,7 +500,7 @@ const ReportsPage: React.FC = () => {
           </div>
 
           {/* Source Distribution */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Lead Source Distribution</h3>
             <div className="flex items-center gap-8">
               <ResponsiveContainer width="50%" height={250}>
@@ -538,7 +538,7 @@ const ReportsPage: React.FC = () => {
 
       {/* EXPORT DATA */}
       {activeTab === 'export' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           {[
             { name: 'Contacts', description: 'Export all contacts with tags, source, and deal values', icon: <Users size={24} />, format: 'CSV' },
             { name: 'Messages', description: 'Export message history with contact details and status', icon: <MessageSquare size={24} />, format: 'CSV' },
@@ -547,7 +547,7 @@ const ReportsPage: React.FC = () => {
             { name: 'Reviews', description: 'Export all reviews with ratings and responses', icon: <Eye size={24} />, format: 'CSV' },
             { name: 'Full Report', description: 'Complete business report with analytics (PDF)', icon: <BarChart3 size={24} />, format: 'PDF' },
           ].map((item, i) => (
-            <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow cursor-pointer group">
+            <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 hover:shadow-md transition-shadow cursor-pointer group">
               <div className="p-3 bg-blue-50 rounded-lg text-blue-600 w-fit mb-4 group-hover:bg-blue-100 transition-colors">
                 {item.icon}
               </div>

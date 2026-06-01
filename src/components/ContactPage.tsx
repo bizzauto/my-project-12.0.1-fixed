@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import Footer from './Footer';
 import PublicNavbar from './PublicNavbar';
 import { Mail, Phone, MapPin, MessageSquare, Send, Clock, CheckCircle } from 'lucide-react';
@@ -150,7 +150,7 @@ const ContactPage: React.FC = () => {
                         rows={5} placeholder="How can we help you?" required />
                     </div>
                     <button type="submit"
-                      className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                      className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 flex items-center gap-2">
                       Send Message <Send size={18} />
                     </button>
                   </form>
@@ -166,3 +166,4 @@ const ContactPage: React.FC = () => {
 };
 
 export default ContactPage;
+

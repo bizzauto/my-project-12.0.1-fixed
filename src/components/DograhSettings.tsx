@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   Bot, Settings, CheckCircle, XCircle, Loader2, Save, RefreshCw,
   Phone, Globe, Key, Link, AlertTriangle, Signal
@@ -28,8 +28,8 @@ interface Agent {
 }
 
 const PROVIDER_INFO: Record<string, { name: string; rate: string; color: string; description: string }> = {
-  twilio: { name: 'Twilio', rate: '~₹1.00-1.50/min', color: 'red', description: 'Industry leader, global reach, reliable' },
-  plivo: { name: 'Plivo', rate: '~₹0.50-1.00/min', color: 'green', description: '50% cheaper than Twilio, great quality' },
+  twilio: { name: 'Twilio', rate: '~â‚¹1.00-1.50/min', color: 'red', description: 'Industry leader, global reach, reliable' },
+  plivo: { name: 'Plivo', rate: '~â‚¹0.50-1.00/min', color: 'green', description: '50% cheaper than Twilio, great quality' },
   browser_only: { name: 'Browser Only', rate: 'FREE', color: 'blue', description: 'No phone number needed, WebRTC calls' },
 };
 
@@ -130,7 +130,7 @@ const DograhSettings: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-5 md:p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
           <p className="text-gray-500">Loading settings...</p>
@@ -140,7 +140,7 @@ const DograhSettings: React.FC = () => {
   }
 
   return (
-    <div className="p-4 sm:p-5 md:p-6 lg:p-8 max-w-4xl mx-auto space-y-6 animate-fade-in-up">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-4 sm:p-6 md:p-8 max-w-4xl mx-auto space-y-6 animate-fade-in-up">
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl">
@@ -199,7 +199,7 @@ const DograhSettings: React.FC = () => {
         {/* Configuration Card - 2/3 width */}
         <div className="lg:col-span-2 space-y-6">
           {/* Dograh Configuration */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-2 mb-4">
               <Settings size={20} className="text-blue-500" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Dograh Configuration</h2>
@@ -340,7 +340,7 @@ const DograhSettings: React.FC = () => {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
+                className="flex items-center gap-2 px-4 sm:px-5 md:px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
               >
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 Save Settings
@@ -349,7 +349,7 @@ const DograhSettings: React.FC = () => {
           </div>
 
           {/* Webhook URL */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Webhook URL</h3>
             <p className="text-sm text-gray-500 mb-3">Configure this URL in your Dograh agent's webhook node:</p>
             <div className="flex items-center gap-2">

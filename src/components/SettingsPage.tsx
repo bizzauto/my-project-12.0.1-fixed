@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useAuthStore } from '../lib/authStore';
 import { useToast } from '../components/Toast';
 import { businessAPI } from '../lib/api';
@@ -114,7 +114,7 @@ export default function SettingsPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Business Information */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <Building className="text-blue-600" size={20} />
             Business Information
@@ -227,7 +227,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Branding & White-label */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <Palette className="text-blue-600" size={20} />
             Branding & White-label
@@ -296,7 +296,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Preferences */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <Clock className="text-blue-600" size={20} />
             Preferences
@@ -324,7 +324,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Security - 2FA Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <Shield className="text-green-600" size={20} />
             Security
@@ -419,8 +419,8 @@ export default function SettingsPage() {
 
         {/* Disable 2FA Confirm Modal */}
         {showDisableConfirm && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-5 md:p-6">
               <div className="flex items-center gap-3 text-red-600 mb-4">
                 <Shield className="w-8 h-8" />
                 <h3 className="text-xl font-bold">Disable Two-Factor Authentication?</h3>
@@ -483,7 +483,7 @@ export default function SettingsPage() {
       </form>
 
       {/* Social Media Connections */}
-      <div className="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+      <div className="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
           <Globe className="text-blue-600" size={20} />
           Social Media Connections
@@ -492,14 +492,14 @@ export default function SettingsPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            { name: 'WhatsApp Business', icon: '💬', color: 'green', connected: !!business?.waAccessToken, desc: 'Send messages, auto-replies, campaigns' },
-            { name: 'Facebook', icon: '📘', color: 'blue', connected: !!business?.fbAccessToken, desc: 'Post to pages, lead ads' },
-            { name: 'Instagram', icon: '📷', color: 'pink', connected: !!business?.igAccessToken, desc: 'Post, stories, reels' },
-            { name: 'LinkedIn', icon: '💼', color: 'blue', connected: !!business?.linkedinAccessToken, desc: 'Professional posts' },
-            { name: 'Twitter/X', icon: '🐦', color: 'sky', connected: !!business?.twitterAccessToken, desc: 'Tweets and threads' },
-            { name: 'Google Business', icon: '🏢', color: 'red', connected: !!business?.gbpAccessToken, desc: 'Reviews, posts, insights' },
-            { name: 'Google OAuth', icon: '🔐', color: 'red', connected: !!user?.googleId, desc: 'Sign in with Google' },
-            { name: 'Apple Sign-In', icon: '🍎', color: 'gray', connected: !!user?.appleId, desc: 'Sign in with Apple' },
+            { name: 'WhatsApp Business', icon: 'ðŸ’¬', color: 'green', connected: !!business?.waAccessToken, desc: 'Send messages, auto-replies, campaigns' },
+            { name: 'Facebook', icon: 'ðŸ“˜', color: 'blue', connected: !!business?.fbAccessToken, desc: 'Post to pages, lead ads' },
+            { name: 'Instagram', icon: 'ðŸ“·', color: 'pink', connected: !!business?.igAccessToken, desc: 'Post, stories, reels' },
+            { name: 'LinkedIn', icon: 'ðŸ’¼', color: 'blue', connected: !!business?.linkedinAccessToken, desc: 'Professional posts' },
+            { name: 'Twitter/X', icon: 'ðŸ¦', color: 'sky', connected: !!business?.twitterAccessToken, desc: 'Tweets and threads' },
+            { name: 'Google Business', icon: 'ðŸ¢', color: 'red', connected: !!business?.gbpAccessToken, desc: 'Reviews, posts, insights' },
+            { name: 'Google OAuth', icon: 'ðŸ”', color: 'red', connected: !!user?.googleId, desc: 'Sign in with Google' },
+            { name: 'Apple Sign-In', icon: 'ðŸŽ', color: 'gray', connected: !!user?.appleId, desc: 'Sign in with Apple' },
           ].map((social) => (
             <div key={social.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
               <div className="flex items-center gap-3">

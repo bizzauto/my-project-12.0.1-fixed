@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle, X, MessageSquare, Zap, Star, ChevronDown, ArrowRight } from 'lucide-react';
 import Footer from './Footer';
@@ -29,11 +29,11 @@ const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
 const LandingPageBottom: React.FC<Props> = ({ openFaq, setOpenFaq, showBackToTop }) => (
   <>
     {/* Comparison Table */}
-    <Section className="py-24 px-6">
+    <Section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 rounded-full px-4 py-1.5 text-sm font-medium mb-4"><CheckCircle size={14} /> Why BizzAuto</div>
-          <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">BizzAuto vs Others</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">BizzAuto vs Others</h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">See why businesses choose BizzAuto</p>
         </div>
         <div className="overflow-x-auto">
@@ -69,13 +69,13 @@ const LandingPageBottom: React.FC<Props> = ({ openFaq, setOpenFaq, showBackToTop
     </Section>
 
     {/* Testimonials */}
-    <Section className="py-24 px-6 relative overflow-hidden">
+    <Section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white dark:from-emerald-500/[0.03] dark:to-transparent" />
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400 rounded-full px-4 py-1.5 text-sm font-medium mb-4"><Star size={14} /> Testimonials</div>
-          <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">Loved by businesses</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">Don't take our word — hear from our users</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">Loved by businesses</h2>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Don't take our word â€” hear from our users</p>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[
@@ -97,11 +97,11 @@ const LandingPageBottom: React.FC<Props> = ({ openFaq, setOpenFaq, showBackToTop
     </Section>
 
     {/* FAQ */}
-    <Section className="py-24 px-6">
+    <Section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-700 dark:text-purple-400 rounded-full px-4 py-1.5 text-sm font-medium mb-4"><MessageSquare size={14} /> FAQ</div>
-          <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">Common questions</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">Common questions</h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">Everything you need to know</p>
         </div>
         <div className="space-y-3">
@@ -128,16 +128,16 @@ const LandingPageBottom: React.FC<Props> = ({ openFaq, setOpenFaq, showBackToTop
     </Section>
 
     {/* Pricing Teaser */}
-    <Section className="py-24 px-6 relative overflow-hidden">
+    <Section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-500/5 dark:via-teal-500/5 dark:to-cyan-500/5" />
       <div className="relative max-w-4xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-full px-4 py-1.5 text-sm font-medium mb-4"><Zap size={14} /> Simple Pricing</div>
-        <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">Start free. Scale as you grow.</h2>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">Start free. Scale as you grow.</h2>
         <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">No hidden fees. No long-term contracts. Cancel anytime.</p>
         <div className="grid sm:grid-cols-3 gap-6 mb-10">
           {[
-            { name: 'Starter', price: '₹0', period: '/mo', desc: 'For solo entrepreneurs', features: ['500 messages/mo', 'Basic CRM', '1 WhatsApp Number', 'Email Support'] },
-            { name: 'Growth', price: '₹2,499', period: '/mo', desc: 'For growing businesses', features: ['10,000 messages/mo', 'Full CRM + Pipelines', 'AI Chatbot', 'Priority Support'], popular: true },
+            { name: 'Starter', price: 'â‚¹0', period: '/mo', desc: 'For solo entrepreneurs', features: ['500 messages/mo', 'Basic CRM', '1 WhatsApp Number', 'Email Support'] },
+            { name: 'Growth', price: 'â‚¹2,499', period: '/mo', desc: 'For growing businesses', features: ['10,000 messages/mo', 'Full CRM + Pipelines', 'AI Chatbot', 'Priority Support'], popular: true },
             { name: 'Enterprise', price: 'Custom', period: '', desc: 'For large organizations', features: ['Unlimited messages', 'Custom Integrations', 'Dedicated Manager', 'SLA Guarantee'] },
           ].map((plan, i) => (
             <div key={i} className={`relative bg-white dark:bg-white/[0.03] border rounded-2xl p-6 hover:-translate-y-1 transition-all ${plan.popular ? 'border-emerald-400 dark:border-emerald-500/50 shadow-xl shadow-emerald-500/10' : 'border-gray-200 dark:border-white/5'}`}>
@@ -154,11 +154,11 @@ const LandingPageBottom: React.FC<Props> = ({ openFaq, setOpenFaq, showBackToTop
     </Section>
 
     {/* Final CTA */}
-    <section className="py-24 px-6 relative overflow-hidden">
+    <section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700" />
       <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
       <div className="relative max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl sm:text-5xl font-bold text-white mb-6">Ready to automate your business?</h2>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">Ready to automate your business?</h2>
         <p className="text-lg text-emerald-100 mb-10 max-w-2xl mx-auto">Join 10,000+ businesses already growing with BizzAuto. Start your 7-day free trial today.</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link to="/register" className="px-8 py-4 bg-white text-emerald-700 font-bold rounded-xl hover:shadow-xl hover:-translate-y-0.5 transition-all text-lg">Start Free Trial</Link>
@@ -185,3 +185,4 @@ const LandingPageBottom: React.FC<Props> = ({ openFaq, setOpenFaq, showBackToTop
 );
 
 export default LandingPageBottom;
+

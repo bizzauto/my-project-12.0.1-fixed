@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, Truck, Check, ArrowLeft, Tag, MapPin, Package, Loader2 } from 'lucide-react';
 import apiClient from '../lib/api';
@@ -189,7 +189,7 @@ const CheckoutPage: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 py-4 sm:py-5 md:py-6">
         {/* Progress Steps */}
         <div className="flex items-center justify-center gap-4 mb-8">
           {[
@@ -219,7 +219,7 @@ const CheckoutPage: React.FC = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Shipping Address */}
             {step === 'address' && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <MapPin size={20} /> Shipping Address
                 </h2>
@@ -261,7 +261,7 @@ const CheckoutPage: React.FC = () => {
 
             {/* Payment */}
             {step === 'payment' && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <CreditCard size={20} /> Payment Method
                 </h2>
@@ -296,7 +296,7 @@ const CheckoutPage: React.FC = () => {
 
             {/* Confirm */}
             {step === 'confirm' && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Check size={20} /> Order Summary
                 </h2>
@@ -315,7 +315,7 @@ const CheckoutPage: React.FC = () => {
                         {item.variantName && <p className="text-xs text-gray-500">{item.variantName}</p>}
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">₹{(item.variantPrice || item.product.price) * item.quantity}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">â‚¹{(item.variantPrice || item.product.price) * item.quantity}</p>
                         <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                       </div>
                     </div>
@@ -331,7 +331,7 @@ const CheckoutPage: React.FC = () => {
                     Back
                   </button>
                   <button onClick={handlePlaceOrder} disabled={processing} className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                    {processing ? <><Loader2 className="animate-spin" size={18} /> Processing...</> : `Place Order • ₹${total.toLocaleString()}`}
+                    {processing ? <><Loader2 className="animate-spin" size={18} /> Processing...</> : `Place Order â€¢ â‚¹${total.toLocaleString()}`}
                   </button>
                 </div>
               </div>
@@ -340,25 +340,25 @@ const CheckoutPage: React.FC = () => {
 
           {/* Order Summary Sidebar */}
           <div className="space-y-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 sticky top-24">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 sticky top-24">
               <h3 className="font-bold text-gray-900 dark:text-white mb-4">Order Summary</h3>
               <div className="space-y-2 mb-4">
                 {cartItems.map(item => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <span className="text-gray-600 dark:text-gray-400 truncate mr-2">{item.product.name} x{item.quantity}</span>
-                    <span className="text-gray-900 dark:text-white font-medium whitespace-nowrap">₹{(item.variantPrice || item.product.price) * item.quantity}</span>
+                    <span className="text-gray-900 dark:text-white font-medium whitespace-nowrap">â‚¹{(item.variantPrice || item.product.price) * item.quantity}</span>
                   </div>
                 ))}
               </div>
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Subtotal</span>
-                  <span className="text-gray-900 dark:text-white">₹{subtotal.toLocaleString()}</span>
+                  <span className="text-gray-900 dark:text-white">â‚¹{subtotal.toLocaleString()}</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-sm text-green-600">
                     <span>Discount ({appliedCoupon.code})</span>
-                    <span>-₹{discount.toLocaleString()}</span>
+                    <span>-â‚¹{discount.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
@@ -367,7 +367,7 @@ const CheckoutPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-700">
                   <span>Total</span>
-                  <span>₹{total.toLocaleString()}</span>
+                  <span>â‚¹{total.toLocaleString()}</span>
                 </div>
               </div>
 

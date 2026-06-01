@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Shield, Clock, Search, Download, RefreshCw } from 'lucide-react';
 import { auditLogAPI } from '../lib/api';
 import { PageSkeleton } from './Skeleton';
@@ -75,7 +75,7 @@ const AuditLogPage: React.FC = () => {
   if (loading) return <PageSkeleton />;
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"><Shield className="text-blue-600" size={32} />Audit Log</h1>

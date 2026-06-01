@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Wallet as WalletIcon, Plus, AlertTriangle, Loader2 } from 'lucide-react';
 import { walletAPI } from '../lib/api';
 
@@ -61,7 +61,7 @@ const WalletWidget: React.FC<WalletWidgetProps> = ({ onAddFunds, onViewHistory }
           </div>
           <div className="min-w-0">
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Wallet Balance</p>
-            <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">₹{balance.toFixed(2)}</p>
+            <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">â‚¹{balance.toFixed(2)}</p>
           </div>
         </div>
       </div>
@@ -78,15 +78,15 @@ const WalletWidget: React.FC<WalletWidgetProps> = ({ onAddFunds, onViewHistory }
       <div className="space-y-2.5 sm:space-y-3 mb-3 sm:mb-4">
         <div className="flex justify-between text-xs sm:text-sm">
           <span className="text-gray-500 dark:text-gray-400">Total Recharged</span>
-          <span className="font-medium text-gray-900 dark:text-white">₹{(wallet?.totalRecharged || 0).toFixed(2)}</span>
+          <span className="font-medium text-gray-900 dark:text-white">â‚¹{(wallet?.totalRecharged || 0).toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-xs sm:text-sm">
           <span className="text-gray-500 dark:text-gray-400">Total Spent</span>
-          <span className="font-medium text-gray-900 dark:text-white">₹{(wallet?.totalSpent || 0).toFixed(2)}</span>
+          <span className="font-medium text-gray-900 dark:text-white">â‚¹{(wallet?.totalSpent || 0).toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-xs sm:text-sm">
           <span className="text-gray-500 dark:text-gray-400">Platform Fee (10%)</span>
-          <span className="font-medium text-orange-600 dark:text-orange-400">₹{(wallet?.totalMarginPaid || 0).toFixed(2)}</span>
+          <span className="font-medium text-orange-600 dark:text-orange-400">â‚¹{(wallet?.totalMarginPaid || 0).toFixed(2)}</span>
         </div>
       </div>
 

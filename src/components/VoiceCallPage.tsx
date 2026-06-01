@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Phone, PhoneCall, PhoneOff, Mic, MicOff, Volume2,
   PhoneIncoming, PhoneOutgoing, Search, RefreshCw, Loader2,
@@ -227,7 +227,7 @@ const VoiceCallPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-5 md:p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
           <p className="text-gray-500">Loading call data...</p>
@@ -244,7 +244,7 @@ const VoiceCallPage: React.FC = () => {
           <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-blue-500/30 animate-pulse">
             {callType === 'browser' ? <Globe size={40} /> : <Phone size={40} />}
           </div>
-          <h2 className="text-2xl font-bold mb-2">{dialNumber || 'AI Agent'}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold mb-2">{dialNumber || 'AI Agent'}</h2>
           <p className="text-blue-200 text-lg mb-2">{formatTime(callTimer)}</p>
           <p className="text-blue-300 text-sm mb-8">
             {callStatus === 'connecting' ? 'Connecting...' :
@@ -267,9 +267,9 @@ const VoiceCallPage: React.FC = () => {
 
       {/* Call Detail Modal */}
       {selectedCall && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSelectedCall(null)}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setSelectedCall(null)}>
           <div className="fixed inset-0 bg-black/50" />
-          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="relative bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-lg p-4 sm:p-5 md:p-6 max-h-[95vh] sm:max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Call Details</h2>
             <div className="space-y-3">
               <div className="flex justify-between"><span className="text-gray-500">Name</span><span className="font-medium text-gray-900 dark:text-white">{selectedCall.name}</span></div>
@@ -327,7 +327,7 @@ const VoiceCallPage: React.FC = () => {
               <div className="flex items-center justify-between mb-3">
                 <div className={`p-2.5 rounded-xl ${cm[s.color]}`}>{s.icon}</div>
               </div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{s.value}</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{s.value}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{s.label}</p>
             </div>
           );
@@ -337,7 +337,7 @@ const VoiceCallPage: React.FC = () => {
       {/* Chart + Call Log */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
         {/* Chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Call Volume</h3>
           {callStats.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -387,7 +387,7 @@ const VoiceCallPage: React.FC = () => {
                   <div className="flex items-center gap-4">
                     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${tc.bg} ${tc.color}`}>{tc.icon} {tc.label}</span>
                     <div className="text-right">
-                      <p className="text-sm text-gray-900 dark:text-white">{call.duration > 0 ? formatTime(call.duration) : '—'}</p>
+                      <p className="text-sm text-gray-900 dark:text-white">{call.duration > 0 ? formatTime(call.duration) : 'â€”'}</p>
                       <p className="text-xs text-gray-400">{new Date(call.time).toLocaleDateString()}</p>
                     </div>
                     {call.recordingUrl && (
@@ -400,7 +400,7 @@ const VoiceCallPage: React.FC = () => {
               );
             })}
             {filteredCalls.length === 0 && (
-              <div className="p-8 text-center text-gray-400">
+              <div className="p-4 sm:p-6 md:p-8 text-center text-gray-400">
                 <PhoneOff size={40} className="mx-auto mb-3 opacity-30" />
                 <p>No call records found</p>
               </div>
@@ -411,9 +411,9 @@ const VoiceCallPage: React.FC = () => {
 
       {/* Dialer Modal */}
       {showDialer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowDialer(false)}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowDialer(false)}>
           <div className="fixed inset-0 bg-black/50" />
-          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
+          <div className="relative bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-sm p-4 sm:p-5 md:p-6 max-h-[95vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white text-center mb-4">Make a Call</h2>
 
             {/* Call Type Toggle */}
@@ -471,7 +471,7 @@ const VoiceCallPage: React.FC = () => {
 
             {/* Wallet Balance */}
             <div className="text-center text-sm text-gray-500 mb-4">
-              Wallet: <span className="font-medium text-gray-900 dark:text-white">₹{walletBalance.toFixed(2)}</span>
+              Wallet: <span className="font-medium text-gray-900 dark:text-white">â‚¹{walletBalance.toFixed(2)}</span>
             </div>
 
             {/* Call Button */}

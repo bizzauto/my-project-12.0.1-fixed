@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, FileText, Download, Send, Eye, Edit, Trash2, X, Copy, Check, DollarSign, Clock, TrendingUp, RefreshCw, Loader2 } from 'lucide-react';
 import { documentsAPI } from '../lib/api';
 
@@ -153,7 +153,7 @@ const DocumentsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
           <p className="text-gray-500">Loading documents...</p>
@@ -163,7 +163,7 @@ const DocumentsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Documents</h1>
@@ -185,9 +185,9 @@ const DocumentsPage: React.FC = () => {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Total Invoiced', value: `₹${totalInvoiced.toLocaleString()}`, icon: <DollarSign size={20} />, color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800' },
-          { label: 'Paid', value: `₹${totalPaid.toLocaleString()}`, icon: <Check size={20} />, color: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800' },
-          { label: 'Pending', value: `₹${pendingAmount.toLocaleString()}`, icon: <Clock size={20} />, color: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800' },
+          { label: 'Total Invoiced', value: `â‚¹${totalInvoiced.toLocaleString()}`, icon: <DollarSign size={20} />, color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800' },
+          { label: 'Paid', value: `â‚¹${totalPaid.toLocaleString()}`, icon: <Check size={20} />, color: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800' },
+          { label: 'Pending', value: `â‚¹${pendingAmount.toLocaleString()}`, icon: <Clock size={20} />, color: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800' },
           { label: 'Open Quotes', value: openQuotes, icon: <TrendingUp size={20} />, color: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800' },
         ].map(stat => (
           <div key={stat.label} className={`${stat.color} border rounded-xl p-4`}>
@@ -195,7 +195,7 @@ const DocumentsPage: React.FC = () => {
               <span className="text-sm font-medium opacity-80">{stat.label}</span>
               {stat.icon}
             </div>
-            <p className="text-2xl font-bold">{stat.value}</p>
+            <p className="text-xl sm:text-2xl font-bold">{stat.value}</p>
           </div>
         ))}
       </div>
@@ -206,7 +206,7 @@ const DocumentsPage: React.FC = () => {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors capitalize ${tab === t ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-transparent'}`}
+            className={`px-4 sm:px-5 md:px-6 py-3 text-sm font-medium border-b-2 transition-colors capitalize ${tab === t ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-transparent'}`}
           >
             {t === 'all' ? 'All' : `${t}s`} ({t === 'all' ? documents.length : documents.filter(d => d.type === t).length})
           </button>
@@ -250,12 +250,12 @@ const DocumentsPage: React.FC = () => {
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {doc.documentNumber} • {displayName} • {new Date(doc.createdAt).toLocaleDateString()}
+                        {doc.documentNumber} â€¢ {displayName} â€¢ {new Date(doc.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">₹{(doc.amount || 0).toLocaleString()}</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">â‚¹{(doc.amount || 0).toLocaleString()}</p>
                     <div className="flex gap-1">
                       <button onClick={(e) => { e.stopPropagation(); }} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="View">
                         <Eye size={16} className="text-gray-400" />
@@ -294,15 +294,15 @@ const DocumentsPage: React.FC = () => {
                         <tr key={idx} className="text-sm text-gray-700 dark:text-gray-300">
                           <td className="py-1.5">{item.description}</td>
                           <td className="text-right py-1.5">{item.qty}</td>
-                          <td className="text-right py-1.5">₹{item.rate.toLocaleString()}</td>
-                          <td className="text-right py-1.5 font-medium">₹{item.amount.toLocaleString()}</td>
+                          <td className="text-right py-1.5">â‚¹{item.rate.toLocaleString()}</td>
+                          <td className="text-right py-1.5 font-medium">â‚¹{item.amount.toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
                       <tr className="border-t border-gray-200 dark:border-gray-600 text-sm font-bold text-gray-900 dark:text-white">
                         <td colSpan={3} className="pt-2 text-right">Total:</td>
-                        <td className="pt-2 text-right">₹{(doc.amount || 0).toLocaleString()}</td>
+                        <td className="pt-2 text-right">â‚¹{(doc.amount || 0).toLocaleString()}</td>
                       </tr>
                     </tfoot>
                   </table>
@@ -320,7 +320,7 @@ const DocumentsPage: React.FC = () => {
             <FileText size={64} className="mx-auto text-gray-300 mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Documents Yet</h3>
             <p className="text-gray-500 mb-6">Create your first quote, invoice, or proposal</p>
-            <button onClick={() => setShowCreateModal(true)} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <button onClick={() => setShowCreateModal(true)} className="px-4 sm:px-5 md:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
               Create Document
             </button>
           </div>
@@ -330,7 +330,7 @@ const DocumentsPage: React.FC = () => {
       {/* Create Document Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-4 sm:p-5 md:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">New Document</h2>
               <button onClick={() => setShowCreateModal(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">

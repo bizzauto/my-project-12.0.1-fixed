@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Send, Mail, MessageSquare, Smartphone, BarChart3, Users, Plus, Play, Pause,
   Trash2, CheckCircle, XCircle, AlertCircle, RefreshCw, Copy, Edit3, Filter,
@@ -8,7 +8,7 @@ import {
 import { useAuthStore } from '../lib/authStore';
 import apiClient from '../lib/api';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface ReviewRequest {
   id: string;
   contactId: string;
@@ -82,7 +82,7 @@ const MESSAGE_PLACEHOLDERS = [
   { key: '{{appointment_date}}', desc: 'Appointment date' },
 ];
 
-// ─── API Helpers ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ API Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function apiGet<T>(url: string, params?: Record<string, any>): Promise<T> {
   const query = params ? '?' + new URLSearchParams(
     Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => [k, String(v)])
@@ -111,7 +111,7 @@ async function apiDelete<T>(url: string): Promise<T> {
   return res.data;
 }
 
-// ─── Utility ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Utility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
@@ -137,7 +137,7 @@ function generateGoogleReviewLink(businessName: string, placeId?: string) {
   return `https://search.google.com/local/writereview?placeid=`;
 }
 
-// ─── Toast Component ────────────────────────────────────────────────────────
+// â”€â”€â”€ Toast Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
   useEffect(() => {
     const t = setTimeout(onClose, 3500);
@@ -152,7 +152,7 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
   );
 }
 
-// ─── Stat Card ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Stat Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function StatCard({ label, value, icon, color, sub }: { label: string; value: string | number; icon: React.ReactNode; color: string; sub?: string }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
@@ -160,13 +160,13 @@ function StatCard({ label, value, icon, color, sub }: { label: string; value: st
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>{icon}</div>
         <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</span>
       </div>
-      <div className="text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
+      <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
       {sub && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{sub}</p>}
     </div>
   );
 }
 
-// ─── Modal ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Modal({ open, onClose, title, children, size = 'md' }: {
   open: boolean; onClose: () => void; title: string; children: React.ReactNode; size?: 'sm' | 'md' | 'lg';
 }) {
@@ -176,17 +176,17 @@ function Modal({ open, onClose, title, children, size = 'md' }: {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full ${w} max-h-[90vh] flex flex-col`}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between px-4 sm:px-5 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h2>
           <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
         </div>
-        <div className="overflow-y-auto p-6">{children}</div>
+        <div className="overflow-y-auto p-4 sm:p-5 md:p-6">{children}</div>
       </div>
     </div>
   );
 }
 
-// ─── Main Component ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function ReviewRequests() {
   const { business } = useAuthStore();
   const [tab, setTab] = useState<Tab>('dashboard');
@@ -228,7 +228,7 @@ export default function ReviewRequests() {
   const [genForm, setGenForm] = useState({ businessName: '', placeId: '' });
   const [generatedLink, setGeneratedLink] = useState('');
 
-  // ─── Fetch Data ────────────────────────────────────────────────────────
+  // â”€â”€â”€ Fetch Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const fetchStats = useCallback(async () => {
     try {
       const res: any = await apiGet('/review-requests/stats');
@@ -283,7 +283,7 @@ export default function ReviewRequests() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  // ─── Send Single ──────────────────────────────────────────────────────
+  // â”€â”€â”€ Send Single â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleSendSingle = async () => {
     if (!sendForm.contactId || !sendForm.reviewUrl) {
       showToast('Select a contact and enter review URL', 'error');
@@ -307,7 +307,7 @@ export default function ReviewRequests() {
     }
   };
 
-  // ─── Send Bulk ────────────────────────────────────────────────────────
+  // â”€â”€â”€ Send Bulk â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleSendBulk = async () => {
     if (bulkForm.contactIds.length === 0 || !bulkForm.reviewUrl) {
       showToast('Select contacts and enter review URL', 'error');
@@ -332,7 +332,7 @@ export default function ReviewRequests() {
     }
   };
 
-  // ─── Campaign CRUD ────────────────────────────────────────────────────
+  // â”€â”€â”€ Campaign CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const openCampaignModal = (campaign?: ReviewCampaign) => {
     if (campaign) {
       setEditingCampaign(campaign);
@@ -404,25 +404,25 @@ export default function ReviewRequests() {
     }
   };
 
-  // ─── Google Review Link Generator ─────────────────────────────────────
+  // â”€â”€â”€ Google Review Link Generator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleGenerateLink = () => {
     const link = generateGoogleReviewLink(genForm.businessName, genForm.placeId);
     setGeneratedLink(link);
   };
 
-  // ─── Filtered contacts ────────────────────────────────────────────────
+  // â”€â”€â”€ Filtered contacts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const filteredContacts = contacts.filter(c => {
     const q = contactSearch.toLowerCase();
     return !q || c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.phone?.includes(q);
   });
 
-  // ─── Channel counts ───────────────────────────────────────────────────
+  // â”€â”€â”€ Channel counts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const channelCounts = campaigns.reduce<Record<string, number>>((acc, c) => {
     acc[c.channel] = (acc[c.channel] || 0) + 1;
     return acc;
   }, {});
 
-  // ─── History filtered ─────────────────────────────────────────────────
+  // â”€â”€â”€ History filtered â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const filteredHistory = requests.filter(r => {
     if (!historySearch) return true;
     const q = historySearch.toLowerCase();
@@ -442,11 +442,11 @@ export default function ReviewRequests() {
       {toast && <Toast message={toast.m} type={toast.t} onClose={() => setToast(null)} />}
 
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-5">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-5">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Review Requests</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{business?.name || 'Your Business'} — Send & manage review requests</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{business?.name || 'Your Business'} â€” Send & manage review requests</p>
           </div>
           <button
             onClick={() => setGenModal(true)}
@@ -457,7 +457,7 @@ export default function ReviewRequests() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-6 py-4 sm:py-5 md:py-6">
         {/* Tabs */}
         <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 mb-6 overflow-x-auto">
           {TABS.map(t => (
@@ -475,7 +475,7 @@ export default function ReviewRequests() {
           ))}
         </div>
 
-        {/* ═══ DASHBOARD ═══════════════════════════════════════════════════ */}
+        {/* â•â•â• DASHBOARD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {tab === 'dashboard' && (
           <div className="space-y-6 animate-fade-in-up">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -486,7 +486,7 @@ export default function ReviewRequests() {
             </div>
 
             {/* Channel Breakdown */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Channel Breakdown</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {Object.entries(CHANNEL_CONFIG).map(([ch, cfg]) => (
@@ -502,7 +502,7 @@ export default function ReviewRequests() {
             </div>
 
             {/* Active Campaigns Quick View */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Active Campaigns</h3>
                 <button onClick={() => setTab('campaigns')} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">View all</button>
@@ -530,7 +530,7 @@ export default function ReviewRequests() {
             </div>
 
             {/* Recent Requests */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Recent Requests</h3>
                 <button onClick={() => setTab('history')} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">View all</button>
@@ -557,10 +557,10 @@ export default function ReviewRequests() {
           </div>
         )}
 
-        {/* ═══ SEND SINGLE ════════════════════════════════════════════════ */}
+        {/* â•â•â• SEND SINGLE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {tab === 'send' && (
           <div className="max-w-2xl animate-fade-in-up">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Send Review Request</h2>
 
               {/* Contact Select */}
@@ -652,7 +652,7 @@ export default function ReviewRequests() {
               <button
                 onClick={handleSendSingle}
                 disabled={sending || !sendForm.contactId || !sendForm.reviewUrl}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
+                className="w-full flex items-center justify-center gap-2 px-4 sm:px-5 md:px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
               >
                 {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                 {sending ? 'Sending...' : 'Send Review Request'}
@@ -661,10 +661,10 @@ export default function ReviewRequests() {
           </div>
         )}
 
-        {/* ═══ BULK SEND ══════════════════════════════════════════════════ */}
+        {/* â•â•â• BULK SEND â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {tab === 'bulk' && (
           <div className="max-w-3xl animate-fade-in-up">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 md:p-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Bulk Send Review Requests</h2>
 
               {/* Contact Multi-Select */}
@@ -746,7 +746,7 @@ export default function ReviewRequests() {
 
               {/* Message */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Message (optional — personalized per contact)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Message (optional â€” personalized per contact)</label>
                 <textarea
                   rows={4}
                   placeholder="Hi {{contact_name}}! We'd love your feedback. Please leave us a review: {{review_url}}"
@@ -771,7 +771,7 @@ export default function ReviewRequests() {
               <button
                 onClick={handleSendBulk}
                 disabled={bulkSending || bulkForm.contactIds.length === 0 || !bulkForm.reviewUrl}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
+                className="w-full flex items-center justify-center gap-2 px-4 sm:px-5 md:px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
               >
                 {bulkSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                 {bulkSending ? 'Sending...' : `Send to ${bulkForm.contactIds.length} Contact${bulkForm.contactIds.length !== 1 ? 's' : ''}`}
@@ -784,7 +784,7 @@ export default function ReviewRequests() {
                     <CheckCircle size={16} /> Bulk Send Complete
                   </div>
                   <p className="text-sm text-green-600 dark:text-green-500">
-                    {bulkResult.total} total — {bulkResult.sent} sent, {bulkResult.failed} failed
+                    {bulkResult.total} total â€” {bulkResult.sent} sent, {bulkResult.failed} failed
                   </p>
                 </div>
               )}
@@ -792,7 +792,7 @@ export default function ReviewRequests() {
           </div>
         )}
 
-        {/* ═══ CAMPAIGNS ══════════════════════════════════════════════════ */}
+        {/* â•â•â• CAMPAIGNS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {tab === 'campaigns' && (
           <div className="animate-fade-in-up">
             <div className="flex items-center justify-between mb-6">
@@ -966,7 +966,7 @@ export default function ReviewRequests() {
                 <button
                   onClick={handleSaveCampaign}
                   disabled={campaignSaving || !campaignForm.name || !campaignForm.reviewUrl}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
+                  className="w-full flex items-center justify-center gap-2 px-4 sm:px-5 md:px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
                 >
                   {campaignSaving ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
                   {campaignSaving ? 'Saving...' : editingCampaign ? 'Update Campaign' : 'Create Campaign'}
@@ -976,7 +976,7 @@ export default function ReviewRequests() {
           </div>
         )}
 
-        {/* ═══ HISTORY ═════════════════════════════════════════════════════ */}
+        {/* â•â•â• HISTORY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {tab === 'history' && (
           <div className="animate-fade-in-up">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
@@ -1085,7 +1085,7 @@ export default function ReviewRequests() {
               {historyTotal > 20 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Showing {((historyPage - 1) * 20) + 1}–{Math.min(historyPage * 20, historyTotal)} of {historyTotal}
+                    Showing {((historyPage - 1) * 20) + 1}â€“{Math.min(historyPage * 20, historyTotal)} of {historyTotal}
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -1110,7 +1110,7 @@ export default function ReviewRequests() {
         )}
       </div>
 
-      {/* ═══ GOOGLE REVIEW LINK MODAL ═══════════════════════════════════ */}
+      {/* â•â•â• GOOGLE REVIEW LINK MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <Modal open={genModal} onClose={() => { setGenModal(false); setGeneratedLink(''); }} title="Google Review Link Generator" size="md">
         <div className="space-y-5">
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1146,7 +1146,7 @@ export default function ReviewRequests() {
           <button
             onClick={handleGenerateLink}
             disabled={!genForm.businessName}
-            className="w-full flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl text-sm font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
+            className="w-full flex items-center justify-center gap-2 px-4 sm:px-5 md:px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl text-sm font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
           >
             <Link2 size={16} /> Generate Link
           </button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Plus, Search, Link as LinkIcon, DollarSign, Clock, Eye, Trash2, X,
   Copy, Check, Send, RefreshCw, Loader2, ChevronDown, ChevronUp,
@@ -269,7 +269,7 @@ const PaymentLinks: React.FC = () => {
   }, [showQrLink, generateQrCode]);
 
   const formatCurrency = (amount: number, currency = 'INR') => {
-    const symbol = currency === 'INR' ? '₹' : currency === 'USD' ? '$' : currency + ' ';
+    const symbol = currency === 'INR' ? 'â‚¹' : currency === 'USD' ? '$' : currency + ' ';
     return `${symbol}${amount.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   };
 
@@ -282,7 +282,7 @@ const PaymentLinks: React.FC = () => {
 
   if (selectedLink && expandedLink) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-4 sm:p-6 md:p-8 min-h-screen bg-gray-50 dark:bg-gray-900">
         <button
           onClick={() => { setSelectedLink(null); setExpandedLink(null); setTransactions([]); }}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors"
@@ -291,10 +291,10 @@ const PaymentLinks: React.FC = () => {
         </button>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
-          <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+          <div className="p-4 sm:p-5 md:p-6 border-b border-gray-100 dark:border-gray-700">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{selectedLink.name}</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{selectedLink.name}</h2>
                 {selectedLink.description && (
                   <p className="text-gray-500 dark:text-gray-400 mt-1">{selectedLink.description}</p>
                 )}
@@ -310,7 +310,7 @@ const PaymentLinks: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 sm:p-5 md:p-6">
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
               <DollarSign size={20} className="text-blue-600 dark:text-blue-400 mb-1" />
               <p className="text-xs text-gray-500 dark:text-gray-400">Amount</p>
@@ -336,7 +336,7 @@ const PaymentLinks: React.FC = () => {
             </div>
           </div>
 
-          <div className="px-6 pb-6 flex flex-wrap gap-3">
+          <div className="px-4 sm:px-5 md:px-6 pb-6 flex flex-wrap gap-3">
             <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 flex-1 min-w-0">
               <LinkIcon size={16} className="text-gray-400 flex-shrink-0" />
               <span className="text-sm text-gray-600 dark:text-gray-300 truncate">{getPaymentUrl(selectedLink.shortCode)}</span>
@@ -368,13 +368,13 @@ const PaymentLinks: React.FC = () => {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+          <div className="p-4 sm:p-5 md:p-6 border-b border-gray-100 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <CreditCard size={20} /> Transaction History
             </h3>
           </div>
           {txLoading ? (
-            <div className="p-8 flex justify-center">
+            <div className="p-4 sm:p-6 md:p-8 flex justify-center">
               <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
             </div>
           ) : transactions.length > 0 ? (
@@ -401,7 +401,7 @@ const PaymentLinks: React.FC = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-gray-500 dark:text-gray-400 font-mono text-xs">
-                        {tx.razorpayPaymentId || '—'}
+                        {tx.razorpayPaymentId || 'â€”'}
                       </td>
                     </tr>
                   ))}
@@ -409,7 +409,7 @@ const PaymentLinks: React.FC = () => {
               </table>
             </div>
           ) : (
-            <div className="p-8 text-center text-gray-400">
+            <div className="p-4 sm:p-6 md:p-8 text-center text-gray-400">
               <CreditCard size={40} className="mx-auto mb-3 opacity-30" />
               <p>No transactions yet</p>
             </div>
@@ -420,11 +420,11 @@ const PaymentLinks: React.FC = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-4 sm:p-6 md:p-8 min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* QR Modal */}
       {showQrLink && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowQrLink(null)}>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 max-w-sm w-full shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2"><QrCode size={20} /> QR Code</h3>
               <button onClick={() => setShowQrLink(null)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"><X size={18} /></button>
@@ -454,7 +454,7 @@ const PaymentLinks: React.FC = () => {
       {showPreview && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowPreview(null)}>
           <div className="bg-white rounded-xl max-w-lg w-full shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 sm:p-5 md:p-6 text-white">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Payment Page Preview</h3>
                 <button onClick={() => setShowPreview(null)} className="p-1 hover:bg-white/20 rounded"><X size={18} /></button>
@@ -465,10 +465,10 @@ const PaymentLinks: React.FC = () => {
                 {showPreview.description && <p className="text-blue-200 text-sm mt-1">{showPreview.description}</p>}
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-4 sm:p-5 md:p-6">
               <div className="text-center mb-6">
                 <p className="text-sm text-gray-500 mb-1">Amount</p>
-                <p className="text-4xl font-bold text-gray-900">
+                <p className="text-3xl sm:text-4xl font-bold text-gray-900">
                   {formatCurrency(showPreview.amount, showPreview.currency)}
                 </p>
                 {showPreview.type === 'flexible' && showPreview.minAmount && (
@@ -489,7 +489,7 @@ const PaymentLinks: React.FC = () => {
                 <div className="mb-6">
                   <label className="text-sm text-gray-600 mb-1 block">Enter Amount</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">₹</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">â‚¹</span>
                     <input type="number" placeholder="0" defaultValue={showPreview.amount} className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-lg text-lg font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
                   </div>
                 </div>
@@ -500,7 +500,7 @@ const PaymentLinks: React.FC = () => {
               </button>
 
               <p className="text-center text-xs text-gray-400 mt-4">
-                Powered by Razorpay • Secure Payment
+                Powered by Razorpay â€¢ Secure Payment
               </p>
             </div>
           </div>
@@ -511,11 +511,11 @@ const PaymentLinks: React.FC = () => {
       {showCreateForm && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowCreateForm(false)}>
           <div className="bg-white dark:bg-gray-800 rounded-xl max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div className="p-4 sm:p-5 md:p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Create Payment Link</h3>
               <button onClick={() => setShowCreateForm(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"><X size={18} /></button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-5 md:p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
                 <input
@@ -574,10 +574,10 @@ const PaymentLinks: React.FC = () => {
                     onChange={e => setNewLink(p => ({ ...p, currency: e.target.value }))}
                     className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   >
-                    <option value="INR">INR (₹)</option>
+                    <option value="INR">INR (â‚¹)</option>
                     <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                    <option value="GBP">GBP (£)</option>
+                    <option value="EUR">EUR (â‚¬)</option>
+                    <option value="GBP">GBP (Â£)</option>
                   </select>
                 </div>
               </div>
@@ -618,7 +618,7 @@ const PaymentLinks: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="p-6 border-t border-gray-100 dark:border-gray-700 flex gap-3">
+            <div className="p-4 sm:p-5 md:p-6 border-t border-gray-100 dark:border-gray-700 flex gap-3">
               <button onClick={() => setShowCreateForm(false)} className="flex-1 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
               <button
                 onClick={handleCreate}
@@ -833,7 +833,7 @@ const PaymentLinks: React.FC = () => {
         {pagination.totalPages > 1 && (
           <div className="p-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
+              Showing {((pagination.page - 1) * pagination.limit) + 1}â€“{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
             </p>
             <div className="flex gap-2">
               <button

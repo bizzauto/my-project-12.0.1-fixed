@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Copy, Check, QrCode, Code, Share2, ExternalLink, LinkIcon, MessageSquare, Download, Globe } from 'lucide-react';
 import apiClient from '../lib/api';
@@ -42,7 +42,7 @@ const StoreSharePage: React.FC = () => {
   };
 
   const shareOnWhatsApp = () => {
-    const message = `🛍️ Check out our store!\n\n${storeData?.name || 'Our Store'}\n\n🛒 Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`;
+    const message = `ðŸ›ï¸ Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -56,7 +56,7 @@ const StoreSharePage: React.FC = () => {
   };
 
   const shareOnTwitter = () => {
-    const text = `🛍️ Shop online at ${storeData?.name || 'Our Store'}: ${storeUrl}`;
+    const text = `ðŸ›ï¸ Shop online at ${storeData?.name || 'Our Store'}: ${storeUrl}`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -118,7 +118,7 @@ const StoreSharePage: React.FC = () => {
     ctx.font = 'bold 16px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('🛍️', size / 2, size / 2);
+    ctx.fillText('ðŸ›ï¸', size / 2, size / 2);
   };
 
   const generateSimplePattern = (data: string): boolean[][] => {
@@ -209,9 +209,9 @@ const StoreSharePage: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 py-4 sm:py-5 md:py-6">
         {/* Store URL Preview */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
               <Globe size={24} className="text-white" />
@@ -259,24 +259,24 @@ const StoreSharePage: React.FC = () => {
         {/* Share Link Tab */}
         {activeTab === 'link' && (
           <div className="space-y-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <h3 className="font-bold text-gray-900 dark:text-white mb-4">Store Link</h3>
               <p className="text-sm text-gray-500 mb-4">Share this link on any platform - WhatsApp, Instagram, Facebook, or your website.</p>
               <div className="flex gap-2">
                 <input type="text" value={storeUrl} readOnly className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white text-sm" />
-                <button onClick={() => copyToClipboard(storeUrl, 'main')} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                <button onClick={() => copyToClipboard(storeUrl, 'main')} className="px-4 sm:px-5 md:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
                   {copiedField === 'main' ? <Check size={16} /> : <Copy size={16} />}
                   Copy
                 </button>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <h3 className="font-bold text-gray-900 dark:text-white mb-4">Order Tracking Link</h3>
               <p className="text-sm text-gray-500 mb-4">Share this so customers can track their orders.</p>
               <div className="flex gap-2">
                 <input type="text" value={trackUrl} readOnly className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white text-sm" />
-                <button onClick={() => copyToClipboard(trackUrl, 'track')} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                <button onClick={() => copyToClipboard(trackUrl, 'track')} className="px-4 sm:px-5 md:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
                   {copiedField === 'track' ? <Check size={16} /> : <Copy size={16} />}
                   Copy
                 </button>
@@ -284,7 +284,7 @@ const StoreSharePage: React.FC = () => {
             </div>
 
             {/* Social Share Buttons */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <h3 className="font-bold text-gray-900 dark:text-white mb-4">Share on Social Media</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <button onClick={shareOnWhatsApp} className="flex items-center gap-2 px-4 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors">
@@ -312,7 +312,7 @@ const StoreSharePage: React.FC = () => {
 
         {/* QR Code Tab */}
         {activeTab === 'qr' && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 text-center">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 text-center">
             <h3 className="font-bold text-gray-900 dark:text-white mb-2">QR Code</h3>
             <p className="text-sm text-gray-500 mb-6">Customers can scan this to open your store directly.</p>
             <div className="inline-block p-4 bg-white rounded-xl shadow-lg mb-4">
@@ -320,10 +320,10 @@ const StoreSharePage: React.FC = () => {
             </div>
             <p className="text-sm text-gray-500 mb-4">Print this QR code at your physical store, on bills, or on product packaging.</p>
             <div className="flex justify-center gap-3">
-              <button onClick={downloadQR} className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 flex items-center gap-2">
+              <button onClick={downloadQR} className="px-4 sm:px-5 md:px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 flex items-center gap-2">
                 <Download size={18} /> Download QR
               </button>
-              <button onClick={() => copyToClipboard(storeUrl, 'qr')} className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <button onClick={() => copyToClipboard(storeUrl, 'qr')} className="px-4 sm:px-5 md:px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                 {copiedField === 'qr' ? <Check size={18} /> : <Copy size={18} />}
                 Copy Link
               </button>
@@ -331,11 +331,11 @@ const StoreSharePage: React.FC = () => {
             <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-left">
               <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2">Where to use QR Code:</h4>
               <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
-                <li>• Print on receipts and bills</li>
-                <li>• Display at checkout counter</li>
-                <li>• Add to product packaging</li>
-                <li>• Include in business cards</li>
-                <li>• Show on social media posts</li>
+                <li>â€¢ Print on receipts and bills</li>
+                <li>â€¢ Display at checkout counter</li>
+                <li>â€¢ Add to product packaging</li>
+                <li>â€¢ Include in business cards</li>
+                <li>â€¢ Show on social media posts</li>
               </ul>
             </div>
           </div>
@@ -344,7 +344,7 @@ const StoreSharePage: React.FC = () => {
         {/* Embed Tab */}
         {activeTab === 'embed' && (
           <div className="space-y-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <h3 className="font-bold text-gray-900 dark:text-white mb-2">Embed Full Store</h3>
               <p className="text-sm text-gray-500 mb-4">Paste this code in your website's HTML to show the full store.</p>
               <div className="relative">
@@ -355,7 +355,7 @@ const StoreSharePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <h3 className="font-bold text-gray-900 dark:text-white mb-2">Floating Widget</h3>
               <p className="text-sm text-gray-500 mb-4">Add a floating store button on your website that opens a mini store.</p>
               <div className="relative">
@@ -367,7 +367,7 @@ const StoreSharePage: React.FC = () => {
               <p className="text-xs text-gray-400 mt-2">This adds a floating store icon in the bottom-right corner of your website.</p>
             </div>
 
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 border border-green-200 dark:border-green-800">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 sm:p-5 md:p-6 border border-green-200 dark:border-green-800">
               <h4 className="font-medium text-green-900 dark:text-green-300 mb-2">How to Add to Your Website:</h4>
               <ol className="text-sm text-green-800 dark:text-green-400 space-y-2 list-decimal list-inside">
                 <li>Copy the embed code above</li>
@@ -382,13 +382,13 @@ const StoreSharePage: React.FC = () => {
         {/* WhatsApp Tab */}
         {activeTab === 'whatsapp' && (
           <div className="space-y-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <h3 className="font-bold text-gray-900 dark:text-white mb-2">Share on WhatsApp</h3>
               <p className="text-sm text-gray-500 mb-4">Send your store link to customers via WhatsApp.</p>
 
               <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl mb-4">
                 <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                  {`🛍️ Check out our store!\n\n${storeData?.name || 'Our Store'}\n\n🛒 Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`}
+                  {`ðŸ›ï¸ Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`}
                 </p>
               </div>
 
@@ -396,33 +396,33 @@ const StoreSharePage: React.FC = () => {
                 <button onClick={shareOnWhatsApp} className="flex-1 py-3 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 flex items-center justify-center gap-2">
                   <MessageSquare size={18} /> Share on WhatsApp
                 </button>
-                <button onClick={() => copyToClipboard(`🛍️ Check out our store!\n\n${storeData?.name || 'Our Store'}\n\n🛒 Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`, 'whatsapp')} className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                <button onClick={() => copyToClipboard(`ðŸ›ï¸ Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`, 'whatsapp')} className="px-4 sm:px-5 md:px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                   {copiedField === 'whatsapp' ? <Check size={18} /> : <Copy size={18} />}
                 </button>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
               <h3 className="font-bold text-gray-900 dark:text-white mb-4">WhatsApp Business Tips</h3>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
                 <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
+                  <span className="text-green-500 mt-0.5">âœ“</span>
                   <span>Add the store link to your WhatsApp Business Profile</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
+                  <span className="text-green-500 mt-0.5">âœ“</span>
                   <span>Send this link to customers after they inquire about products</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
+                  <span className="text-green-500 mt-0.5">âœ“</span>
                   <span>Use it in WhatsApp catalogs for direct ordering</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
+                  <span className="text-green-500 mt-0.5">âœ“</span>
                   <span>Include in automated reply messages</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
+                  <span className="text-green-500 mt-0.5">âœ“</span>
                   <span>Share in WhatsApp groups and communities</span>
                 </li>
               </ul>

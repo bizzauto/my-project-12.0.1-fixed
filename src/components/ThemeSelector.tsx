@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Palette, Check, X, RotateCcw } from 'lucide-react';
 import { themes, applyTheme, getThemeById, getStoredTheme, setStoredTheme, Theme } from '../lib/themes';
 
@@ -58,11 +58,11 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onClose }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => { setIsOpen(false); handleCancelPreview(); }}>
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden"
+            className="relative bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between z-10">
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
                   <Palette size={20} className="text-white" />
@@ -90,7 +90,7 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onClose }) => {
             </div>
 
             {/* Theme Grid */}
-            <div className="p-6 overflow-y-auto max-h-[calc(85vh-80px)]">
+            <div className="p-4 sm:p-5 md:p-6 overflow-y-auto max-h-[calc(85vh-80px)]">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {themes.map((theme) => (
                   <ThemeCard

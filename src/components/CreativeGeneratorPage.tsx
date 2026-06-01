@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import {
   Download, Share2, Sparkles, Palette, Type, Image,
   Wand2, RefreshCw, Layout, Eye, Clock,
@@ -55,51 +55,51 @@ const FONT_OPTIONS = [
 ];
 
 const FORMAT_OPTIONS = [
-  { name: 'Square', desc: '1080×1080', ratio: 'aspect-square', width: 1080, height: 1080 },
-  { name: 'Story', desc: '1080×1920', ratio: 'aspect-[9/16]', width: 1080, height: 1920 },
-  { name: 'Landscape', desc: '1200×628', ratio: 'aspect-[16/9]', width: 1200, height: 628 },
+  { name: 'Square', desc: '1080Ã—1080', ratio: 'aspect-square', width: 1080, height: 1080 },
+  { name: 'Story', desc: '1080Ã—1920', ratio: 'aspect-[9/16]', width: 1080, height: 1920 },
+  { name: 'Landscape', desc: '1200Ã—628', ratio: 'aspect-[16/9]', width: 1200, height: 628 },
 ];
 
 const CATEGORIES = ['Festival', 'Offer', 'Product', 'Seasonal', 'Menu', 'Price List', 'Testimonial', 'Wedding', 'Birthday'];
 
 const DEFAULT_TEMPLATES: Template[] = [
-  { id: '1', name: 'Diwali Special', emoji: '🪔', gradient: 'from-orange-500 via-red-500 to-yellow-500', category: 'Festival' },
-  { id: '2', name: 'Holi Colors', emoji: '🎨', gradient: 'from-pink-500 via-purple-500 to-blue-500', category: 'Festival' },
-  { id: '3', name: 'Eid Mubarak', emoji: '🌙', gradient: 'from-emerald-500 via-teal-500 to-cyan-500', category: 'Festival' },
-  { id: '4', name: 'Christmas', emoji: '🎄', gradient: 'from-red-600 via-green-600 to-red-700', category: 'Festival' },
-  { id: '5', name: 'Pongal Wishes', emoji: '🌾', gradient: 'from-yellow-600 via-orange-500 to-red-500', category: 'Festival' },
-  { id: '6', name: 'Flash Sale', emoji: '⚡', gradient: 'from-blue-600 via-indigo-600 to-purple-600', category: 'Offer' },
-  { id: '7', name: 'Grand Opening', emoji: '🏪', gradient: 'from-amber-500 via-orange-500 to-red-500', category: 'Offer' },
-  { id: '8', name: 'Buy 1 Get 1', emoji: '🎯', gradient: 'from-green-500 via-teal-500 to-cyan-500', category: 'Offer' },
-  { id: '9', name: '50% Off', emoji: '🏷️', gradient: 'from-pink-500 via-rose-500 to-red-500', category: 'Offer' },
-  { id: '10', name: 'New Arrival', emoji: '🆕', gradient: 'from-violet-500 via-purple-500 to-fuchsia-500', category: 'Product' },
-  { id: '11', name: 'Best Seller', emoji: '🏆', gradient: 'from-amber-600 via-yellow-500 to-orange-500', category: 'Product' },
-  { id: '12', name: 'Summer Deal', emoji: '☀️', gradient: 'from-yellow-400 via-orange-400 to-red-400', category: 'Seasonal' },
-  { id: '13', name: 'Monsoon Sale', emoji: '🌧️', gradient: 'from-slate-500 via-blue-500 to-indigo-500', category: 'Seasonal' },
-  { id: '14', name: 'Winter Collection', emoji: '❄️', gradient: 'from-blue-300 via-indigo-400 to-purple-500', category: 'Seasonal' },
-  { id: '15', name: 'Todays Special', emoji: '🍽️', gradient: 'from-amber-600 via-orange-500 to-red-500', category: 'Menu' },
-  { id: '16', name: 'Biryani Fest', emoji: '🍛', gradient: 'from-red-700 via-orange-600 to-yellow-500', category: 'Menu' },
-  { id: '17', name: 'Pizza Offer', emoji: '🍕', gradient: 'from-green-600 via-yellow-500 to-red-500', category: 'Menu' },
-  { id: '18', name: 'Price List', emoji: '📋', gradient: 'from-gray-600 via-slate-500 to-blue-600', category: 'Price List' },
-  { id: '19', name: 'Rate Card', emoji: '💰', gradient: 'from-emerald-600 via-green-500 to-teal-500', category: 'Price List' },
-  { id: '20', name: 'Customer Review', emoji: '⭐', gradient: 'from-purple-600 via-pink-500 to-rose-500', category: 'Testimonial' },
-  { id: '21', name: 'Happy Clients', emoji: '😊', gradient: 'from-teal-500 via-cyan-500 to-blue-500', category: 'Testimonial' },
-  { id: '22', name: 'Wedding Invite', emoji: '💍', gradient: 'from-pink-400 via-rose-400 to-red-400', category: 'Wedding' },
-  { id: '23', name: 'Engagement', emoji: '💎', gradient: 'from-cyan-400 via-blue-400 to-indigo-400', category: 'Wedding' },
-  { id: '24', name: 'Birthday Party', emoji: '🎂', gradient: 'from-pink-400 via-purple-400 to-indigo-400', category: 'Birthday' },
-  { id: '25', name: 'Kids Party', emoji: '🎈', gradient: 'from-yellow-300 via-green-300 to-blue-300', category: 'Birthday' },
+  { id: '1', name: 'Diwali Special', emoji: 'ðŸª”', gradient: 'from-orange-500 via-red-500 to-yellow-500', category: 'Festival' },
+  { id: '2', name: 'Holi Colors', emoji: 'ðŸŽ¨', gradient: 'from-pink-500 via-purple-500 to-blue-500', category: 'Festival' },
+  { id: '3', name: 'Eid Mubarak', emoji: 'ðŸŒ™', gradient: 'from-emerald-500 via-teal-500 to-cyan-500', category: 'Festival' },
+  { id: '4', name: 'Christmas', emoji: 'ðŸŽ„', gradient: 'from-red-600 via-green-600 to-red-700', category: 'Festival' },
+  { id: '5', name: 'Pongal Wishes', emoji: 'ðŸŒ¾', gradient: 'from-yellow-600 via-orange-500 to-red-500', category: 'Festival' },
+  { id: '6', name: 'Flash Sale', emoji: 'âš¡', gradient: 'from-blue-600 via-indigo-600 to-purple-600', category: 'Offer' },
+  { id: '7', name: 'Grand Opening', emoji: 'ðŸª', gradient: 'from-amber-500 via-orange-500 to-red-500', category: 'Offer' },
+  { id: '8', name: 'Buy 1 Get 1', emoji: 'ðŸŽ¯', gradient: 'from-green-500 via-teal-500 to-cyan-500', category: 'Offer' },
+  { id: '9', name: '50% Off', emoji: 'ðŸ·ï¸', gradient: 'from-pink-500 via-rose-500 to-red-500', category: 'Offer' },
+  { id: '10', name: 'New Arrival', emoji: 'ðŸ†•', gradient: 'from-violet-500 via-purple-500 to-fuchsia-500', category: 'Product' },
+  { id: '11', name: 'Best Seller', emoji: 'ðŸ†', gradient: 'from-amber-600 via-yellow-500 to-orange-500', category: 'Product' },
+  { id: '12', name: 'Summer Deal', emoji: 'â˜€ï¸', gradient: 'from-yellow-400 via-orange-400 to-red-400', category: 'Seasonal' },
+  { id: '13', name: 'Monsoon Sale', emoji: 'ðŸŒ§ï¸', gradient: 'from-slate-500 via-blue-500 to-indigo-500', category: 'Seasonal' },
+  { id: '14', name: 'Winter Collection', emoji: 'â„ï¸', gradient: 'from-blue-300 via-indigo-400 to-purple-500', category: 'Seasonal' },
+  { id: '15', name: 'Todays Special', emoji: 'ðŸ½ï¸', gradient: 'from-amber-600 via-orange-500 to-red-500', category: 'Menu' },
+  { id: '16', name: 'Biryani Fest', emoji: 'ðŸ›', gradient: 'from-red-700 via-orange-600 to-yellow-500', category: 'Menu' },
+  { id: '17', name: 'Pizza Offer', emoji: 'ðŸ•', gradient: 'from-green-600 via-yellow-500 to-red-500', category: 'Menu' },
+  { id: '18', name: 'Price List', emoji: 'ðŸ“‹', gradient: 'from-gray-600 via-slate-500 to-blue-600', category: 'Price List' },
+  { id: '19', name: 'Rate Card', emoji: 'ðŸ’°', gradient: 'from-emerald-600 via-green-500 to-teal-500', category: 'Price List' },
+  { id: '20', name: 'Customer Review', emoji: 'â­', gradient: 'from-purple-600 via-pink-500 to-rose-500', category: 'Testimonial' },
+  { id: '21', name: 'Happy Clients', emoji: 'ðŸ˜Š', gradient: 'from-teal-500 via-cyan-500 to-blue-500', category: 'Testimonial' },
+  { id: '22', name: 'Wedding Invite', emoji: 'ðŸ’', gradient: 'from-pink-400 via-rose-400 to-red-400', category: 'Wedding' },
+  { id: '23', name: 'Engagement', emoji: 'ðŸ’Ž', gradient: 'from-cyan-400 via-blue-400 to-indigo-400', category: 'Wedding' },
+  { id: '24', name: 'Birthday Party', emoji: 'ðŸŽ‚', gradient: 'from-pink-400 via-purple-400 to-indigo-400', category: 'Birthday' },
+  { id: '25', name: 'Kids Party', emoji: 'ðŸŽˆ', gradient: 'from-yellow-300 via-green-300 to-blue-300', category: 'Birthday' },
 ];
 
 const LOGO_STYLES: LogoStyle[] = [
-  { id: 'modern', name: 'Modern', icon: '⬡', gradient: 'from-blue-500 to-purple-500' },
-  { id: 'classic', name: 'Classic', icon: '✦', gradient: 'from-amber-500 to-red-500' },
-  { id: 'minimal', name: 'Minimal', icon: '◈', gradient: 'from-gray-500 to-slate-500' },
-  { id: 'playful', name: 'Playful', icon: '★', gradient: 'from-pink-500 to-yellow-500' },
-  { id: 'nature', name: 'Nature', icon: '🌿', gradient: 'from-green-500 to-emerald-500' },
-  { id: 'luxury', name: 'Luxury', icon: '♦', gradient: 'from-yellow-600 to-amber-700' },
+  { id: 'modern', name: 'Modern', icon: 'â¬¡', gradient: 'from-blue-500 to-purple-500' },
+  { id: 'classic', name: 'Classic', icon: 'âœ¦', gradient: 'from-amber-500 to-red-500' },
+  { id: 'minimal', name: 'Minimal', icon: 'â—ˆ', gradient: 'from-gray-500 to-slate-500' },
+  { id: 'playful', name: 'Playful', icon: 'â˜…', gradient: 'from-pink-500 to-yellow-500' },
+  { id: 'nature', name: 'Nature', icon: 'ðŸŒ¿', gradient: 'from-green-500 to-emerald-500' },
+  { id: 'luxury', name: 'Luxury', icon: 'â™¦', gradient: 'from-yellow-600 to-amber-700' },
 ];
 
-const STICKERS = ['⭐', '🔥', '❤️', '✨', '🎉', '💥', '🎯', '✅', '🚀', '💰', '💎', '🏆', '🌟', '🎪', '🎨', '🛒', '📱', '🎁', '💡', '🔔', '🥇', '📢', '💫', '🎊'];
+const STICKERS = ['â­', 'ðŸ”¥', 'â¤ï¸', 'âœ¨', 'ðŸŽ‰', 'ðŸ’¥', 'ðŸŽ¯', 'âœ…', 'ðŸš€', 'ðŸ’°', 'ðŸ’Ž', 'ðŸ†', 'ðŸŒŸ', 'ðŸŽª', 'ðŸŽ¨', 'ðŸ›’', 'ðŸ“±', 'ðŸŽ', 'ðŸ’¡', 'ðŸ””', 'ðŸ¥‡', 'ðŸ“¢', 'ðŸ’«', 'ðŸŽŠ'];
 
 const AI_PROMPTS: Record<string, string[]> = {
   Festival: [
@@ -120,7 +120,7 @@ const AI_PROMPTS: Record<string, string[]> = {
     'Festival special combo offer',
     'First time customer discount 20%',
     'Loyalty reward points program',
-    'Refer a friend and get ₹500 off',
+    'Refer a friend and get â‚¹500 off',
   ],
   Product: [
     'New smartphone launch with specs',
@@ -413,8 +413,8 @@ const CreativeGeneratorPage: React.FC = () => {
   };
 
   const getEmojiForCategory = (cat: string): string => {
-    const map: Record<string, string> = { Festival: '🎉', Offer: '🎁', Product: '📦', Seasonal: '🌸', Testimonial: '⭐', Menu: '🍽️', 'Price List': '💰', Wedding: '💍', Birthday: '🎂' };
-    return map[cat] || '🎨';
+    const map: Record<string, string> = { Festival: 'ðŸŽ‰', Offer: 'ðŸŽ', Product: 'ðŸ“¦', Seasonal: 'ðŸŒ¸', Testimonial: 'â­', Menu: 'ðŸ½ï¸', 'Price List': 'ðŸ’°', Wedding: 'ðŸ’', Birthday: 'ðŸŽ‚' };
+    return map[cat] || 'ðŸŽ¨';
   };
   const getGradientForCategory = (cat: string): string => {
     const map: Record<string, string> = { Festival: 'from-orange-500 via-red-500 to-yellow-500', Offer: 'from-blue-600 via-indigo-600 to-purple-600', Product: 'from-violet-500 via-purple-500 to-fuchsia-500', Seasonal: 'from-yellow-400 via-orange-400 to-red-400', Testimonial: 'from-green-500 via-teal-500 to-cyan-500', Menu: 'from-amber-500 via-orange-500 to-red-500', 'Price List': 'from-slate-500 via-blue-500 to-indigo-500', Wedding: 'from-pink-400 via-rose-400 to-red-400', Birthday: 'from-pink-400 via-purple-400 to-indigo-400' };
@@ -441,9 +441,9 @@ const CreativeGeneratorPage: React.FC = () => {
       if (res.data?.subtitles) setAiSubtitles(res.data.subtitles);
     } catch {
       const h = language === 'hi'
-        ? ['धमाकेदार ऑफर!', 'त्योहारी छूट!', 'नया कलेक्शन!', 'जल्दी करें!', 'स्पेशल डील!']
+        ? ['à¤§à¤®à¤¾à¤•à¥‡à¤¦à¤¾à¤° à¤‘à¤«à¤°!', 'à¤¤à¥à¤¯à¥‹à¤¹à¤¾à¤°à¥€ à¤›à¥‚à¤Ÿ!', 'à¤¨à¤¯à¤¾ à¤•à¤²à¥‡à¤•à¥à¤¶à¤¨!', 'à¤œà¤²à¥à¤¦à¥€ à¤•à¤°à¥‡à¤‚!', 'à¤¸à¥à¤ªà¥‡à¤¶à¤² à¤¡à¥€à¤²!']
         : ['Biggest Sale Ever!', 'Festival Special!', 'New Collection!', 'Limited Time!', 'Exclusive Deal!'];
-      const s = language === 'hi' ? ['अभी खरीदें', 'सीमित समय', 'स्टॉक खत्म'] : ['Shop Now', 'Limited Time', 'While Stocks Last'];
+      const s = language === 'hi' ? ['à¤…à¤­à¥€ à¤–à¤°à¥€à¤¦à¥‡à¤‚', 'à¤¸à¥€à¤®à¤¿à¤¤ à¤¸à¤®à¤¯', 'à¤¸à¥à¤Ÿà¥‰à¤• à¤–à¤¤à¥à¤®'] : ['Shop Now', 'Limited Time', 'While Stocks Last'];
       setAiHeadlines(h);
       setAiSubtitles(s);
     } finally { setIsGenerating(false); }
@@ -459,7 +459,7 @@ const CreativeGeneratorPage: React.FC = () => {
   };
 
   const handleWhatsAppShare = () => {
-    const text = encodeURIComponent(`*${headline || 'Check this!'}*\n${subtitle || ''}\n\n${businessName ? `🏪 ${businessName}` : ''}\n${phone ? `📞 ${phone}` : ''}`);
+    const text = encodeURIComponent(`*${headline || 'Check this!'}*\n${subtitle || ''}\n\n${businessName ? `ðŸª ${businessName}` : ''}\n${phone ? `ðŸ“ž ${phone}` : ''}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
@@ -502,7 +502,7 @@ const CreativeGeneratorPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-screen">
+      <div className="p-4 sm:p-5 md:p-6 flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
           <p className="text-gray-500 dark:text-gray-400 text-sm">Loading creative studio...</p>
@@ -512,11 +512,11 @@ const CreativeGeneratorPage: React.FC = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6 animate-fade-in-up max-w-[1600px] mx-auto">
+    <div className="p-4 sm:p-5 md:p-6 space-y-6 animate-fade-in-up max-w-[1600px] mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+          <h1 className="text-2xl md:text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
               <Wand2 size={20} className="text-white" />
             </div>
@@ -528,7 +528,7 @@ const CreativeGeneratorPage: React.FC = () => {
           {(['create', 'history'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeView === v ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}>
-              {v === 'create' ? '✨ Create' : '📂 History'}
+              {v === 'create' ? 'âœ¨ Create' : 'ðŸ“‚ History'}
             </button>
           ))}
         </div>
@@ -634,10 +634,10 @@ const CreativeGeneratorPage: React.FC = () => {
                 {(['basic', 'filters', 'effects', 'stickers'] as const).map(tab => (
                   <button key={tab} onClick={() => setActiveDesignTab(tab)}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-medium whitespace-nowrap transition-all ${activeDesignTab === tab ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>
-                    {tab === 'basic' && '🎨 Basic'}
-                    {tab === 'filters' && '🔄 Filters'}
-                    {tab === 'effects' && '✨ Effects'}
-                    {tab === 'stickers' && '😊 Stickers'}
+                    {tab === 'basic' && 'ðŸŽ¨ Basic'}
+                    {tab === 'filters' && 'ðŸ”„ Filters'}
+                    {tab === 'effects' && 'âœ¨ Effects'}
+                    {tab === 'stickers' && 'ðŸ˜Š Stickers'}
                   </button>
                 ))}
               </div>
@@ -649,7 +649,7 @@ const CreativeGeneratorPage: React.FC = () => {
                     <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1"><Globe size={12} /> Language</label>
                     <div className="grid grid-cols-2 gap-2">
                       <button onClick={() => setLanguage('en')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${language === 'en' ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>English</button>
-                      <button onClick={() => setLanguage('hi')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${language === 'hi' ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>हिन्दी</button>
+                      <button onClick={() => setLanguage('hi')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${language === 'hi' ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>à¤¹à¤¿à¤¨à¥à¤¦à¥€</button>
                     </div>
                   </div>
                   <div className="mb-3">
@@ -767,7 +767,7 @@ const CreativeGeneratorPage: React.FC = () => {
                       <button onClick={() => setShowPremiumBadge(!showPremiumBadge)} className={`w-9 h-4.5 rounded-full transition-all ${showPremiumBadge ? 'bg-purple-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
                         <div className={`w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-all ${showPremiumBadge ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
                       </button>
-                      <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">⭐ Badge</span>
+                      <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">â­ Badge</span>
                     </label>
                   </div>
                   {/* Brand Kit */}
@@ -813,7 +813,7 @@ const CreativeGeneratorPage: React.FC = () => {
                 </div>
               )}
               {activeDesignTab === 'filters' && !productImage && (
-                <p className="text-xs text-gray-400 text-center py-6">Upload a product image to apply filters</p>
+                <p className="text-xs text-gray-400 text-center py-4 sm:py-5 md:py-6">Upload a product image to apply filters</p>
               )}
 
               {/* EFFECTS TAB */}
@@ -882,7 +882,7 @@ const CreativeGeneratorPage: React.FC = () => {
           {/* ============ RIGHT PANEL - PREVIEW ============ */}
           <div className="lg:col-span-8 space-y-4">
             {/* Preview */}
-            <div className="modern-card rounded-2xl p-4 md:p-6">
+            <div className="modern-card rounded-2xl p-4 sm:p-5 md:p-6">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <Eye size={18} className="text-gray-500" />
@@ -897,7 +897,7 @@ const CreativeGeneratorPage: React.FC = () => {
               </div>
 
               {/* Poster Preview Canvas */}
-              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 md:p-8 flex items-center justify-center min-h-[400px] md:min-h-[500px]">
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 md:p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[400px] md:min-h-[500px]">
                 {selectedTemplate ? (
                   <div ref={previewRef}
                     className={`w-full max-w-md rounded-2xl overflow-hidden shadow-2xl ${FORMAT_OPTIONS[selectedFormat].ratio} relative select-none`}
@@ -913,7 +913,7 @@ const CreativeGeneratorPage: React.FC = () => {
                     {/* Premium Badge */}
                     {showPremiumBadge && (
                       <div className="absolute top-3 right-3 z-20">
-                        <div className="px-2.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-black text-[10px] font-bold rounded-full shadow-lg flex items-center gap-1">⭐ PREMIUM</div>
+                        <div className="px-2.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-black text-[10px] font-bold rounded-full shadow-lg flex items-center gap-1">â­ PREMIUM</div>
                       </div>
                     )}
 
@@ -944,7 +944,7 @@ const CreativeGeneratorPage: React.FC = () => {
                           <img src={productImage} alt={productName} className="w-full h-full object-cover" style={filterStyle} />
                         </div>
                       ) : (
-                        <div className="text-4xl md:text-6xl mb-3 drop-shadow-lg">{selectedTemplate.emoji}</div>
+                        <div className="text-3xl sm:text-4xl md:text-6xl mb-3 drop-shadow-lg">{selectedTemplate.emoji}</div>
                       )}
 
                       {productName && productImage && (
@@ -961,7 +961,7 @@ const CreativeGeneratorPage: React.FC = () => {
                           ...getTextEffectStyle(),
                         }}
                       >
-                        {headline || (language === 'hi' ? 'अपनी हेडलाइन लिखें' : 'Your Headline')}
+                        {headline || (language === 'hi' ? 'à¤…à¤ªà¤¨à¥€ à¤¹à¥‡à¤¡à¤²à¤¾à¤‡à¤¨ à¤²à¤¿à¤–à¥‡à¤‚' : 'Your Headline')}
                       </h2>
 
                       <p className="mt-1.5 opacity-90 drop-shadow-md px-2 max-w-xs"
@@ -972,7 +972,7 @@ const CreativeGeneratorPage: React.FC = () => {
                           textTransform: textEffects.uppercase ? 'uppercase' : 'none',
                         }}
                       >
-                        {subtitle || (language === 'hi' ? 'आपकी सबटाइटल' : 'Your subtitle goes here')}
+                        {subtitle || (language === 'hi' ? 'à¤†à¤ªà¤•à¥€ à¤¸à¤¬à¤Ÿà¤¾à¤‡à¤Ÿà¤²' : 'Your subtitle goes here')}
                       </p>
 
                       <div className="mt-auto pt-3 w-full px-3">
@@ -980,7 +980,7 @@ const CreativeGeneratorPage: React.FC = () => {
                           <div className="text-left">
                             <p className="font-semibold text-xs drop-shadow-md"
                               style={{ color: textColor, fontFamily: FONT_OPTIONS[selectedFont].family }}>
-                              {businessName || (language === 'hi' ? 'व्यवसाय' : 'Business Name')}
+                              {businessName || (language === 'hi' ? 'à¤µà¥à¤¯à¤µà¤¸à¤¾à¤¯' : 'Business Name')}
                             </p>
                             <p className="text-[11px] opacity-80 drop-shadow-md" style={{ color: textColor }}>{phone || '+91 XXXXX XXXXX'}</p>
                           </div>
@@ -1003,7 +1003,7 @@ const CreativeGeneratorPage: React.FC = () => {
                 <button onClick={handleGenerateAIImage} disabled={isGeneratingImage}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-all ${aiImageUrl ? 'bg-green-500/20 text-green-600 hover:bg-green-500/30' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/25'}`}>
                   {isGeneratingImage ? <RefreshCw size={13} className="animate-spin" /> : <Zap size={13} />}
-                  {isGeneratingImage ? 'Generating...' : aiImageUrl ? '✨ Regenerate' : '🚀 Generate AI Poster'}
+                  {isGeneratingImage ? 'Generating...' : aiImageUrl ? 'âœ¨ Regenerate' : 'ðŸš€ Generate AI Poster'}
                 </button>
               </div>
             </div>
@@ -1016,28 +1016,28 @@ const CreativeGeneratorPage: React.FC = () => {
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">{language === 'hi' ? 'हेडलाइन' : 'Headline'}</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">{language === 'hi' ? 'à¤¹à¥‡à¤¡à¤²à¤¾à¤‡à¤¨' : 'Headline'}</label>
                   <input type="text" value={headline} onChange={(e) => setHeadline(e.target.value)}
                     className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder={language === 'hi' ? 'हेडलाइन लिखें...' : 'Enter headline...'}
+                    placeholder={language === 'hi' ? 'à¤¹à¥‡à¤¡à¤²à¤¾à¤‡à¤¨ à¤²à¤¿à¤–à¥‡à¤‚...' : 'Enter headline...'}
                     style={{ fontFamily: language === 'hi' ? "'Noto Sans Devanagari', sans-serif" : 'inherit' }} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">{language === 'hi' ? 'उपशीर्षक' : 'Subtitle'}</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">{language === 'hi' ? 'à¤‰à¤ªà¤¶à¥€à¤°à¥à¤·à¤•' : 'Subtitle'}</label>
                   <input type="text" value={subtitle} onChange={(e) => setSubtitle(e.target.value)}
                     className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder={language === 'hi' ? 'उपशीर्षक लिखें...' : 'Enter subtitle...'}
+                    placeholder={language === 'hi' ? 'à¤‰à¤ªà¤¶à¥€à¤°à¥à¤·à¤• à¤²à¤¿à¤–à¥‡à¤‚...' : 'Enter subtitle...'}
                     style={{ fontFamily: language === 'hi' ? "'Noto Sans Devanagari', sans-serif" : 'inherit' }} />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">{language === 'hi' ? 'व्यवसाय का नाम' : 'Business Name'}</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">{language === 'hi' ? 'à¤µà¥à¤¯à¤µà¤¸à¤¾à¤¯ à¤•à¤¾ à¤¨à¤¾à¤®' : 'Business Name'}</label>
                     <input type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)}
                       className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder={language === 'hi' ? 'व्यवसाय का नाम...' : 'Business name...'} />
+                      placeholder={language === 'hi' ? 'à¤µà¥à¤¯à¤µà¤¸à¤¾à¤¯ à¤•à¤¾ à¤¨à¤¾à¤®...' : 'Business name...'} />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">{language === 'hi' ? 'फ़ोन नंबर' : 'Phone'}</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">{language === 'hi' ? 'à¤«à¤¼à¥‹à¤¨ à¤¨à¤‚à¤¬à¤°' : 'Phone'}</label>
                     <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)}
                       className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       placeholder="+91 XXXXX XXXXX" />
@@ -1049,13 +1049,13 @@ const CreativeGeneratorPage: React.FC = () => {
         </div>
       ) : (
         /* History View */
-        <div className="modern-card rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📂 Saved Posters</h3>
+        <div className="modern-card rounded-2xl p-4 sm:p-5 md:p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">ðŸ“‚ Saved Posters</h3>
           {history.length === 0 ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               <Image size={48} className="mx-auto mb-4 opacity-30" />
-              <p>{language === 'hi' ? 'कोई पोस्टर सेव नहीं' : 'No saved posters yet'}</p>
-              <p className="text-sm mt-1">{language === 'hi' ? 'अपना पहला पोस्टर बनाएं' : 'Create your first poster'}</p>
+              <p>{language === 'hi' ? 'à¤•à¥‹à¤ˆ à¤ªà¥‹à¤¸à¥à¤Ÿà¤° à¤¸à¥‡à¤µ à¤¨à¤¹à¥€à¤‚' : 'No saved posters yet'}</p>
+              <p className="text-sm mt-1">{language === 'hi' ? 'à¤…à¤ªà¤¨à¤¾ à¤ªà¤¹à¤²à¤¾ à¤ªà¥‹à¤¸à¥à¤Ÿà¤° à¤¬à¤¨à¤¾à¤à¤‚' : 'Create your first poster'}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -1086,7 +1086,7 @@ const CreativeGeneratorPage: React.FC = () => {
       {/* ============ LOGO GENERATOR MODAL ============ */}
       {showLogoGen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowLogoGen(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6 max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2"><Star size={20} className="text-yellow-500" /> AI Logo Generator</h3>
               <button onClick={() => setShowLogoGen(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>

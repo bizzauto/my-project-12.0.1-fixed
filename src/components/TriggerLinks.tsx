@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Link2, Plus, BarChart3, MousePointerClick, Globe, Smartphone,
   Monitor, Tablet, Copy, CheckCircle, XCircle, Trash2, Edit3,
@@ -15,7 +15,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { triggerLinksAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface TriggerLink {
   id: string;
   name: string;
@@ -52,7 +52,7 @@ interface CreateLinkForm {
   automationTrigger: string;
 }
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
 const TRIGGER_OPTIONS = [
@@ -113,7 +113,7 @@ const DEMO_ANALYTICS: ClickAnalytics = {
   topBrowser: 'Chrome',
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function formatNumber(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
@@ -124,7 +124,7 @@ function formatDate(d: string): string {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const StatCard: React.FC<{
   icon: React.ReactNode;
@@ -180,7 +180,7 @@ const QRCodeModal: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-fade-in-up">
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-sm p-4 sm:p-5 md:p-6 animate-fade-in-up">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <QrCode size={20} /> QR Code
@@ -234,7 +234,7 @@ const CreateLinkModal: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg animate-fade-in-up">
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-lg animate-fade-in-up">
         <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
             {editMode ? <Edit3 size={20} /> : <Plus size={20} />}
@@ -323,7 +323,7 @@ const CreateLinkModal: React.FC<{
   );
 };
 
-// ─── Main Component ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const TriggerLinks: React.FC = () => {
   const { isDemoMode } = useAuthStore();
@@ -348,7 +348,7 @@ const TriggerLinks: React.FC = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // ── Load data ──
+  // â”€â”€ Load data â”€â”€
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -369,7 +369,7 @@ const TriggerLinks: React.FC = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // ── Load analytics when a link is selected ──
+  // â”€â”€ Load analytics when a link is selected â”€â”€
   useEffect(() => {
     if (!selectedLink || isDemoMode) return;
     triggerLinksAPI.analytics(selectedLink.id)
@@ -380,7 +380,7 @@ const TriggerLinks: React.FC = () => {
       .catch(() => {});
   }, [selectedLink, isDemoMode]);
 
-  // ── Filtered links ──
+  // â”€â”€ Filtered links â”€â”€
   const filteredLinks = useMemo(() => {
     return links.filter(l => {
       if (filterStatus === 'active' && !l.isActive) return false;
@@ -398,7 +398,7 @@ const TriggerLinks: React.FC = () => {
     });
   }, [links, searchQuery, filterStatus]);
 
-  // ── Computed stats ──
+  // â”€â”€ Computed stats â”€â”€
   const stats = useMemo(() => {
     const total = links.length;
     const active = links.filter(l => l.isActive).length;
@@ -407,7 +407,7 @@ const TriggerLinks: React.FC = () => {
     return { total, active, inactive: total - active, totalClicks, topLink };
   }, [links]);
 
-  // ── Actions ──
+  // â”€â”€ Actions â”€â”€
   const resetForm = () => {
     setForm({ name: '', originalUrl: '', shortCode: '', tags: '', automationTrigger: '' });
   };
@@ -526,10 +526,10 @@ const TriggerLinks: React.FC = () => {
     setEditingLink(link);
   };
 
-  // ── Render ──
+  // â”€â”€ Render â”€â”€
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
           <p className="text-gray-500 dark:text-gray-400">Loading trigger links...</p>
@@ -539,7 +539,7 @@ const TriggerLinks: React.FC = () => {
   }
 
   return (
-    <div className="p-4 md:p-8 animate-fade-in-up">
+    <div className="p-4 md:p-4 sm:p-6 md:p-8 animate-fade-in-up">
       {toast && (
         <div className={`fixed top-4 right-4 z-[100] flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white ${toast.t === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
           {toast.t === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}{toast.m}
@@ -559,10 +559,10 @@ const TriggerLinks: React.FC = () => {
         />
       )}
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+          <h1 className="text-2xl md:text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <Link2 className="text-indigo-600" size={28} /> Trigger Links
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Track, shorten, and manage smart links with analytics</p>
@@ -575,7 +575,7 @@ const TriggerLinks: React.FC = () => {
         </button>
       </div>
 
-      {/* ── Stats ── */}
+      {/* â”€â”€ Stats â”€â”€ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <StatCard
           icon={<Link2 size={20} />}
@@ -606,11 +606,11 @@ const TriggerLinks: React.FC = () => {
         />
       </div>
 
-      {/* ── Main Content Grid ── */}
+      {/* â”€â”€ Main Content Grid â”€â”€ */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* ── Left: Link List ── */}
+        {/* â”€â”€ Left: Link List â”€â”€ */}
         <div className={`${selectedLink ? 'xl:col-span-1' : 'xl:col-span-3'}`}>
-          {/* ── Filters ── */}
+          {/* â”€â”€ Filters â”€â”€ */}
           <div className="flex flex-col sm:flex-row gap-3 mb-4">
             <div className="relative flex-1">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -639,7 +639,7 @@ const TriggerLinks: React.FC = () => {
             </div>
           </div>
 
-          {/* ── Links Table/Cards ── */}
+          {/* â”€â”€ Links Table/Cards â”€â”€ */}
           {filteredLinks.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
               <Link2 size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
@@ -657,7 +657,7 @@ const TriggerLinks: React.FC = () => {
               )}
             </div>
           ) : selectedLink ? (
-            /* ── Compact list when analytics panel is open ── */
+            /* â”€â”€ Compact list when analytics panel is open â”€â”€ */
             <div className="space-y-2">
               {filteredLinks.map(link => (
                 <div
@@ -683,7 +683,7 @@ const TriggerLinks: React.FC = () => {
               ))}
             </div>
           ) : (
-            /* ── Full table view ── */
+            /* â”€â”€ Full table view â”€â”€ */
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -793,10 +793,10 @@ const TriggerLinks: React.FC = () => {
           )}
         </div>
 
-        {/* ── Right: Analytics Panel ── */}
+        {/* â”€â”€ Right: Analytics Panel â”€â”€ */}
         {selectedLink && (
           <div className="xl:col-span-2 space-y-4">
-            {/* ── Analytics Header ── */}
+            {/* â”€â”€ Analytics Header â”€â”€ */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
               <div className="flex items-start justify-between mb-4">
                 <div>
@@ -858,14 +858,14 @@ const TriggerLinks: React.FC = () => {
                 <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                   <Zap size={12} className="text-yellow-500" />
                   Trigger: {selectedLink.automationTrigger.replace(/_/g, ' ')}
-                  <span className="mx-1">·</span>
+                  <span className="mx-1">Â·</span>
                   <Clock size={12} />
                   Created {formatDate(selectedLink.createdAt)}
                 </div>
               )}
             </div>
 
-            {/* ── Analytics Stats ── */}
+            {/* â”€â”€ Analytics Stats â”€â”€ */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3 text-center">
                 <MousePointerClick size={18} className="mx-auto text-indigo-500 mb-1" />
@@ -889,7 +889,7 @@ const TriggerLinks: React.FC = () => {
               </div>
             </div>
 
-            {/* ── Timeline Chart ── */}
+            {/* â”€â”€ Timeline Chart â”€â”€ */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Click Timeline (7 Days)</h3>
               <div className="h-48 sm:h-56">
@@ -913,7 +913,7 @@ const TriggerLinks: React.FC = () => {
               </div>
             </div>
 
-            {/* ── Breakdown Charts ── */}
+            {/* â”€â”€ Breakdown Charts â”€â”€ */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Device Breakdown */}
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">

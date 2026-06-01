@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, BookOpen, Users, Clock, BarChart3 } from 'lucide-react';
 
@@ -14,7 +14,7 @@ export default function CourseBuilder() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-5 md:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
@@ -28,7 +28,7 @@ export default function CourseBuilder() {
           </button>
         </div>
       </div>
-      <div className="p-6 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="p-4 sm:p-5 md:p-6 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {courses.map((course) => (
           <div key={course.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-all">
             <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mb-4">

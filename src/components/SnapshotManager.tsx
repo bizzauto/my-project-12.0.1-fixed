@@ -480,7 +480,7 @@ const SnapshotManager: React.FC = () => {
     <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-xl sm:text-2xl sm:text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+        <h1 className="text-xl sm:text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
           <ArrowLeftRight className="text-blue-600" size={32} />
           Business Snapshot
         </h1>
@@ -601,7 +601,7 @@ const SnapshotManager: React.FC = () => {
         <div className="space-y-6">
           {/* Upload step */}
           {importStep === 'upload' && (
-            <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-4 sm:p-5 md:p-6 md:p-8">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 md:p-6 md:p-8">
               <div
                 className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-blue-500 transition-colors cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
