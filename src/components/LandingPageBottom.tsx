@@ -127,32 +127,6 @@ const LandingPageBottom: React.FC<Props> = ({ openFaq, setOpenFaq, showBackToTop
       </div>
     </Section>
 
-    {/* Pricing Teaser */}
-    <Section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-500/5 dark:via-teal-500/5 dark:to-cyan-500/5" />
-      <div className="relative max-w-4xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-full px-4 py-1.5 text-sm font-medium mb-4"><Zap size={14} /> Simple Pricing</div>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">Start free. Scale as you grow.</h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">No hidden fees. No long-term contracts. Cancel anytime.</p>
-        <div className="grid sm:grid-cols-3 gap-6 mb-10">
-          {[
-            { name: 'Starter', price: 'â‚¹0', period: '/mo', desc: 'For solo entrepreneurs', features: ['500 messages/mo', 'Basic CRM', '1 WhatsApp Number', 'Email Support'] },
-            { name: 'Growth', price: 'â‚¹2,499', period: '/mo', desc: 'For growing businesses', features: ['10,000 messages/mo', 'Full CRM + Pipelines', 'AI Chatbot', 'Priority Support'], popular: true },
-            { name: 'Enterprise', price: 'Custom', period: '', desc: 'For large organizations', features: ['Unlimited messages', 'Custom Integrations', 'Dedicated Manager', 'SLA Guarantee'] },
-          ].map((plan, i) => (
-            <div key={i} className={`relative bg-white dark:bg-white/[0.03] border rounded-2xl p-6 hover:-translate-y-1 transition-all ${plan.popular ? 'border-emerald-400 dark:border-emerald-500/50 shadow-xl shadow-emerald-500/10' : 'border-gray-200 dark:border-white/5'}`}>
-              {plan.popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold px-4 py-1 rounded-full">Most Popular</div>}
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{plan.name}</h3>
-              <p className="text-gray-500 dark:text-gray-500 text-sm mb-4">{plan.desc}</p>
-              <div className="mb-6"><span className="text-3xl font-bold text-gray-900 dark:text-white">{plan.price}</span><span className="text-gray-500 dark:text-gray-400">{plan.period}</span></div>
-              <ul className="space-y-2.5 mb-6">{plan.features.map((f, j) => (<li key={j} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"><CheckCircle size={14} className="text-emerald-500 flex-shrink-0" />{f}</li>))}</ul>
-              <Link to="/pricing" className={`block w-full text-center py-2.5 rounded-xl font-medium transition-all ${plan.popular ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:shadow-lg hover:shadow-emerald-500/25' : 'bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10'}`}>Get Started</Link>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Section>
-
     {/* Final CTA */}
     <section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700" />
