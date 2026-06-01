@@ -1,13 +1,16 @@
-const CACHE_NAME = 'bizzauto-v5';
-const STATIC_CACHE = 'bizzauto-static-v5';
-const DYNAMIC_CACHE = 'bizzauto-dynamic-v5';
+const CACHE_NAME = 'bizzauto-v6';
+const STATIC_CACHE = 'bizzauto-static-v6';
+const DYNAMIC_CACHE = 'bizzauto-dynamic-v6';
 
 const STATIC_ASSETS = [
   '/',
   '/dashboard',
   '/login',
   '/manifest.json',
-  '/offline.html'
+  '/offline.html',
+  '/favicon.svg',
+  '/icon-192.png',
+  '/icon-512.png',
 ];
 
 // Install event - cache static assets
@@ -46,37 +49,34 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   // Skip non-GET requests
-  if (request.method !== 'GET') {
-    return;
-  }
+  if (request.method !== 'GET') return;
 
-  // Skip chrome extensions and non-http(s) requests
-  if (!url.protocol.startsWith('http')) {
-    return;
-  }
+  // Skip chrome-extension and non-http(s)
+  if (!url.protocol.startsWith('http')) return;
 
-  // Network first for API calls
+  // Skip Vite HMR and dev server
+  if (url.pathname.startsWith('/@') || url.pathname.includes('hmr')) return;
+
+  // Network first for API calls — always try fresh data
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(networkFirst(request));
     return;
   }
 
-  // Cache first for static assets
-  if (url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|ico|woff|woff2)$/)) {
+  // Cache first for static assets (JS, CSS, images, fonts)
+  if (url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|ico|woff|woff2|webp|gif)$/)) {
     event.respondWith(cacheFirst(request));
     return;
   }
 
-  // Network first for pages
-  event.respondWith(networkFirst(request));
+  // Network first with offline fallback for pages
+  event.respondWith(networkFirstWithOffline(request));
 });
 
-// Cache first strategy
+// Cache first — for immutable assets
 async function cacheFirst(request) {
   const cached = await caches.match(request);
-  if (cached) {
-    return cached;
-  }
+  if (cached) return cached;
   try {
     const response = await fetch(request);
     if (response.ok) {
@@ -84,12 +84,12 @@ async function cacheFirst(request) {
       cache.put(request, response.clone());
     }
     return response;
-  } catch (error) {
-    return caches.match('/offline.html');
+  } catch {
+    return new Response('', { status: 408, statusText: 'Offline' });
   }
 }
 
-// Network first strategy
+// Network first — for API
 async function networkFirst(request) {
   try {
     const response = await fetch(request);
@@ -98,19 +98,33 @@ async function networkFirst(request) {
       cache.put(request, response.clone());
     }
     return response;
-  } catch (error) {
+  } catch {
     const cached = await caches.match(request);
-    if (cached) {
-      return cached;
+    if (cached) return cached;
+    return new Response(JSON.stringify({ error: 'Offline' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+// Network first with offline fallback — for navigation pages
+async function networkFirstWithOffline(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(DYNAMIC_CACHE);
+      cache.put(request, response.clone());
     }
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
     // Return offline page for navigation requests
     if (request.mode === 'navigate') {
       return caches.match('/offline.html');
     }
-    return new Response(JSON.stringify({ error: 'Offline' }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return new Response('Offline', { status: 503 });
   }
 }
 
@@ -123,7 +137,6 @@ self.addEventListener('sync', (event) => {
 });
 
 async function syncMessages() {
-  // Get pending messages from IndexedDB and send them
   console.log('[SW] Syncing pending messages...');
 }
 
@@ -135,13 +148,11 @@ self.addEventListener('push', (event) => {
     icon: '/icon-192.png',
     badge: '/icon-192.png',
     vibrate: [100, 50, 100],
-    data: {
-      url: data.url || '/'
-    },
+    data: { url: data.url || '/' },
     actions: [
       { action: 'view', title: 'View' },
-      { action: 'dismiss', title: 'Dismiss' }
-    ]
+      { action: 'dismiss', title: 'Dismiss' },
+    ],
   };
 
   event.waitUntil(
