@@ -121,7 +121,7 @@ const BillingPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-6 text-center">
           <AlertCircle className="mx-auto text-red-500 mb-3" size={40} />
           <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
@@ -132,11 +132,11 @@ const BillingPage: React.FC = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       {toastEl}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"><CreditCard className="text-blue-600" size={32} />Billing & Subscription</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"><CreditCard className="text-blue-600" size={32} />Billing & Subscription</h1>
           <p className="text-gray-600">Manage your plan, payment methods, and invoices</p>
         </div>
         <button onClick={loadBilling} className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg" title="Refresh">
@@ -158,7 +158,7 @@ const BillingPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6">
         <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Usage This Month</h3>
           {usage.length > 0 ? (

@@ -227,7 +227,7 @@ const VoiceCallPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
           <p className="text-gray-500">Loading call data...</p>
@@ -237,7 +237,7 @@ const VoiceCallPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 lg:p-8 animate-fade-in-up">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8 animate-fade-in-up">
       {/* Active Call Overlay */}
       {isCallActive && (
         <div className="fixed inset-0 z-50 bg-gradient-to-b from-blue-900/95 to-purple-900/95 flex flex-col items-center justify-center text-white animate-fade-in-up">
@@ -295,7 +295,7 @@ const VoiceCallPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Voice Calls</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Voice Calls</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Manage and track your business calls</p>
         </div>
         <div className="flex items-center gap-3">
@@ -335,7 +335,7 @@ const VoiceCallPage: React.FC = () => {
       </div>
 
       {/* Chart + Call Log */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
         {/* Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Call Volume</h3>

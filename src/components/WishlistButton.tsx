@@ -54,7 +54,7 @@ const WishlistButton: React.FC<Props> = ({ productId, businessId, className = ''
     >
       <Heart
         size={18}
-        className={`transition-colors ${
+        className={`transition-colors w-[18px] h-[18px] sm:w-5 sm:h-5 ${
           inWishlist ? 'text-red-500 fill-red-500' : 'text-gray-400 hover:text-red-400'
         } ${loading ? 'opacity-50' : ''}`}
       />

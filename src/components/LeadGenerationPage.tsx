@@ -201,7 +201,7 @@ export default function LeadGenerationPage(){
       {toast&&<div className={`fixed top-4 right-4 z-[100] flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white ${toast.t==='success'?'bg-green-500':'bg-red-500'}`}>{toast.t==='success'?<CheckCircle size={18}/>:<AlertCircle size={18}/>}{toast.m}</div>}
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div><h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><UserPlus size={28} className="text-blue-600"/> Lead Generation</h1><p className="text-gray-500 dark:text-gray-400 mt-1">Capture, manage & convert leads from multiple sources</p></div>
+        <div><h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><UserPlus size={28} className="text-blue-600"/> Lead Generation</h1><p className="text-gray-500 dark:text-gray-400 mt-1">Capture, manage & convert leads from multiple sources</p></div>
         <div className="flex items-center gap-3">
           <button onClick={()=>fetchLeads()} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><RefreshCw size={18}/></button>
           <button onClick={()=>setShowExport(true)} className={`${btn} bg-green-600 hover:bg-green-700`}><Download size={16}/> Export</button>
@@ -286,7 +286,7 @@ export default function LeadGenerationPage(){
         <SCard icon={<ArrowUpRight size={22}/>} label="Conversion" value={`${stats.total?Math.round((stats.byStatus.find(s=>s.name==='won')?.value||0)/stats.total*100):0}%`} c="orange"/>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-gray-700">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Leads by Source</h3>
           <ResponsiveContainer width="100%" height={200}><BarChart data={stats.bySource}><CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb"/><XAxis dataKey="name" tick={{fontSize:11}}/><YAxis tick={{fontSize:11}}/><RT/><Bar dataKey="value" radius={[4,4,0,0]}>{stats.bySource.map((e,i)=><Cell key={i} fill={SC[e.name]||'#6B7280'}/>)}</Bar></BarChart></ResponsiveContainer>

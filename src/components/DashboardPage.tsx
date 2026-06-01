@@ -29,7 +29,7 @@ interface AnimatedNumberProps {
 const AnimatedNumber: React.FC<AnimatedNumberProps> = ({ value, duration = 1000 }) => {
   const [current, setCurrent] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
-  
+
   useEffect(() => {
     if (!hasAnimated) {
       setHasAnimated(true);
@@ -49,7 +49,7 @@ const AnimatedNumber: React.FC<AnimatedNumberProps> = ({ value, duration = 1000 
     }
   }, [value, hasAnimated, duration]);
 
-  return <span className="text-2xl font-bold text-gray-900 dark:text-white">{current}</span>;
+  return <span className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{current}</span>;
 };
 
 interface LeadContact {
@@ -78,18 +78,18 @@ interface PipelineData {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, change, positive, icon }) => (
-  <div className="modern-card card-futuristic hover-lift rounded-2xl p-5 animate-fade-in-up">
-    <div className="flex items-center justify-between mb-4">
-      <div className="p-2.5 bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 rounded-xl text-blue-600 dark:text-blue-400 glow-effect">{icon}</div>
-      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${positive ? 'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'}`}>
+  <div className="modern-card card-futuristic hover-lift rounded-xl md:rounded-2xl p-4 md:p-5 animate-fade-in-up">
+    <div className="flex items-center justify-between mb-3 md:mb-4">
+      <div className="p-2 md:p-2.5 bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 rounded-lg md:rounded-xl text-blue-600 dark:text-blue-400 glow-effect">{icon}</div>
+      <span className={`text-[10px] md:text-xs font-semibold px-1.5 md:px-2 py-0.5 md:py-1 rounded-full ${positive ? 'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'}`}>
         {change}
       </span>
     </div>
-    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">{title}</h3>
+    <h3 className="text-gray-500 dark:text-gray-400 text-xs md:text-sm font-medium mb-1">{title}</h3>
     {typeof value === 'number' ? (
       <AnimatedNumber value={value} />
     ) : (
-      <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+      <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white break-words">{value}</p>
     )}
   </div>
 );
@@ -319,7 +319,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 animate-fade-in-up">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-8 animate-fade-in-up">
         <LoadingSpinner />
       </div>
     );
@@ -327,7 +327,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="p-6 lg:p-8 animate-fade-in-up">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-8 animate-fade-in-up">
         <div className="modern-card rounded-2xl p-8 text-center">
           <p className="text-red-500 dark:text-red-400 mb-4">{error}</p>
           <button
@@ -342,20 +342,20 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 animate-fade-in-up">
-      <div className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back, {userName}!</h1>
-          <p className="text-gray-500 dark:text-gray-400">Here's what's happening with your business today.</p>
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8 animate-fade-in-up">
+      <div className="mb-5 sm:mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">Welcome back, {userName}!</h1>
+          <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Here's what's happening with your business today.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
           {/* Date Range Selector */}
-          <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+          <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 overflow-x-auto scrollbar-hide">
             {(['today', 'week', 'month', 'quarter'] as const).map((range) => (
               <button
                 key={range}
                 onClick={() => setDateRange(range)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                className={`px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
                   dateRange === range
                     ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -367,26 +367,26 @@ export default function DashboardPage() {
           </div>
           <button
             onClick={fetchDashboard}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
             title="Refresh dashboard"
           >
             <RefreshCw size={16} />
-            Refresh
+            <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
       </div>
 
       {/* 8 KPI Cards - 2 rows of 4 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 stagger-children">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6 md:mb-8 stagger-children">
         {stats.map((stat, index) => (
           <StatCard key={index} {...stat} />
         ))}
       </div>
 
       {/* Charts Row: Activity + Revenue */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2 modern-card rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Activity Overview</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-5 sm:mb-6 md:mb-8">
+        <div className="lg:col-span-2 modern-card rounded-xl md:rounded-2xl p-4 sm:p-5 md:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">Activity Overview</h3>
           {analyticsData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={analyticsData}>
@@ -418,12 +418,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Activity Feed */}
-        <div className="modern-card rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Live Activity</h3>
-          <div className="space-y-3">
+        <div className="modern-card rounded-xl md:rounded-2xl p-4 sm:p-5 md:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">Live Activity</h3>
+          <div className="space-y-2 sm:space-y-3">
             {demoActivityFeed.map((activity) => (
-              <div key={activity.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+              <div key={activity.id} className="flex items-start gap-2.5 sm:gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                   activity.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' :
                   activity.color === 'green' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
                   activity.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400' :
@@ -433,8 +433,8 @@ export default function DashboardPage() {
                   {activity.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{activity.message}</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{activity.time}</p>
+                  <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 break-words">{activity.message}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 mt-0.5">{activity.time}</p>
                 </div>
               </div>
             ))}
@@ -443,9 +443,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Revenue Chart + AI Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2 modern-card rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Revenue Trend</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-5 sm:mb-6 md:mb-8">
+        <div className="lg:col-span-2 modern-card rounded-xl md:rounded-2xl p-4 sm:p-5 md:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">Revenue Trend</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={demoRevenueData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -460,22 +460,22 @@ export default function DashboardPage() {
         </div>
 
         {/* AI Insights */}
-        <div className="modern-card rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Brain className="text-purple-600 dark:text-purple-400" size={20} />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">AI Insights</h3>
+        <div className="modern-card rounded-xl md:rounded-2xl p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+            <Brain className="text-purple-600 dark:text-purple-400" size={18} />
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">AI Insights</h3>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {demoInsights.map((insight) => (
-              <div key={insight.id} className="p-3 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl border border-purple-200/50 dark:border-purple-800/30">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    {insight.icon}
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{insight.title}</span>
+              <div key={insight.id} className="p-2.5 sm:p-3 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg sm:rounded-xl border border-purple-200/50 dark:border-purple-800/30">
+                <div className="flex items-center justify-between mb-1 gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+                    <span className="flex-shrink-0">{insight.icon}</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{insight.title}</span>
                   </div>
-                  <span className="text-sm font-bold text-purple-600 dark:text-purple-400">{insight.value}</span>
+                  <span className="text-xs sm:text-sm font-bold text-purple-600 dark:text-purple-400 flex-shrink-0">{insight.value}</span>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{insight.suggestion}</p>
+                <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 break-words">{insight.suggestion}</p>
               </div>
             ))}
           </div>
@@ -483,10 +483,10 @@ export default function DashboardPage() {
       </div>
 
       {/* Pipeline + Quick Actions + Recent Leads */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
         {/* Pipeline Distribution */}
-        <div className="modern-card rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pipeline</h3>
+        <div className="modern-card rounded-xl md:rounded-2xl p-4 sm:p-5 md:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">Pipeline</h3>
           {pipelineData.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -516,25 +516,25 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Leads */}
-        <div className="modern-card rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Leads</h3>
-            <button onClick={() => navigate('/crm')} className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline">View All</button>
+        <div className="modern-card rounded-xl md:rounded-2xl p-4 sm:p-5 md:p-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Recent Leads</h3>
+            <button onClick={() => navigate('/crm')} className="text-blue-600 dark:text-blue-400 text-xs sm:text-sm font-medium hover:underline whitespace-nowrap">View All</button>
           </div>
           {recentLeads.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {recentLeads.slice(0, 4).map((contact) => (
-                <div key={contact.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+                <div key={contact.id} className="flex items-center justify-between p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer gap-2">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm shadow-sm flex-shrink-0">
                       {contact.avatar}
                     </div>
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">{contact.name}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{contact.phone}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">{contact.name}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">{contact.phone}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                     <button className="p-1.5 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors" title="WhatsApp">
                       <Phone size={14} className="text-green-600 dark:text-green-400" />
                     </button>
@@ -554,24 +554,24 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="modern-card rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => navigate('/whatsapp')} className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 transition-all gap-2 border border-green-200/50 dark:border-green-800/30">
+        <div className="modern-card rounded-xl md:rounded-2xl p-4 sm:p-5 md:p-6 md:col-span-2 lg:col-span-1">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5 sm:gap-3">
+            <button onClick={() => navigate('/whatsapp')} className="flex flex-col items-center justify-center p-3 sm:p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg sm:rounded-xl hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 transition-all gap-1.5 sm:gap-2 border border-green-200/50 dark:border-green-800/30">
               <MessageSquare className="text-green-600 dark:text-green-400" size={20} />
-              <span className="text-xs font-medium text-green-700 dark:text-green-400">WhatsApp</span>
+              <span className="text-[10px] sm:text-xs font-medium text-green-700 dark:text-green-400">WhatsApp</span>
             </button>
-            <button onClick={() => navigate('/social')} className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all gap-2 border border-blue-200/50 dark:border-blue-800/30">
+            <button onClick={() => navigate('/social')} className="flex flex-col items-center justify-center p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg sm:rounded-xl hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all gap-1.5 sm:gap-2 border border-blue-200/50 dark:border-blue-800/30">
               <Smartphone className="text-blue-600 dark:text-blue-400" size={20} />
-              <span className="text-xs font-medium text-blue-700 dark:text-blue-400">Social Post</span>
+              <span className="text-[10px] sm:text-xs font-medium text-blue-700 dark:text-blue-400">Social Post</span>
             </button>
-            <button onClick={() => navigate('/campaigns')} className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 transition-all gap-2 border border-purple-200/50 dark:border-purple-800/30">
+            <button onClick={() => navigate('/campaigns')} className="flex flex-col items-center justify-center p-3 sm:p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg sm:rounded-xl hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 transition-all gap-1.5 sm:gap-2 border border-purple-200/50 dark:border-purple-800/30">
               <Send className="text-purple-600 dark:text-purple-400" size={20} />
-              <span className="text-xs font-medium text-purple-700 dark:text-purple-400">Campaign</span>
+              <span className="text-[10px] sm:text-xs font-medium text-purple-700 dark:text-purple-400">Campaign</span>
             </button>
-            <button onClick={() => navigate('/workflows')} className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl hover:from-orange-100 hover:to-amber-100 dark:hover:from-orange-900/30 dark:hover:to-amber-900/30 transition-all gap-2 border border-orange-200/50 dark:border-orange-800/30">
+            <button onClick={() => navigate('/workflows')} className="flex flex-col items-center justify-center p-3 sm:p-4 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg sm:rounded-xl hover:from-orange-100 hover:to-amber-100 dark:hover:from-orange-900/30 dark:hover:to-amber-900/30 transition-all gap-1.5 sm:gap-2 border border-orange-200/50 dark:border-orange-800/30">
               <Zap className="text-orange-600 dark:text-orange-400" size={20} />
-              <span className="text-xs font-medium text-orange-700 dark:text-orange-400">Workflow</span>
+              <span className="text-[10px] sm:text-xs font-medium text-orange-700 dark:text-orange-400">Workflow</span>
             </button>
           </div>
         </div>

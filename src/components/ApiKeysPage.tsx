@@ -81,10 +81,10 @@ const generateKey = async () => {
   if (loading) return <PageSkeleton />;
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"><Key className="text-blue-600" size={32} />API Keys</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"><Key className="text-blue-600" size={32} />API Keys</h1>
           <p className="text-gray-600">Manage access keys for integrations and developers</p>
         </div>
         <div className="flex items-center gap-2">

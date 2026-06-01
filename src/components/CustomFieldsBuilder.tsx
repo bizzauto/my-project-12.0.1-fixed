@@ -353,7 +353,7 @@ export default function CustomFieldsBuilder() {
               <Settings className="text-indigo-600 dark:text-indigo-400" size={24} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Custom Fields</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Custom Fields</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Build and manage custom fields for each entity type
               </p>

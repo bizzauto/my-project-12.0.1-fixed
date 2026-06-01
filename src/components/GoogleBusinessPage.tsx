@@ -208,12 +208,12 @@ const GoogleBusinessPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8">
       {toast && <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${toast.t === 'error' ? 'bg-red-500' : 'bg-green-500'}`}>{toast.m}</div>}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Google Business Profile</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Google Business Profile</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your business on Google Search & Maps</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -242,7 +242,7 @@ const GoogleBusinessPage: React.FC = () => {
       )}
 
       {view === 'profile' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
               <div className="flex items-start justify-between mb-4">
@@ -411,7 +411,7 @@ const GoogleBusinessPage: React.FC = () => {
                   </label>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                   {/* Time Settings */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

@@ -52,7 +52,7 @@ export const PageSkeleton: React.FC<{ type?: 'dashboard' | 'table' | 'mixed' }> 
       <>
         <div><div className="h-8 bg-gray-200 rounded w-1/3 mb-2 animate-pulse" /><div className="h-4 bg-gray-200 rounded w-1/4 animate-pulse" /></div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">{[1, 2, 3, 4].map(i => <SkeletonStat key={i} />)}</div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6"><SkeletonChart /><SkeletonChart /></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6"><SkeletonChart /><SkeletonChart /></div>
       </>
     )}
     {type === 'table' && (

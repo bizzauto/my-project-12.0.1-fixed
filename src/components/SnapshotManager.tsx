@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+﻿import React, { useState, useCallback, useRef } from 'react';
 import {
   Download,
   Upload,
@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useToast } from './Toast';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type SnapshotCategory =
   | 'contacts'
@@ -59,7 +59,7 @@ interface SnapshotLog {
   fileName?: string;
 }
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const CATEGORY_META: Record<
   SnapshotCategory,
@@ -115,7 +115,7 @@ const CATEGORIES: SnapshotCategory[] = [
 const STORAGE_KEY = 'snapshot_logs';
 const SNAPSHOT_VERSION = '1.0.0';
 
-// ─── Demo data (simulates what would come from an API / store) ──────────────
+// â”€â”€â”€ Demo data (simulates what would come from an API / store) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const DEMO_DATA: Record<SnapshotCategory, SnapshotItem[]> = {
   contacts: [
@@ -153,7 +153,7 @@ const DEMO_DATA: Record<SnapshotCategory, SnapshotItem[]> = {
   ],
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function loadLogs(): SnapshotLog[] {
   try {
@@ -182,7 +182,7 @@ function formatTimestamp(ts: string) {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const SnapshotManager: React.FC = () => {
   const { error: showError, success: showSuccess } = useToast();
@@ -232,7 +232,7 @@ const SnapshotManager: React.FC = () => {
   // History state
   const [logs, setLogs] = useState<SnapshotLog[]>(loadLogs);
 
-  // ── Export handlers ──────────────────────────────────────────────────────
+  // â”€â”€ Export handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const toggleExportCategory = useCallback((cat: SnapshotCategory) => {
     setExportSelected((prev) => ({ ...prev, [cat]: !prev[cat] }));
@@ -297,7 +297,7 @@ const SnapshotManager: React.FC = () => {
     }, 800);
   }, [exportSelected, selectedCount, logs, showError, showSuccess]);
 
-  // ── Import handlers ─────────────────────────────────────────────────────
+  // â”€â”€ Import handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -433,7 +433,7 @@ const SnapshotManager: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
-  // ── Render ───────────────────────────────────────────────────────────────
+  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const renderCategoryCheckbox = (
     cat: SnapshotCategory,
@@ -477,10 +477,10 @@ const SnapshotManager: React.FC = () => {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+        <h1 className="text-xl sm:text-2xl sm:text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
           <ArrowLeftRight className="text-blue-600" size={32} />
           Business Snapshot
         </h1>
@@ -511,7 +511,7 @@ const SnapshotManager: React.FC = () => {
         ))}
       </div>
 
-      {/* ═══════ EXPORT TAB ═══════ */}
+      {/* â•â•â•â•â•â•â• EXPORT TAB â•â•â•â•â•â•â• */}
       {activeTab === 'export' && (
         <div className="space-y-6">
           {/* Select All / Deselect All */}
@@ -576,7 +576,7 @@ const SnapshotManager: React.FC = () => {
                         {meta.icon}
                       </div>
                       <span className="font-medium text-gray-900">{meta.label}</span>
-                      <span className="text-gray-400">—</span>
+                      <span className="text-gray-400">â€”</span>
                       <span className="text-gray-600">
                         {items.length} {items.length === 1 ? 'item' : 'items'}
                       </span>
@@ -596,12 +596,12 @@ const SnapshotManager: React.FC = () => {
         </div>
       )}
 
-      {/* ═══════ IMPORT TAB ═══════ */}
+      {/* â•â•â•â•â•â•â• IMPORT TAB â•â•â•â•â•â•â• */}
       {activeTab === 'import' && (
         <div className="space-y-6">
           {/* Upload step */}
           {importStep === 'upload' && (
-            <div className="bg-white rounded-xl border border-gray-200 p-8">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-4 sm:p-5 md:p-6 md:p-8">
               <div
                 className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-blue-500 transition-colors cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
@@ -676,15 +676,15 @@ const SnapshotManager: React.FC = () => {
               {/* Summary cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                  <p className="text-2xl font-bold text-blue-600">{totalImportItems}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-600">{totalImportItems}</p>
                   <p className="text-sm text-gray-500">Items to Import</p>
                 </div>
                 <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                  <p className="text-2xl font-bold text-amber-600">{totalConflicts}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-amber-600">{totalConflicts}</p>
                   <p className="text-sm text-gray-500">Name Conflicts</p>
                 </div>
                 <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                  <p className="text-2xl font-bold text-gray-600">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-600">
                     {CATEGORIES.filter((c) => importPayload?.categories[c]?.length).length}
                   </p>
                   <p className="text-sm text-gray-500">Categories Found</p>
@@ -805,21 +805,21 @@ const SnapshotManager: React.FC = () => {
 
           {/* Done step */}
           {importStep === 'done' && (
-            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center max-w-lg mx-auto">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 md:p-8 text-center max-w-lg mx-auto">
               <CheckCircle size={64} className="mx-auto text-green-500 mb-4" />
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Import Complete!</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Import Complete!</h3>
               <p className="text-gray-600 mb-6">Here's what happened:</p>
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-green-50 rounded-lg p-4">
-                  <p className="text-2xl font-bold text-green-600">{importResult.imported}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-600">{importResult.imported}</p>
                   <p className="text-sm text-green-700">Imported</p>
                 </div>
                 <div className="bg-amber-50 rounded-lg p-4">
-                  <p className="text-2xl font-bold text-amber-600">{importResult.conflicts}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-amber-600">{importResult.conflicts}</p>
                   <p className="text-sm text-amber-700">Skipped (conflicts)</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-2xl font-bold text-gray-600">{importResult.skipped}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-600">{importResult.skipped}</p>
                   <p className="text-sm text-gray-700">Not Selected</p>
                 </div>
               </div>
@@ -842,7 +842,7 @@ const SnapshotManager: React.FC = () => {
         </div>
       )}
 
-      {/* ═══════ HISTORY TAB ═══════ */}
+      {/* â•â•â•â•â•â•â• HISTORY TAB â•â•â•â•â•â•â• */}
       {activeTab === 'history' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -938,3 +938,4 @@ const SnapshotManager: React.FC = () => {
 };
 
 export default SnapshotManager;
+

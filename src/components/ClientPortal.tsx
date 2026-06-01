@@ -561,7 +561,7 @@ const ClientPortal: React.FC = () => {
           <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Shield size={32} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Client Portal</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Client Portal</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-2">Enter your access token to view your account</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
@@ -661,7 +661,7 @@ const ClientPortal: React.FC = () => {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome, {clientProfile?.name}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Welcome, {clientProfile?.name}</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Here's an overview of your account</p>
         </div>
 
@@ -776,7 +776,7 @@ const ClientPortal: React.FC = () => {
   const renderClientInvoices = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Invoices</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Invoices</h1>
         <div className="flex gap-2">
           {['', 'pending', 'paid', 'overdue'].map((s) => (
             <button
@@ -845,7 +845,7 @@ const ClientPortal: React.FC = () => {
   const renderClientAppointments = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Appointments</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Appointments</h1>
         <div className="flex gap-2">
           {['', 'scheduled', 'confirmed', 'completed', 'cancelled'].map((s) => (
             <button
@@ -915,7 +915,7 @@ const ClientPortal: React.FC = () => {
 
   const renderClientDeals = () => (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Your Deal</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Your Deal</h1>
 
       {dealLoading ? (
         <div className="flex justify-center py-12"><Loader2 size={32} className="animate-spin text-blue-500" /></div>
@@ -1173,7 +1173,7 @@ const ClientPortal: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                 <Shield size={28} className="text-blue-600 dark:text-blue-400" />
                 Client Portal
               </h1>

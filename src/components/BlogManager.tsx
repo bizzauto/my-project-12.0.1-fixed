@@ -431,7 +431,7 @@ export default function BlogManager() {
               </button>
             )}
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 {view === 'posts' && 'Blog Manager'}
                 {view === 'editor' && (selectedPost ? 'Edit Post' : 'New Post')}
                 {view === 'categories' && 'Categories'}
@@ -652,7 +652,7 @@ export default function BlogManager() {
 
       {view === 'editor' && (
         <div className="p-6">
-          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>

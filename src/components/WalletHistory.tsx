@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, ArrowDownLeft, Phone, RefreshCw, Loader2 } from 'lucide-react';
 import { walletAPI } from '../lib/api';
 
@@ -50,11 +50,11 @@ const WalletHistory: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center p-8">
+        <div className="flex items-center justify-center p-4 sm:p-4 sm:p-5 md:p-6 md:p-8">
           <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
         </div>
       ) : transactions.length === 0 ? (
-        <div className="p-8 text-center text-gray-400">
+        <div className="p-4 sm:p-6 md:p-8 text-center text-gray-400">
           <p>No transactions yet</p>
         </div>
       ) : (
@@ -81,9 +81,9 @@ const WalletHistory: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className={`font-semibold ${isCredit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {isCredit ? '+' : ''}₹{Math.abs(txn.amount).toFixed(2)}
+                      {isCredit ? '+' : ''}â‚¹{Math.abs(txn.amount).toFixed(2)}
                     </p>
-                    <p className="text-xs text-gray-400">Balance: ₹{txn.balance.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400">Balance: â‚¹{txn.balance.toFixed(2)}</p>
                   </div>
                 </div>
               );
@@ -107,3 +107,4 @@ const WalletHistory: React.FC = () => {
 };
 
 export default WalletHistory;
+

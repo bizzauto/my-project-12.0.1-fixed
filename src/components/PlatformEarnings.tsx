@@ -105,7 +105,7 @@ const PlatformEarnings: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center p-8">
+          <div className="flex items-center justify-center p-4 sm:p-6 md:p-8">
             <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
           </div>
         ) : earnings.length === 0 ? (

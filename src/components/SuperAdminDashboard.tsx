@@ -247,7 +247,7 @@ const SuperAdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       {/* Tab Navigation */}
       <div className="flex items-center gap-2 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
         <button onClick={() => setActiveTab('dashboard')}
@@ -268,7 +268,7 @@ const SuperAdminDashboard: React.FC = () => {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <Shield className="text-purple-600" size={32} />
-              <h1 className="text-3xl font-bold text-gray-900">Super Admin Dashboard</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Super Admin Dashboard</h1>
             </div>
             <p className="text-gray-600">Platform-wide overview and management</p>
           </div>
@@ -315,7 +315,7 @@ const SuperAdminDashboard: React.FC = () => {
       {stats && (
         <>
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard
               title="Total Businesses"
               value={stats.totalBusinesses > 0 ? stats.totalBusinesses.toString() : '0'}
@@ -351,7 +351,7 @@ const SuperAdminDashboard: React.FC = () => {
           </div>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-8">
             {/* Growth Trend */}
             <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -401,7 +401,7 @@ const SuperAdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-8">
             {/* Plan Distribution */}
             <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Plan Distribution</h3>

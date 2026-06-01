@@ -344,7 +344,7 @@ const ECommercePage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">E-Commerce</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">E-Commerce</h1>
           <p className="text-gray-500 dark:text-gray-400">Manage products, orders, and coupons</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">

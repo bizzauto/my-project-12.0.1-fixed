@@ -130,7 +130,7 @@ const DograhSettings: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-5 md:p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
           <p className="text-gray-500">Loading settings...</p>
@@ -140,14 +140,14 @@ const DograhSettings: React.FC = () => {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6 animate-fade-in-up">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8 max-w-4xl mx-auto space-y-6 animate-fade-in-up">
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl">
           <Bot size={24} className="text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Voice AI Settings</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Voice AI Settings</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Configure Dograh voice AI integration</p>
         </div>
       </div>
@@ -195,7 +195,7 @@ const DograhSettings: React.FC = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
         {/* Configuration Card - 2/3 width */}
         <div className="lg:col-span-2 space-y-6">
           {/* Dograh Configuration */}

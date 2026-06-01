@@ -184,10 +184,10 @@ export default function MissedCallSettings() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
           <PhoneMissed className="text-red-500" size={32} />
           Missed Call Text-Back
         </h1>
@@ -339,7 +339,7 @@ export default function MissedCallSettings() {
       </div>
 
       {/* Response Delay & Channel */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
         {/* Response Delay */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">

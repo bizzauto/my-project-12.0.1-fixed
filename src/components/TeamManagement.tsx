@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Users, UserPlus, Search, Shield,
   Edit3, Trash2, Crown, Ban, CheckCircle, RefreshCw
@@ -145,7 +145,7 @@ const TeamManagement: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-4 sm:p-5 md:p-6 md:p-8">
         <div className="p-12 text-center">
           <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-gray-500">Loading team...</p>
@@ -155,7 +155,7 @@ const TeamManagement: React.FC = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-4 sm:p-5 md:p-6 md:p-8">
       {/* Toast */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
@@ -169,7 +169,7 @@ const TeamManagement: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Team Management</h1>
+          <h1 className="text-xl sm:text-2xl sm:text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Team Management</h1>
           <p className="text-gray-600">Manage users, roles, and permissions</p>
         </div>
         <div className="flex gap-3">
@@ -190,19 +190,19 @@ const TeamManagement: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
           <p className="text-sm text-gray-500 mb-1">Total Members</p>
-          <p className="text-2xl font-bold text-gray-900">{team.length}</p>
+          <p className="text-xl sm:text-2xl font-bold text-gray-900">{team.length}</p>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
           <p className="text-sm text-gray-500 mb-1">Active</p>
-          <p className="text-2xl font-bold text-green-600">{team.filter((m) => m.isActive).length}</p>
+          <p className="text-xl sm:text-2xl font-bold text-green-600">{team.filter((m) => m.isActive).length}</p>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
           <p className="text-sm text-gray-500 mb-1">Suspended</p>
-          <p className="text-2xl font-bold text-red-600">{team.filter((m) => !m.isActive).length}</p>
+          <p className="text-xl sm:text-2xl font-bold text-red-600">{team.filter((m) => !m.isActive).length}</p>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
           <p className="text-sm text-gray-500 mb-1">Owners</p>
-          <p className="text-2xl font-bold text-purple-600">{team.filter((m) => m.role === 'OWNER').length}</p>
+          <p className="text-xl sm:text-2xl font-bold text-purple-600">{team.filter((m) => m.role === 'OWNER').length}</p>
         </div>
       </div>
 
@@ -314,7 +314,7 @@ const TeamManagement: React.FC = () => {
                 Invite Team Member
               </h2>
               <button onClick={() => setShowInviteModal(false)} className="text-gray-400 hover:text-gray-600">
-                ✕
+                âœ•
               </button>
             </div>
 
@@ -395,7 +395,7 @@ const TeamManagement: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Change Role</h2>
               <button onClick={() => setShowRoleModal(false)} className="text-gray-400 hover:text-gray-600">
-                ✕
+                âœ•
               </button>
             </div>
 
@@ -428,3 +428,4 @@ const TeamManagement: React.FC = () => {
 };
 
 export default TeamManagement;
+

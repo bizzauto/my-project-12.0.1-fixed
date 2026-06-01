@@ -2,7 +2,7 @@ import React from 'react';
 import { AlertTriangle, Home, ArrowLeft } from 'lucide-react';
 
 const NotFoundPage: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate }) => (
-  <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
     <div className="text-center max-w-lg">
       <div className="relative mb-8">
         <h1 className="text-9xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">404</h1>

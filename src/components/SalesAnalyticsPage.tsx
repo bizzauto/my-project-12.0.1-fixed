@@ -95,7 +95,7 @@ const SalesAnalyticsPage: React.FC = () => {
               <ArrowLeft size={20} className="text-gray-600 dark:text-gray-300" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <BarChart3 className="text-blue-600" size={28} />
                 Sales Analytics
               </h1>
@@ -214,7 +214,7 @@ const SalesAnalyticsPage: React.FC = () => {
               </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-6">
               {/* Top Products */}
               {data.topProducts?.length > 0 && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
@@ -276,7 +276,7 @@ const SalesAnalyticsPage: React.FC = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
               {/* Orders by Status */}
               {data.ordersByStatus?.length > 0 && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">

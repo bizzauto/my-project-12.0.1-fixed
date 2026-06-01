@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Search, ArrowRight, Settings, Users, MessageSquare, BarChart3, FileText, Zap, CreditCard, Key, Shield } from 'lucide-react';
 
 interface CommandPaletteProps {
@@ -49,29 +49,29 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onNavi
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-[100] pt-20" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-[100] pt-16 sm:pt-20 px-2 sm:px-4" onClick={onClose}>
       <div className="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-          <Search size={20} className="text-gray-400" />
+        <div className="flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-3 border-b border-gray-100">
+          <Search size={18} className="text-gray-400 flex-shrink-0 sm:w-5 sm:h-5" />
           <input ref={inputRef} value={query} onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
-            className="flex-1 outline-none text-gray-900 placeholder-gray-400" placeholder="Type a command or search..." />
-          <kbd className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">ESC</kbd>
+            className="flex-1 min-w-0 outline-none text-sm sm:text-base text-gray-900 placeholder-gray-400" placeholder="Type a command or search..." />
+          <kbd className="hidden sm:inline-block text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">ESC</kbd>
         </div>
         <div className="max-h-80 overflow-y-auto">
           {filtered.map((cmd, i) => (
             <button key={i} onClick={() => { cmd.action(); onClose(); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${i === selectedIndex ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}>
-              <span className="text-gray-400">{cmd.icon}</span>
-              <span className="flex-1">{cmd.label}</span>
-              <ArrowRight size={14} className="text-gray-400" />
+              className={`w-full flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left text-sm sm:text-base transition-colors ${i === selectedIndex ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}>
+              <span className="text-gray-400 flex-shrink-0">{cmd.icon}</span>
+              <span className="flex-1 truncate">{cmd.label}</span>
+              <ArrowRight size={14} className="text-gray-400 flex-shrink-0" />
             </button>
           ))}
-          {filtered.length === 0 && <div className="text-center py-8 text-gray-500">No results found</div>}
+          {filtered.length === 0 && <div className="text-center py-6 sm:py-8 text-sm text-gray-500">No results found</div>}
         </div>
-        <div className="px-4 py-2 border-t border-gray-100 flex items-center gap-4 text-xs text-gray-500">
-          <span><kbd className="bg-gray-100 px-1 rounded">↑↓</kbd> Navigate</span>
-          <span><kbd className="bg-gray-100 px-1 rounded">↵</kbd> Select</span>
-          <span><kbd className="bg-gray-100 px-1 rounded">ESC</kbd> Close</span>
+        <div className="px-3 sm:px-4 py-2 border-t border-gray-100 flex items-center gap-2.5 sm:gap-4 text-xs text-gray-500 flex-wrap">
+          <span className="whitespace-nowrap"><kbd className="bg-gray-100 px-1 rounded">â†‘â†“</kbd> Navigate</span>
+          <span className="whitespace-nowrap"><kbd className="bg-gray-100 px-1 rounded">â†µ</kbd> Select</span>
+          <span className="whitespace-nowrap"><kbd className="bg-gray-100 px-1 rounded">ESC</kbd> Close</span>
         </div>
       </div>
     </div>
@@ -79,3 +79,4 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onNavi
 };
 
 export default CommandPalette;
+

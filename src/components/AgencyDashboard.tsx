@@ -497,12 +497,12 @@ const AgencyDashboard: React.FC = () => {
 
   if (!agency && !showCreateAgency) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <div className="max-w-2xl mx-auto text-center py-20">
           <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Building2 className="text-indigo-600" size={36} />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">Welcome to Agency Mode</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Welcome to Agency Mode</h1>
           <p className="text-gray-600 mb-8 text-lg">
             Create your agency to start managing sub-accounts, custom branding, and white-label solutions.
           </p>
@@ -531,7 +531,7 @@ const AgencyDashboard: React.FC = () => {
               <Crown className="text-indigo-600" size={24} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{agency?.name || 'Agency Dashboard'}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{agency?.name || 'Agency Dashboard'}</h1>
               <p className="text-gray-500 text-sm">
                 {getPlanLabel(agency?.plan || 'STARTER')} Plan &middot; {subAccounts.length}/{agency?.maxSubAccounts || 0} sub-accounts
               </p>
@@ -575,7 +575,7 @@ const AgencyDashboard: React.FC = () => {
         {activeTab === 'overview' && (
           <div className="space-y-8">
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <StatCard
                 title="Sub-Accounts"
                 value={stats?.totalSubAccounts ?? subAccounts.length}
@@ -808,7 +808,7 @@ const AgencyDashboard: React.FC = () => {
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
               {/* Colors */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Primary Color</label>
                   <div className="flex items-center gap-3">

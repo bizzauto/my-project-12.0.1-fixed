@@ -635,7 +635,7 @@ const PaymentLinks: React.FC = () => {
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <LinkIcon className="text-blue-600" size={32} /> Payment Links
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Create and share payment links to collect money from customers</p>

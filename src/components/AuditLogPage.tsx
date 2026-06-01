@@ -75,10 +75,10 @@ const AuditLogPage: React.FC = () => {
   if (loading) return <PageSkeleton />;
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"><Shield className="text-blue-600" size={32} />Audit Log</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"><Shield className="text-blue-600" size={32} />Audit Log</h1>
           <p className="text-gray-600">Track all activities and changes in your account</p>
         </div>
         <button onClick={loadLogs} className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg" title="Refresh">

@@ -20,7 +20,7 @@ export default function FunnelBuilder() {
             <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
               <ArrowLeft size={20} className="text-gray-600 dark:text-gray-400" />
             </button>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Funnels</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Funnels</h1>
           </div>
           <button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:shadow-lg transition-all">
             <Plus size={18} />

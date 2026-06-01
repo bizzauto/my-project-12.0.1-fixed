@@ -91,7 +91,7 @@ const NotificationCenter: React.FC<{ onNavigate?: (tab: string) => void; onClose
 	if (loading) {
 		return (
 			<div className="w-96 max-h-[500px] flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-				<div className="flex items-center justify-center p-8">
+				<div className="flex items-center justify-center p-4 sm:p-6 md:p-8">
 					<div className="flex flex-col items-center gap-2">
 						<div className="w-6 h-6 border-2 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
 						<p className="text-xs text-gray-400">Loading...</p>

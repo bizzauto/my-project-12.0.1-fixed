@@ -95,7 +95,7 @@ const ContactPage: React.FC = () => {
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-8">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8">
               {sent ? (
                 <div className="text-center py-12">
                   <CheckCircle size={64} className="text-green-500 mx-auto mb-4" />

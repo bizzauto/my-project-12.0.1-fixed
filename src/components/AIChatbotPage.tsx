@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles, Trash2, Copy, CheckCircle, Mic, MicOff, Volume2, VolumeX, AlertCircle } from 'lucide-react';
 import { aiAPI } from '../lib/api';
 
@@ -8,7 +8,7 @@ const SUGGESTIONS = ['Marketing tips', 'Poster ideas', 'CRM advice', 'WhatsApp s
 
 const AIChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
-    { id: '0', role: 'assistant', content: "👋 Hello! I'm your BizzAuto AI Assistant. I can help with marketing, CRM, WhatsApp campaigns, poster design, and business analytics. How can I help you today?", timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+    { id: '0', role: 'assistant', content: "ðŸ‘‹ Hello! I'm your BizzAuto AI Assistant. I can help with marketing, CRM, WhatsApp campaigns, poster design, and business analytics. How can I help you today?", timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -53,7 +53,7 @@ const AIChatbotPage: React.FC = () => {
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `⚠️ ${errorMsg}`,
+        content: `âš ï¸ ${errorMsg}`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         error: true
       };
@@ -70,7 +70,7 @@ const AIChatbotPage: React.FC = () => {
   };
 
   const clearChat = () => {
-    setMessages([{ id: '0', role: 'assistant', content: "👋 Chat cleared! How can I help you?", timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]);
+    setMessages([{ id: '0', role: 'assistant', content: "ðŸ‘‹ Chat cleared! How can I help you?", timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]);
   };
 
   const toggleVoice = () => setIsListening(!isListening);
@@ -88,7 +88,7 @@ const AIChatbotPage: React.FC = () => {
             <h2 className="font-semibold text-gray-900 dark:text-white">BizzAuto AI Assistant</h2>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 bg-green-500 rounded-full pulse-dot" />
-              <span className="text-xs text-green-600 dark:text-green-400">Online — AI Powered</span>
+              <span className="text-xs text-green-600 dark:text-green-400">Online â€” AI Powered</span>
             </div>
           </div>
         </div>
@@ -103,7 +103,7 @@ const AIChatbotPage: React.FC = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-5 md:p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
         {messages.map(msg => (
           <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`}>
             {msg.role === 'assistant' && (
@@ -186,3 +186,4 @@ const AIChatbotPage: React.FC = () => {
 };
 
 export default AIChatbotPage;
+

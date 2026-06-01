@@ -221,15 +221,15 @@ const PublicStorefront: React.FC = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Store</h1>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between gap-2">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white truncate">Store</h1>
           <button
             onClick={() => setShowCart(true)}
-            className="relative p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+            className="relative p-1.5 sm:p-2 bg-blue-600 text-white rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors flex-shrink-0"
           >
-            <ShoppingCart size={20} />
+            <ShoppingCart size={18} className="sm:w-5 sm:h-5" />
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 bg-red-500 text-white text-[10px] sm:text-xs font-bold rounded-full min-w-[18px] h-[18px] sm:w-5 sm:h-5 flex items-center justify-center px-1">
                 {cartCount}
               </span>
             )}
@@ -237,9 +237,9 @@ const PublicStorefront: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Search & Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
@@ -247,15 +247,15 @@ const PublicStorefront: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search products..."
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2.5 text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0">
             {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
                   selectedCategory === cat
                     ? 'bg-blue-600 text-white'
                     : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -269,19 +269,19 @@ const PublicStorefront: React.FC = () => {
 
         {/* Products Grid */}
         {filteredProducts.length === 0 ? (
-          <div className="text-center py-20">
-            <Package size={64} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-            <p className="text-gray-500 dark:text-gray-400 text-lg">No products found</p>
+          <div className="text-center py-12 sm:py-20">
+            <Package size={48} className="sm:w-16 sm:h-16 mx-auto text-gray-300 dark:text-gray-600 mb-3 sm:mb-4" />
+            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">No products found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {filteredProducts.map(product => (
               <div
                 key={product.id}
-                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all cursor-pointer"
+                className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all cursor-pointer"
                 onClick={() => setSelectedProduct(product)}
               >
-                <div className="relative h-40 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
+                <div className="relative h-32 sm:h-40 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
                   {product.mainImage || (product.images && product.images.length > 0) ? (
                     <img
                       src={product.mainImage || product.images[0]}
@@ -289,34 +289,34 @@ const PublicStorefront: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <Package size={40} className="text-gray-400" />
+                    <Package size={32} className="sm:w-10 sm:h-10 text-gray-400" />
                   )}
                   {product.compareAtPrice && product.compareAtPrice > product.price && (
-                    <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    <span className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 bg-red-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
                       {Math.round((1 - product.price / product.compareAtPrice) * 100)}% OFF
                     </span>
                   )}
                   {product.quantity <= 0 && (
-                    <span className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-bold">
+                    <span className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs sm:text-sm font-bold">
                       Out of Stock
                     </span>
                   )}
                 </div>
-                <div className="p-3">
-                  <h3 className="font-semibold text-gray-900 dark:text-white text-sm truncate">{product.name}</h3>
+                <div className="p-2.5 sm:p-3">
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm truncate">{product.name}</h3>
                   {product.description && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">{product.description}</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5 sm:mt-1">{product.description}</p>
                   )}
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">₹{product.price}</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2 flex-wrap">
+                    <span className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">₹{product.price}</span>
                     {product.compareAtPrice && product.compareAtPrice > product.price && (
-                      <span className="text-sm text-gray-400 line-through">₹{product.compareAtPrice}</span>
+                      <span className="text-xs sm:text-sm text-gray-400 line-through">₹{product.compareAtPrice}</span>
                     )}
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); addToCart(product); }}
                     disabled={product.quantity <= 0 || cartLoading}
-                    className="w-full mt-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="w-full mt-2 sm:mt-3 py-1.5 sm:py-2 bg-blue-600 text-white text-xs sm:text-sm rounded-md sm:rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {product.quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
                   </button>
@@ -327,41 +327,44 @@ const PublicStorefront: React.FC = () => {
         )}
       </div>
 
-      {/* Product Detail Modal */}
+      {/* Product Detail Modal - bottom sheet on mobile, modal on desktop */}
       {selectedProduct && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedProduct(null)}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="relative h-64 bg-gray-100 dark:bg-gray-700">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:p-4" onClick={() => setSelectedProduct(null)}>
+          <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up" onClick={e => e.stopPropagation()}>
+            <div className="relative h-48 sm:h-64 bg-gray-100 dark:bg-gray-700">
               {selectedProduct.mainImage || (selectedProduct.images && selectedProduct.images.length > 0) ? (
                 <img src={selectedProduct.mainImage || selectedProduct.images[0]} alt={selectedProduct.name} className="w-full h-full object-cover rounded-t-2xl" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center"><Package size={64} className="text-gray-400" /></div>
+                <div className="w-full h-full flex items-center justify-center"><Package size={48} className="sm:w-16 sm:h-16 text-gray-400" /></div>
               )}
               <button onClick={() => setSelectedProduct(null)} className="absolute top-3 right-3 p-2 bg-white/80 dark:bg-gray-800/80 rounded-full"><X size={18} /></button>
+              <div className="sm:hidden flex justify-center pt-2 absolute top-2 left-0 right-0">
+                <div className="w-10 h-1 bg-gray-300/80 rounded-full" />
+              </div>
             </div>
-            <div className="p-5">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{selectedProduct.name}</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{selectedProduct.category}</p>
-              {selectedProduct.description && <p className="text-gray-600 dark:text-gray-300 mt-3 text-sm">{selectedProduct.description}</p>}
-              <div className="flex items-center gap-3 mt-4">
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">₹{selectedProduct.price}</span>
+            <div className="p-4 sm:p-5">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{selectedProduct.name}</h2>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">{selectedProduct.category}</p>
+              {selectedProduct.description && <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 sm:mt-3">{selectedProduct.description}</p>}
+              <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-4 flex-wrap">
+                <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">₹{selectedProduct.price}</span>
                 {selectedProduct.compareAtPrice && selectedProduct.compareAtPrice > selectedProduct.price && (
-                  <span className="text-lg text-gray-400 line-through">₹{selectedProduct.compareAtPrice}</span>
+                  <span className="text-base sm:text-lg text-gray-400 line-through">₹{selectedProduct.compareAtPrice}</span>
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-xs sm:text-sm text-gray-500 mt-2">
                 {selectedProduct.quantity > 0 ? `${selectedProduct.quantity} in stock` : 'Out of stock'}
               </p>
               {selectedProduct.variants && selectedProduct.variants.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Variants:</p>
+                <div className="mt-3 sm:mt-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Variants:</p>
                   <div className="flex flex-wrap gap-2">
                     {selectedProduct.variants.map(v => (
                       <button
                         key={v.id}
                         onClick={() => addToCart(selectedProduct, 1, { id: v.id, name: v.name, price: v.price })}
                         disabled={v.quantity <= 0 || cartLoading}
-                        className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50"
+                        className="px-2.5 sm:px-3 py-1 sm:py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50"
                       >
                         {v.name} {v.price ? `- ₹${v.price}` : ''}
                       </button>
@@ -372,7 +375,7 @@ const PublicStorefront: React.FC = () => {
               <button
                 onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
                 disabled={selectedProduct.quantity <= 0 || cartLoading}
-                className="w-full mt-5 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="w-full mt-4 sm:mt-5 py-3 bg-blue-600 text-white text-sm sm:text-base font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
                 {selectedProduct.quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
               </button>
@@ -381,56 +384,56 @@ const PublicStorefront: React.FC = () => {
         </div>
       )}
 
-      {/* Cart Sidebar */}
+      {/* Cart Sidebar - full-screen on mobile, sidebar on desktop */}
       {showCart && (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-end" onClick={() => setShowCart(false)}>
-          <div className="bg-white dark:bg-gray-800 w-full max-w-md h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Cart ({cartCount})</h2>
-              <button onClick={() => setShowCart(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={20} /></button>
+          <div className="bg-white dark:bg-gray-800 w-full sm:max-w-md h-full overflow-y-auto animate-slide-up sm:animate-fade-in-up" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white dark:bg-gray-800 flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 z-10">
+              <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white">Cart ({cartCount})</h2>
+              <button onClick={() => setShowCart(false)} className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} className="sm:w-5 sm:h-5" /></button>
             </div>
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               {cart.length === 0 ? (
-                <div className="text-center py-12">
-                  <ShoppingCart size={48} className="mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500">Your cart is empty</p>
+                <div className="text-center py-10 sm:py-12">
+                  <ShoppingCart size={40} className="sm:w-12 sm:h-12 mx-auto text-gray-300 mb-3 sm:mb-4" />
+                  <p className="text-sm sm:text-base text-gray-500">Your cart is empty</p>
                 </div>
               ) : (
                 <>
-                  <div className="space-y-4">
+                  <div className="space-y-2.5 sm:space-y-4">
                     {cart.map(item => (
-                      <div key={item.id || item.product.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                        <div className="w-14 h-14 bg-gray-200 dark:bg-gray-600 rounded-lg flex-shrink-0 overflow-hidden">
+                      <div key={item.id || item.product.id} className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg sm:rounded-xl">
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-200 dark:bg-gray-600 rounded-md sm:rounded-lg flex-shrink-0 overflow-hidden">
                           {item.product.mainImage || (item.product.images && item.product.images[0]) ? (
                             <img src={item.product.mainImage || item.product.images[0]} alt="" className="w-full h-full object-cover" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center"><Package size={20} className="text-gray-400" /></div>
+                            <div className="w-full h-full flex items-center justify-center"><Package size={16} className="sm:w-5 sm:h-5 text-gray-400" /></div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{item.product.name}</p>
-                          {item.variant && <p className="text-xs text-gray-500">{item.variant.name}</p>}
-                          <p className="text-sm font-semibold text-blue-600">₹{item.product.price}</p>
+                          <p className="font-medium text-gray-900 dark:text-white text-xs sm:text-sm truncate">{item.product.name}</p>
+                          {item.variant && <p className="text-[10px] sm:text-xs text-gray-500 truncate">{item.variant.name}</p>}
+                          <p className="text-xs sm:text-sm font-semibold text-blue-600">₹{item.product.price}</p>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <button onClick={() => item.id && updateQuantity(item.id, item.quantity - 1)} className="p-1 bg-gray-200 dark:bg-gray-600 rounded"><Minus size={14} /></button>
-                          <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                          <button onClick={() => item.id && updateQuantity(item.id, item.quantity + 1)} className="p-1 bg-gray-200 dark:bg-gray-600 rounded"><Plus size={14} /></button>
-                          <button onClick={() => item.id && removeItem(item.id)} className="p-1 text-red-500"><Trash2 size={14} /></button>
+                        <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+                          <button onClick={() => item.id && updateQuantity(item.id, item.quantity - 1)} className="p-1 sm:p-1 bg-gray-200 dark:bg-gray-600 rounded"><Minus size={12} className="sm:w-3.5 sm:h-3.5" /></button>
+                          <span className="w-6 sm:w-8 text-center text-xs sm:text-sm font-medium">{item.quantity}</span>
+                          <button onClick={() => item.id && updateQuantity(item.id, item.quantity + 1)} className="p-1 sm:p-1 bg-gray-200 dark:bg-gray-600 rounded"><Plus size={12} className="sm:w-3.5 sm:h-3.5" /></button>
+                          <button onClick={() => item.id && removeItem(item.id)} className="p-1 sm:p-1 text-red-500"><Trash2 size={12} className="sm:w-3.5 sm:h-3.5" /></button>
                         </div>
                       </div>
                     ))}
                   </div>
 
                   {/* Coupon */}
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
                     {appliedCoupon ? (
-                      <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="flex items-center justify-between p-2.5 sm:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <div className="flex items-center gap-2">
-                          <Tag size={14} className="text-green-600" />
-                          <span className="text-sm font-medium text-green-700">{appliedCoupon.code}</span>
+                          <Tag size={12} className="sm:w-3.5 sm:h-3.5 text-green-600" />
+                          <span className="text-xs sm:text-sm font-medium text-green-700">{appliedCoupon.code}</span>
                         </div>
-                        <button onClick={() => setAppliedCoupon(null)} className="text-sm text-red-500">Remove</button>
+                        <button onClick={() => setAppliedCoupon(null)} className="text-xs sm:text-sm text-red-500">Remove</button>
                       </div>
                     ) : (
                       <div className="flex gap-2">
@@ -439,32 +442,32 @@ const PublicStorefront: React.FC = () => {
                           value={couponCode}
                           onChange={e => setCouponCode(e.target.value)}
                           placeholder="Coupon code"
-                          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700"
+                          className="flex-1 min-w-0 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
                         />
-                        <button onClick={applyCoupon} className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Apply</button>
+                        <button onClick={applyCoupon} className="px-3 sm:px-4 py-2 bg-blue-600 text-white text-xs sm:text-sm rounded-lg hover:bg-blue-700 flex-shrink-0">Apply</button>
                       </div>
                     )}
                   </div>
 
                   {/* Summary */}
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                    <div className="flex justify-between text-sm">
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700 space-y-1.5 sm:space-y-2">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span className="text-gray-500">Subtotal</span>
                       <span className="text-gray-900 dark:text-white">₹{subtotal.toLocaleString()}</span>
                     </div>
                     {discount > 0 && (
-                      <div className="flex justify-between text-sm text-green-600">
+                      <div className="flex justify-between text-xs sm:text-sm text-green-600">
                         <span>Discount</span>
                         <span>-₹{discount.toLocaleString()}</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-between text-base sm:text-lg font-bold pt-1.5 sm:pt-2 border-t border-gray-200 dark:border-gray-700">
                       <span>Total</span>
                       <span>₹{total.toLocaleString()}</span>
                     </div>
                   </div>
 
-                  <button onClick={handleCheckout} className="w-full mt-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all">
+                  <button onClick={handleCheckout} className="w-full mt-3 sm:mt-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm sm:text-base font-semibold rounded-xl hover:shadow-lg transition-all">
                     Checkout • ₹{total.toLocaleString()}
                   </button>
                 </>

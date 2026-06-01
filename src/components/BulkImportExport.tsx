@@ -109,7 +109,7 @@ const BulkImportExport: React.FC = () => {
         Bulk Import & Export
       </h3>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
         {/* Import Section */}
         <div>
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Import Products (CSV)</h4>

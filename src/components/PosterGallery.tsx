@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Download, Calendar, Grid3X3, List, Filter,
   ChevronLeft, ChevronRight, RefreshCw, Tag, AlertCircle,
@@ -29,14 +29,14 @@ interface PaginationInfo {
 const CATEGORIES = ['all', 'Festival', 'Offer', 'Product', 'Seasonal', 'social', 'whatsapp', 'flyer', 'poster'];
 
 const CATEGORY_EMOJIS: Record<string, string> = {
-  Festival: '🎉',
-  Offer: '🎁',
-  Product: '📦',
-  Seasonal: '🌸',
-  social: '📱',
-  whatsapp: '💬',
-  flyer: '📄',
-  poster: '🖼️',
+  Festival: 'ðŸŽ‰',
+  Offer: 'ðŸŽ',
+  Product: 'ðŸ“¦',
+  Seasonal: 'ðŸŒ¸',
+  social: 'ðŸ“±',
+  whatsapp: 'ðŸ’¬',
+  flyer: 'ðŸ“„',
+  poster: 'ðŸ–¼ï¸',
 };
 
 const PosterGallery: React.FC = () => {
@@ -132,7 +132,7 @@ const PosterGallery: React.FC = () => {
   // Loading skeleton
   if (loading && posters.length === 0) {
     return (
-      <div className="p-6 animate-fade-in-up">
+      <div className="p-4 sm:p-5 md:p-6 animate-fade-in-up">
         <div className="flex items-center justify-between mb-6">
           <div>
             <div className="h-8 w-48 skeleton-animate rounded-lg mb-2" />
@@ -156,11 +156,11 @@ const PosterGallery: React.FC = () => {
   }
 
   return (
-    <div className="p-6 animate-fade-in-up">
+    <div className="p-4 sm:p-5 md:p-6 animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+          <h1 className="text-xl sm:text-2xl sm:text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
               <ImageOff size={20} className="text-white" />
             </div>
@@ -227,7 +227,7 @@ const PosterGallery: React.FC = () => {
 
       {/* Error state */}
       {error && (
-        <div className="modern-card rounded-xl p-6 mb-6 border border-red-200 dark:border-red-800/30">
+        <div className="modern-card rounded-xl p-4 sm:p-5 md:p-6 mb-6 border border-red-200 dark:border-red-800/30">
           <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
             <AlertCircle size={20} />
             <div>
@@ -278,7 +278,7 @@ const PosterGallery: React.FC = () => {
                           loading="lazy"
                           onError={() => markBroken(poster.id)}
                         />
-                        {/* Hover overlay — download, view & delete */}
+                        {/* Hover overlay â€” download, view & delete */}
                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                           <button
                             onClick={() => handleDownload(poster.url)}
@@ -490,3 +490,4 @@ const PosterGallery: React.FC = () => {
 }
 
 export default PosterGallery;
+

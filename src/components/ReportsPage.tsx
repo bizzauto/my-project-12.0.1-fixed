@@ -213,10 +213,10 @@ const ReportsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
               <BarChart3 className="text-blue-600" size={32} />
               Reports & Intelligence
             </h1>
@@ -232,10 +232,10 @@ const ReportsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
             <BarChart3 className="text-blue-600" size={32} />
             Reports & Intelligence
           </h1>
@@ -291,7 +291,7 @@ const ReportsPage: React.FC = () => {
           </div>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-6">
             <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <TrendingUp size={20} className="text-blue-600" />Weekly Performance

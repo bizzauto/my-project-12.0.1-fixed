@@ -70,17 +70,17 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
       
       {/* Toast Container */}
-      <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+      <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50 space-y-2 max-w-[calc(100vw-1.5rem)] sm:max-w-md w-full sm:w-auto pointer-events-none">
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`flex items-start gap-3 p-4 border rounded-lg shadow-lg animate-slide-in ${getStyles(t.type)}`}
+            className={`flex items-start gap-2.5 sm:gap-3 p-3 sm:p-4 border rounded-lg shadow-lg animate-slide-in pointer-events-auto ${getStyles(t.type)}`}
           >
-            {getIcon(t.type)}
-            <p className="flex-1 text-sm font-medium text-gray-900">{t.message}</p>
+            <div className="flex-shrink-0">{getIcon(t.type)}</div>
+            <p className="flex-1 text-xs sm:text-sm font-medium text-gray-900 break-words">{t.message}</p>
             <button
               onClick={() => removeToast(t.id)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
             >
               <X className="w-4 h-4" />
             </button>

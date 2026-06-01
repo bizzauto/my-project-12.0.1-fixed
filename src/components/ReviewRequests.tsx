@@ -445,7 +445,7 @@ export default function ReviewRequests() {
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-5">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Review Requests</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Review Requests</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{business?.name || 'Your Business'} — Send & manage review requests</p>
           </div>
           <button

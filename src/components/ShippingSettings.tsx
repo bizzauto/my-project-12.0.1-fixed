@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Truck, Plus, Edit, Trash2, Loader2, Save, X, MapPin, DollarSign, Package,
 } from 'lucide-react';
@@ -122,7 +122,7 @@ const ShippingSettings: React.FC = () => {
   const inputClass = 'w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none';
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
           <Truck size={18} className="text-blue-600" />
@@ -158,10 +158,10 @@ const ShippingSettings: React.FC = () => {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-                  <span className="flex items-center gap-1"><DollarSign size={12} />Fee: ₹{rule.shippingFee}</span>
-                  {rule.freeAboveAmount && <span className="flex items-center gap-1"><Package size={12} />Free above ₹{rule.freeAboveAmount}</span>}
-                  {rule.minOrderAmount > 0 && <span>Min: ₹{rule.minOrderAmount}</span>}
-                  {rule.maxOrderAmount && <span>Max: ₹{rule.maxOrderAmount}</span>}
+                  <span className="flex items-center gap-1"><DollarSign size={12} />Fee: â‚¹{rule.shippingFee}</span>
+                  {rule.freeAboveAmount && <span className="flex items-center gap-1"><Package size={12} />Free above â‚¹{rule.freeAboveAmount}</span>}
+                  {rule.minOrderAmount > 0 && <span>Min: â‚¹{rule.minOrderAmount}</span>}
+                  {rule.maxOrderAmount && <span>Max: â‚¹{rule.maxOrderAmount}</span>}
                   {rule.pincodePrefixes.length > 0 && (
                     <span className="flex items-center gap-1"><MapPin size={12} />Pincodes: {rule.pincodePrefixes.slice(0, 3).join(', ')}{rule.pincodePrefixes.length > 3 ? ` +${rule.pincodePrefixes.length - 3}` : ''}</span>
                   )}
@@ -184,7 +184,7 @@ const ShippingSettings: React.FC = () => {
       {/* Add/Edit Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowForm(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {editing ? 'Edit Shipping Rule' : 'Add Shipping Rule'}
@@ -208,7 +208,7 @@ const ShippingSettings: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Min Order Amount (₹)</label>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Min Order Amount (â‚¹)</label>
                   <input
                     type="number"
                     value={form.minOrderAmount || ''}
@@ -217,7 +217,7 @@ const ShippingSettings: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Max Order Amount (₹)</label>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Max Order Amount (â‚¹)</label>
                   <input
                     type="number"
                     value={form.maxOrderAmount ?? ''}
@@ -230,7 +230,7 @@ const ShippingSettings: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Shipping Fee (₹)</label>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Shipping Fee (â‚¹)</label>
                   <input
                     type="number"
                     value={form.shippingFee || ''}
@@ -239,7 +239,7 @@ const ShippingSettings: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Free Above (₹)</label>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Free Above (â‚¹)</label>
                   <input
                     type="number"
                     value={form.freeAboveAmount ?? ''}
@@ -307,3 +307,4 @@ const ShippingSettings: React.FC = () => {
 };
 
 export default ShippingSettings;
+

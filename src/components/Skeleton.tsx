@@ -72,15 +72,15 @@ export const SkeletonChart: React.FC = () => (
 );
 
 export const PageSkeleton: React.FC = () => (
-  <div className="p-8">
+  <div className="p-4 sm:p-6 md:p-8">
     <div className="mb-6">
       <Skeleton className="h-8 w-64 mb-2" />
       <Skeleton className="h-4 w-48" />
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
     </div>
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
       <SkeletonChart />
       <SkeletonChart />
     </div>

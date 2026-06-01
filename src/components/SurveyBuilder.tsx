@@ -524,7 +524,7 @@ export default function SurveyBuilder() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Surveys & Forms</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Surveys & Forms</h1>
           <p className="text-sm text-slate-500 mt-1">Create and manage your surveys, forms, and polls</p>
         </div>
         <button
@@ -734,7 +734,7 @@ export default function SurveyBuilder() {
               <ArrowLeft size={18} />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Responses</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Responses</h1>
               <p className="text-sm text-slate-500 mt-0.5">{activeSurvey.name}</p>
             </div>
           </div>

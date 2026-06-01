@@ -77,12 +77,12 @@ const StatsSection = () => {
     { value: c4 >= 48 ? '4.8/5' : `${(c4 / 10).toFixed(1)}/5`, label: 'User Rating', icon: <Award size={24} /> },
   ];
   return (
-    <div ref={ref} className="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <div ref={ref} className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
       {stats.map((s, i) => (
         <div key={i} className={`text-center group transition-all duration-500 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: `${i * 100}ms` }}>
-          <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-all border border-emerald-200 dark:border-emerald-500/10">{s.icon}</div>
-          <p className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-1">{inView ? s.value : '0'}</p>
-          <p className="text-gray-500 text-sm">{s.label}</p>
+          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl sm:rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-all border border-emerald-200 dark:border-emerald-500/10">{s.icon}</div>
+          <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-1">{inView ? s.value : '0'}</p>
+          <p className="text-gray-500 text-xs sm:text-sm">{s.label}</p>
         </div>
       ))}
     </div>
@@ -220,24 +220,24 @@ const LandingPage: React.FC = () => {
       <PublicNavbar isDark={isDark} onToggleDark={toggle} />
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-16 pb-24">
+      <section className="relative overflow-hidden pt-12 pb-16 sm:pt-16 sm:pb-20 lg:pt-24 lg:pb-32">
         <div className="absolute inset-0"><div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-emerald-500/10 dark:bg-emerald-500/8 rounded-full blur-[150px]" /><div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-teal-500/10 dark:bg-teal-500/8 rounded-full blur-[150px]" /></div>
         <Particles />
-        <div className="relative max-w-7xl mx-auto px-6 text-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <div className="max-w-4xl mx-auto animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-full px-4 py-2 text-sm mb-8">
+            <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm mb-6 sm:mb-8">
               <span className="w-2 h-2 bg-emerald-500 rounded-full pulse-dot" /><span className="text-emerald-700 dark:text-emerald-400">Trusted by 10,000+ businesses across India</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight text-gray-900 dark:text-white">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-[1.1] tracking-tight text-gray-900 dark:text-white">
               Automate your business<br />
               <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">with WhatsApp & AI</span>
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">CRM, WhatsApp marketing, AI content, automation — all in one powerful platform. Built specifically for Indian businesses.</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-              <Link to="/register" className="group px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-lg">Start Free Trial<ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" /></Link>
-              <button onClick={() => setShowVideo(true)} className="px-8 py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center gap-2 transition-all text-lg"><Play size={20} /> Watch Demo</button>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">CRM, WhatsApp marketing, AI content, automation — all in one powerful platform. Built specifically for Indian businesses.</p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-6 px-4 sm:px-0">
+              <Link to="/register" className="group w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-base sm:text-lg">Start Free Trial<ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" /></Link>
+              <button onClick={() => setShowVideo(true)} className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center gap-2 transition-all text-base sm:text-lg"><Play size={20} /> Watch Demo</button>
             </div>
-            <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-500 px-4">
               <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-emerald-500" /> 7-day free trial</span>
               <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-emerald-500" /> No credit card</span>
               <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-emerald-500" /> 5 min setup</span>
@@ -259,41 +259,41 @@ const LandingPage: React.FC = () => {
       )}
 
       {/* Feature Slider */}
-      <Section className="py-20 px-6 relative">
+      <Section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 relative">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-full px-4 py-1.5 text-sm font-medium mb-4"><Sparkles size={14} /> Features</div>
-            <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">Everything you need to grow</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">One platform. All the tools. Zero complexity.</p>
+          <div className="text-center mb-8 sm:mb-12">
+            <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-full px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-medium mb-3 sm:mb-4"><Sparkles size={14} /> Features</div>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Everything you need to grow</h2>
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-2">One platform. All the tools. Zero complexity.</p>
           </div>
-          <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className="grid lg:grid-cols-2 gap-12 items-center">
-            <div key={`i-${activeSlide}`} className="animate-fade-in-up">
-              <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${slides[activeSlide].gradient} mb-6 shadow-lg text-white`}>{slides[activeSlide].icon}</div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">{slides[activeSlide].title}</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed mb-8">{slides[activeSlide].desc}</p>
+          <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div key={`i-${activeSlide}`} className="animate-fade-in-up order-2 lg:order-1">
+              <div className={`inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${slides[activeSlide].gradient} mb-4 sm:mb-6 shadow-lg text-white`}>{slides[activeSlide].icon}</div>
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">{slides[activeSlide].title}</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg leading-relaxed mb-6 sm:mb-8">{slides[activeSlide].desc}</p>
               <Link to="/register" className="group flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">Learn more <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" /></Link>
             </div>
-            <div key={`p-${activeSlide}`} className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>{slides[activeSlide].preview}</div>
+            <div key={`p-${activeSlide}`} className="animate-fade-in-up order-1 lg:order-2" style={{ animationDelay: '0.1s' }}>{slides[activeSlide].preview}</div>
           </div>
-          <div className="flex items-center justify-between mt-10">
-            <div className="flex items-center gap-3">{slides.map((_, i) => (<button key={i} onClick={() => setActiveSlide(i)} className={`h-2 rounded-full transition-all duration-300 ${i === activeSlide ? 'w-8 bg-emerald-500' : 'w-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'}`} />))}</div>
+          <div className="flex items-center justify-between mt-8 sm:mt-10">
+            <div className="flex items-center gap-2 sm:gap-3">{slides.map((_, i) => (<button key={i} onClick={() => setActiveSlide(i)} className={`h-2 rounded-full transition-all duration-300 ${i === activeSlide ? 'w-6 sm:w-8 bg-emerald-500' : 'w-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'}`} />))}</div>
             <div className="flex items-center gap-2">
-              <button onClick={prevSlide} className="p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all"><ChevronLeft size={20} /></button>
-              <button onClick={nextSlide} className="p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all"><ChevronRight size={20} /></button>
+              <button onClick={prevSlide} className="p-2.5 sm:p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all"><ChevronLeft size={18} className="sm:w-5 sm:h-5" /></button>
+              <button onClick={nextSlide} className="p-2.5 sm:p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all"><ChevronRight size={18} className="sm:w-5 sm:h-5" /></button>
             </div>
           </div>
         </div>
       </Section>
 
       {/* Trusted By */}
-      <section className="py-12 px-6 border-y border-gray-200 dark:border-white/5">
+      <section className="py-10 sm:py-12 px-4 sm:px-6 border-y border-gray-200 dark:border-white/5">
         <div className="max-w-7xl mx-auto">
-          <p className="text-center text-sm text-gray-500 mb-8">Trusted by businesses in every industry</p>
-          <div className="flex flex-wrap justify-center gap-4 md:gap-8">
+          <p className="text-center text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8">Trusted by businesses in every industry</p>
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-8">
             {[{ e: '🏥', n: 'Healthcare' }, { e: '🏠', n: 'Real Estate' }, { e: '🍕', n: 'Restaurants' }, { e: '💇', n: 'Salons' }, { e: '📚', n: 'Education' }, { e: '🛒', n: 'E-Commerce' }].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 px-5 py-2.5 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/5 hover:border-emerald-300 dark:hover:border-emerald-500/30 hover:bg-emerald-50 dark:hover:bg-emerald-500/5 transition-all cursor-default">
-                <span className="text-2xl">{item.e}</span>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{item.n}</span>
+              <div key={i} className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-5 sm:py-2.5 bg-gray-50 dark:bg-white/5 rounded-lg sm:rounded-xl border border-gray-200 dark:border-white/5 hover:border-emerald-300 dark:hover:border-emerald-500/30 hover:bg-emerald-50 dark:hover:bg-emerald-500/5 transition-all cursor-default">
+                <span className="text-xl sm:text-2xl">{item.e}</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{item.n}</span>
               </div>
             ))}
           </div>
@@ -301,14 +301,14 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* How It Works */}
-      <Section className="py-24 px-6">
+      <Section className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/20 text-teal-700 dark:text-teal-400 rounded-full px-4 py-1.5 text-sm font-medium mb-4"><Zap size={14} /> How It Works</div>
-            <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">Up and running in minutes</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Three simple steps to transform your business</p>
+          <div className="text-center mb-10 sm:mb-16">
+            <div className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/20 text-teal-700 dark:text-teal-400 rounded-full px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-medium mb-3 sm:mb-4"><Zap size={14} /> How It Works</div>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Up and running in minutes</h2>
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Three simple steps to transform your business</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 relative">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 relative">
             <div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-px bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 dark:from-emerald-500/30 dark:via-teal-500/30 dark:to-cyan-500/30" />
             {[
               { step: '01', title: 'Connect WhatsApp', desc: 'Link your WhatsApp Business API in under 2 minutes.', icon: <MessageSquare size={24} /> },
@@ -316,10 +316,10 @@ const LandingPage: React.FC = () => {
               { step: '03', title: 'Automate & Grow', desc: 'Set up campaigns, AI replies, and automations.', icon: <Zap size={24} /> },
             ].map((item, i) => (
               <div key={i} className="relative text-center group">
-                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-all relative z-10">{item.icon}</div>
-                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mb-2 block">Step {item.step}</span>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">{item.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400 max-w-xs mx-auto">{item.desc}</p>
+                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-all relative z-10">{item.icon}</div>
+                <span className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 mb-2 block">Step {item.step}</span>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">{item.title}</h3>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xs mx-auto">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -327,7 +327,7 @@ const LandingPage: React.FC = () => {
       </Section>
 
       {/* Stats with Counter */}
-      <section className="py-20 px-6 relative overflow-hidden border-y border-gray-200 dark:border-white/5">
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 relative overflow-hidden border-y border-gray-200 dark:border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-500/5 dark:via-teal-500/5 dark:to-cyan-500/5" />
         <div className="relative max-w-7xl mx-auto"><StatsSection /></div>
       </section>

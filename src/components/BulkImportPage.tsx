@@ -55,10 +55,10 @@ const BulkImportPage: React.FC = () => {
   const reset = () => { setStep('upload'); setFile(null); setContacts([]); setStats({ total: 0, success: 0, duplicates: 0, failed: 0 }); };
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"><Users className="text-blue-600" size={32} />Bulk Import Contacts</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"><Users className="text-blue-600" size={32} />Bulk Import Contacts</h1>
           <p className="text-gray-600">Upload CSV or Excel files to import contacts in bulk</p>
         </div>
         <button onClick={reset} className="text-sm text-blue-600 hover:underline">Start Over</button>

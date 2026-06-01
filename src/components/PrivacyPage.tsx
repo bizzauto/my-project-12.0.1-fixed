@@ -3,11 +3,11 @@ import Footer from './Footer';
 
 const PrivacyPage: React.FC = () => (
   <div className="min-h-screen bg-gray-50">
-    <div className="max-w-4xl mx-auto px-8 py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
-      <p className="text-gray-500 mb-8">Last updated: April 8, 2026</p>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16">
+      <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
+      <p className="text-sm sm:text-base text-gray-500 mb-6 sm:mb-8">Last updated: April 8, 2026</p>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {[
           {
             title: '1. Information We Collect',
@@ -102,9 +102,9 @@ const PrivacyPage: React.FC = () => (
             ],
           },
         ].map((section, i) => (
-          <section key={i} className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">{section.title}</h2>
-            <ul className="text-gray-600 space-y-2">
+          <section key={i} className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">{section.title}</h2>
+            <ul className="text-sm sm:text-base text-gray-600 space-y-1.5 sm:space-y-2">
               {section.content.map((item, j) => (
                 <li key={j} className="flex items-start gap-2">
                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0" />

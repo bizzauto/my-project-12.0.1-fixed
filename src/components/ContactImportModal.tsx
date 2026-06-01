@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import { Upload, FileText, X, AlertCircle, CheckCircle, Download } from 'lucide-react';
 import { contactsAPI } from '../lib/api';
 
@@ -88,7 +88,7 @@ const ContactImportModal: React.FC<ContactImportModalProps> = ({ isOpen, onClose
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleClose}>
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between p-4 sm:p-5 md:p-6 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-900">Import Contacts</h2>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
         </div>
@@ -100,15 +100,15 @@ const ContactImportModal: React.FC<ContactImportModalProps> = ({ isOpen, onClose
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Import Complete!</h3>
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-gray-900">{result.total || result.success + result.failed}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{result.total || result.success + result.failed}</p>
                   <p className="text-xs text-gray-500">Total</p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-green-600">{result.success}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-600">{result.success}</p>
                   <p className="text-xs text-green-600">Imported</p>
                 </div>
                 <div className="bg-red-50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-red-600">{result.failed}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-red-600">{result.failed}</p>
                   <p className="text-xs text-red-600">Failed</p>
                 </div>
               </div>
@@ -121,7 +121,7 @@ const ContactImportModal: React.FC<ContactImportModalProps> = ({ isOpen, onClose
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                className={`border-2 border-dashed rounded-lg p-4 sm:p-6 md:p-8 text-center cursor-pointer transition-colors ${
                   dragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
                 }`}
               >

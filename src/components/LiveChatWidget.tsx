@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   MessageCircle, X, Send, Star, Minimize2, Maximize2, Phone, Mail,
   User, ChevronLeft, Wifi, WifiOff, Loader, Smile, Paperclip, Image as ImageIcon,
@@ -108,12 +108,12 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   const widgetColor = theme?.primaryColor || widgetConfig?.primaryColor || '#3B82F6';
 
   const positionClasses = position === 'bottom-left'
-    ? 'bottom-5 left-5'
-    : 'bottom-5 right-5';
+    ? 'bottom-4 left-4 sm:bottom-5 sm:left-5'
+    : 'bottom-4 right-4 sm:bottom-5 sm:right-5';
 
   const widgetWindowPosition = position === 'bottom-left'
-    ? 'bottom-20 left-5'
-    : 'bottom-20 right-5';
+    ? 'bottom-20 left-2 sm:left-5 right-2 sm:right-auto'
+    : 'bottom-20 right-2 sm:right-5 left-2 sm:left-auto';
 
   // ============================================================
   // WIDGET CONFIG
@@ -367,10 +367,10 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       {/* Chat Window */}
       {isOpen && (
         <div
-          className={`fixed ${widgetWindowPosition} z-[9999] w-[380px] max-w-[calc(100vw-2rem)] rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300`}
+          className={`fixed ${widgetWindowPosition} z-[9999] w-[380px] max-w-[calc(100vw-1rem)] sm:max-w-[380px] rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300`}
           style={{
-            height: isMinimized ? '56px' : '560px',
-            maxHeight: 'calc(100vh - 120px)',
+            height: isMinimized ? '56px' : 'min(560px, calc(100vh - 100px))',
+            maxHeight: 'calc(100vh - 100px)',
             fontFamily: theme?.fontFamily || 'inherit',
           }}
         >
@@ -381,7 +381,7 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-semibold text-sm backdrop-blur-sm">
-                {session ? getInitials(visitorInfo.name || 'V') : '💬'}
+                {session ? getInitials(visitorInfo.name || 'V') : 'ðŸ’¬'}
               </div>
               <div>
                 <h3 className="text-white font-semibold text-sm leading-tight">
@@ -430,7 +430,7 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center text-white text-xl font-bold"
                       style={{ backgroundColor: widgetColor }}
                     >
-                      {widgetConfig?.name?.[0] || '💬'}
+                      {widgetConfig?.name?.[0] || 'ðŸ’¬'}
                     </div>
                     <h4 className="text-gray-900 dark:text-white font-semibold text-lg">
                       {widgetConfig?.name || 'Start a Conversation'}
@@ -604,7 +604,7 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                               className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 mt-1"
                               style={{ backgroundColor: isBot ? '#6B7280' : widgetColor }}
                             >
-                              {isBot ? '🤖' : '👤'}
+                              {isBot ? 'ðŸ¤–' : 'ðŸ‘¤'}
                             </div>
                           )}
                           <div
@@ -634,7 +634,7 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
                           style={{ backgroundColor: widgetColor }}
                         >
-                          👤
+                          ðŸ‘¤
                         </div>
                         <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
                           <div className="flex gap-1">
@@ -733,7 +733,7 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             setUnreadCount(0);
           }
         }}
-        className={`fixed ${positionClasses} z-[9998] w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white transition-all hover:shadow-xl hover:scale-105 active:scale-95`}
+        className={`fixed ${positionClasses} z-[9998] w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg flex items-center justify-center text-white transition-all hover:shadow-xl hover:scale-105 active:scale-95`}
         style={{ backgroundColor: widgetColor }}
         title="Chat with us"
       >
@@ -763,3 +763,4 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 };
 
 export default LiveChatWidget;
+

@@ -12,6 +12,7 @@ import {
 import { useAuthStore } from '../lib/authStore';
 import { useThemeStore } from '../lib/themeStore';
 import { MobileApp } from '../lib/capacitor-app';
+import { useViewport } from '../hooks/useViewport';
 import NotificationCenter from '../components/NotificationCenter';
 
 interface MenuItem {
@@ -106,12 +107,15 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const location = useLocation();
   const { user, business, logout } = useAuthStore();
   const { isDark, toggle: toggleTheme } = useThemeStore();
+  const { isMobile, isTablet, isDesktop } = useViewport();
   const [showNotifications, setShowNotifications] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
   const isNative = MobileApp.isNative();
+  const sidebarOpen = !collapsed;
+  const showSidebarOverlay = isTablet && sidebarOpen;
   const userName = user?.name || 'Admin User';
   const userEmail = user?.email || 'admin@bizzauto.com';
   const userRole = user?.role || 'OWNER';
@@ -158,10 +162,23 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
-      {/* ===== DESKTOP SIDEBAR (hidden on mobile) ===== */}
+      {/* ===== TABLET BACKDROP (for slide-out sidebar) ===== */}
+      {showSidebarOverlay && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm animate-fade-in-up"
+          onClick={() => setCollapsed(true)}
+        />
+      )}
+
+      {/* ===== SIDEBAR ===== */}
+      {/* Mobile: completely hidden */}
+      {/* Tablet (md-lg): slide-out drawer with w-72 */}
+      {/* Desktop (lg+): always visible, collapsible w-64/w-20 */}
       <div
-        className={`hidden md:flex bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 min-h-screen fixed left-0 top-0 z-50 flex-col transition-all duration-300 ${
-          collapsed ? 'w-20' : 'w-64'
+        className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 min-h-screen fixed left-0 top-0 z-50 flex-col transition-all duration-300 ${
+          isMobile ? 'hidden' :
+          isTablet ? (sidebarOpen ? 'flex w-72 shadow-2xl' : 'hidden') :
+          'flex ' + (collapsed ? 'w-20' : 'w-64')
         }`}
       >
         {/* Logo */}
@@ -286,25 +303,81 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* ===== MAIN CONTENT AREA ===== */}
-      <div className={`flex-1 flex flex-col w-full transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-64'}`}>
+      <div className={`flex-1 flex flex-col w-full transition-all duration-300 ${
+        isMobile ? 'ml-0' :
+        isTablet ? (sidebarOpen ? 'ml-72' : 'ml-0') :
+        (collapsed ? 'lg:ml-20' : 'lg:ml-64')
+      }`}>
         {/* ===== MOBILE TOP BAR (visible only on mobile) ===== */}
-        <div className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-4 py-3 flex items-center justify-between sticky top-0 z-40 ios-status-bar">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Zap size={16} className="text-white" />
+        <div className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between sticky top-0 z-40 ios-status-bar">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Zap size={14} className="text-white sm:w-4 sm:h-4" />
             </div>
-            <div>
-              <h1 className="text-sm font-bold text-gray-900 dark:text-white">BizzAuto</h1>
-              <p className="text-[10px] text-gray-500 dark:text-gray-400 capitalize">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate">BizzAuto</h1>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400 capitalize truncate">
                 {location.pathname.split('/')[1]?.replace('-', ' ') || 'Dashboard'}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <button
               onClick={toggleTheme}
-              className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-1.5 sm:p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
+              {isDark ? <Sun size={16} className="sm:w-[18px] sm:h-[18px]" /> : <Moon size={16} className="sm:w-[18px] sm:h-[18px]" />}
+            </button>
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-1.5 sm:p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <Bell size={16} className="sm:w-[18px] sm:h-[18px]" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              </button>
+              {showNotifications && (
+                <div className="absolute right-0 top-10 sm:top-12 z-50">
+                  <NotificationCenter
+                    onNavigate={(tab) => {
+                      navigate(tab);
+                      setShowNotifications(false);
+                    }}
+                    onClose={() => setShowNotifications(false)}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ===== TABLET TOP BAR ===== */}
+        <div className="hidden md:flex lg:hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 py-3 items-center justify-between sticky top-0 z-40">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+              title="Toggle sidebar"
+            >
+              <Menu size={20} />
+            </button>
+            <div className="text-base font-semibold text-gray-900 dark:text-white capitalize truncate">
+              {location.pathname.split('/')[1]?.replace('-', ' ') || 'Dashboard'}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium ${
+              userRole === 'SUPER_ADMIN' || userRole === 'OWNER'
+                ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'
+                : userRole === 'ADMIN'
+                ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+                : userRole === 'MEMBER'
+                ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+            }`}>
+              {userRole}
+            </div>
+            <button onClick={toggleTheme} className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <div className="relative" ref={notifRef}>
@@ -327,26 +400,29 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                 </div>
               )}
             </div>
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+              <span className="text-sm font-medium text-blue-700 dark:text-blue-300 whitespace-nowrap">{businessPlan} Plan</span>
+            </div>
           </div>
         </div>
 
-        {/* ===== DESKTOP TOP BAR (hidden on mobile) ===== */}
-        <div className="hidden md:flex bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-8 py-3.5 items-center justify-between sticky top-0 z-40">
-          <div className="flex items-center gap-4 flex-1">
+        {/* ===== DESKTOP TOP BAR (hidden on mobile/tablet) ===== */}
+        <div className="hidden lg:flex bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-6 xl:px-8 py-3.5 items-center justify-between sticky top-0 z-40">
+          <div className="flex items-center gap-4 flex-1 min-w-0">
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={collapsed ? 'M13 5l7 7-7 7M5 5l7 7-7 7' : 'M11 19l-7-7 7-7m8 14l-7-7 7-7'} />
               </svg>
             </button>
-            <div className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
+            <div className="text-lg font-semibold text-gray-900 dark:text-white capitalize truncate">
               {location.pathname.split('/')[1]?.replace('-', ' ') || 'Dashboard'}
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-shrink-0">
             <div className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
               userRole === 'SUPER_ADMIN' || userRole === 'OWNER'
                 ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'
@@ -393,12 +469,12 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
       {/* ===== MOBILE BOTTOM NAVIGATION (visible only on mobile) ===== */}
       <div className="md:hidden mobile-bottom-nav">
-        <div className="flex items-center justify-around py-2 px-2">
+        <div className="flex items-center justify-around py-1.5 sm:py-2 px-1 sm:px-2">
           {bottomNavItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleBottomNavClick(item.id)}
-              className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all duration-200 min-w-[56px] ${
+              className={`relative flex flex-col items-center justify-center py-1 px-1.5 sm:px-3 rounded-xl transition-all duration-200 min-w-[50px] sm:min-w-[56px] ${
                 item.id === '/more'
                   ? 'text-gray-500 dark:text-gray-400'
                   : isActive(item.id)
@@ -409,13 +485,13 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               <span className={isActive(item.id) && item.id !== '/more' ? 'scale-110' : ''}>
                 {item.icon}
               </span>
-              <span className={`text-[10px] mt-0.5 font-medium ${
+              <span className={`text-[9px] sm:text-[10px] mt-0.5 font-medium ${
                 isActive(item.id) && item.id !== '/more' ? 'text-blue-600 dark:text-blue-400' : ''
               }`}>
                 {item.label}
               </span>
               {item.badge && (
-                <span className="absolute -top-0.5 right-1 bg-red-500 text-white text-[8px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5">
+                <span className="absolute -top-0.5 right-0.5 sm:right-1 bg-red-500 text-white text-[8px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5">
                   {item.badge}
                 </span>
               )}

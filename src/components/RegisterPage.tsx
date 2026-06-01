@@ -42,69 +42,69 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex">
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white dark:bg-gray-900">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 bg-white dark:bg-gray-900">
         <div className="w-full max-w-md">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               BizzAuto Solutions
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 mb-8">
+          <div className="flex items-center gap-2 mb-6 sm:mb-8">
             {[1, 2, 3].map(s => (
-              <div key={s} className={`flex-1 h-2 rounded-full transition-colors ${s <= step ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}`} />
+              <div key={s} className={`flex-1 h-1.5 sm:h-2 rounded-full transition-colors ${s <= step ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}`} />
             ))}
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-sm text-red-700 dark:text-red-400">
-              <AlertCircle size={16} />
-              {error}
+            <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-xs sm:text-sm text-red-700 dark:text-red-400">
+              <AlertCircle size={16} className="flex-shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
           {step === 1 && (
             <>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Create your account</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">Start your 7-day free trial</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2">Create your account</h2>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">Start your 7-day free trial</p>
 
-              <form className="space-y-4">
+              <form className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
                   <div className="relative">
                     <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input type="text" value={form.name} onChange={(e) => handleChange('name', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                      className="w-full pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                       placeholder="Rahul Sharma" required />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
                   <div className="relative">
                     <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input type="email" value={form.email} onChange={(e) => handleChange('email', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                      className="w-full pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                       placeholder="you@company.com" required />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
                   <div className="relative">
                     <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input type="tel" value={form.phone} onChange={(e) => handleChange('phone', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                      className="w-full pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                       placeholder="+91 98765 43210" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
                   <div className="relative">
                     <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input type={showPassword ? 'text' : 'password'} value={form.password} onChange={(e) => handleChange('password', e.target.value)}
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                      className="w-full pl-10 pr-12 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                       placeholder="Min. 8 characters" required />
                     <button type="button" onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 p-1">
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
@@ -122,12 +122,12 @@ const RegisterPage: React.FC = () => {
                 </div>
 
                 <button type="button" onClick={() => setStep(2)}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:opacity-90 flex items-center justify-center gap-2">
+                  className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:opacity-90 flex items-center justify-center gap-2">
                   Continue <ArrowRight size={18} />
                 </button>
               </form>
 
-              <div className="relative my-6">
+              <div className="relative my-5 sm:my-6">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300 dark:border-gray-600" />
                 </div>
@@ -168,26 +168,26 @@ const RegisterPage: React.FC = () => {
 
           {step === 2 && (
             <>
-              <button onClick={() => setStep(1)} className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-4">
+              <button onClick={() => setStep(1)} className="flex items-center gap-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-3 sm:mb-4">
                 <ArrowLeft size={16} /> Back
               </button>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Tell us about your business</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">This helps us customize your experience</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2">Tell us about your business</h2>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">This helps us customize your experience</p>
 
-              <form className="space-y-4">
+              <form className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Name</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Name</label>
                   <div className="relative">
                     <Building2 size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input type="text" value={form.businessName} onChange={(e) => handleChange('businessName', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                      className="w-full pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                       placeholder="Your Business Name" required />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Type</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Type</label>
                   <select value={form.businessType} onChange={(e) => handleChange('businessType', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white">
+                    className="w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white">
                     <option value="general">General Business</option>
                     <option value="salon">Salon & Spa</option>
                     <option value="restaurant">Restaurant</option>
@@ -200,14 +200,14 @@ const RegisterPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">City</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">City</label>
                   <input type="text" value={form.city} onChange={(e) => handleChange('city', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                    className="w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                     placeholder="Mumbai" />
                 </div>
 
                 <button type="button" onClick={() => setStep(3)}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:opacity-90 flex items-center justify-center gap-2">
+                  className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:opacity-90 flex items-center justify-center gap-2">
                   Continue <ArrowRight size={18} />
                 </button>
               </form>
@@ -216,37 +216,37 @@ const RegisterPage: React.FC = () => {
 
           {step === 3 && (
             <>
-              <button onClick={() => setStep(2)} className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-4">
+              <button onClick={() => setStep(2)} className="flex items-center gap-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-3 sm:mb-4">
                 <ArrowLeft size={16} /> Back
               </button>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Almost done!</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">Review and confirm your details</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2">Almost done!</h2>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">Review and confirm your details</p>
 
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6 space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Name</span><span className="font-medium text-gray-900 dark:text-white">{form.name}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Email</span><span className="font-medium text-gray-900 dark:text-white">{form.email}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Business</span><span className="font-medium text-gray-900 dark:text-white">{form.businessName}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Type</span><span className="font-medium text-gray-900 dark:text-white capitalize">{form.businessType}</span></div>
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+                <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-gray-400 flex-shrink-0">Name</span><span className="font-medium text-gray-900 dark:text-white truncate text-right">{form.name}</span></div>
+                <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-gray-400 flex-shrink-0">Email</span><span className="font-medium text-gray-900 dark:text-white truncate text-right">{form.email}</span></div>
+                <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-gray-400 flex-shrink-0">Business</span><span className="font-medium text-gray-900 dark:text-white truncate text-right">{form.businessName}</span></div>
+                <div className="flex justify-between gap-2"><span className="text-gray-500 dark:text-gray-400 flex-shrink-0">Type</span><span className="font-medium text-gray-900 dark:text-white capitalize truncate text-right">{form.businessType}</span></div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="flex items-start gap-3">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                <div className="flex items-start gap-2.5 sm:gap-3">
                   <input type="checkbox" checked={form.agreeTerms} onChange={(e) => handleChange('agreeTerms', e.target.checked)}
-                    className="w-4 h-4 mt-1 text-blue-600 rounded" required />
-                  <label className="text-sm text-gray-600 dark:text-gray-400">
+                    className="w-4 h-4 mt-0.5 sm:mt-1 text-blue-600 rounded flex-shrink-0" required />
+                  <label className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     I agree to the <Link to="/terms" className="text-blue-600 hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>
                   </label>
                 </div>
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2.5 sm:gap-3">
                   <input type="checkbox" checked={form.receiveUpdates} onChange={(e) => handleChange('receiveUpdates', e.target.checked)}
-                    className="w-4 h-4 mt-1 text-blue-600 rounded" />
-                  <label className="text-sm text-gray-600 dark:text-gray-400">
+                    className="w-4 h-4 mt-0.5 sm:mt-1 text-blue-600 rounded flex-shrink-0" />
+                  <label className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     Send me product updates, tips, and offers via email
                   </label>
                 </div>
 
                 <button type="submit" disabled={isLoading || !form.agreeTerms}
-                  className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50">
+                  className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50">
                   {isLoading ? (
                     <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
@@ -257,8 +257,8 @@ const RegisterPage: React.FC = () => {
             </>
           )}
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
+          <div className="mt-5 sm:mt-6 text-center">
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
               Already have an account?{' '}
               <Link to="/login" className="text-blue-600 font-medium hover:underline">
                 Sign in
@@ -268,18 +268,18 @@ const RegisterPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 to-blue-700 items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 to-blue-700 items-center justify-center p-8 xl:p-12">
         <div className="max-w-md text-white">
-          <h2 className="text-4xl font-bold mb-6">Everything you need to grow</h2>
-          <div className="space-y-4">
+          <h2 className="text-3xl xl:text-4xl font-bold mb-4 xl:mb-6">Everything you need to grow</h2>
+          <div className="space-y-3 xl:space-y-4">
             {['WhatsApp Business API', 'CRM & Lead Management', 'AI-Powered Content', 'Marketing Automation', 'Analytics & Reports', 'Team Collaboration'].map((item, i) => (
               <div key={i} className="flex items-center gap-3">
-                <Check size={20} className="text-green-300" />
-                <span className="text-lg">{item}</span>
+                <Check size={20} className="text-green-300 flex-shrink-0" />
+                <span className="text-base xl:text-lg">{item}</span>
               </div>
             ))}
           </div>
-          <div className="mt-8 p-4 bg-white/10 rounded-lg">
+          <div className="mt-6 xl:mt-8 p-3 xl:p-4 bg-white/10 rounded-lg">
             <p className="text-sm font-medium">Free 7-day trial</p>
             <p className="text-xs text-green-100 mt-1">No credit card required. Full features. Cancel anytime.</p>
           </div>

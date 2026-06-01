@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+﻿import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import {
   ReactFlow,
   addEdge,
@@ -228,7 +228,7 @@ function NodeProperties({ node, onUpdate, onDelete }: NodePropertiesProps) {
   };
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className={template.color}>
@@ -1109,17 +1109,17 @@ function WorkflowBuilderInner({ workflowId }: { workflowId?: string }) {
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-900">
       {/* TOP BAR */}
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700 flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <Workflow size={20} className="text-blue-400" />
+      <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-2 bg-gray-800 border-b border-gray-700 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <Workflow size={18} className="text-blue-400 flex-shrink-0 sm:w-5 sm:h-5" />
           <input
             type="text"
             value={workflowName}
             onChange={(e) => setWorkflowName(e.target.value)}
-            className="bg-transparent text-white font-semibold text-sm border-none focus:outline-none focus:ring-0 px-1 py-0.5 rounded hover:bg-gray-700 focus:bg-gray-700 transition-colors min-w-[200px]"
+            className="bg-transparent text-white font-semibold text-sm border-none focus:outline-none focus:ring-0 px-1 py-0.5 rounded hover:bg-gray-700 focus:bg-gray-700 transition-colors min-w-0 sm:min-w-[200px] flex-1 sm:flex-initial"
           />
           <span
-            className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+            className={`hidden sm:inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
               isActive
                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                 : 'bg-gray-600/20 text-gray-400 border border-gray-600/30'
@@ -1128,19 +1128,19 @@ function WorkflowBuilderInner({ workflowId }: { workflowId?: string }) {
             {isActive ? 'Active' : 'Inactive'}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           <button
             onClick={handleRunTest}
             disabled={running}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-300 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50"
           >
             {running ? <Loader2 size={14} className="animate-spin" /> : <TestTube size={14} />}
-            {running ? 'Running...' : 'Test Run'}
+            <span className="hidden sm:inline">{running ? 'Running...' : 'Test Run'}</span>
           </button>
           {workflowId && (
             <button
               onClick={handleToggleActive}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+              className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
                 isActive
                   ? 'text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30'
                   : 'text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30'
@@ -1153,10 +1153,10 @@ function WorkflowBuilderInner({ workflowId }: { workflowId?: string }) {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-sm text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors disabled:opacity-50"
           >
             {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-            {saving ? 'Saving...' : 'Save'}
+            <span>{saving ? 'Saving...' : 'Save'}</span>
           </button>
         </div>
       </div>
@@ -1165,8 +1165,8 @@ function WorkflowBuilderInner({ workflowId }: { workflowId?: string }) {
       <div className="flex flex-1 min-h-0">
         {/* LEFT SIDEBAR - Node Palette */}
         <div
-          className={`flex-shrink-0 border-r border-gray-700 bg-gray-800/50 transition-all duration-300 ${
-            sidebarCollapsed ? 'w-12' : 'w-64'
+          className={`flex-shrink-0 border-r border-gray-700 bg-gray-800/50 transition-all duration-300 hidden md:block ${
+            sidebarCollapsed ? 'w-12' : 'w-56 lg:w-64'
           } overflow-hidden`}
         >
           {sidebarCollapsed ? (
@@ -1293,8 +1293,8 @@ function WorkflowBuilderInner({ workflowId }: { workflowId?: string }) {
 
         {/* RIGHT SIDEBAR - Properties Panel */}
         <div
-          className={`flex-shrink-0 border-l border-gray-700 bg-gray-800/50 transition-all duration-300 ${
-            propertiesCollapsed ? 'w-12' : 'w-80'
+          className={`flex-shrink-0 border-l border-gray-700 bg-gray-800/50 transition-all duration-300 hidden lg:block ${
+            propertiesCollapsed ? 'w-12' : 'w-72 xl:w-80'
           } overflow-hidden`}
         >
           {propertiesCollapsed ? (
@@ -1363,3 +1363,4 @@ export default function WorkflowBuilder({ workflowId }: { workflowId?: string })
     </ReactFlowProvider>
   );
 }
+

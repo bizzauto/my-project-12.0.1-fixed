@@ -123,7 +123,7 @@ const EmailLeadImporter: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Upload className="text-blue-600" size={28} />
           Import IndiaMART Leads
         </h1>
