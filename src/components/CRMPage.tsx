@@ -4,7 +4,7 @@ import {
   TrendingUp, Calendar, Clock, MessageSquare, FileText, Bell, CheckCircle, X, Star, Activity, ArrowUp, ArrowDown,
   BarChart3, PieChart, Target, Award, AlertCircle, RefreshCw, ChevronDown, ChevronRight, Users, Building2, MapPin,
   Globe, Linkedin, Twitter, Facebook, Copy, Check, List, Grid, Columns, Settings, Share2, Printer, Smartphone,
-  Zap, Shield, Flag, MessageCircle, Paperclip, Camera, Video, Headphones, Heart, ThumbsUp, Send
+  Zap, Shield, Flag, MessageCircle, Paperclip, Camera, Video, Headphones, Heart, ThumbsUp, Send, Brain
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../lib/authStore';
@@ -1362,7 +1362,7 @@ const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = 
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={() => info('Edit task feature coming soon')} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"><Edit3 size={14} className="text-gray-400" /></button>
+                    <button onClick={() => setToast({ message: 'Edit task feature coming soon', type: 'info' })} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"><Edit3 size={14} className="text-gray-400" /></button>
                   </div>
                 </div>
               )) : (
