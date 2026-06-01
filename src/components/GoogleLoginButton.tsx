@@ -9,6 +9,9 @@ declare global {
 }
 
 const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
+if (typeof window !== 'undefined') {
+  console.log('[GoogleLogin] env present:', !!import.meta.env.VITE_GOOGLE_CLIENT_ID, '| resolved:', GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.slice(0, 12)}...` : 'EMPTY');
+}
 
 const loadGsi = (): Promise<void> => {
   return new Promise((resolve) => {
