@@ -73,3 +73,8 @@ nul
 
 # Accidental nested repos
 MY\ PROJECT*/
+
+# Android local SDK path (machine-specific, not in repo)
+/local.properties
+local.properties
+
