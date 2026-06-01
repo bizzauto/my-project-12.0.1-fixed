@@ -1,6 +1,6 @@
-const CACHE_NAME = 'bizzauto-v4';
-const STATIC_CACHE = 'bizzauto-static-v4';
-const DYNAMIC_CACHE = 'bizzauto-dynamic-v4';
+const CACHE_NAME = 'bizzauto-v5';
+const STATIC_CACHE = 'bizzauto-static-v5';
+const DYNAMIC_CACHE = 'bizzauto-dynamic-v5';
 
 const STATIC_ASSETS = [
   '/',
