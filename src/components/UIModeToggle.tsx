@@ -3,28 +3,28 @@ import { Sparkles, X, Zap, Check, Brain } from 'lucide-react';
 import { useUIMode } from '../contexts/UIModeContext';
 
 const OrbsLayer: React.FC = () => {
-  // Pause orbs while user is actively scrolling to keep mobile scroll snappy.
+  // Pause orbs while user is actively scrolling to keep desktop scroll snappy.
+  // On mobile/touch devices orbs are already hidden via CSS, so we skip the
+  // listener entirely to avoid any JS overhead during scroll.
   const [paused, setPaused] = useState(false);
   const timer = useRef<any>(null);
   useEffect(() => {
+    const isTouch = typeof window !== 'undefined' && (('ontouchstart' in window) || navigator.maxTouchPoints > 0);
+    if (isTouch) return;
+    if (window.innerWidth < 1024) return;
     const onScroll = () => {
       setPaused(true);
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => setPaused(false), 200);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('touchmove', onScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('touchmove', onScroll);
       if (timer.current) clearTimeout(timer.current);
     };
   }, []);
   return (
-    <div
-      className="fixed inset-0 -z-10 overflow-hidden pointer-events-none"
-      style={{ animationPlayState: paused ? 'paused' : 'running' }}
-    >
+    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
       <div className="ai-orb ai-orb-1" style={{ animationPlayState: paused ? 'paused' : 'running' }} />
       <div className="ai-orb ai-orb-2" style={{ animationPlayState: paused ? 'paused' : 'running' }} />
       <div className="ai-orb ai-orb-3" style={{ animationPlayState: paused ? 'paused' : 'running' }} />
@@ -83,15 +83,17 @@ const UIModeToggle: React.FC = () => {
         </div>
       )}
 
-      {/* Fixed toggle button - bottom right */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40">
+      {/* Fixed toggle button — top-right on mobile (out of scroll path),
+          bottom-right on desktop where the bottom nav is hidden. */}
+      <div className="fixed top-3 right-3 sm:bottom-6 sm:top-auto sm:right-6 z-40">
         {mode === 'classic' ? (
           <button
             onClick={() => setMode('ai')}
-            className="group flex items-center gap-2 px-4 py-3 ai-aurora text-white font-semibold rounded-full shadow-2xl shadow-indigo-500/40 hover:shadow-indigo-500/60 transition-all hover:scale-105"
+            className="group flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-3 ai-aurora text-white font-semibold rounded-full shadow-2xl shadow-indigo-500/40 hover:shadow-indigo-500/60 transition-all"
+            style={{ minHeight: 40 }}
             title="Try our AI-powered UI"
           >
-            <Sparkles size={18} className="group-hover:rotate-12 transition-transform" />
+            <Sparkles size={16} className="sm:w-[18px] sm:h-[18px]" />
             <span className="hidden sm:inline text-sm">Try AI UI</span>
             <span className="absolute -top-1 -right-1 flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75" />
@@ -101,10 +103,11 @@ const UIModeToggle: React.FC = () => {
         ) : (
           <button
             onClick={() => setMode('classic')}
-            className="group flex items-center gap-2 px-4 py-3 ai-glass text-slate-200 font-semibold rounded-full hover:bg-white/10 transition-all"
+            className="group flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-3 ai-glass text-slate-200 font-semibold rounded-full hover:bg-white/10 transition-all"
+            style={{ minHeight: 40 }}
             title="Switch to Classic UI"
           >
-            <Brain size={18} className="group-hover:scale-110 transition-transform text-indigo-300" />
+            <Brain size={16} className="sm:w-[18px] sm:h-[18px] text-indigo-300" />
             <span className="hidden sm:inline text-sm">AI Mode</span>
             <span className="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
               <Check size={10} />

@@ -385,11 +385,13 @@ a:focus-visible {
   animation: slideIn 0.3s ease-out;
 }
 
-/* Smooth scrolling */
+/* Smooth scrolling (disabled on touch — CSS smooth scroll adds mobile jank) */
 html {
-  scroll-behavior: smooth;
   overflow-x: hidden; /* only html, never body — body overflow breaks mobile scroll */
   -webkit-text-size-adjust: 100%;
+}
+@media (hover: hover) and (pointer: fine) {
+  html { scroll-behavior: smooth; }
 }
 
 /* Body: just let it scroll. Keep -webkit-overflow-scrolling OFF html/body
@@ -398,10 +400,15 @@ body {
   overflow-x: hidden;
   min-height: 100vh;
   min-height: 100dvh; /* dynamic viewport — fixes iOS address-bar resize */
-  position: relative;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   overscroll-behavior-y: contain; /* keep pull-to-refresh off but allow normal scroll */
+  /* Promote body to its own GPU layer; prevents repaints of background-image
+     gradients on Android Chrome from re-compositing the page during scroll. */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Custom scrollbar */
@@ -609,10 +616,19 @@ body {
   right: 0;
   z-index: 50;
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #0f172a; /* solid on mobile — backdrop-filter kills Android scroll perf */
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  /* Force GPU layer once; helps avoid repaint jank during scroll */
+  transform: translateZ(0);
+  will-change: transform;
+  contain: layout style paint;
+}
+@media (min-width: 768px) {
+  .mobile-bottom-nav {
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
 }
 
 /* Touch-friendly tap targets */
@@ -1060,6 +1076,23 @@ body {
   will-change: transform; /* hint for GPU; reduces repaint cost */
   transform: translateZ(0);
 }
+
+/* Heavy blur orbs kill Android scroll perf. Kill them on mobile/touch. */
+@media (max-width: 1024px), (hover: none) {
+  .ai-orb-1, .ai-orb-2, .ai-orb-3 { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-orb { animation: none !important; }
+}
+
+/* Replace AI welcome banner backdrop-filter on mobile */
+@media (max-width: 640px) {
+  .ai-glass {
+    background: rgba(15, 23, 42, 0.95) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
 .ai-orb-1 {
   top: 10%;
   left: 10%;
@@ -1086,13 +1119,10 @@ body {
 }
 
 /* Heavy blur orbs kill mobile scroll perf. Hide on small screens, pause when scrolling. */
-@media (max-width: 768px) {
+@media (min-width: 1025px) and (hover: hover) {
   .ai-orb-1 { width: 220px; height: 220px; filter: blur(40px); }
   .ai-orb-2 { width: 260px; height: 260px; filter: blur(40px); }
   .ai-orb-3 { display: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ai-orb { animation: none !important; }
 }
 
 /* Glassmorphism card */

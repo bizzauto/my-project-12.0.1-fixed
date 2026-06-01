@@ -161,7 +161,10 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex" style={{ minHeight: '100dvh' }}>
+    <div
+      className="bg-gray-50 dark:bg-gray-900 flex"
+      style={{ height: '100dvh', maxHeight: '100dvh', overflow: 'hidden' }}
+    >
       {/* ===== TABLET BACKDROP (for slide-out sidebar) ===== */}
       {showSidebarOverlay && (
         <div
@@ -175,11 +178,12 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       {/* Tablet (md-lg): slide-out drawer with w-72 */}
       {/* Desktop (lg+): always visible, collapsible w-64/w-20 */}
       <div
-        className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 min-h-screen fixed left-0 top-0 z-50 flex-col transition-all duration-300 ${
+        className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 fixed left-0 top-0 z-50 flex-col transition-all duration-300 ${
           isMobile ? 'hidden' :
           isTablet ? (sidebarOpen ? 'flex w-72 shadow-2xl' : 'hidden') :
           'flex ' + (collapsed ? 'w-20' : 'w-64')
         }`}
+        style={{ height: '100dvh', maxHeight: '100dvh', overflow: 'hidden' }}
       >
         {/* Logo */}
         <div className="p-5 border-b border-white/10">
@@ -308,8 +312,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         isTablet ? (sidebarOpen ? 'ml-72' : 'ml-0') :
         (collapsed ? 'lg:ml-20' : 'lg:ml-64')
       }`}>
-        {/* ===== MOBILE TOP BAR (visible only on mobile) ===== */}
-        <div className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between sticky top-0 z-40 ios-status-bar">
+        {/* ===== MOBILE TOP BAR (visible only on mobile) =====
+            backdrop-blur removed on mobile — kills Android scroll perf. */}
+        <div className="md:hidden bg-white dark:bg-gray-900 border-b border-gray-200/50 dark:border-gray-700/50 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between sticky top-0 z-40 ios-status-bar" style={{ transform: 'translateZ(0)' }}>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <Zap size={14} className="text-white sm:w-4 sm:h-4" />
@@ -352,7 +357,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         </div>
 
         {/* ===== TABLET TOP BAR ===== */}
-        <div className="hidden md:flex lg:hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 py-3 items-center justify-between sticky top-0 z-40">
+        <div className="hidden md:flex lg:hidden bg-white dark:bg-gray-900 border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 py-3 items-center justify-between sticky top-0 z-40">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <button
               onClick={() => setCollapsed(!collapsed)}
@@ -406,8 +411,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           </div>
         </div>
 
-        {/* ===== DESKTOP TOP BAR (hidden on mobile/tablet) ===== */}
-        <div className="hidden lg:flex bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-6 xl:px-8 py-3.5 items-center justify-between sticky top-0 z-40">
+        {/* ===== DESKTOP TOP BAR (hidden on mobile/tablet) =====
+            backdrop-blur-x removed — only on desktop, but still costly during scroll */}
+        <div className="hidden lg:flex bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 px-6 xl:px-8 py-3.5 items-center justify-between sticky top-0 z-40">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <button
               onClick={() => setCollapsed(!collapsed)}
@@ -464,15 +470,27 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         </div>
 
         {/* ===== PAGE CONTENT =====
-            Use overflow-y-auto (not overflow-auto) + WebKit momentum scroll +
-            -webkit-overflow-scrolling: touch to make iOS Safari scroll smoothly.
-            Avoid overscroll-behavior on this container; it makes the page feel
-            "stuck" on Android/iOS when combined with min-h-screen parents. */}
+            CRITICAL for Android scroll: parent is fixed `height: 100dvh` (not
+            min-h-screen), so this child gets a constrained height and overflow
+            can actually kick in. Without a constrained parent, `flex-1` on
+            Android Chrome doesn't trigger scroll on long pages. */}
         <div
-          className="flex-1 overflow-y-auto overscroll-contain pb-20 md:pb-0 touch-scroll"
-          style={{ WebkitOverflowScrolling: 'touch', minHeight: 0 }}
+          className="flex-1 overflow-y-auto touch-scroll overscroll-contain"
+          style={{
+            height: '100%',
+            maxHeight: '100dvh',
+            minHeight: 0,
+            WebkitOverflowScrolling: 'touch',
+            transform: 'translateZ(0)',
+            WebkitTransform: 'translateZ(0)',
+            contain: 'layout paint',
+            willChange: 'scroll-position',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          }}
         >
-          {children}
+          <div className="pb-16 md:pb-0">
+            {children}
+          </div>
         </div>
       </div>
 
