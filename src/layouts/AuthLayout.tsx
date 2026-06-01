@@ -161,7 +161,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex" style={{ minHeight: '100dvh' }}>
       {/* ===== TABLET BACKDROP (for slide-out sidebar) ===== */}
       {showSidebarOverlay && (
         <div
@@ -463,8 +463,17 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           </div>
         </div>
 
-        {/* ===== PAGE CONTENT ===== */}
-        <div className="flex-1 overflow-auto pb-20 md:pb-0">{children}</div>
+        {/* ===== PAGE CONTENT =====
+            Use overflow-y-auto (not overflow-auto) + WebKit momentum scroll +
+            -webkit-overflow-scrolling: touch to make iOS Safari scroll smoothly.
+            Avoid overscroll-behavior on this container; it makes the page feel
+            "stuck" on Android/iOS when combined with min-h-screen parents. */}
+        <div
+          className="flex-1 overflow-y-auto overscroll-contain pb-20 md:pb-0 touch-scroll"
+          style={{ WebkitOverflowScrolling: 'touch', minHeight: 0 }}
+        >
+          {children}
+        </div>
       </div>
 
       {/* ===== MOBILE BOTTOM NAVIGATION (visible only on mobile) ===== */}

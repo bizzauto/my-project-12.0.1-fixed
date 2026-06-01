@@ -1,6 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, X, Zap, Check, Brain } from 'lucide-react';
 import { useUIMode } from '../contexts/UIModeContext';
+
+const OrbsLayer: React.FC = () => {
+  // Pause orbs while user is actively scrolling to keep mobile scroll snappy.
+  const [paused, setPaused] = useState(false);
+  const timer = useRef<any>(null);
+  useEffect(() => {
+    const onScroll = () => {
+      setPaused(true);
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => setPaused(false), 200);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('touchmove', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('touchmove', onScroll);
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
+  return (
+    <div
+      className="fixed inset-0 -z-10 overflow-hidden pointer-events-none"
+      style={{ animationPlayState: paused ? 'paused' : 'running' }}
+    >
+      <div className="ai-orb ai-orb-1" style={{ animationPlayState: paused ? 'paused' : 'running' }} />
+      <div className="ai-orb ai-orb-2" style={{ animationPlayState: paused ? 'paused' : 'running' }} />
+      <div className="ai-orb ai-orb-3" style={{ animationPlayState: paused ? 'paused' : 'running' }} />
+    </div>
+  );
+};
 
 const UIModeToggle: React.FC = () => {
   const { mode, setMode } = useUIMode();
@@ -20,13 +50,10 @@ const UIModeToggle: React.FC = () => {
 
   return (
     <>
-      {/* Floating background orbs - only in AI mode */}
+      {/* Floating background orbs - only in AI mode.
+          Paused while user is actively scrolling to keep mobile scroll buttery-smooth. */}
       {mode === 'ai' && (
-        <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-          <div className="ai-orb ai-orb-1" />
-          <div className="ai-orb ai-orb-2" />
-          <div className="ai-orb ai-orb-3" />
-        </div>
+        <OrbsLayer />
       )}
 
       {/* Welcome banner on first AI activation */}

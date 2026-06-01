@@ -69,8 +69,9 @@
   --color-bg-tertiary: #334155;
 }
 
-/* Theme transition for smooth color changes */
-* {
+/* Theme transition for smooth color changes (scoped — NOT universal, breaks mobile scroll) */
+.theme-transition,
+.theme-transition * {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease;
 }
 
@@ -387,13 +388,20 @@ a:focus-visible {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden; /* only html, never body — body overflow breaks mobile scroll */
+  -webkit-text-size-adjust: 100%;
 }
 
-/* Prevent pull-to-refresh and overscroll on mobile */
-html, body {
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
+/* Body: just let it scroll. Keep -webkit-overflow-scrolling OFF html/body
+   (deprecated, breaks iOS momentum scroll when set on document root). */
+body {
   overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport — fixes iOS address-bar resize */
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  overscroll-behavior-y: contain; /* keep pull-to-refresh off but allow normal scroll */
 }
 
 /* Custom scrollbar */
@@ -620,8 +628,11 @@ body {
     user-select: none;
   }
 
-  /* Better touch scrolling */
-  .overflow-y-auto, .overflow-auto, [class*="overflow-"] {
+  /* Better touch scrolling on every scrollable element. Scoped only to elements
+     that actually have an overflow-* class — applying to body/html breaks iOS
+     momentum scroll. */
+  .overflow-y-auto, .overflow-auto, .touch-scroll,
+  [class*="overflow-"]:not(html):not(body) {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
@@ -643,10 +654,9 @@ body {
   }
 }
 
-/* Prevent iOS bounce overscroll */
-html {
-  overscroll-behavior: none;
-}
+/* Prevent iOS bounce overscroll — REMOVED. Was breaking mobile momentum scroll. */
+/* If you need to prevent bounce on a specific scroll container, set
+   overscroll-behavior: contain on that container, NOT on html. */
 
 /* iOS safe area for status bar */
 .ios-status-bar {
@@ -1021,7 +1031,8 @@ html {
     radial-gradient(ellipse 80% 50% at 20% 0%, rgba(99, 102, 241, 0.15), transparent 60%),
     radial-gradient(ellipse 60% 50% at 80% 30%, rgba(236, 72, 153, 0.12), transparent 60%),
     radial-gradient(ellipse 50% 40% at 50% 80%, rgba(20, 184, 166, 0.10), transparent 60%);
-  background-attachment: fixed;
+  /* NOT background-attachment: fixed — that kills mobile scroll perf */
+  background-attachment: scroll;
 }
 
 /* Animated background orbs */
@@ -1043,9 +1054,11 @@ html {
 .ai-orb {
   position: fixed;
   border-radius: 9999px;
-  filter: blur(80px);
+  filter: blur(60px);
   pointer-events: none;
   z-index: 0;
+  will-change: transform; /* hint for GPU; reduces repaint cost */
+  transform: translateZ(0);
 }
 .ai-orb-1 {
   top: 10%;
@@ -1070,6 +1083,16 @@ html {
   height: 450px;
   background: radial-gradient(circle, rgba(20, 184, 166, 0.35), transparent 70%);
   animation: orb-float-3 26s ease-in-out infinite;
+}
+
+/* Heavy blur orbs kill mobile scroll perf. Hide on small screens, pause when scrolling. */
+@media (max-width: 768px) {
+  .ai-orb-1 { width: 220px; height: 220px; filter: blur(40px); }
+  .ai-orb-2 { width: 260px; height: 260px; filter: blur(40px); }
+  .ai-orb-3 { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-orb { animation: none !important; }
 }
 
 /* Glassmorphism card */
