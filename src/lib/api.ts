@@ -495,4 +495,35 @@ export const walletAPI = {
     apiClient.post('/wallet/earnings/settle', { earningIds }),
 };
 
+// ====================================================================
+// Claude WhatsApp Provider - AI-powered smart messaging with SMS fallback
+// ====================================================================
+export const claudeWhatsAppAPI = {
+  getConfig: () => apiClient.get('/claude-whatsapp/config'),
+  saveConfig: (config: any) => apiClient.post('/claude-whatsapp/config', config),
+  getChannels: () => apiClient.get('/claude-whatsapp/channels'),
+  getStatus: () => apiClient.get('/claude-whatsapp/status'),
+  send: (message: any) => apiClient.post('/claude-whatsapp/send', message),
+  sendBulk: (messages: any[]) => apiClient.post('/claude-whatsapp/send-bulk', { messages }),
+  optimize: (body: string, channel?: string, contactName?: string) =>
+    apiClient.post('/claude-whatsapp/optimize', { body, channel, contactName }),
+  testChannel: (channel: string, phone: string) =>
+    apiClient.post(`/claude-whatsapp/test/${channel}`, { phone }),
+  getCostStats: (from?: string, to?: string) =>
+    apiClient.get('/claude-whatsapp/cost-stats', { params: { from, to } }),
+};
+
+// SMS Marketing API
+export const smsMarketingAPI = {
+  listCampaigns: (params?: any) => apiClient.get('/sms-marketing/campaigns', { params }),
+  getCampaign: (id: string) => apiClient.get(`/sms-marketing/campaigns/${id}`),
+  createCampaign: (data: any) => apiClient.post('/sms-marketing/campaigns', data),
+  updateCampaign: (id: string, data: any) => apiClient.put(`/sms-marketing/campaigns/${id}`, data),
+  deleteCampaign: (id: string) => apiClient.delete(`/sms-marketing/campaigns/${id}`),
+  sendCampaign: (id: string) => apiClient.post(`/sms-marketing/campaigns/${id}/send`),
+  sendMessage: (data: any) => apiClient.post('/sms-marketing/send', data),
+  listMessages: (params?: any) => apiClient.get('/sms-marketing/messages', { params }),
+  getStats: () => apiClient.get('/sms-marketing/stats'),
+};
+
 export default apiClient;

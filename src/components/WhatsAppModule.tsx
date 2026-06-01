@@ -12,6 +12,7 @@ import {
   AlertCircle, CheckCircle, VolumeX
 , Loader} from 'lucide-react';
 import apiClient, { whatsappAPI } from '../lib/api';
+import ClaudeWhatsAppSettings from './ClaudeWhatsAppSettings';
 
 // ============================================================
 // TYPES
@@ -70,7 +71,7 @@ interface AutoReplyRule {
   matchType: 'exact' | 'contains' | 'startsWith';
 }
 
-type WAView = 'connect' | 'chats' | 'broadcast' | 'templates' | 'campaigns' | 'scheduled' | 'settings' | 'chatbot';
+type WAView = 'connect' | 'chats' | 'broadcast' | 'templates' | 'campaigns' | 'scheduled' | 'settings' | 'chatbot' | 'claude';
 type ConnectionStatus = 'disconnected' | 'scanning' | 'connecting' | 'connected';
 type ConnectionMode = 'meta' | 'evolution';
 
@@ -2390,6 +2391,7 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     { id: 'campaigns', label: 'Campaigns', icon: <Zap size={18} /> },
     { id: 'templates', label: 'Templates', icon: <FileText size={18} /> },
     { id: 'connect', label: 'Connection', icon: connectionStatus === 'connected' ? <Wifi size={18} /> : <WifiOff size={18} /> },
+    { id: 'claude', label: 'Claude AI', icon: <Bot size={18} /> },
     { id: 'settings', label: 'Settings', icon: <SettingsIcon size={18} /> },
   ];
 
@@ -2487,6 +2489,11 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
               <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-2">Chatbot Builder</h2>
               <p className="text-gray-500 dark:text-gray-400">Visual flow builder coming soon!</p>
             </div>
+          </div>
+        )}
+        {currentView === 'claude' && (
+          <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+            <ClaudeWhatsAppSettings />
           </div>
         )}
       </div>

@@ -578,6 +578,78 @@ export default function CRMPage() {
         </div>
       </div>
 
+      {/* AI Lead Scoring Widget */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="lg:col-span-1 modern-card rounded-xl p-4 sm:p-5 bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-cyan-900/20 border-purple-200 dark:border-purple-800/50">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <Brain className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">AI Lead Scoring</h3>
+              <p className="text-[10px] sm:text-xs text-purple-600 dark:text-purple-300">Predicted close probability</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {(() => {
+              const hot = contacts.filter(c => c.leadScore === 'hot').length;
+              const warm = contacts.filter(c => c.leadScore === 'warm').length;
+              const cold = contacts.filter(c => c.leadScore === 'cold').length;
+              const total = hot + warm + cold || 1;
+              return [
+                { label: 'Hot Leads', count: hot, color: 'bg-red-500', icon: <Zap size={12} />, percent: (hot / total * 100) },
+                { label: 'Warm Leads', count: warm, color: 'bg-yellow-500', icon: <Activity size={12} />, percent: (warm / total * 100) },
+                { label: 'Cold Leads', count: cold, color: 'bg-blue-500', icon: <SnowflakeIcon size={12} />, percent: (cold / total * 100) },
+              ].map(s => (
+                <div key={s.label}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {s.icon} {s.label}
+                    </span>
+                    <span className="text-xs font-bold text-gray-900 dark:text-white">{s.count} <span className="text-gray-500">({s.percent.toFixed(0)}%)</span></span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                    <div className={`${s.color} h-full rounded-full transition-all`} style={{ width: `${s.percent}%` }} />
+                  </div>
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
+        <div className="lg:col-span-2 modern-card rounded-xl p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-emerald-500" />
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Top Hot Leads to Follow Up</h3>
+            </div>
+            <span className="text-[10px] sm:text-xs text-gray-500">Sorted by AI score</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {contacts
+              .filter(c => c.leadScore === 'hot')
+              .sort((a, b) => b.dealValue - a.dealValue)
+              .slice(0, 4)
+              .map(c => (
+                <div key={c.id} className="flex items-center gap-2.5 p-2 bg-red-50/50 dark:bg-red-900/10 rounded-lg border border-red-100 dark:border-red-800/30">
+                  <div className="w-9 h-9 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    {c.avatar}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white truncate">{c.name}</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 truncate">₹{(c.dealValue / 1000).toFixed(0)}K • {c.lastActivity}</p>
+                  </div>
+                  <button className="flex-shrink-0 p-1.5 bg-emerald-500 text-white rounded-md hover:bg-emerald-600">
+                    <MessageSquare size={12} />
+                  </button>
+                </div>
+              ))}
+            {contacts.filter(c => c.leadScore === 'hot').length === 0 && (
+              <p className="col-span-2 text-center text-xs text-gray-500 py-4">No hot leads yet. Add lead score in contact profiles.</p>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Tab Navigation */}
       <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
         <div className="flex gap-1 min-w-max">

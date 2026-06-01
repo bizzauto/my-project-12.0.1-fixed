@@ -482,6 +482,50 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Claude AI Cost Savings Widget */}
+      <div className="modern-card rounded-xl md:rounded-2xl p-4 sm:p-5 md:p-6 mb-5 sm:mb-6 md:mb-8 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-900/20 dark:via-teal-900/20 dark:to-cyan-900/20 border-emerald-200 dark:border-emerald-800/50">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+              <Bot className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Claude AI Cost Savings</h3>
+              <p className="text-xs text-emerald-700 dark:text-emerald-300">Smart WhatsApp + SMS routing</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setActiveModule?.('whatsapp')}
+            className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 bg-white/80 dark:bg-gray-800/80 text-emerald-700 dark:text-emerald-300 text-xs font-medium rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors border border-emerald-200 dark:border-emerald-700"
+          >
+            <Sparkles size={14} />
+            Configure
+          </button>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-white/70 dark:bg-gray-800/70 rounded-xl p-3 border border-emerald-100 dark:border-emerald-800/50">
+            <p className="text-[10px] sm:text-xs text-emerald-700 dark:text-emerald-300 font-medium mb-0.5">Saved This Month</p>
+            <p className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400">₹3,247</p>
+            <p className="text-[10px] text-gray-500">vs. always-Meta baseline</p>
+          </div>
+          <div className="bg-white/70 dark:bg-gray-800/70 rounded-xl p-3 border border-emerald-100 dark:border-emerald-800/50">
+            <p className="text-[10px] sm:text-xs text-blue-700 dark:text-blue-300 font-medium mb-0.5">Channel Mix</p>
+            <p className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400">62%</p>
+            <p className="text-[10px] text-gray-500">WhatsApp / 38% SMS</p>
+          </div>
+          <div className="bg-white/70 dark:bg-gray-800/70 rounded-xl p-3 border border-emerald-100 dark:border-emerald-800/50">
+            <p className="text-[10px] sm:text-xs text-purple-700 dark:text-purple-300 font-medium mb-0.5">AI Optimized</p>
+            <p className="text-lg sm:text-xl font-bold text-purple-600 dark:text-purple-400">1,428</p>
+            <p className="text-[10px] text-gray-500">messages</p>
+          </div>
+          <div className="bg-white/70 dark:bg-gray-800/70 rounded-xl p-3 border border-emerald-100 dark:border-emerald-800/50">
+            <p className="text-[10px] sm:text-xs text-orange-700 dark:text-orange-300 font-medium mb-0.5">Auto-Fallbacks</p>
+            <p className="text-lg sm:text-xl font-bold text-orange-600 dark:text-orange-400">47</p>
+            <p className="text-[10px] text-gray-500">rescued by SMS</p>
+          </div>
+        </div>
+      </div>
+
       {/* Pipeline + Quick Actions + Recent Leads */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
         {/* Pipeline Distribution */}
