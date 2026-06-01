@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Shield, Zap, AlertCircle, ArrowLeft, TrendingUp, Users, MessageSquare, BarChart3, CheckCircle, Star } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Shield, Zap, AlertCircle, ArrowLeft, TrendingUp, Users, MessageSquare, BarChart3, CheckCircle, Star, Brain, ShoppingCart, Phone, Share2, Activity, Sparkles, Wand2, Crown, Rocket, Bot, Globe, Target, FileText, Calendar, CreditCard, Heart, Megaphone, Layers, Send, Instagram, Facebook, Twitter, Youtube, Image as ImageIcon, Mic, Briefcase, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '../lib/authStore';
 import { useTranslation } from 'react-i18next';
 import { GoogleLogin } from '@react-oauth/google';
@@ -146,6 +146,112 @@ const LoginPage: React.FC = () => {
                 <Star key={i} size={12} className="fill-yellow-300 text-yellow-300" />
               ))}
               <span className="text-xs sm:text-sm ml-1">4.9/5</span>
+            </div>
+          </div>
+
+          {/* Features Showcase */}
+          <div className="mt-7">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles size={14} className="text-amber-300" />
+              <p className="text-white/90 text-xs sm:text-sm font-semibold uppercase tracking-wider">Everything you need to grow</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+              {/* WhatsApp AI */}
+              <div className="group flex items-center gap-2.5 p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/30 transition-all cursor-pointer">
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform">
+                  <Bot size={16} className="text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-xs sm:text-sm font-semibold leading-tight">WhatsApp AI</p>
+                  <p className="text-blue-200 text-[10px] sm:text-xs leading-tight">Smart messaging</p>
+                </div>
+              </div>
+              {/* AI Lead Scoring */}
+              <div className="group flex items-center gap-2.5 p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/30 transition-all cursor-pointer">
+                <div className="w-8 h-8 bg-gradient-to-br from-violet-400 to-fuchsia-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-violet-500/30 group-hover:scale-110 transition-transform">
+                  <Brain size={16} className="text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-xs sm:text-sm font-semibold leading-tight">AI Lead Scoring</p>
+                  <p className="text-blue-200 text-[10px] sm:text-xs leading-tight">Predictive CRM</p>
+                </div>
+              </div>
+              {/* E-commerce */}
+              <div className="group flex items-center gap-2.5 p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/30 transition-all cursor-pointer">
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-500/30 group-hover:scale-110 transition-transform">
+                  <ShoppingCart size={16} className="text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-xs sm:text-sm font-semibold leading-tight">E-Commerce</p>
+                  <p className="text-blue-200 text-[10px] sm:text-xs leading-tight">Online store</p>
+                </div>
+              </div>
+              {/* AI Automation */}
+              <div className="group flex items-center gap-2.5 p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/30 transition-all cursor-pointer">
+                <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform">
+                  <Wand2 size={16} className="text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-xs sm:text-sm font-semibold leading-tight">AI Automation</p>
+                  <p className="text-blue-200 text-[10px] sm:text-xs leading-tight">Workflows that run</p>
+                </div>
+              </div>
+              {/* Voice AI */}
+              <div className="group flex items-center gap-2.5 p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/30 transition-all cursor-pointer">
+                <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/30 group-hover:scale-110 transition-transform">
+                  <Phone size={16} className="text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-xs sm:text-sm font-semibold leading-tight">Voice AI Calls</p>
+                  <p className="text-blue-200 text-[10px] sm:text-xs leading-tight">24/7 calling agent</p>
+                </div>
+              </div>
+              {/* Social Media */}
+              <div className="group flex items-center gap-2.5 p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/30 transition-all cursor-pointer">
+                <div className="w-8 h-8 bg-gradient-to-br from-pink-400 to-rose-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform">
+                  <Megaphone size={16} className="text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-xs sm:text-sm font-semibold leading-tight">Social Media</p>
+                  <p className="text-blue-200 text-[10px] sm:text-xs leading-tight">Auto-posting</p>
+                </div>
+              </div>
+              {/* Analytics */}
+              <div className="group flex items-center gap-2.5 p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/30 transition-all cursor-pointer">
+                <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform">
+                  <BarChart3 size={16} className="text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-xs sm:text-sm font-semibold leading-tight">Smart Analytics</p>
+                  <p className="text-blue-200 text-[10px] sm:text-xs leading-tight">Real-time insights</p>
+                </div>
+              </div>
+              {/* Course Builder */}
+              <div className="group flex items-center gap-2.5 p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/30 transition-all cursor-pointer">
+                <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-500/30 group-hover:scale-110 transition-transform">
+                  <FileText size={16} className="text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-xs sm:text-sm font-semibold leading-tight">Courses & Funnels</p>
+                  <p className="text-blue-200 text-[10px] sm:text-xs leading-tight">Sell digital products</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick stats row */}
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div className="bg-white/5 backdrop-blur-sm rounded-lg p-2 border border-white/5">
+                <p className="text-emerald-300 text-base sm:text-lg font-bold">25+</p>
+                <p className="text-blue-200 text-[10px]">AI Tools</p>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm rounded-lg p-2 border border-white/5">
+                <p className="text-amber-300 text-base sm:text-lg font-bold">10K+</p>
+                <p className="text-blue-200 text-[10px]">Businesses</p>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm rounded-lg p-2 border border-white/5">
+                <p className="text-pink-300 text-base sm:text-lg font-bold">99.9%</p>
+                <p className="text-blue-200 text-[10px]">Uptime</p>
+              </div>
             </div>
           </div>
         </div>
