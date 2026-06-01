@@ -385,6 +385,14 @@ a:focus-visible {
   animation: slideIn 0.3s ease-out;
 }
 
+@keyframes slideInUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-in-up {
+  animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* Smooth scrolling (disabled on touch — CSS smooth scroll adds mobile jank) */
 html {
   overflow-x: hidden; /* only html, never body — body overflow breaks mobile scroll */

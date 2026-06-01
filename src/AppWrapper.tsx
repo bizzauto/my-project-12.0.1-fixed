@@ -9,6 +9,7 @@ import ThemeSelector from './components/ThemeSelector';
 import NetworkStatus from './components/NetworkStatus';
 import { UIModeProvider, useUIMode } from './contexts/UIModeContext';
 import UIModeToggle from './components/UIModeToggle';
+import PWAInstallBanner from './components/PWAInstallBanner';
 import { lazy, Suspense } from 'react';
 const ModernPage = lazy(() => import('./components/ModernPage'));
 
@@ -659,6 +660,7 @@ function AppRoutes() {
     <NetworkStatus />
     <ThemeSelector />
     <UIModeToggle />
+    <PWAInstallBanner />
     </ToastProvider>
   );
 }
