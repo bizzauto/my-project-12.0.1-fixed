@@ -198,7 +198,7 @@ router.post('/apple', socialAuthLimiter, async (req: Request, res: Response) => 
         type: 'general',
         plan: 'FREE',
         planStartedAt: new Date(),
-        planExpiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        planExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days free trial
       },
     });
 
@@ -347,7 +347,7 @@ router.post('/google', socialAuthLimiter, async (req: Request, res: Response) =>
         type: 'general',
         plan: 'FREE',
         planStartedAt: new Date(),
-        planExpiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        planExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days free trial
       },
     });
 
