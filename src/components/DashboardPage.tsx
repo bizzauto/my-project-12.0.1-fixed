@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   MessageSquare, Users, Calendar, Star, RefreshCw, Smartphone,
   TrendingUp, DollarSign, Target, Clock, ArrowUpRight, ArrowDownRight,
-  Zap, Brain, Eye, BarChart3, Phone, Mail, Send,
+  Zap, Brain, Eye, BarChart3, Phone, Mail, Send, Bot, Sparkles,
 } from 'lucide-react';
 import {
   LineChart, Line, PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area,
