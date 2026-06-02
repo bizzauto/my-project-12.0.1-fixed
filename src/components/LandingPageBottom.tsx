@@ -75,7 +75,7 @@ const LandingPageBottom: React.FC<Props> = ({ openFaq, setOpenFaq, showBackToTop
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400 rounded-full px-4 py-1.5 text-sm font-medium mb-4"><Star size={14} /> Testimonials</div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">Loved by businesses</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">Don't take our word â€” hear from our users</p>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Don't take our word — hear from our users</p>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[

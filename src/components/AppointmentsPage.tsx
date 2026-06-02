@@ -52,7 +52,7 @@ const statusColors: Record<string, string> = {
 };
 
 const typeIcons: Record<string, string> = {
-  call: 'ðŸ“ž', meeting: 'ðŸ¤', demo: 'ðŸ’»', 'follow-up': 'ðŸ”„', consultation: 'ðŸ’¡', service: 'ðŸ”§',
+  call: '📞', meeting: '🤝', demo: '💻', 'follow-up': '🔄', consultation: '💡', service: '🔧',
 };
 
 const SERVICE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
@@ -284,10 +284,10 @@ const AppointmentsPage: React.FC = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
         {[
-          { label: 'Today', count: appointments.filter(a => a.date === todayStr).length, icon: 'ðŸ“…', color: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
-          { label: 'This Week', count: thisWeekCount, icon: 'ðŸ“Š', color: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' },
-          { label: 'Confirmed', count: appointments.filter(a => a.status === 'confirmed').length, icon: 'âœ…', color: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' },
-          { label: 'Pending', count: appointments.filter(a => a.status === 'scheduled').length, icon: 'â³', color: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' },
+          { label: 'Today', count: appointments.filter(a => a.date === todayStr).length, icon: '📅', color: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
+          { label: 'This Week', count: thisWeekCount, icon: '📊', color: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' },
+          { label: 'Confirmed', count: appointments.filter(a => a.status === 'confirmed').length, icon: '✅', color: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' },
+          { label: 'Pending', count: appointments.filter(a => a.status === 'scheduled').length, icon: '⏳', color: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' },
         ].map(stat => (
           <div key={stat.label} className={`${stat.color} border rounded-xl p-3 md:p-4`}>
             <div className="flex items-center justify-between">
@@ -366,7 +366,7 @@ const AppointmentsPage: React.FC = () => {
                     </div>
                     <div className="space-y-1.5 text-xs md:text-sm text-gray-500 dark:text-gray-400">
                       <div className="flex items-center gap-2"><User size={12} /> {appt.contactName}</div>
-                      <div className="flex items-center gap-2"><Clock size={12} /> {appt.time} â€¢ {appt.duration} min</div>
+                      <div className="flex items-center gap-2"><Clock size={12} /> {appt.time} • {appt.duration} min</div>
                       {appt.location && <div className="flex items-center gap-2"><MapPin size={12} /> {appt.location}</div>}
                       {appt.meetingUrl && (
                         <a href={appt.meetingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
@@ -514,7 +514,7 @@ const AppointmentsPage: React.FC = () => {
                     <span className="text-xl">{typeIcons[appt.type]}</span>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white text-sm">{appt.title}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{appt.contactName} â€¢ {appt.duration}m</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{appt.contactName} • {appt.duration}m</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-auto">
@@ -577,7 +577,7 @@ const AppointmentsPage: React.FC = () => {
                     }} className="w-20 px-2 py-1 border border-gray-200 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700" />
                   </div>
                   <div>
-                    <label className="text-[10px] text-gray-500 block">Price (â‚¹)</label>
+                    <label className="text-[10px] text-gray-500 block">Price (₹)</label>
                     <input type="number" value={service.price} onChange={e => {
                       const updated = [...services];
                       updated[idx] = { ...updated[idx], price: parseInt(e.target.value) || 0 };
@@ -843,12 +843,12 @@ const BookingModal: React.FC<{
               <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Type</label>
               <select value={type} onChange={e => setType(e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                <option value="call">ðŸ“ž Call</option>
-                <option value="meeting">ðŸ¤ Meeting</option>
-                <option value="demo">ðŸ’» Demo</option>
-                <option value="consultation">ðŸ’¡ Consultation</option>
-                <option value="follow-up">ðŸ”„ Follow-up</option>
-                <option value="service">ðŸ”§ Service</option>
+                <option value="call">📞 Call</option>
+                <option value="meeting">🤝 Meeting</option>
+                <option value="demo">💻 Demo</option>
+                <option value="consultation">💡 Consultation</option>
+                <option value="follow-up">🔄 Follow-up</option>
+                <option value="service">🔧 Service</option>
               </select>
             </div>
             <div>

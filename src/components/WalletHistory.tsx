@@ -81,9 +81,9 @@ const WalletHistory: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className={`font-semibold ${isCredit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {isCredit ? '+' : ''}â‚¹{Math.abs(txn.amount).toFixed(2)}
+                      {isCredit ? '+' : ''}₹{Math.abs(txn.amount).toFixed(2)}
                     </p>
-                    <p className="text-xs text-gray-400">Balance: â‚¹{txn.balance.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400">Balance: ₹{txn.balance.toFixed(2)}</p>
                   </div>
                 </div>
               );

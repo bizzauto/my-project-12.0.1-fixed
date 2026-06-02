@@ -186,14 +186,14 @@ const CustomerAccountPage: React.FC = () => {
                         <div className="space-y-2 mb-3">
                           {order.items.map((item, i) => (
                             <div key={i} className="flex items-center justify-between text-sm">
-                              <span className="text-gray-700 dark:text-gray-300">{item.name} Ã— {item.quantity}</span>
-                              <span className="text-gray-900 dark:text-white font-medium">â‚¹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                              <span className="text-gray-700 dark:text-gray-300">{item.name} × {item.quantity}</span>
+                              <span className="text-gray-900 dark:text-white font-medium">₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
                             </div>
                           ))}
                         </div>
                         <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                           <span className="text-sm text-gray-500 dark:text-gray-400">{order.items.length} item(s)</span>
-                          <span className="text-lg font-bold text-gray-900 dark:text-white">â‚¹{order.total.toLocaleString('en-IN')}</span>
+                          <span className="text-lg font-bold text-gray-900 dark:text-white">₹{order.total.toLocaleString('en-IN')}</span>
                         </div>
                       </div>
                     );
@@ -218,7 +218,7 @@ const CustomerAccountPage: React.FC = () => {
                           <img src={item.image} alt={item.name} className="w-full h-40 object-cover rounded-lg mb-3" />
                         )}
                         <h4 className="font-medium text-gray-900 dark:text-white truncate">{item.name}</h4>
-                        <p className="text-blue-600 font-bold mt-1">â‚¹{item.price.toLocaleString('en-IN')}</p>
+                        <p className="text-blue-600 font-bold mt-1">₹{item.price.toLocaleString('en-IN')}</p>
                         <div className="flex gap-2 mt-3">
                           <button
                             onClick={() => navigate(`/product/${item.productId}`)}
@@ -297,21 +297,21 @@ const CustomerAccountPage: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Name</label>
-                    <p className="text-gray-900 dark:text-white font-medium">{profile.name || 'â€”'}</p>
+                    <p className="text-gray-900 dark:text-white font-medium">{profile.name || '—'}</p>
                   </div>
                   <div>
                     <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Email</label>
-                    <p className="text-gray-900 dark:text-white font-medium">{profile.email || 'â€”'}</p>
+                    <p className="text-gray-900 dark:text-white font-medium">{profile.email || '—'}</p>
                   </div>
                   <div>
                     <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Phone</label>
-                    <p className="text-gray-900 dark:text-white font-medium">{profile.phone || 'â€”'}</p>
+                    <p className="text-gray-900 dark:text-white font-medium">{profile.phone || '—'}</p>
                   </div>
                   <div>
                     <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Address</label>
                     <p className="text-gray-900 dark:text-white font-medium flex items-start gap-1">
                       <MapPin size={14} className="mt-0.5 shrink-0" />
-                      {profile.address || 'â€”'}
+                      {profile.address || '—'}
                     </p>
                   </div>
                 </div>

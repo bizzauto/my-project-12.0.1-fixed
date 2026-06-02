@@ -28,8 +28,8 @@ interface Agent {
 }
 
 const PROVIDER_INFO: Record<string, { name: string; rate: string; color: string; description: string }> = {
-  twilio: { name: 'Twilio', rate: '~â‚¹1.00-1.50/min', color: 'red', description: 'Industry leader, global reach, reliable' },
-  plivo: { name: 'Plivo', rate: '~â‚¹0.50-1.00/min', color: 'green', description: '50% cheaper than Twilio, great quality' },
+  twilio: { name: 'Twilio', rate: '~₹1.00-1.50/min', color: 'red', description: 'Industry leader, global reach, reliable' },
+  plivo: { name: 'Plivo', rate: '~₹0.50-1.00/min', color: 'green', description: '50% cheaper than Twilio, great quality' },
   browser_only: { name: 'Browser Only', rate: 'FREE', color: 'blue', description: 'No phone number needed, WebRTC calls' },
 };
 

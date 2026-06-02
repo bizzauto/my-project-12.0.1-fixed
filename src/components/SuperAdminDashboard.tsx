@@ -252,11 +252,11 @@ const SuperAdminDashboard: React.FC = () => {
       <div className="flex items-center gap-2 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
         <button onClick={() => setActiveTab('dashboard')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'dashboard' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-          ðŸ“Š Dashboard
+          📊 Dashboard
         </button>
         <button onClick={() => { setActiveTab('backgrounds'); fetchBackgrounds(); }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'backgrounds' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-          ðŸ–¼ Poster Backgrounds
+          🖼 Poster Backgrounds
         </button>
       </div>
 
@@ -547,7 +547,7 @@ const SuperAdminDashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">ðŸ–¼ Poster Backgrounds</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">🖼 Poster Backgrounds</h2>
               <p className="text-gray-500 text-sm mt-1">Upload background images that users can use in Creative Studio</p>
             </div>
             <button onClick={() => setShowAddBg(true)}

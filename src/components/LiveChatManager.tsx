@@ -386,7 +386,7 @@ export default function LiveChatManager() {
               </div>
               <div className="text-center p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20">
                 <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
-                  {stats.averageSatisfaction ? stats.averageSatisfaction.toFixed(1) : 'â€“'}
+                  {stats.averageSatisfaction ? stats.averageSatisfaction.toFixed(1) : '–'}
                 </p>
                 <p className="text-[10px] text-purple-600/70 dark:text-purple-400/70 font-medium">Rating</p>
               </div>
@@ -494,7 +494,7 @@ export default function LiveChatManager() {
                       </div>
                       {session.lastMessage && (
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
-                          {session.lastMessage.senderType === 'visitor' ? '' : 'ðŸ¤– '}
+                          {session.lastMessage.senderType === 'visitor' ? '' : '🤖 '}
                           {session.lastMessage.content}
                         </p>
                       )}
@@ -616,7 +616,7 @@ export default function LiveChatManager() {
                               className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1"
                               style={{ backgroundColor: isBot ? '#6B7280' : '#6366F1' }}
                             >
-                              {isBot ? 'ðŸ¤–' : getInitials(selectedSession.visitorName || 'V')}
+                              {isBot ? '🤖' : getInitials(selectedSession.visitorName || 'V')}
                             </div>
                           )}
                           <div

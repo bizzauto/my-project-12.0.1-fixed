@@ -659,7 +659,7 @@ const AgencyDashboard: React.FC = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">Recent Sub-Accounts</h2>
                 <button onClick={() => setActiveTab('sub-accounts')} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                  View All â†’
+                  View All →
                 </button>
               </div>
               {subAccounts.length === 0 ? (

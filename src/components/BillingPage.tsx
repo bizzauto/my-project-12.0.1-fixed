@@ -18,7 +18,7 @@ const BillingPage: React.FC = () => {
 
   const currentPlan = subscription?.plan || {
     name: business?.plan || 'STARTER',
-    price: business?.plan === 'PRO' ? 'â‚¹2,999' : business?.plan === 'ENTERPRISE' ? 'â‚¹9,999' : 'â‚¹1,499',
+    price: business?.plan === 'PRO' ? '₹2,999' : business?.plan === 'ENTERPRISE' ? '₹9,999' : '₹1,499',
     nextBilling: subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
     status: subscription?.status || 'Active',
   };

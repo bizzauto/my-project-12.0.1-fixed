@@ -610,7 +610,7 @@ export default function BlogManager() {
                         </td>
                         <td className="px-4 sm:px-5 md:px-6 py-4">
                           <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {categories.find(c => c.id === post.categoryId)?.name || 'â€”'}
+                            {categories.find(c => c.id === post.categoryId)?.name || '—'}
                           </span>
                         </td>
                         <td className="px-4 sm:px-5 md:px-6 py-4">

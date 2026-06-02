@@ -15,7 +15,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { triggerLinksAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ───────────────────────────────────────────────────────────────────
 interface TriggerLink {
   id: string;
   name: string;
@@ -52,7 +52,7 @@ interface CreateLinkForm {
   automationTrigger: string;
 }
 
-// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Constants ───────────────────────────────────────────────────────────────
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
 const TRIGGER_OPTIONS = [
@@ -113,7 +113,7 @@ const DEMO_ANALYTICS: ClickAnalytics = {
   topBrowser: 'Chrome',
 };
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 function formatNumber(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
@@ -124,7 +124,7 @@ function formatDate(d: string): string {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Sub-components ──────────────────────────────────────────────────────────
 
 const StatCard: React.FC<{
   icon: React.ReactNode;
@@ -323,7 +323,7 @@ const CreateLinkModal: React.FC<{
   );
 };
 
-// â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main Component ──────────────────────────────────────────────────────────
 
 const TriggerLinks: React.FC = () => {
   const { isDemoMode } = useAuthStore();
@@ -348,7 +348,7 @@ const TriggerLinks: React.FC = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // â”€â”€ Load data â”€â”€
+  // ── Load data ──
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -369,7 +369,7 @@ const TriggerLinks: React.FC = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // â”€â”€ Load analytics when a link is selected â”€â”€
+  // ── Load analytics when a link is selected ──
   useEffect(() => {
     if (!selectedLink || isDemoMode) return;
     triggerLinksAPI.analytics(selectedLink.id)
@@ -380,7 +380,7 @@ const TriggerLinks: React.FC = () => {
       .catch(() => {});
   }, [selectedLink, isDemoMode]);
 
-  // â”€â”€ Filtered links â”€â”€
+  // ── Filtered links ──
   const filteredLinks = useMemo(() => {
     return links.filter(l => {
       if (filterStatus === 'active' && !l.isActive) return false;
@@ -398,7 +398,7 @@ const TriggerLinks: React.FC = () => {
     });
   }, [links, searchQuery, filterStatus]);
 
-  // â”€â”€ Computed stats â”€â”€
+  // ── Computed stats ──
   const stats = useMemo(() => {
     const total = links.length;
     const active = links.filter(l => l.isActive).length;
@@ -407,7 +407,7 @@ const TriggerLinks: React.FC = () => {
     return { total, active, inactive: total - active, totalClicks, topLink };
   }, [links]);
 
-  // â”€â”€ Actions â”€â”€
+  // ── Actions ──
   const resetForm = () => {
     setForm({ name: '', originalUrl: '', shortCode: '', tags: '', automationTrigger: '' });
   };
@@ -526,7 +526,7 @@ const TriggerLinks: React.FC = () => {
     setEditingLink(link);
   };
 
-  // â”€â”€ Render â”€â”€
+  // ── Render ──
   if (loading) {
     return (
       <div className="p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[60vh]">
@@ -559,7 +559,7 @@ const TriggerLinks: React.FC = () => {
         />
       )}
 
-      {/* â”€â”€ Header â”€â”€ */}
+      {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
         <div>
           <h1 className="text-2xl md:text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
@@ -575,7 +575,7 @@ const TriggerLinks: React.FC = () => {
         </button>
       </div>
 
-      {/* â”€â”€ Stats â”€â”€ */}
+      {/* ── Stats ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <StatCard
           icon={<Link2 size={20} />}
@@ -606,11 +606,11 @@ const TriggerLinks: React.FC = () => {
         />
       </div>
 
-      {/* â”€â”€ Main Content Grid â”€â”€ */}
+      {/* ── Main Content Grid ── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* â”€â”€ Left: Link List â”€â”€ */}
+        {/* ── Left: Link List ── */}
         <div className={`${selectedLink ? 'xl:col-span-1' : 'xl:col-span-3'}`}>
-          {/* â”€â”€ Filters â”€â”€ */}
+          {/* ── Filters ── */}
           <div className="flex flex-col sm:flex-row gap-3 mb-4">
             <div className="relative flex-1">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -639,7 +639,7 @@ const TriggerLinks: React.FC = () => {
             </div>
           </div>
 
-          {/* â”€â”€ Links Table/Cards â”€â”€ */}
+          {/* ── Links Table/Cards ── */}
           {filteredLinks.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
               <Link2 size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
@@ -657,7 +657,7 @@ const TriggerLinks: React.FC = () => {
               )}
             </div>
           ) : selectedLink ? (
-            /* â”€â”€ Compact list when analytics panel is open â”€â”€ */
+            /* ── Compact list when analytics panel is open ── */
             <div className="space-y-2">
               {filteredLinks.map(link => (
                 <div
@@ -683,7 +683,7 @@ const TriggerLinks: React.FC = () => {
               ))}
             </div>
           ) : (
-            /* â”€â”€ Full table view â”€â”€ */
+            /* ── Full table view ── */
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -793,10 +793,10 @@ const TriggerLinks: React.FC = () => {
           )}
         </div>
 
-        {/* â”€â”€ Right: Analytics Panel â”€â”€ */}
+        {/* ── Right: Analytics Panel ── */}
         {selectedLink && (
           <div className="xl:col-span-2 space-y-4">
-            {/* â”€â”€ Analytics Header â”€â”€ */}
+            {/* ── Analytics Header ── */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
               <div className="flex items-start justify-between mb-4">
                 <div>
@@ -865,7 +865,7 @@ const TriggerLinks: React.FC = () => {
               )}
             </div>
 
-            {/* â”€â”€ Analytics Stats â”€â”€ */}
+            {/* ── Analytics Stats ── */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3 text-center">
                 <MousePointerClick size={18} className="mx-auto text-indigo-500 mb-1" />
@@ -889,7 +889,7 @@ const TriggerLinks: React.FC = () => {
               </div>
             </div>
 
-            {/* â”€â”€ Timeline Chart â”€â”€ */}
+            {/* ── Timeline Chart ── */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Click Timeline (7 Days)</h3>
               <div className="h-48 sm:h-56">
@@ -913,7 +913,7 @@ const TriggerLinks: React.FC = () => {
               </div>
             </div>
 
-            {/* â”€â”€ Breakdown Charts â”€â”€ */}
+            {/* ── Breakdown Charts ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Device Breakdown */}
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">

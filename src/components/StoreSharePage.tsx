@@ -42,7 +42,7 @@ const StoreSharePage: React.FC = () => {
   };
 
   const shareOnWhatsApp = () => {
-    const message = `ðŸ› Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`;
+    const message = `🛍 Check out our store!\n\n${storeData?.name || 'Our Store'}\n\n🛒 Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -56,7 +56,7 @@ const StoreSharePage: React.FC = () => {
   };
 
   const shareOnTwitter = () => {
-    const text = `ðŸ› Shop online at ${storeData?.name || 'Our Store'}: ${storeUrl}`;
+    const text = `🛍 Shop online at ${storeData?.name || 'Our Store'}: ${storeUrl}`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -118,7 +118,7 @@ const StoreSharePage: React.FC = () => {
     ctx.font = 'bold 16px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('ðŸ›', size / 2, size / 2);
+    ctx.fillText('🛍', size / 2, size / 2);
   };
 
   const generateSimplePattern = (data: string): boolean[][] => {
@@ -331,11 +331,11 @@ const StoreSharePage: React.FC = () => {
             <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-left">
               <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2">Where to use QR Code:</h4>
               <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
-                <li>â€¢ Print on receipts and bills</li>
-                <li>â€¢ Display at checkout counter</li>
-                <li>â€¢ Add to product packaging</li>
-                <li>â€¢ Include in business cards</li>
-                <li>â€¢ Show on social media posts</li>
+                <li>• Print on receipts and bills</li>
+                <li>• Display at checkout counter</li>
+                <li>• Add to product packaging</li>
+                <li>• Include in business cards</li>
+                <li>• Show on social media posts</li>
               </ul>
             </div>
           </div>
@@ -388,7 +388,7 @@ const StoreSharePage: React.FC = () => {
 
               <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl mb-4">
                 <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                  {`ðŸ› Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`}
+                  {`🛍 Check out our store!\n\n${storeData?.name || 'Our Store'}\n\n🛒 Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`}
                 </p>
               </div>
 
@@ -396,7 +396,7 @@ const StoreSharePage: React.FC = () => {
                 <button onClick={shareOnWhatsApp} className="flex-1 py-3 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 flex items-center justify-center gap-2">
                   <MessageSquare size={18} /> Share on WhatsApp
                 </button>
-                <button onClick={() => copyToClipboard(`ðŸ› Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`, 'whatsapp')} className="px-4 sm:px-5 md:px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                <button onClick={() => copyToClipboard(`🛍 Check out our store!\n\n${storeData?.name || 'Our Store'}\n\n🛒 Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`, 'whatsapp')} className="px-4 sm:px-5 md:px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                   {copiedField === 'whatsapp' ? <Check size={18} /> : <Copy size={18} />}
                 </button>
               </div>
@@ -406,23 +406,23 @@ const StoreSharePage: React.FC = () => {
               <h3 className="font-bold text-gray-900 dark:text-white mb-4">WhatsApp Business Tips</h3>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
                 <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">âœ“</span>
+                  <span className="text-green-500 mt-0.5">✓</span>
                   <span>Add the store link to your WhatsApp Business Profile</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">âœ“</span>
+                  <span className="text-green-500 mt-0.5">✓</span>
                   <span>Send this link to customers after they inquire about products</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">âœ“</span>
+                  <span className="text-green-500 mt-0.5">✓</span>
                   <span>Use it in WhatsApp catalogs for direct ordering</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">âœ“</span>
+                  <span className="text-green-500 mt-0.5">✓</span>
                   <span>Include in automated reply messages</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">âœ“</span>
+                  <span className="text-green-500 mt-0.5">✓</span>
                   <span>Share in WhatsApp groups and communities</span>
                 </li>
               </ul>

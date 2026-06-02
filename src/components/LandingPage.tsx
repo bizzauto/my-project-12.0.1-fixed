@@ -117,7 +117,7 @@ const slides = [
       <div className="bg-white dark:bg-gray-800/80 rounded-2xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-blue-500/20 shadow-2xl">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/20 rounded-xl flex items-center justify-center"><Users size={20} className="text-blue-600 dark:text-blue-400" /></div>
-          <div><p className="text-gray-900 dark:text-white font-semibold text-sm">Sales Pipeline</p><p className="text-blue-600 dark:text-blue-400 text-xs">â‚¹12,50,000 in pipeline</p></div>
+          <div><p className="text-gray-900 dark:text-white font-semibold text-sm">Sales Pipeline</p><p className="text-blue-600 dark:text-blue-400 text-xs">₹12,50,000 in pipeline</p></div>
         </div>
         <div className="grid grid-cols-4 gap-2 mb-4">
           {['New', 'Contacted', 'Qualified', 'Won'].map((s, i) => (
@@ -144,8 +144,8 @@ const slides = [
           <div><p className="text-gray-900 dark:text-white font-semibold text-sm">BizzAuto AI</p><div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-green-400 rounded-full pulse-dot" /><span className="text-xs text-green-600 dark:text-green-400">Online</span></div></div>
         </div>
         <div className="space-y-3">
-          <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-xl rounded-tl-none p-3 text-sm text-gray-700 dark:text-gray-300">ðŸ‘‹ Hello! I can help with marketing, CRM, and WhatsApp campaigns.</div>
-          <div className="bg-purple-100 dark:bg-purple-500/30 rounded-xl rounded-tr-none p-3 text-sm text-gray-900 dark:text-white ml-8 border border-purple-300 dark:border-purple-400/20">Generate a Diwali sale poster ðŸª”</div>
+          <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-xl rounded-tl-none p-3 text-sm text-gray-700 dark:text-gray-300">👋 Hello! I can help with marketing, CRM, and WhatsApp campaigns.</div>
+          <div className="bg-purple-100 dark:bg-purple-500/30 rounded-xl rounded-tr-none p-3 text-sm text-gray-900 dark:text-white ml-8 border border-purple-300 dark:border-purple-400/20">Generate a Diwali sale poster 🪔</div>
           <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-xl rounded-tl-none p-3 text-sm text-gray-700 dark:text-gray-300"><Sparkles size={14} className="inline text-yellow-500 mr-1" />Creating your poster with festive theme...</div>
         </div>
       </div>
@@ -159,7 +159,7 @@ const slides = [
           <div><p className="text-gray-900 dark:text-white font-semibold text-sm">Analytics Dashboard</p><p className="text-orange-600 dark:text-orange-400 text-xs">Last 7 days</p></div>
         </div>
         <div className="grid grid-cols-3 gap-3 mb-4">
-          {[{ l: 'Leads', v: '247', c: '+12%' }, { l: 'Revenue', v: 'â‚¹2.4L', c: '+23%' }, { l: 'Messages', v: '8.5K', c: '+8%' }].map((s, i) => (
+          {[{ l: 'Leads', v: '247', c: '+12%' }, { l: 'Revenue', v: '₹2.4L', c: '+23%' }, { l: 'Messages', v: '8.5K', c: '+8%' }].map((s, i) => (
             <div key={i} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 text-center"><p className="text-[10px] text-gray-500 dark:text-gray-400">{s.l}</p><p className="text-gray-900 dark:text-white font-bold text-sm">{s.v}</p><p className="text-emerald-600 dark:text-emerald-400 text-[10px]">{s.c}</p></div>
           ))}
         </div>
@@ -167,7 +167,7 @@ const slides = [
       </div>
     )
   },
-  { title: 'Multi-Channel Marketing', desc: 'Facebook, Instagram, LinkedIn, Google, Email â€” manage all your marketing channels from one unified dashboard.', icon: <Globe size={32} />, gradient: 'from-teal-500 to-emerald-600',
+  { title: 'Multi-Channel Marketing', desc: 'Facebook, Instagram, LinkedIn, Google, Email — manage all your marketing channels from one unified dashboard.', icon: <Globe size={32} />, gradient: 'from-teal-500 to-emerald-600',
     preview: (
       <div className="bg-white dark:bg-gray-800/80 rounded-2xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-teal-500/20 shadow-2xl">
         <div className="flex items-center gap-3 mb-5">
@@ -232,7 +232,7 @@ const LandingPage: React.FC = () => {
               Automate your business<br />
               <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">with WhatsApp & AI</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">CRM, WhatsApp marketing, AI content, automation â€” all in one powerful platform. Built specifically for Indian businesses.</p>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">CRM, WhatsApp marketing, AI content, automation — all in one powerful platform. Built specifically for Indian businesses.</p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-6 px-4 sm:px-0">
               <Link to="/register" className="group w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-base sm:text-lg">Start Free Trial<ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" /></Link>
               <button onClick={() => setShowVideo(true)} className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center gap-2 transition-all text-base sm:text-lg"><Play size={20} /> Watch Demo</button>
@@ -290,7 +290,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <p className="text-center text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8">Trusted by businesses in every industry</p>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-8">
-            {[{ e: 'ðŸ¥', n: 'Healthcare' }, { e: 'ðŸ ', n: 'Real Estate' }, { e: 'ðŸ•', n: 'Restaurants' }, { e: 'ðŸ’‡', n: 'Salons' }, { e: 'ðŸ“š', n: 'Education' }, { e: 'ðŸ›’', n: 'E-Commerce' }].map((item, i) => (
+            {[{ e: '🏥', n: 'Healthcare' }, { e: '🏠', n: 'Real Estate' }, { e: '🍕', n: 'Restaurants' }, { e: '💇', n: 'Salons' }, { e: '📚', n: 'Education' }, { e: '🛒', n: 'E-Commerce' }].map((item, i) => (
               <div key={i} className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-5 sm:py-2.5 bg-gray-50 dark:bg-white/5 rounded-lg sm:rounded-xl border border-gray-200 dark:border-white/5 hover:border-emerald-300 dark:hover:border-emerald-500/30 hover:bg-emerald-50 dark:hover:bg-emerald-500/5 transition-all cursor-default">
                 <span className="text-xl sm:text-2xl">{item.e}</span>
                 <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{item.n}</span>

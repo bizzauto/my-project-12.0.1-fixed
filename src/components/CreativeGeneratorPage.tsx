@@ -441,9 +441,9 @@ const CreativeGeneratorPage: React.FC = () => {
       if (res.data?.subtitles) setAiSubtitles(res.data.subtitles);
     } catch {
       const h = language === 'hi'
-        ? ['à¤§à¤®à¤¾à¤•à¥‡à¤¦à¤¾à¤° à¤‘à¤«à¤°!', 'à¤¤à¥à¤¯à¥‹à¤¹à¤¾à¤°à¥€ à¤›à¥‚à¤Ÿ!', 'à¤¨à¤¯à¤¾ à¤•à¤²à¥‡à¤•à¥à¤¶à¤¨!', 'à¤œà¤²à¥à¤¦à¥€ à¤•à¤°à¥‡à¤‚!', 'à¤¸à¥à¤ªà¥‡à¤¶à¤² à¤¡à¥€à¤²!']
+        ? ['Biggest Sale Ever!', 'Festival Special!', 'New Collection!', 'Limited Time!', 'Exclusive Deal!']
         : ['Biggest Sale Ever!', 'Festival Special!', 'New Collection!', 'Limited Time!', 'Exclusive Deal!'];
-      const s = language === 'hi' ? ['à¤…à¤­à¥€ à¤–à¤°à¥€à¤¦à¥‡à¤‚', 'à¤¸à¥€à¤®à¤¿à¤¤ à¤¸à¤®à¤¯', 'à¤¸à¥à¤Ÿà¥‰à¤• à¤–à¤¤à¥à¤®'] : ['Shop Now', 'Limited Time', 'While Stocks Last'];
+      const s = language === 'hi' ? ['Shop Now', 'Limited Time', 'While Stocks Last'] : ['Shop Now', 'Limited Time', 'While Stocks Last'];
       setAiHeadlines(h);
       setAiSubtitles(s);
     } finally { setIsGenerating(false); }
@@ -528,7 +528,7 @@ const CreativeGeneratorPage: React.FC = () => {
           {(['create', 'history'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeView === v ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}>
-              {v === 'create' ? '✨ Create' : 'ðŸ“‚ History'}
+              {v === 'create' ? '✨ Create' : '📂 History'}
             </button>
           ))}
         </div>
@@ -635,7 +635,7 @@ const CreativeGeneratorPage: React.FC = () => {
                   <button key={tab} onClick={() => setActiveDesignTab(tab)}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-medium whitespace-nowrap transition-all ${activeDesignTab === tab ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>
                     {tab === 'basic' && '🎨 Basic'}
-                    {tab === 'filters' && 'ðŸ”„ Filters'}
+                    {tab === 'filters' && '🔄 Filters'}
                     {tab === 'effects' && '✨ Effects'}
                     {tab === 'stickers' && '😊 Stickers'}
                   </button>
@@ -649,7 +649,7 @@ const CreativeGeneratorPage: React.FC = () => {
                     <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1"><Globe size={12} /> Language</label>
                     <div className="grid grid-cols-2 gap-2">
                       <button onClick={() => setLanguage('en')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${language === 'en' ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>English</button>
-                      <button onClick={() => setLanguage('hi')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${language === 'hi' ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>à¤¹à¤¿à¤¨à¥à¤¦à¥€</button>
+                      <button onClick={() => setLanguage('hi')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${language === 'hi' ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>हिन्दी</button>
                     </div>
                   </div>
                   <div className="mb-3">
@@ -961,7 +961,7 @@ const CreativeGeneratorPage: React.FC = () => {
                           ...getTextEffectStyle(),
                         }}
                       >
-                        {headline || (language === 'hi' ? 'à¤…à¤ªà¤¨à¥€ à¤¹à¥‡à¤¡à¤²à¤¾à¤‡à¤¨ à¤²à¤¿à¤–à¥‡à¤‚' : 'Your Headline')}
+                        {headline || 'Your Headline'}
                       </h2>
 
                       <p className="mt-1.5 opacity-90 drop-shadow-md px-2 max-w-xs"
@@ -972,7 +972,7 @@ const CreativeGeneratorPage: React.FC = () => {
                           textTransform: textEffects.uppercase ? 'uppercase' : 'none',
                         }}
                       >
-                        {subtitle || (language === 'hi' ? 'à¤†à¤ªà¤•à¥€ à¤¸à¤¬à¤Ÿà¤¾à¤‡à¤Ÿà¤²' : 'Your subtitle goes here')}
+                        {subtitle || 'Your subtitle goes here'}
                       </p>
 
                       <div className="mt-auto pt-3 w-full px-3">
@@ -1016,10 +1016,10 @@ const CreativeGeneratorPage: React.FC = () => {
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">{language === 'hi' ? 'à¤¹à¥‡à¤¡à¤²à¤¾à¤‡à¤¨' : 'Headline'}</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">{'Headline'}</label>
                   <input type="text" value={headline} onChange={(e) => setHeadline(e.target.value)}
                     className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder={language === 'hi' ? 'à¤¹à¥‡à¤¡à¤²à¤¾à¤‡à¤¨ à¤²à¤¿à¤–à¥‡à¤‚...' : 'Enter headline...'}
+                    placeholder='Enter headline...'
                     style={{ fontFamily: language === 'hi' ? "'Noto Sans Devanagari', sans-serif" : 'inherit' }} />
                 </div>
                 <div>
@@ -1050,12 +1050,12 @@ const CreativeGeneratorPage: React.FC = () => {
       ) : (
         /* History View */
         <div className="modern-card rounded-2xl p-4 sm:p-5 md:p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">ðŸ“‚ Saved Posters</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📂 Saved Posters</h3>
           {history.length === 0 ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               <Image size={48} className="mx-auto mb-4 opacity-30" />
-              <p>{language === 'hi' ? 'à¤•à¥‹à¤ˆ à¤ªà¥‹à¤¸à¥à¤Ÿà¤° à¤¸à¥‡à¤µ à¤¨à¤¹à¥€à¤‚' : 'No saved posters yet'}</p>
-              <p className="text-sm mt-1">{language === 'hi' ? 'à¤…à¤ªà¤¨à¤¾ à¤ªà¤¹à¤²à¤¾ à¤ªà¥‹à¤¸à¥à¤Ÿà¤° à¤¬à¤¨à¤¾à¤à¤‚' : 'Create your first poster'}</p>
+              <p>{'No saved posters yet'}</p>
+              <p className="text-sm mt-1">{'Create your first poster'}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">

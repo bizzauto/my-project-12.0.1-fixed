@@ -182,14 +182,14 @@ const BulkImportExport: React.FC = () => {
                 <span className="font-medium text-gray-900 dark:text-white text-sm">Import Results</span>
               </div>
               <div className="text-sm space-y-1">
-                <p className="text-green-600 dark:text-green-400">âœ“ {importResult.success} products imported</p>
+                <p className="text-green-600 dark:text-green-400">✓ {importResult.success} products imported</p>
                 {importResult.errors > 0 && (
-                  <p className="text-red-600 dark:text-red-400">âœ— {importResult.errors} errors</p>
+                  <p className="text-red-600 dark:text-red-400">✖ {importResult.errors} errors</p>
                 )}
                 {importResult.errorMessages.length > 0 && (
                   <div className="mt-2 space-y-1">
                     {importResult.errorMessages.map((msg, i) => (
-                      <p key={i} className="text-xs text-red-500 dark:text-red-400 pl-2">â€¢ {msg}</p>
+                      <p key={i} className="text-xs text-red-500 dark:text-red-400 pl-2">• {msg}</p>
                     ))}
                   </div>
                 )}

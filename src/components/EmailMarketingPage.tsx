@@ -13,7 +13,7 @@ import {
 import { emailAPI, campaignsAPI, analyticsAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ───────────────────────────────────────────────────────────────────
 interface EmailTemplate {
   id: string;
   name: string;
@@ -110,7 +110,7 @@ interface SmtpConfig {
   provider: 'smtp' | 'sendgrid' | 'mailgun' | 'ses';
 }
 
-// â”€â”€â”€ Color Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Color Constants ─────────────────────────────────────────────────────────
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
@@ -120,18 +120,18 @@ const STATUS_COLORS: Record<string, string> = {
   paused: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
 };
 
-// â”€â”€â”€ Static Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Static Data ─────────────────────────────────────────────────────────────
 const DEMO_TEMPLATES: EmailTemplate[] = [
   { id: 't1', name: 'Welcome Series', subject: 'Welcome to {{business}}!', preview: 'Beautiful welcome email with brand intro', category: 'Onboarding', variables: ['business', 'name'], isDragEnabled: true, blocks: [] },
-  { id: 't2', name: 'Promotional', subject: 'ðŸ”¥ {{discount}}% Off - Limited Time!', preview: 'Eye-catching promotional campaign', category: 'Marketing', variables: ['discount', 'business'], isDragEnabled: true, blocks: [] },
+  { id: 't2', name: 'Promotional', subject: '🔥 {{discount}}% Off - Limited Time!', preview: 'Eye-catching promotional campaign', category: 'Marketing', variables: ['discount', 'business'], isDragEnabled: true, blocks: [] },
   { id: 't3', name: 'Newsletter', subject: '{{business}} Monthly Update', preview: 'Monthly newsletter with updates and offers', category: 'Content', variables: ['business', 'month'], isDragEnabled: true, blocks: [] },
   { id: 't4', name: 'Re-engagement', subject: 'We Miss You, {{name}}!', preview: 'Win back inactive customers', category: 'Retention', variables: ['name', 'business'], isDragEnabled: true, blocks: [] },
-  { id: 't5', name: 'Abandoned Cart', subject: 'Your Cart is Waiting! ðŸ›’', preview: 'Recover abandoned carts with urgency', category: 'E-Commerce', variables: ['name', 'items', 'business'], isDragEnabled: true, blocks: [] },
+  { id: 't5', name: 'Abandoned Cart', subject: 'Your Cart is Waiting! 🛒', preview: 'Recover abandoned carts with urgency', category: 'E-Commerce', variables: ['name', 'items', 'business'], isDragEnabled: true, blocks: [] },
   { id: 't6', name: 'Invoice/Receipt', subject: 'Receipt for {{business}} Order', preview: 'Professional invoice template', category: 'Transactional', variables: ['business', 'order', 'amount'], isDragEnabled: true, blocks: [] },
 ];
 
 const DEMO_CAMPAIGNS: EmailCampaign[] = [
-  { id: 'c1', name: 'New Year Mega Sale', subject: 'ðŸŽ‰ New Year Special - Up to 50% Off!', previewText: 'Start the year with amazing deals', status: 'sent', recipients: 2450, sent: 2450, delivered: 2352, opened: 857, clicked: 284, bounced: 48, unsubscribed: 12, complaints: 2, sentAt: '2025-01-01T10:00:00Z' },
+  { id: 'c1', name: 'New Year Mega Sale', subject: '🎉 New Year Special - Up to 50% Off!', previewText: 'Start the year with amazing deals', status: 'sent', recipients: 2450, sent: 2450, delivered: 2352, opened: 857, clicked: 284, bounced: 48, unsubscribed: 12, complaints: 2, sentAt: '2025-01-01T10:00:00Z' },
   { id: 'c2', name: 'Product Launch', subject: 'Introducing Our New Feature', previewText: 'Check out what we built', status: 'scheduled', recipients: 3800, scheduledAt: '2025-02-15T09:00:00Z' },
   { id: 'c3', name: 'Monthly Newsletter', subject: 'February Updates Inside', previewText: 'News, tips, and exclusive offers', status: 'draft', recipients: 4200 },
   { id: 'c4', name: 'Re-engagement Campaign', subject: 'We Miss You! Come Back for 20% Off', previewText: 'Exclusive offer for loyal customers', status: 'sending', recipients: 1800, sent: 523, delivered: 510, opened: 89, clicked: 34 },
@@ -149,18 +149,18 @@ const DEMO_DRIPS: DripSequence[] = [
   { id: 'd1', name: 'New Lead Nurture', trigger: 'signup', emails: [
     { id: 'de1', subject: 'Welcome! Here\'s What to Expect', delay: 0, content: 'Welcome email content...' },
     { id: 'de2', subject: 'Tip: Get the Most Out of Our Platform', delay: 24, content: 'Tip content...' },
-    { id: 'de3', subject: 'Special Offer Inside ðŸŽ', delay: 72, content: 'Offer content...' },
+    { id: 'de3', subject: 'Special Offer Inside 🎁', delay: 72, content: 'Offer content...' },
   ], isActive: true, stats: { sent: 892, opened: 345, clicked: 123 } },
   { id: 'd2', name: 'Cart Abandonment', trigger: 'order_placed', emails: [
     { id: 'de4', subject: 'You Left Something Behind!', delay: 1, content: 'Reminder content...' },
     { id: 'de5', subject: 'Still Thinking? Here\'s 10% Off', delay: 24, content: 'Discount content...' },
   ], isActive: true, stats: { sent: 445, opened: 178, clicked: 67 } },
   { id: 'd3', name: 'Birthday Wishes', trigger: 'custom', triggerValue: 'birthday', emails: [
-    { id: 'de6', subject: 'Happy Birthday from {{business}}! ðŸŽ‚', delay: 0, content: 'Birthday content...' },
+    { id: 'de6', subject: 'Happy Birthday from {{business}}! 🎂', delay: 0, content: 'Birthday content...' },
   ], isActive: false, stats: { sent: 0, opened: 0, clicked: 0 } },
 ];
 
-// â”€â”€â”€ Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Components ──────────────────────────────────────────────────────────────
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; color: string }> = ({ icon, label, value, color }) => {
   const bgMap: Record<string, string> = {
@@ -180,7 +180,7 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string |
   );
 };
 
-// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main Page ───────────────────────────────────────────────────────────────
 
 const EmailMarketingPage: React.FC = () => {
   const { isDemoMode } = useAuthStore();
@@ -208,7 +208,7 @@ const EmailMarketingPage: React.FC = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // â”€â”€ Load data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Load data ─────────────────────────────────────────────────────
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -256,7 +256,7 @@ const EmailMarketingPage: React.FC = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // â”€â”€ Computed stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Computed stats ─────────────────────────────────────────────────
   const emailStats = useMemo(() => {
     const totalSent = campaigns.reduce((s, c) => s + (c.sent || 0), 0);
     const totalDelivered = campaigns.reduce((s, c) => s + (c.delivered || 0), 0);
@@ -286,7 +286,7 @@ const EmailMarketingPage: React.FC = () => {
     l.name.toLowerCase().includes(searchQuery.toLowerCase())
   ), [emailLists, searchQuery]);
 
-  // â”€â”€ Campaign actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Campaign actions ───────────────────────────────────────────────
   const sendCampaign = async (id: string) => {
     setCampaigns(prev => prev.map(c => c.id === id ? { ...c, status: 'sending' } : c));
     try {
@@ -321,10 +321,10 @@ const EmailMarketingPage: React.FC = () => {
     setDrips(prev => prev.map(d => d.id === id ? { ...d, isActive: !d.isActive } : d));
   };
 
-  // â”€â”€ Formatting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Formatting ─────────────────────────────────────────────────────
   const formatPct = (v: number) => `${v.toFixed(1)}%`;
 
-  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Render ─────────────────────────────────────────────────────────
   if (loading) return (
     <div className="p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[60vh]">
       <div className="flex flex-col items-center gap-3">
@@ -342,7 +342,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       )}
 
-      {/* â”€â”€ Header â”€â”€ */}
+      {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
         <div>
           <h1 className="text-2xl md:text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
@@ -361,7 +361,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* â”€â”€ Stats â”€â”€ */}
+      {/* ── Stats ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
         <StatCard icon={<Send size={18} />} label="Total Sent" value={(totalSent || totalRecipients).toLocaleString()} color="blue" />
         <StatCard icon={<Eye size={18} />} label="Open Rate" value={`${avgOpenRate}%`} color="green" />
@@ -371,7 +371,7 @@ const EmailMarketingPage: React.FC = () => {
         <StatCard icon={<TrendingUp size={18} />} label="Campaigns" value={campaigns.length} color="green" />
       </div>
 
-      {/* â”€â”€ Tabs â”€â”€ */}
+      {/* ── Tabs ── */}
       <div className="border-b border-gray-200 dark:border-gray-700 mb-6 overflow-x-auto">
         <div className="flex gap-1 min-w-max">
           {[
@@ -392,7 +392,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* â”€â”€ Search â”€â”€ */}
+      {/* ── Search ── */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
         <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
@@ -400,7 +400,7 @@ const EmailMarketingPage: React.FC = () => {
           className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
       </div>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CAMPAIGNS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ══════════════════ CAMPAIGNS ══════════════════ */}
       {activeTab === 'campaigns' && (
         <div className="space-y-4">
           {filteredCampaigns.length === 0 ? (
@@ -474,7 +474,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TEMPLATES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ══════════════════ TEMPLATES ══════════════════ */}
       {activeTab === 'templates' && (
         <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -512,7 +512,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LISTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ══════════════════ LISTS ══════════════════ */}
       {activeTab === 'lists' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredLists.map(list => (
@@ -545,7 +545,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• AUTOMATION (Drip Sequences) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ══════════════════ AUTOMATION (Drip Sequences) ══════════════════ */}
       {activeTab === 'automation' && (
         <div className="space-y-4">
           {drips.map(drip => (
@@ -558,7 +558,7 @@ const EmailMarketingPage: React.FC = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-white">{drip.name}</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Trigger: {drip.trigger.replace('_', ' ')} {drip.triggerValue ? `(${drip.triggerValue})` : ''} â€¢ {drip.emails.length} emails
+                      Trigger: {drip.trigger.replace('_', ' ')} {drip.triggerValue ? `(${drip.triggerValue})` : ''} • {drip.emails.length} emails
                     </p>
                   </div>
                 </div>
@@ -600,7 +600,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ANALYTICS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ══════════════════ ANALYTICS ══════════════════ */}
       {activeTab === 'analytics' && (
         <div className="space-y-6">
           {/* Date range selector */}
@@ -698,7 +698,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SETTINGS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ══════════════════ SETTINGS ══════════════════ */}
       {activeTab === 'settings' && (
         <div className="max-w-2xl space-y-6">
           {/* SMTP Configuration */}
@@ -778,7 +778,7 @@ const EmailMarketingPage: React.FC = () => {
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• COMPOSE MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ══════════════════ COMPOSE MODAL ══════════════════ */}
       {showComposeModal && (
         <ComposeModal
           onClose={() => setShowComposeModal(false)}
@@ -803,7 +803,7 @@ const EmailMarketingPage: React.FC = () => {
   );
 };
 
-// â”€â”€â”€ Compose Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Compose Modal ────────────────────────────────────────────────────────────
 const ComposeModal: React.FC<{
   onClose: () => void;
   onSend: (data: any) => void;
@@ -898,7 +898,7 @@ const ComposeModal: React.FC<{
                   <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Write your email content here... Use {{name}}, {{business}} for personalization." rows={8} className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none resize-none text-sm" />
                 </div>
                 <div className="flex items-center justify-between mt-2">
-                  <button onClick={() => showToast('AI content generation coming soon')} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1"><Zap size={12} /> âœ¨ Generate with AI</button>
+                  <button onClick={() => showToast('AI content generation coming soon')} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1"><Zap size={12} /> ✨ Generate with AI</button>
                   <span className="text-xs text-gray-400">{content.length} chars</span>
                 </div>
               </div>
@@ -929,8 +929,8 @@ const ComposeModal: React.FC<{
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Campaign Summary</h4>
                 <div className="space-y-1.5 text-sm">
-                  <p className="flex justify-between"><span className="text-gray-500">Name:</span><span className="font-medium text-gray-900 dark:text-white">{name || 'â€”'}</span></p>
-                  <p className="flex justify-between"><span className="text-gray-500">Subject:</span><span className="font-medium text-gray-900 dark:text-white">{subject || 'â€”'}</span></p>
+                  <p className="flex justify-between"><span className="text-gray-500">Name:</span><span className="font-medium text-gray-900 dark:text-white">{name || '—'}</span></p>
+                  <p className="flex justify-between"><span className="text-gray-500">Subject:</span><span className="font-medium text-gray-900 dark:text-white">{subject || '—'}</span></p>
                   <p className="flex justify-between"><span className="text-gray-500">Recipients:</span><span className="font-medium text-gray-900 dark:text-white">{selectedList ? `${selectedList} list` : 'All Contacts'}</span></p>
                   <p className="flex justify-between"><span className="text-gray-500">Delivery:</span><span className="font-medium text-gray-900 dark:text-white">{scheduledAt ? `Scheduled ${new Date(scheduledAt).toLocaleString()}` : 'Immediate'}</span></p>
                 </div>

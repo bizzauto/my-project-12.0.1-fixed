@@ -381,7 +381,7 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-semibold text-sm backdrop-blur-sm">
-                {session ? getInitials(visitorInfo.name || 'V') : 'ðŸ’¬'}
+                {session ? getInitials(visitorInfo.name || 'V') : '💬'}
               </div>
               <div>
                 <h3 className="text-white font-semibold text-sm leading-tight">
@@ -430,7 +430,7 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center text-white text-xl font-bold"
                       style={{ backgroundColor: widgetColor }}
                     >
-                      {widgetConfig?.name?.[0] || 'ðŸ’¬'}
+                      {widgetConfig?.name?.[0] || '💬'}
                     </div>
                     <h4 className="text-gray-900 dark:text-white font-semibold text-lg">
                       {widgetConfig?.name || 'Start a Conversation'}
@@ -604,7 +604,7 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                               className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 mt-1"
                               style={{ backgroundColor: isBot ? '#6B7280' : widgetColor }}
                             >
-                              {isBot ? 'ðŸ¤–' : 'ðŸ‘¤'}
+                              {isBot ? '🤖' : '👤'}
                             </div>
                           )}
                           <div
@@ -634,7 +634,7 @@ const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
                           style={{ backgroundColor: widgetColor }}
                         >
-                          ðŸ‘¤
+                          👤
                         </div>
                         <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
                           <div className="flex gap-1">

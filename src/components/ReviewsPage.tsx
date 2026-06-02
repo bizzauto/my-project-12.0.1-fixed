@@ -121,7 +121,7 @@ export default function ReviewsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Reviews</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">{business?.name || 'Your Business'} â€” Manage customer reviews</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">{business?.name || 'Your Business'} — Manage customer reviews</p>
         </div>
         <button onClick={fetchReviews} className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
           <RefreshCw size={16} /> Sync Reviews

@@ -200,10 +200,10 @@ const ReportsPage: React.FC = () => {
   }, [fetchData]);
 
   const formatCurrency = (val: number) => {
-    if (val >= 10000000) return 'â‚¹' + (val / 10000000).toFixed(1) + 'Cr';
-    if (val >= 100000) return 'â‚¹' + (val / 100000).toFixed(1) + 'L';
-    if (val >= 1000) return 'â‚¹' + (val / 1000).toFixed(1) + 'K';
-    return 'â‚¹' + val;
+    if (val >= 10000000) return '₹' + (val / 10000000).toFixed(1) + 'Cr';
+    if (val >= 100000) return '₹' + (val / 100000).toFixed(1) + 'L';
+    if (val >= 1000) return '₹' + (val / 1000).toFixed(1) + 'K';
+    return '₹' + val;
   };
 
   const getScoreColor = (score: number) =>

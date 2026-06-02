@@ -96,7 +96,7 @@ const SocialMediaPage: React.FC = () => {
   const demoPosts: SocialPost[] = [
     {
       id: '1',
-      content: 'ðŸš€ Exciting news! We are launching our new product next week. Stay tuned for updates! #Launch #NewProduct',
+      content: '🚀 Exciting news! We are launching our new product next week. Stay tuned for updates! #Launch #NewProduct',
       platforms: ['facebook', 'instagram', 'linkedin'],
       status: 'published',
       publishedAt: '2024-01-15T10:30:00Z',
@@ -107,7 +107,7 @@ const SocialMediaPage: React.FC = () => {
     },
     {
       id: '2',
-      content: 'ðŸ“¢ Special offer: Get 20% off on all services this weekend only! Limited time offer. #SpecialOffer #WeekendSale',
+      content: '📢 Special offer: Get 20% off on all services this weekend only! Limited time offer. #SpecialOffer #WeekendSale',
       platforms: ['facebook', 'instagram'],
       status: 'scheduled',
       scheduledAt: '2024-01-20T09:00:00Z',
@@ -118,7 +118,7 @@ const SocialMediaPage: React.FC = () => {
     },
     {
       id: '3',
-      content: 'ðŸ’¡ Did you know? Our platform helps businesses automate their workflows and save up to 10 hours per week! #Productivity #Automation',
+      content: '💡 Did you know? Our platform helps businesses automate their workflows and save up to 10 hours per week! #Productivity #Automation',
       platforms: ['linkedin', 'twitter'],
       status: 'published',
       publishedAt: '2024-01-12T14:00:00Z',
@@ -129,7 +129,7 @@ const SocialMediaPage: React.FC = () => {
     },
     {
       id: '4',
-      content: 'ðŸŽ‰ Thank you to our amazing customers! We reached 10,000 users today! #Milestone #ThankYou',
+      content: '🎉 Thank you to our amazing customers! We reached 10,000 users today! #Milestone #ThankYou',
       platforms: ['facebook', 'instagram', 'twitter'],
       status: 'draft',
       likes: 0,
@@ -139,7 +139,7 @@ const SocialMediaPage: React.FC = () => {
     },
     {
       id: '5',
-      content: 'ðŸ“¸ Behind the scenes: Our team working hard to bring you the best features! #TeamWork #BehindTheScenes',
+      content: '📸 Behind the scenes: Our team working hard to bring you the best features! #TeamWork #BehindTheScenes',
       platforms: ['instagram'],
       status: 'published',
       publishedAt: '2024-01-10T16:45:00Z',
@@ -389,7 +389,7 @@ const SocialMediaPage: React.FC = () => {
     const media = igPublishMedia.length > 0 ? igPublishMedia : uploadedMedia;
 
     if (!media.length) {
-      showToast('ðŸ“· Instagram requires at least one image or video. Upload media first.', 'error');
+      showToast('📷 Instagram requires at least one image or video. Upload media first.', 'error');
       return;
     }
 
@@ -400,11 +400,11 @@ const SocialMediaPage: React.FC = () => {
       const mediaTypes = media.map(m => m.type);
       const caption = igPublishCaption.trim() || igPublishModal.post.content;
 
-      setIgPublishProgress({ step: 'ðŸ“¦ Creating media container...', percent: 25, status: 'processing' });
+      setIgPublishProgress({ step: '📦 Creating media container...', percent: 25, status: 'processing' });
 
       if (mediaUrls.length === 1) {
         // Single media publish
-        setIgPublishProgress({ step: 'â³ Waiting for Instagram to process media...', percent: 50, status: 'processing' });
+        setIgPublishProgress({ step: '⏳ Waiting for Instagram to process media...', percent: 50, status: 'processing' });
 
         const res = await instagramAPI.publish({
           mediaUrl: mediaUrls[0],
@@ -414,16 +414,16 @@ const SocialMediaPage: React.FC = () => {
 
         if (res.data.success) {
           await postsAPI.publish(igPublishModal.post.id).catch(() => {});
-          setIgPublishProgress({ step: 'âœ… Published successfully!', percent: 100, status: 'success' });
+          setIgPublishProgress({ step: '✅ Published successfully!', percent: 100, status: 'success' });
           setIgPublishResult({
             mediaId: res.data.data?.mediaId,
           });
-          showToast('âœ… Published to Instagram!');
+          showToast('✅ Published to Instagram!');
           fetchPosts();
         }
       } else {
         // Carousel publish (multiple items)
-        setIgPublishProgress({ step: 'ðŸ”„ Creating carousel containers...', percent: 30, status: 'processing' });
+        setIgPublishProgress({ step: '🔄 Creating carousel containers...', percent: 30, status: 'processing' });
 
         const res = await instagramAPI.publishCarousel({
           children: mediaUrls.map((url, i) => ({ mediaUrl: url, mediaType: mediaTypes[i] })),
@@ -432,17 +432,17 @@ const SocialMediaPage: React.FC = () => {
 
         if (res.data.success) {
           await postsAPI.publish(igPublishModal.post.id).catch(() => {});
-          setIgPublishProgress({ step: 'âœ… Carousel published successfully!', percent: 100, status: 'success' });
+          setIgPublishProgress({ step: '✅ Carousel published successfully!', percent: 100, status: 'success' });
           setIgPublishResult({
             mediaId: res.data.data?.mediaId,
           });
-          showToast('âœ… Carousel published to Instagram!');
+          showToast('✅ Carousel published to Instagram!');
           fetchPosts();
         }
       }
     } catch (err: any) {
       const errorMsg = err?.response?.data?.error || err?.response?.data?.details || 'Failed to publish to Instagram';
-      setIgPublishProgress({ step: `âŒ ${errorMsg}`, percent: 0, status: 'error' });
+      setIgPublishProgress({ step: `❌ ${errorMsg}`, percent: 0, status: 'error' });
       showToast(errorMsg, 'error');
     }
   };
@@ -874,8 +874,8 @@ const SocialMediaPage: React.FC = () => {
                       <div className="mt-1 space-y-1">
                         {Array.from({ length: Math.min(d.posts, 2) }).map((_, j) => (
                           <div key={j} className="px-1 sm:px-2 py-0.5 sm:py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs rounded truncate">
-                            <span className="hidden sm:inline">ðŸ“± Post {j + 1}</span>
-                            <span className="sm:hidden">ðŸ“±</span>
+                            <span className="hidden sm:inline">📱 Post {j + 1}</span>
+                            <span className="sm:hidden">📱</span>
                           </div>
                         ))}
                         {d.posts > 2 && <p className="text-xs text-gray-400">+{d.posts - 2}</p>}
@@ -946,7 +946,7 @@ const SocialMediaPage: React.FC = () => {
 
           {/* Best Time to Post */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4 sm:p-5 md:p-6 border border-gray-100 dark:border-gray-700">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">â° Best Time to Post</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">🕐 Best Time to Post</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Facebook</p>
@@ -1084,10 +1084,10 @@ const SocialMediaPage: React.FC = () => {
                   <p className="text-xs text-blue-700 dark:text-blue-300">
                     <strong>How to get these credentials:</strong><br />
                     {connectModal.platform === 'facebook'
-                      ? 'Go to Facebook Developers â†’ Your App â†’ Tools â†’ Graph API Explorer. Select your Page, get a Page Access Token with pages_manage_posts permission.'
+                      ? 'Go to Facebook Developers → Your App → Tools → Graph API Explorer. Select your Page, get a Page Access Token with pages_manage_posts permission.'
                       : connectModal.platform === 'linkedin'
-                        ? 'Go to LinkedIn Developers â†’ Your App â†’ Auth â†’ Access Tokens. Request w_organization_social permission.'
-                        : 'Go to Twitter Developer Portal â†’ Your Project â†’ Keys and Tokens â†’ Generate Bearer Token with Read and Write permissions.'}
+                        ? 'Go to LinkedIn Developers → Your App → Auth → Access Tokens. Request w_organization_social permission.'
+                        : 'Go to Twitter Developer Portal → Your Project → Keys and Tokens → Generate Bearer Token with Read and Write permissions.'}
                   </p>
                 </div>
 
@@ -1212,13 +1212,13 @@ const SocialMediaPage: React.FC = () => {
                 <textarea
                   value={composeContent}
                   onChange={e => setComposeContent(e.target.value)}
-                  placeholder="Write your post or click âœ¨ Generate with AI..."
+                  placeholder="Write your post or click ✨ Generate with AI..."
                   rows={4}
                   className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm sm:text-base"
                 />
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-2">
                   <button className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg text-xs sm:text-sm hover:bg-purple-100 dark:hover:bg-purple-900/50">
-                    <Zap size={14} /> âœ¨ Generate with AI
+                    <Zap size={14} /> ✨ Generate with AI
                   </button>
                   <span className="text-xs text-gray-400">{composeContent.length} characters</span>
                 </div>
@@ -1290,7 +1290,7 @@ const SocialMediaPage: React.FC = () => {
                             <XCircle size={14} />
                           </button>
                           <span className="absolute bottom-1 left-1 px-1 py-0.5 bg-black/50 text-white text-[10px] rounded">
-                            {media.type === 'VIDEO' ? 'ðŸŽ¬' : 'ðŸ“·'}
+                            {media.type === 'VIDEO' ? '🎬' : '📷'}
                           </span>
                         </div>
                       ))}
@@ -1427,8 +1427,8 @@ const SocialMediaPage: React.FC = () => {
                       </p>
                       {igStatus.accountInfo && (
                         <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                          <span>ðŸ‘¥ {igStatus.accountInfo.followers_count?.toLocaleString() || 'N/A'} followers</span>
-                          <span>ðŸ“¸ {igStatus.accountInfo.media_count || 'N/A'} posts</span>
+                          <span>👥 {igStatus.accountInfo.followers_count?.toLocaleString() || 'N/A'} followers</span>
+                          <span>📸 {igStatus.accountInfo.media_count || 'N/A'} posts</span>
                         </div>
                       )}
                     </div>
@@ -1459,7 +1459,7 @@ const SocialMediaPage: React.FC = () => {
               {/* Instagram Caption (editable) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <span className="text-pink-500">ðŸ“</span>
+                  <span className="text-pink-500">📝</span>
                   Caption for Instagram
                 </label>
                 <div className="relative">
@@ -1480,8 +1480,8 @@ const SocialMediaPage: React.FC = () => {
               {/* Media for Instagram */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <span className="text-pink-500">ðŸ“¸</span>
-                  Media {igPublishMedia.length > 1 && <span className="text-xs text-gray-400 font-normal">({igPublishMedia.length} items â€” Carousel)</span>}
+                  <span className="text-pink-500">📸</span>
+                  Media {igPublishMedia.length > 1 && <span className="text-xs text-gray-400 font-normal">({igPublishMedia.length} items — Carousel)</span>}
                 </label>
 
                 {/* Media grid preview */}
@@ -1508,7 +1508,7 @@ const SocialMediaPage: React.FC = () => {
                           <XCircle size={14} />
                         </button>
                         <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 text-white text-[10px] rounded-full backdrop-blur-sm">
-                          {media.type === 'VIDEO' ? 'ðŸŽ¬ Video' : 'ðŸ“· Photo'}
+                          {media.type === 'VIDEO' ? '🎬 Video' : '📷 Photo'}
                           {igPublishMedia.length > 1 && <span className="ml-1">#{i + 1}</span>}
                         </div>
                       </div>
@@ -1698,13 +1698,13 @@ const SocialMediaPage: React.FC = () => {
                   <div className="flex items-center gap-4 sm:gap-6 mt-2">
                     <div className="text-center">
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
-                        {igStatus.accountInfo.followers_count?.toLocaleString() || 'â€”'}
+                        {igStatus.accountInfo.followers_count?.toLocaleString() || '—'}
                       </p>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Followers</p>
                     </div>
                     <div className="text-center">
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
-                        {igStatus.accountInfo.media_count || 'â€”'}
+                        {igStatus.accountInfo.media_count || '—'}
                       </p>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Posts</p>
                     </div>
@@ -1737,7 +1737,7 @@ const SocialMediaPage: React.FC = () => {
                   onClick={() => setActiveView('dashboard')}
                   className="mt-3 text-xs text-pink-600 hover:underline"
                 >
-                  â† Go to Posts
+                  ← Go to Posts
                 </button>
               </div>
             ) : (
@@ -1765,7 +1765,7 @@ const SocialMediaPage: React.FC = () => {
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/50 text-white text-[10px] rounded-full">
-                          ðŸ“‘
+                          🔗
                         </div>
                       </div>
                     ) : (

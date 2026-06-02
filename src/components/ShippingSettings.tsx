@@ -158,10 +158,10 @@ const ShippingSettings: React.FC = () => {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-                  <span className="flex items-center gap-1"><DollarSign size={12} />Fee: â‚¹{rule.shippingFee}</span>
-                  {rule.freeAboveAmount && <span className="flex items-center gap-1"><Package size={12} />Free above â‚¹{rule.freeAboveAmount}</span>}
-                  {rule.minOrderAmount > 0 && <span>Min: â‚¹{rule.minOrderAmount}</span>}
-                  {rule.maxOrderAmount && <span>Max: â‚¹{rule.maxOrderAmount}</span>}
+                  <span className="flex items-center gap-1"><DollarSign size={12} />Fee: ₹{rule.shippingFee}</span>
+                  {rule.freeAboveAmount && <span className="flex items-center gap-1"><Package size={12} />Free above ₹{rule.freeAboveAmount}</span>}
+                  {rule.minOrderAmount > 0 && <span>Min: ₹{rule.minOrderAmount}</span>}
+                  {rule.maxOrderAmount && <span>Max: ₹{rule.maxOrderAmount}</span>}
                   {rule.pincodePrefixes.length > 0 && (
                     <span className="flex items-center gap-1"><MapPin size={12} />Pincodes: {rule.pincodePrefixes.slice(0, 3).join(', ')}{rule.pincodePrefixes.length > 3 ? ` +${rule.pincodePrefixes.length - 3}` : ''}</span>
                   )}
@@ -208,7 +208,7 @@ const ShippingSettings: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Min Order Amount (â‚¹)</label>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Min Order Amount (₹)</label>
                   <input
                     type="number"
                     value={form.minOrderAmount || ''}
@@ -217,7 +217,7 @@ const ShippingSettings: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Max Order Amount (â‚¹)</label>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Max Order Amount (₹)</label>
                   <input
                     type="number"
                     value={form.maxOrderAmount ?? ''}
@@ -230,7 +230,7 @@ const ShippingSettings: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Shipping Fee (â‚¹)</label>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Shipping Fee (₹)</label>
                   <input
                     type="number"
                     value={form.shippingFee || ''}
@@ -239,7 +239,7 @@ const ShippingSettings: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Free Above (â‚¹)</label>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Free Above (₹)</label>
                   <input
                     type="number"
                     value={form.freeAboveAmount ?? ''}

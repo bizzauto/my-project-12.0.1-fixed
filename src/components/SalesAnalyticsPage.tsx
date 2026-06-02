@@ -100,7 +100,7 @@ const SalesAnalyticsPage: React.FC = () => {
     fetchAnalytics();
   }, [fetchAnalytics]);
 
-  const formatCurrency = (val: number) => `â‚¹${val.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  const formatCurrency = (val: number) => `₹${val.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-5 md:p-6">

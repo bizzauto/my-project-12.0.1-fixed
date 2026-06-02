@@ -163,7 +163,7 @@ async function tryAPI<T>(apiCall: () => Promise<{ data: any }>, fallback: T): Pr
   try {
     const res = await apiCall();
     const body = res?.data;
-    // Backend wraps: { success: true, data: actualData } â†’ unwrap to actualData
+    // Backend wraps: { success: true, data: actualData } → unwrap to actualData
     return (body?.data as T) ?? (body as T) ?? fallback;
   } catch {
     return fallback;
@@ -221,7 +221,7 @@ const QRConnectView: React.FC<{
           <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={48} className="text-green-500" />
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">WhatsApp Connected! âœ…</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">WhatsApp Connected! ✅</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">Your WhatsApp Business is linked and ready to use.</p>
 
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-6">
@@ -232,7 +232,7 @@ const QRConnectView: React.FC<{
               <div className="text-left">
                 <p className="font-semibold text-gray-900 dark:text-white">{connectedPhone}</p>
                 <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
-                  <Wifi size={14} /> Connected â€¢ Active
+                  <Wifi size={14} /> Connected • Active
                 </p>
               </div>
             </div>
@@ -370,7 +370,7 @@ const QRConnectView: React.FC<{
               <div className="space-y-4">
                 {[
                   { step: 1, icon: <Smartphone size={20} />, text: 'Open WhatsApp on your phone', done: step >= 0 },
-                  { step: 2, icon: <MoreVertical size={20} />, text: 'Tap Menu (â‹®) or Settings', done: step >= 1 },
+                  { step: 2, icon: <MoreVertical size={20} />, text: 'Tap Menu (⋮) or Settings', done: step >= 1 },
                   { step: 3, icon: <Link2 size={20} />, text: 'Tap "Linked Devices"', done: step >= 2 },
                   { step: 4, icon: <QrCode size={20} />, text: 'Tap "Link a Device"', done: step >= 3 },
                   { step: 5, icon: <Smartphone size={20} />, text: 'Point your phone at this QR code', done: step >= 4 },
@@ -498,7 +498,7 @@ const QRConnectView: React.FC<{
                 <div className="mt-6 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl text-left">
                   <p className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-2">What is Evolution API?</p>
                   <p className="text-xs text-purple-600 dark:text-purple-400">
-                    Evolution API is an open-source WhatsApp Web API that lets you connect via QR code scanning â€” no Meta Business approval needed. Perfect for small businesses and quick setup.
+                    Evolution API is an open-source WhatsApp Web API that lets you connect via QR code scanning — no Meta Business approval needed. Perfect for small businesses and quick setup.
                   </p>
                 </div>
               </div>
@@ -543,7 +543,7 @@ const QRConnectView: React.FC<{
                     onClick={() => { onEvolutionConfigChange({ ...evolutionConfig, configured: true }); setShowEvolutionForm(false); }}
                     className="w-full px-4 sm:px-5 md:px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-semibold"
                   >
-                    ðŸ’¾ Save Configuration
+                    💾 Save Configuration
                   </button>
                 </div>
               </div>
@@ -689,7 +689,7 @@ const ChatView: React.FC<{
   const aiReplySuggestions = [
     'Thank you for your interest! Our premium package includes unlimited access to all features. Would you like to proceed?',
     'Hi! We appreciate your message. Our team is available Mon-Sat, 10 AM to 8 PM. How can we assist you?',
-    'Great question! Let me share our complete catalog with you. One moment please ðŸ˜Š',
+    'Great question! Let me share our complete catalog with you. One moment please 😊',
   ];
 
   const handleSendTemplate = (template: WATemplate) => {
@@ -956,7 +956,7 @@ const ChatView: React.FC<{
                             <Smile size={14} />
                           </button>
                           <button onClick={() => {
-                            const emoji = 'ðŸ‘';
+                            const emoji = '👍';
                             setNewMessage((prev) => prev + emoji);
                           }} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 dark:text-gray-400" title="React">
                             <Smile size={14} />
@@ -1121,7 +1121,7 @@ const ChatView: React.FC<{
                     </div>
                     <h3 className="font-bold text-white text-lg">{selectedContact.name}</h3>
                     <p className="text-green-100 text-sm">{selectedContact.phone}</p>
-                    <p className="text-green-200 text-xs mt-1">{selectedContact.online ? 'ðŸŸ¢ Online' : 'âšª Last seen today'}</p>
+                    <p className="text-green-200 text-xs mt-1">{selectedContact.online ? '🟢 Online' : '⚪ Last seen today'}</p>
                   </div>
 
                   <div className="p-4 space-y-4">
@@ -1160,7 +1160,7 @@ const ChatView: React.FC<{
                       <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">CRM Details</h4>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Stage:</span><span className="font-medium text-green-600 dark:text-green-400">Contacted</span></div>
-                        <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Deal Value:</span><span className="font-medium">â‚¹50,000</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Deal Value:</span><span className="font-medium">₹50,000</span></div>
                         <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Source:</span><span className="font-medium">WhatsApp</span></div>
                         <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Created:</span><span className="font-medium">Mar 15, 2024</span></div>
                       </div>
@@ -1317,7 +1317,7 @@ const BroadcastView: React.FC = () => {
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={40} className="text-green-500" />
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">Broadcast Sent! ðŸŽ‰</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">Broadcast Sent! 🎉</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-2">Successfully sent to {selectedContacts.length} contacts</p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Template: {selectedTemplate?.name.replace(/_/g, ' ')}</p>
           <div className="grid grid-cols-3 gap-3 mb-6">
@@ -1468,7 +1468,7 @@ const BroadcastView: React.FC = () => {
                   <div className="flex justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"><span className="text-gray-600 dark:text-gray-300">Recipients:</span><span className="font-medium text-green-600 dark:text-green-400">{selectedContacts.length} contacts</span></div>
                   <div className="flex justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"><span className="text-gray-600 dark:text-gray-300">Template:</span><span className="font-medium">{selectedTemplate.name.replace(/_/g, ' ')}</span></div>
                   <div className="flex justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"><span className="text-gray-600 dark:text-gray-300">Category:</span><span className="font-medium">{selectedTemplate.category}</span></div>
-                  <div className="flex justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"><span className="text-gray-600 dark:text-gray-300">Est. Cost:</span><span className="font-medium">â‚¹{(selectedContacts.length * 0.76).toFixed(2)}</span></div>
+                  <div className="flex justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"><span className="text-gray-600 dark:text-gray-300">Est. Cost:</span><span className="font-medium">₹{(selectedContacts.length * 0.76).toFixed(2)}</span></div>
                 </div>
 
                 <div className="mt-4">
@@ -1746,8 +1746,8 @@ const TemplateManagerView: React.FC = () => {
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[template.status]}`}>{template.status}</span>
                       <span className="text-xs text-gray-400">{template.category}</span>
-                      <span className="text-xs text-gray-400">â€¢</span>
-                      <span className="text-xs text-gray-400">{template.language === 'en' ? 'ðŸ‡¬ðŸ‡§ English' : template.language === 'hi' ? 'ðŸ‡®ðŸ‡³ Hindi' : template.language}</span>
+                      <span className="text-xs text-gray-400">•</span>
+                      <span className="text-xs text-gray-400">{template.language === 'en' ? '🇬🇧 English' : template.language === 'hi' ? '🇮🇳 Hindi' : template.language}</span>
                     </div>
                   </div>
                 </div>
@@ -1780,7 +1780,7 @@ const TemplateManagerView: React.FC = () => {
 
 const WhatsAppSettingsView: React.FC = () => {
   const [autoReplyEnabled, setAutoReplyEnabled] = useState(true);
-  const [welcomeMessage, setWelcomeMessage] = useState('Hello! ðŸ‘‹ Welcome to our business. How can we help you today?');
+  const [welcomeMessage, setWelcomeMessage] = useState('Hello! 👋 Welcome to our business. How can we help you today?');
   const [awayMessage, setAwayMessage] = useState('We are currently away. Our business hours are Mon-Sat, 10 AM to 8 PM IST. We\'ll get back to you soon!');
   const [autoReplies, setAutoReplies] = useState<AutoReplyRule[]>([]);
   const [autoRepliesLoading, setAutoRepliesLoading] = useState(true);
@@ -1933,7 +1933,7 @@ const WhatsAppSettingsView: React.FC = () => {
           {/* Save Button */}
           <div className="flex justify-end">
             <button className="px-4 sm:px-5 md:px-6 md:px-4 sm:px-6 md:px-8 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 font-semibold shadow-lg shadow-green-500/20">
-              ðŸ’¾ Save All Settings
+              💾 Save All Settings
             </button>
           </div>
         </div>
@@ -2007,7 +2007,7 @@ const CampaignsView: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-white">{campaign.name}</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Created {campaign.createdAt} â€¢ Template: {campaign.template.replace(/_/g, ' ')}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Created {campaign.createdAt} • Template: {campaign.template.replace(/_/g, ' ')}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -2241,7 +2241,7 @@ const ScheduledMessagesView: React.FC = () => {
                       <span className="flex items-center gap-1"><Phone size={12} /> {msg.phone}</span>
                       {msg.type !== 'text' && <span className="flex items-center gap-1"><Tag size={12} /> {msg.type}</span>}
                     </div>
-                    {msg.error && <p className="text-xs text-red-500 mt-1">âš  {msg.error}</p>}
+                    {msg.error && <p className="text-xs text-red-500 mt-1">⚠ {msg.error}</p>}
                   </div>
                   {msg.status === 'pending' && (
                     <button

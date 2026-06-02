@@ -123,7 +123,7 @@ const BulkImportPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <FileSpreadsheet size={20} className="text-blue-600" />
               <span className="font-medium text-gray-900">{file?.name}</span>
-              <span className="text-sm text-gray-500">â€¢ {contacts.length} contacts found</span>
+              <span className="text-sm text-gray-500">• {contacts.length} contacts found</span>
             </div>
             <div className="flex gap-2">
               <button onClick={reset} className="px-4 py-2 border border-gray-300 rounded-lg text-sm">Change File</button>

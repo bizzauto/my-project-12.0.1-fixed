@@ -29,14 +29,14 @@ interface PaginationInfo {
 const CATEGORIES = ['all', 'Festival', 'Offer', 'Product', 'Seasonal', 'social', 'whatsapp', 'flyer', 'poster'];
 
 const CATEGORY_EMOJIS: Record<string, string> = {
-  Festival: 'ðŸŽ‰',
-  Offer: 'ðŸŽ',
-  Product: 'ðŸ“¦',
-  Seasonal: 'ðŸŒ¸',
-  social: 'ðŸ“±',
-  whatsapp: 'ðŸ’¬',
-  flyer: 'ðŸ“„',
-  poster: 'ðŸ–¼',
+  Festival: '🎉',
+  Offer: '🎁',
+  Product: '📦',
+  Seasonal: '🌷',
+  social: '📱',
+  whatsapp: '💬',
+  flyer: '📄',
+  poster: '🖼',
 };
 
 const PosterGallery: React.FC = () => {
@@ -278,7 +278,7 @@ const PosterGallery: React.FC = () => {
                           loading="lazy"
                           onError={() => markBroken(poster.id)}
                         />
-                        {/* Hover overlay â€” download, view & delete */}
+                        {/* Hover overlay — download, view & delete */}
                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                           <button
                             onClick={() => handleDownload(poster.url)}

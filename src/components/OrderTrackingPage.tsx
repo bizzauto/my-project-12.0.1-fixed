@@ -213,9 +213,9 @@ const OrderTrackingPage: React.FC = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{item.name}</p>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity} Ã— â‚¹{item.price}</p>
+                      <p className="text-xs text-gray-500">Qty: {item.quantity} × ₹{item.price}</p>
                     </div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">â‚¹{item.total.toLocaleString()}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">₹{item.total.toLocaleString()}</p>
                   </div>
                 ))}
               </div>
@@ -226,10 +226,10 @@ const OrderTrackingPage: React.FC = () => {
               <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><CreditCard size={16} /> Payment Summary</h3>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span className="text-gray-900 dark:text-white">â‚¹{order.subtotal.toLocaleString()}</span></div>
-                  {order.discountAmount > 0 && <div className="flex justify-between text-green-600"><span>Discount</span><span>-â‚¹{order.discountAmount.toLocaleString()}</span></div>}
+                  <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span className="text-gray-900 dark:text-white">₹{order.subtotal.toLocaleString()}</span></div>
+                  {order.discountAmount > 0 && <div className="flex justify-between text-green-600"><span>Discount</span><span>-₹{order.discountAmount.toLocaleString()}</span></div>}
                   <div className="flex justify-between"><span className="text-gray-500">Shipping</span><span className="text-green-600">Free</span></div>
-                  <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200 dark:border-gray-700"><span>Total</span><span>â‚¹{order.total.toLocaleString()}</span></div>
+                  <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200 dark:border-gray-700"><span>Total</span><span>₹{order.total.toLocaleString()}</span></div>
                 </div>
                 {order.gateway && (
                   <p className="text-xs text-gray-400 mt-3">Payment via: {order.gateway === 'cod' ? 'Cash on Delivery' : 'Razorpay'}</p>

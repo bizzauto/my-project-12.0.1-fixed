@@ -440,7 +440,7 @@ const ECommercePage: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><TrendingUp size={16} /><span className="text-sm">Revenue</span></div>
-          <p className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">â‚¹{totalRevenue.toLocaleString()}</p>
+          <p className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">₹{totalRevenue.toLocaleString()}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><Package size={16} /><span className="text-sm">Total Orders</span></div>
@@ -509,9 +509,9 @@ const ECommercePage: React.FC = () => {
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg font-bold text-gray-900 dark:text-white">â‚¹{product.price}</span>
+                      <span className="text-lg font-bold text-gray-900 dark:text-white">₹{product.price}</span>
                       {(product.comparePrice || product.compareAtPrice) && (
-                        <span className="text-sm text-gray-400 line-through">â‚¹{product.comparePrice || product.compareAtPrice}</span>
+                        <span className="text-sm text-gray-400 line-through">₹{product.comparePrice || product.compareAtPrice}</span>
                       )}
                       {(product.comparePrice || product.compareAtPrice) && (
                         <span className="text-xs bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400 px-2 py-0.5 rounded-full">
@@ -563,18 +563,18 @@ const ECommercePage: React.FC = () => {
                           {orderStatusConfig[order.status]?.label || order.status}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{order.contact?.name || order.customerName || 'N/A'} â€¢ {order.contact?.phone || order.phone || ''}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{order.contact?.name || order.customerName || 'N/A'} • {order.contact?.phone || order.phone || ''}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-500">
                         {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : order.date || ''}
-                        {order.gateway && ` â€¢ ${order.gateway === 'cod' ? 'COD' : 'Online'}`}
+                        {order.gateway && ` • ${order.gateway === 'cod' ? 'COD' : 'Online'}`}
                       </p>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
                         <p className="text-sm text-gray-500 dark:text-gray-400">{order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}</p>
-                        <p className="text-lg font-bold text-gray-900 dark:text-white">â‚¹{order.total.toLocaleString()}</p>
+                        <p className="text-lg font-bold text-gray-900 dark:text-white">₹{order.total.toLocaleString()}</p>
                         {(order.discountAmount || 0) > 0 && (
-                          <p className="text-xs text-green-600 dark:text-green-400">-â‚¹{order.discountAmount} discount</p>
+                          <p className="text-xs text-green-600 dark:text-green-400">-₹{order.discountAmount} discount</p>
                         )}
                       </div>
                       <select
@@ -622,8 +622,8 @@ const ECommercePage: React.FC = () => {
                     <div>
                       <p className="font-semibold text-gray-900 dark:text-white">{coupon.code}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {(coupon.type === 'percentage' || coupon.type === 'PERCENTAGE') ? `${coupon.value}% off` : `â‚¹${coupon.value} off`}
-                        {coupon.minOrder && coupon.minOrder > 0 && ` â€¢ Min order â‚¹${coupon.minOrder}`}
+                        {(coupon.type === 'percentage' || coupon.type === 'PERCENTAGE') ? `${coupon.value}% off` : `₹${coupon.value} off`}
+                        {coupon.minOrder && coupon.minOrder > 0 && ` • Min order ₹${coupon.minOrder}`}
                       </p>
                       {coupon.maxUses && (
                         <p className="text-xs text-gray-400">{coupon.usedCount || 0}/{coupon.maxUses} used</p>
@@ -768,11 +768,11 @@ const AddProductModal: React.FC<{
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price (â‚¹) *</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price (₹) *</label>
               <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="499" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Compare Price (â‚¹)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Compare Price (₹)</label>
               <input type="number" value={comparePrice} onChange={e => setComparePrice(e.target.value)} placeholder="699" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
             </div>
           </div>
@@ -851,7 +851,7 @@ const CartModal: React.FC<{
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{item.product.name}</p>
                       {item.variantName && <p className="text-xs text-gray-500">{item.variantName}</p>}
-                      <p className="text-sm font-semibold text-blue-600">â‚¹{(item.variantPrice || item.product.price).toLocaleString()}</p>
+                      <p className="text-sm font-semibold text-blue-600">₹{(item.variantPrice || item.product.price).toLocaleString()}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       {item.id && (
@@ -869,11 +869,11 @@ const CartModal: React.FC<{
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
                 <div className="flex justify-between text-lg font-bold">
                   <span className="text-gray-900 dark:text-white">Total</span>
-                  <span className="text-gray-900 dark:text-white">â‚¹{subtotal.toLocaleString()}</span>
+                  <span className="text-gray-900 dark:text-white">₹{subtotal.toLocaleString()}</span>
                 </div>
               </div>
               <button onClick={onCheckout} className="w-full mt-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all">
-                Checkout â€¢ â‚¹{subtotal.toLocaleString()}
+                Checkout • ₹{subtotal.toLocaleString()}
               </button>
             </>
           )}
@@ -909,13 +909,13 @@ const CouponDisplayModal: React.FC<{
                     <div>
                       <p className="font-semibold text-gray-900 dark:text-white">{coupon.code}</p>
                       <p className="text-sm text-gray-500">
-                        {(coupon.type === 'percentage' || coupon.type === 'PERCENTAGE') ? `${coupon.value}% off` : `â‚¹${coupon.value} off`}
+                        {(coupon.type === 'percentage' || coupon.type === 'PERCENTAGE') ? `${coupon.value}% off` : `₹${coupon.value} off`}
                       </p>
                     </div>
                   </div>
                   <button onClick={() => { navigator.clipboard.writeText(coupon.code); }} className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">Copy</button>
                 </div>
-                {coupon.minOrder && coupon.minOrder > 0 && <p className="text-xs text-gray-500 mt-2">Min order: â‚¹{coupon.minOrder}</p>}
+                {coupon.minOrder && coupon.minOrder > 0 && <p className="text-xs text-gray-500 mt-2">Min order: ₹{coupon.minOrder}</p>}
                 {coupon.expiresAt && <p className="text-xs text-gray-400 mt-1">Expires: {new Date(coupon.expiresAt).toLocaleDateString()}</p>}
               </div>
             ))
@@ -969,7 +969,7 @@ const AddCouponModal: React.FC<{
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type *</label>
               <select value={type} onChange={e => setType(e.target.value as any)} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <option value="PERCENTAGE">Percentage (%)</option>
-                <option value="FIXED">Fixed Amount (â‚¹)</option>
+                <option value="FIXED">Fixed Amount (₹)</option>
               </select>
             </div>
             <div>
@@ -979,7 +979,7 @@ const AddCouponModal: React.FC<{
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Min Order (â‚¹)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Min Order (₹)</label>
               <input type="number" value={minOrder} onChange={e => setMinOrder(e.target.value)} placeholder="500" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
             </div>
             <div>

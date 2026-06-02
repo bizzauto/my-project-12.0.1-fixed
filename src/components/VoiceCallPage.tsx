@@ -387,7 +387,7 @@ const VoiceCallPage: React.FC = () => {
                   <div className="flex items-center gap-4">
                     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${tc.bg} ${tc.color}`}>{tc.icon} {tc.label}</span>
                     <div className="text-right">
-                      <p className="text-sm text-gray-900 dark:text-white">{call.duration > 0 ? formatTime(call.duration) : 'â€”'}</p>
+                      <p className="text-sm text-gray-900 dark:text-white">{call.duration > 0 ? formatTime(call.duration) : '—'}</p>
                       <p className="text-xs text-gray-400">{new Date(call.time).toLocaleDateString()}</p>
                     </div>
                     {call.recordingUrl && (
@@ -471,7 +471,7 @@ const VoiceCallPage: React.FC = () => {
 
             {/* Wallet Balance */}
             <div className="text-center text-sm text-gray-500 mb-4">
-              Wallet: <span className="font-medium text-gray-900 dark:text-white">â‚¹{walletBalance.toFixed(2)}</span>
+              Wallet: <span className="font-medium text-gray-900 dark:text-white">₹{walletBalance.toFixed(2)}</span>
             </div>
 
             {/* Call Button */}

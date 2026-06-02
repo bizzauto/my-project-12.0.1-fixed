@@ -315,7 +315,7 @@ const CheckoutPage: React.FC = () => {
                         {item.variantName && <p className="text-xs text-gray-500">{item.variantName}</p>}
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">â‚¹{(item.variantPrice || item.product.price) * item.quantity}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">₹{(item.variantPrice || item.product.price) * item.quantity}</p>
                         <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                       </div>
                     </div>
@@ -331,7 +331,7 @@ const CheckoutPage: React.FC = () => {
                     Back
                   </button>
                   <button onClick={handlePlaceOrder} disabled={processing} className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                    {processing ? <><Loader2 className="animate-spin" size={18} /> Processing...</> : `Place Order â€¢ â‚¹${total.toLocaleString()}`}
+                    {processing ? <><Loader2 className="animate-spin" size={18} /> Processing...</> : `Place Order • ₹${total.toLocaleString()}`}
                   </button>
                 </div>
               </div>
@@ -346,19 +346,19 @@ const CheckoutPage: React.FC = () => {
                 {cartItems.map(item => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <span className="text-gray-600 dark:text-gray-400 truncate mr-2">{item.product.name} x{item.quantity}</span>
-                    <span className="text-gray-900 dark:text-white font-medium whitespace-nowrap">â‚¹{(item.variantPrice || item.product.price) * item.quantity}</span>
+                    <span className="text-gray-900 dark:text-white font-medium whitespace-nowrap">₹{(item.variantPrice || item.product.price) * item.quantity}</span>
                   </div>
                 ))}
               </div>
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Subtotal</span>
-                  <span className="text-gray-900 dark:text-white">â‚¹{subtotal.toLocaleString()}</span>
+                  <span className="text-gray-900 dark:text-white">₹{subtotal.toLocaleString()}</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-sm text-green-600">
                     <span>Discount ({appliedCoupon.code})</span>
-                    <span>-â‚¹{discount.toLocaleString()}</span>
+                    <span>-₹{discount.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
@@ -367,7 +367,7 @@ const CheckoutPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-700">
                   <span>Total</span>
-                  <span>â‚¹{total.toLocaleString()}</span>
+                  <span>₹{total.toLocaleString()}</span>
                 </div>
               </div>
 

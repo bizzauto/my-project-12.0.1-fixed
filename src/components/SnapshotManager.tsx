@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useToast } from './Toast';
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 type SnapshotCategory =
   | 'contacts'
@@ -59,7 +59,7 @@ interface SnapshotLog {
   fileName?: string;
 }
 
-// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Constants ───────────────────────────────────────────────────────────────
 
 const CATEGORY_META: Record<
   SnapshotCategory,
@@ -115,7 +115,7 @@ const CATEGORIES: SnapshotCategory[] = [
 const STORAGE_KEY = 'snapshot_logs';
 const SNAPSHOT_VERSION = '1.0.0';
 
-// â”€â”€â”€ Demo data (simulates what would come from an API / store) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Demo data (simulates what would come from an API / store) ──────────────
 
 const DEMO_DATA: Record<SnapshotCategory, SnapshotItem[]> = {
   contacts: [
@@ -153,7 +153,7 @@ const DEMO_DATA: Record<SnapshotCategory, SnapshotItem[]> = {
   ],
 };
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function loadLogs(): SnapshotLog[] {
   try {
@@ -182,7 +182,7 @@ function formatTimestamp(ts: string) {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const SnapshotManager: React.FC = () => {
   const { error: showError, success: showSuccess } = useToast();
@@ -232,7 +232,7 @@ const SnapshotManager: React.FC = () => {
   // History state
   const [logs, setLogs] = useState<SnapshotLog[]>(loadLogs);
 
-  // â”€â”€ Export handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Export handlers ──────────────────────────────────────────────────────
 
   const toggleExportCategory = useCallback((cat: SnapshotCategory) => {
     setExportSelected((prev) => ({ ...prev, [cat]: !prev[cat] }));
@@ -297,7 +297,7 @@ const SnapshotManager: React.FC = () => {
     }, 800);
   }, [exportSelected, selectedCount, logs, showError, showSuccess]);
 
-  // â”€â”€ Import handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Import handlers ─────────────────────────────────────────────────────
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -433,7 +433,7 @@ const SnapshotManager: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
-  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Render ───────────────────────────────────────────────────────────────
 
   const renderCategoryCheckbox = (
     cat: SnapshotCategory,
@@ -511,7 +511,7 @@ const SnapshotManager: React.FC = () => {
         ))}
       </div>
 
-      {/* â•â•â•â•â•â•â• EXPORT TAB â•â•â•â•â•â•â• */}
+      {/* ═══════ EXPORT TAB ═══════ */}
       {activeTab === 'export' && (
         <div className="space-y-6">
           {/* Select All / Deselect All */}
@@ -576,7 +576,7 @@ const SnapshotManager: React.FC = () => {
                         {meta.icon}
                       </div>
                       <span className="font-medium text-gray-900">{meta.label}</span>
-                      <span className="text-gray-400">â€”</span>
+                      <span className="text-gray-400">—</span>
                       <span className="text-gray-600">
                         {items.length} {items.length === 1 ? 'item' : 'items'}
                       </span>
@@ -596,7 +596,7 @@ const SnapshotManager: React.FC = () => {
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â• IMPORT TAB â•â•â•â•â•â•â• */}
+      {/* ═══════ IMPORT TAB ═══════ */}
       {activeTab === 'import' && (
         <div className="space-y-6">
           {/* Upload step */}
@@ -842,7 +842,7 @@ const SnapshotManager: React.FC = () => {
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â• HISTORY TAB â•â•â•â•â•â•â• */}
+      {/* ═══════ HISTORY TAB ═══════ */}
       {activeTab === 'history' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">

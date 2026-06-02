@@ -269,7 +269,7 @@ const PaymentLinks: React.FC = () => {
   }, [showQrLink, generateQrCode]);
 
   const formatCurrency = (amount: number, currency = 'INR') => {
-    const symbol = currency === 'INR' ? 'â‚¹' : currency === 'USD' ? '$' : currency + ' ';
+    const symbol = currency === 'INR' ? '₹' : currency === 'USD' ? '$' : currency + ' ';
     return `${symbol}${amount.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   };
 
@@ -401,7 +401,7 @@ const PaymentLinks: React.FC = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-gray-500 dark:text-gray-400 font-mono text-xs">
-                        {tx.razorpayPaymentId || 'â€”'}
+                        {tx.razorpayPaymentId || '—'}
                       </td>
                     </tr>
                   ))}
@@ -489,7 +489,7 @@ const PaymentLinks: React.FC = () => {
                 <div className="mb-6">
                   <label className="text-sm text-gray-600 mb-1 block">Enter Amount</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">â‚¹</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">₹</span>
                     <input type="number" placeholder="0" defaultValue={showPreview.amount} className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-lg text-lg font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
                   </div>
                 </div>
@@ -500,7 +500,7 @@ const PaymentLinks: React.FC = () => {
               </button>
 
               <p className="text-center text-xs text-gray-400 mt-4">
-                Powered by Razorpay â€¢ Secure Payment
+                Powered by Razorpay • Secure Payment
               </p>
             </div>
           </div>
@@ -574,9 +574,9 @@ const PaymentLinks: React.FC = () => {
                     onChange={e => setNewLink(p => ({ ...p, currency: e.target.value }))}
                     className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   >
-                    <option value="INR">INR (â‚¹)</option>
+                    <option value="INR">INR (₹)</option>
                     <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (â‚¬)</option>
+                    <option value="EUR">EUR (€)</option>
                     <option value="GBP">GBP (£)</option>
                   </select>
                 </div>
@@ -833,7 +833,7 @@ const PaymentLinks: React.FC = () => {
         {pagination.totalPages > 1 && (
           <div className="p-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {((pagination.page - 1) * pagination.limit) + 1}â€“{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
+              Showing {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
             </p>
             <div className="flex gap-2">
               <button

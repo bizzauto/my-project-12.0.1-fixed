@@ -9,14 +9,14 @@ import { automationAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
 
 const templates = [
-  { id: 't1', name: 'WhatsApp Auto-Reply', description: 'Instantly reply to WhatsApp messages with AI-generated responses', icon: 'ðŸ’¬', category: 'Messaging', triggerType: 'whatsapp_message' },
-  { id: 't2', name: 'Lead Auto-Capture', description: 'Capture leads from IndiaMART, JustDial, Facebook & auto-reply', icon: 'ðŸ‘¤', category: 'Leads', triggerType: 'new_lead' },
+  { id: 't1', name: 'WhatsApp Auto-Reply', description: 'Instantly reply to WhatsApp messages with AI-generated responses', icon: '💬', category: 'Messaging', triggerType: 'whatsapp_message' },
+  { id: 't2', name: 'Lead Auto-Capture', description: 'Capture leads from IndiaMART, JustDial, Facebook & auto-reply', icon: '👤', category: 'Leads', triggerType: 'new_lead' },
   { id: 't3', name: 'Review Responder', description: 'AI-powered auto-replies to Google reviews', icon: '⭐', category: 'Reviews', triggerType: 'new_review' },
-  { id: 't4', name: 'Drip Campaign', description: 'Multi-step follow-up sequence via WhatsApp & Email', icon: 'ðŸ“§', category: 'Marketing', triggerType: 'contact_stage_change' },
-  { id: 't5', name: 'Appointment Reminder', description: 'Send WhatsApp reminders before appointments', icon: 'ðŸ“…', category: 'Scheduling', triggerType: 'appointment_scheduled' },
-  { id: 't6', name: 'Order Status Update', description: 'Auto-notify customers about order status changes', icon: 'ðŸ“¦', category: 'E-Commerce', triggerType: 'order_status_change' },
-  { id: 't7', name: 'Payment Reminder', description: 'Send payment reminders via WhatsApp', icon: 'ðŸ’³', category: 'Billing', triggerType: 'payment_due' },
-  { id: 't8', name: 'Feedback Collection', description: 'Auto-send feedback forms after service', icon: 'ðŸ“', category: 'Feedback', triggerType: 'appointment_completed' },
+  { id: 't4', name: 'Drip Campaign', description: 'Multi-step follow-up sequence via WhatsApp & Email', icon: '📧', category: 'Marketing', triggerType: 'contact_stage_change' },
+  { id: 't5', name: 'Appointment Reminder', description: 'Send WhatsApp reminders before appointments', icon: '📅', category: 'Scheduling', triggerType: 'appointment_scheduled' },
+  { id: 't6', name: 'Order Status Update', description: 'Auto-notify customers about order status changes', icon: '📦', category: 'E-Commerce', triggerType: 'order_status_change' },
+  { id: 't7', name: 'Payment Reminder', description: 'Send payment reminders via WhatsApp', icon: '💳', category: 'Billing', triggerType: 'payment_due' },
+  { id: 't8', name: 'Feedback Collection', description: 'Auto-send feedback forms after service', icon: '📝', category: 'Feedback', triggerType: 'appointment_completed' },
 ];
 
 interface AutomationRule {
@@ -44,7 +44,7 @@ interface AutomationSettings {
 
 const defaultSettings: AutomationSettings = {
   autoReplyEnabled: false,
-  autoReplyMessage: 'Thank you for contacting us! We\'ll get back to you shortly. ðŸ˜Š',
+  autoReplyMessage: 'Thank you for contacting us! We\'ll get back to you shortly. 😊',
   businessHours: { enabled: false, start: '09:00', end: '18:00' },
   aiReplyEnabled: false,
   aiProvider: 'openrouter',
@@ -96,7 +96,7 @@ const AutomationPage: React.FC = () => {
 
   const demoSettings: AutomationSettings = {
     autoReplyEnabled: true,
-    autoReplyMessage: 'Thank you for contacting us! We\'ll get back to you shortly. ðŸ˜Š',
+    autoReplyMessage: 'Thank you for contacting us! We\'ll get back to you shortly. 😊',
     businessHours: { enabled: true, start: '09:00', end: '18:00' },
     aiReplyEnabled: true,
     aiProvider: 'openrouter',
@@ -242,16 +242,16 @@ const AutomationPage: React.FC = () => {
 
   const getCategoryIcon = (triggerType: string) => {
     const map: Record<string, string> = {
-      whatsapp_message: 'ðŸ’¬',
-      new_lead: 'ðŸ‘¤',
+      whatsapp_message: '💬',
+      new_lead: '👤',
       new_review: '⭐',
-      contact_stage_change: 'ðŸ“‹',
-      appointment_scheduled: 'ðŸ“…',
-      order_status_change: 'ðŸ“¦',
-      payment_due: 'ðŸ’³',
-      appointment_completed: 'ðŸ“',
+      contact_stage_change: '📋',
+      appointment_scheduled: '📅',
+      order_status_change: '📦',
+      payment_due: '💳',
+      appointment_completed: '📝',
     };
-    return map[triggerType] || 'âš¡';
+    return map[triggerType] || '⚡';
   };
 
   const getStatusColor = (isActive: boolean) =>
@@ -373,7 +373,7 @@ const AutomationPage: React.FC = () => {
                         {auto.triggerValue || getTriggerLabel(auto.triggerType)}
                       </span>
                       {auto.description && (
-                        <span className="text-sm text-gray-400">â€¢ {auto.description}</span>
+                        <span className="text-sm text-gray-400">• {auto.description}</span>
                       )}
                     </div>
                   </div>
@@ -622,7 +622,7 @@ const AutomationPage: React.FC = () => {
             </div>
 
             <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
-              <p className="font-medium text-gray-900 mb-2">ðŸ’¡ How it works:</p>
+              <p className="font-medium text-gray-900 mb-2">💡 How it works:</p>
               <ol className="list-decimal list-inside space-y-1">
                 <li>Create workflows in n8n Dashboard</li>
                 <li>Use webhooks to trigger from WhatsApp, leads, reviews</li>
@@ -650,7 +650,7 @@ const AutomationPage: React.FC = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Choose Automation Template</h2>
               <button onClick={() => setShowTemplateModal(false)} className="text-gray-400 hover:text-gray-600">
-                âœ•
+                ✔
               </button>
             </div>
 

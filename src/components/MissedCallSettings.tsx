@@ -262,7 +262,7 @@ export default function MissedCallSettings() {
           <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-start gap-3">
             <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
             <p className="text-sm text-green-800 dark:text-green-200">
-              Active â€” missed calls will receive an auto-reply via{' '}
+              Active — missed calls will receive an auto-reply via{' '}
               <strong>{settings.responseChannel === 'whatsapp' ? 'WhatsApp' : 'SMS'}</strong>.
             </p>
           </div>

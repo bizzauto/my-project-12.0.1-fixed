@@ -69,8 +69,8 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onNavi
           {filtered.length === 0 && <div className="text-center py-6 sm:py-8 text-sm text-gray-500">No results found</div>}
         </div>
         <div className="px-3 sm:px-4 py-2 border-t border-gray-100 flex items-center gap-2.5 sm:gap-4 text-xs text-gray-500 flex-wrap">
-          <span className="whitespace-nowrap"><kbd className="bg-gray-100 px-1 rounded">â†‘â†“</kbd> Navigate</span>
-          <span className="whitespace-nowrap"><kbd className="bg-gray-100 px-1 rounded">â†µ</kbd> Select</span>
+          <span className="whitespace-nowrap"><kbd className="bg-gray-100 px-1 rounded">↑↓</kbd> Navigate</span>
+          <span className="whitespace-nowrap"><kbd className="bg-gray-100 px-1 rounded">↵</kbd> Select</span>
           <span className="whitespace-nowrap"><kbd className="bg-gray-100 px-1 rounded">ESC</kbd> Close</span>
         </div>
       </div>

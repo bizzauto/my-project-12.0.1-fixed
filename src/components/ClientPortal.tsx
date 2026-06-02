@@ -1112,7 +1112,7 @@ const ClientPortal: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md">
           <div className="flex items-center justify-between p-4 sm:p-5 md:p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              Permissions â€” {editingPortal.contact?.name}
+              Permissions — {editingPortal.contact?.name}
             </h2>
             <button onClick={() => setEditingPortal(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
               <X size={20} />

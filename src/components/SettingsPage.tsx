@@ -492,14 +492,14 @@ export default function SettingsPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            { name: 'WhatsApp Business', icon: 'ðŸ’¬', color: 'green', connected: !!business?.waAccessToken, desc: 'Send messages, auto-replies, campaigns' },
-            { name: 'Facebook', icon: 'ðŸ“˜', color: 'blue', connected: !!business?.fbAccessToken, desc: 'Post to pages, lead ads' },
-            { name: 'Instagram', icon: 'ðŸ“·', color: 'pink', connected: !!business?.igAccessToken, desc: 'Post, stories, reels' },
-            { name: 'LinkedIn', icon: 'ðŸ’¼', color: 'blue', connected: !!business?.linkedinAccessToken, desc: 'Professional posts' },
-            { name: 'Twitter/X', icon: 'ðŸ¦', color: 'sky', connected: !!business?.twitterAccessToken, desc: 'Tweets and threads' },
-            { name: 'Google Business', icon: 'ðŸ¢', color: 'red', connected: !!business?.gbpAccessToken, desc: 'Reviews, posts, insights' },
-            { name: 'Google OAuth', icon: 'ðŸ”', color: 'red', connected: !!user?.googleId, desc: 'Sign in with Google' },
-            { name: 'Apple Sign-In', icon: 'ðŸŽ', color: 'gray', connected: !!user?.appleId, desc: 'Sign in with Apple' },
+            { name: 'WhatsApp Business', icon: '💬', color: 'green', connected: !!business?.waAccessToken, desc: 'Send messages, auto-replies, campaigns' },
+            { name: 'Facebook', icon: '📘', color: 'blue', connected: !!business?.fbAccessToken, desc: 'Post to pages, lead ads' },
+            { name: 'Instagram', icon: '📷', color: 'pink', connected: !!business?.igAccessToken, desc: 'Post, stories, reels' },
+            { name: 'LinkedIn', icon: '💼', color: 'blue', connected: !!business?.linkedinAccessToken, desc: 'Professional posts' },
+            { name: 'Twitter/X', icon: '🐦', color: 'sky', connected: !!business?.twitterAccessToken, desc: 'Tweets and threads' },
+            { name: 'Google Business', icon: '🏢', color: 'red', connected: !!business?.gbpAccessToken, desc: 'Reviews, posts, insights' },
+            { name: 'Google OAuth', icon: '🔐', color: 'red', connected: !!user?.googleId, desc: 'Sign in with Google' },
+            { name: 'Apple Sign-In', icon: '🍎', color: 'gray', connected: !!user?.appleId, desc: 'Sign in with Apple' },
           ].map((social) => (
             <div key={social.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
               <div className="flex items-center gap-3">
