@@ -1,0 +1,32 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 87.76.169.6
+          username: root
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            set -e
+            cd /tmp
+            rm -rf bizzauto-build
+            git clone https://github.com/bizzauto/my-project-12.0.1.git bizzauto-build
+            cd bizzauto-build
+            cp /data/coolify/applications/wxxl6hhh02j9yf7m3u8452qo/.env .env
+            docker build -t wxxl6hhh02j9yf7m3u8452qo:${{ github.sha }} .
+            docker tag wxxl6hhh02j9yf7m3u8452qo:${{ github.sha }} wxxl6hhh02j9yf7m3u8452qo:latest
+            cd /data/coolify/applications/wxxl6hhh02j9yf7m3u8452qo
+            sed -i "s/wxxl6hhh02j9yf7m3u8452qo:[^\"]*/wxxl6hhh02j9yf7m3u8452qo:${{ github.sha }}/g" docker-compose.yaml
+            docker compose up -d --remove-orphans
+            rm -rf /tmp/bizzauto-build
+            docker image prune -f --filter "until=24h"
