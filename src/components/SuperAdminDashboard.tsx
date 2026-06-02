@@ -256,7 +256,7 @@ const SuperAdminDashboard: React.FC = () => {
         </button>
         <button onClick={() => { setActiveTab('backgrounds'); fetchBackgrounds(); }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'backgrounds' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-          ðŸ–¼ï¸ Poster Backgrounds
+          ðŸ–¼ Poster Backgrounds
         </button>
       </div>
 
@@ -547,7 +547,7 @@ const SuperAdminDashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">ðŸ–¼ï¸ Poster Backgrounds</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">ðŸ–¼ Poster Backgrounds</h2>
               <p className="text-gray-500 text-sm mt-1">Upload background images that users can use in Creative Studio</p>
             </div>
             <button onClick={() => setShowAddBg(true)}
@@ -648,7 +648,7 @@ const SuperAdminDashboard: React.FC = () => {
                   </div>
                   <div className="p-3">
                     <h3 className="text-sm font-semibold text-gray-900 truncate">{bg.name}</h3>
-                    <p className="text-[10px] text-gray-500 mt-0.5">{bg.category} Â· {bg.usageCount || 0} uses</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5">{bg.category} · {bg.usageCount || 0} uses</p>
                     {bg.expiresAt && (
                       <p className="text-[10px] text-amber-500 mt-0.5 flex items-center gap-1">
                         <Calendar size={10} /> Expires {new Date(bg.expiresAt).toLocaleDateString()}

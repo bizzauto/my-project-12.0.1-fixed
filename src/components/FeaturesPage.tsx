@@ -159,7 +159,7 @@ export default function FeaturesPage() {
               </div>
               <span className="font-bold text-gray-900 dark:text-white">BizzAuto</span>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Â© 2026 BizzAuto. All rights reserved.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">© 2026 BizzAuto. All rights reserved.</p>
           </div>
         </footer>
       </div>

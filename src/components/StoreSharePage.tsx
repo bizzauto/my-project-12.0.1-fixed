@@ -42,7 +42,7 @@ const StoreSharePage: React.FC = () => {
   };
 
   const shareOnWhatsApp = () => {
-    const message = `ðŸ›ï¸ Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`;
+    const message = `ðŸ› Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -56,7 +56,7 @@ const StoreSharePage: React.FC = () => {
   };
 
   const shareOnTwitter = () => {
-    const text = `ðŸ›ï¸ Shop online at ${storeData?.name || 'Our Store'}: ${storeUrl}`;
+    const text = `ðŸ› Shop online at ${storeData?.name || 'Our Store'}: ${storeUrl}`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -118,7 +118,7 @@ const StoreSharePage: React.FC = () => {
     ctx.font = 'bold 16px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('ðŸ›ï¸', size / 2, size / 2);
+    ctx.fillText('ðŸ›', size / 2, size / 2);
   };
 
   const generateSimplePattern = (data: string): boolean[][] => {
@@ -388,7 +388,7 @@ const StoreSharePage: React.FC = () => {
 
               <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl mb-4">
                 <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                  {`ðŸ›ï¸ Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`}
+                  {`ðŸ› Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`}
                 </p>
               </div>
 
@@ -396,7 +396,7 @@ const StoreSharePage: React.FC = () => {
                 <button onClick={shareOnWhatsApp} className="flex-1 py-3 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 flex items-center justify-center gap-2">
                   <MessageSquare size={18} /> Share on WhatsApp
                 </button>
-                <button onClick={() => copyToClipboard(`ðŸ›ï¸ Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`, 'whatsapp')} className="px-4 sm:px-5 md:px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                <button onClick={() => copyToClipboard(`ðŸ› Check out our store!\n\n${storeData?.name || 'Our Store'}\n\nðŸ›’ Browse products & order online:\n${storeUrl}\n\nTrack your order anytime:\n${trackUrl}`, 'whatsapp')} className="px-4 sm:px-5 md:px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                   {copiedField === 'whatsapp' ? <Check size={18} /> : <Copy size={18} />}
                 </button>
               </div>

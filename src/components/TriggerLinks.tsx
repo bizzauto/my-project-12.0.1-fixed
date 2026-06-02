@@ -858,7 +858,7 @@ const TriggerLinks: React.FC = () => {
                 <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                   <Zap size={12} className="text-yellow-500" />
                   Trigger: {selectedLink.automationTrigger.replace(/_/g, ' ')}
-                  <span className="mx-1">Â·</span>
+                  <span className="mx-1">·</span>
                   <Clock size={12} />
                   Created {formatDate(selectedLink.createdAt)}
                 </div>

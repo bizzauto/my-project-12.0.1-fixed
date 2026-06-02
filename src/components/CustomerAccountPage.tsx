@@ -160,7 +160,7 @@ const CustomerAccountPage: React.FC = () => {
                     <ShoppingBag size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">No orders yet</p>
                     <button
-                      onClick={() => navigate('/storefront')}
+                      onClick={() => navigate('/store')}
                       className="mt-4 px-4 sm:px-5 md:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                     >
                       Browse Products

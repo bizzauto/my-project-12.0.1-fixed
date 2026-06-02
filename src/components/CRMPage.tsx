@@ -1451,7 +1451,7 @@ const AddContactModal: React.FC<{ onClose: () => void; onAdd: (contact: any) => 
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><label className="block text-sm font-medium mb-1">Stage</label><select value={form.stage} onChange={e => setForm({ ...form, stage: e.target.value })} className="w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-gray-700">{['New Lead','Contacted','Qualified','Proposal','Negotiation','Won','Lost'].map(s => <option key={s}>{s}</option>)}</select></div>
-            <div><label className="block text-sm font-medium mb-1">Lead Score</label><select value={form.leadScore} onChange={e => setForm({ ...form, leadScore: e.target.value })} className="w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-gray-700"><option value="hot">ðŸ”¥ Hot</option><option value="warm">ðŸ’¡ Warm</option><option value="cold">â„ï¸ Cold</option></select></div>
+            <div><label className="block text-sm font-medium mb-1">Lead Score</label><select value={form.leadScore} onChange={e => setForm({ ...form, leadScore: e.target.value })} className="w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-gray-700"><option value="hot">ðŸ”¥ Hot</option><option value="warm">ðŸ’¡ Warm</option><option value="cold">â„ Cold</option></select></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><label className="block text-sm font-medium mb-1">Deal Value (â‚¹)</label><input type="number" value={form.dealValue} onChange={e => setForm({ ...form, dealValue: e.target.value })} className="w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-gray-700" /></div>

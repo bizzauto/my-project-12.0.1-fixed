@@ -1,9 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Footer from './Footer';
 import PublicNavbar from './PublicNavbar';
 import { Users, Target, Award, Globe, Zap, Heart, ArrowRight } from 'lucide-react';
 
-const AboutPage: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate }) => (
+const AboutPage: React.FC = () => {
+  const navigate = useNavigate();
+  return (
   <div className="min-h-screen bg-white">
     <PublicNavbar />
     {/* Hero */}
@@ -103,7 +106,7 @@ const AboutPage: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNaviga
       <div className="max-w-4xl mx-auto text-center">
         <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Ready to transform your business?</h2>
         <p className="text-sm sm:text-base text-blue-100 mb-6 sm:mb-8">Join 10,000+ businesses already growing with BizzAuto Solutions</p>
-        <button onClick={() => onNavigate?.('register')}
+        <button onClick={() => navigate('/register')}
           className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-white text-blue-600 text-sm sm:text-base font-semibold rounded-lg hover:bg-gray-100 flex items-center justify-center gap-2 mx-auto">
           Start Free Trial <ArrowRight size={18} />
         </button>
@@ -112,6 +115,7 @@ const AboutPage: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNaviga
 
     <Footer />
   </div>
-);
+  );
+};
 
 export default AboutPage;

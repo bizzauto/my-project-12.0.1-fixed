@@ -371,31 +371,11 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/analytics"
-        element={
-          <ProtectedRoute>
-            <ModeAwareAuthLayout>
-              <ReportsPage />
-            </ModeAwareAuthLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/reports"
         element={
           <ProtectedRoute>
             <ModeAwareAuthLayout>
               <ReportsPage />
-            </ModeAwareAuthLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/bulk-import"
-        element={
-          <ProtectedRoute>
-            <ModeAwareAuthLayout>
-              <BulkImportPage />
             </ModeAwareAuthLayout>
           </ProtectedRoute>
         }

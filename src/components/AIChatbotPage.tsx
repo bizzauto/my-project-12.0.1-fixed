@@ -53,7 +53,7 @@ const AIChatbotPage: React.FC = () => {
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `âš ï¸ ${errorMsg}`,
+        content: `âš  ${errorMsg}`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         error: true
       };

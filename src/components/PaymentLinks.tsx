@@ -577,7 +577,7 @@ const PaymentLinks: React.FC = () => {
                     <option value="INR">INR (â‚¹)</option>
                     <option value="USD">USD ($)</option>
                     <option value="EUR">EUR (â‚¬)</option>
-                    <option value="GBP">GBP (Â£)</option>
+                    <option value="GBP">GBP (£)</option>
                   </select>
                 </div>
               </div>

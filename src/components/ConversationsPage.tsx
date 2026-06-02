@@ -474,7 +474,7 @@ export default function ConversationsPage() {
             </h2>
             <p className="text-[11px] text-gray-500">
               {(CHANNEL_CONFIG[selectedConversation.channel] || CHANNEL_CONFIG.whatsapp).label}
-              {selectedConversation.contactPhone && ` Â· ${selectedConversation.contactPhone}`}
+              {selectedConversation.contactPhone && ` · ${selectedConversation.contactPhone}`}
             </p>
           </div>
           <div className="flex items-center gap-1">

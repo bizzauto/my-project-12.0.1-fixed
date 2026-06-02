@@ -36,7 +36,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   social: 'ðŸ“±',
   whatsapp: 'ðŸ’¬',
   flyer: 'ðŸ“„',
-  poster: 'ðŸ–¼ï¸',
+  poster: 'ðŸ–¼',
 };
 
 const PosterGallery: React.FC = () => {

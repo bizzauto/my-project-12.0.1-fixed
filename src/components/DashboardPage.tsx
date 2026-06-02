@@ -609,7 +609,7 @@ export default function DashboardPage() {
               <Smartphone className="text-blue-600 dark:text-blue-400" size={20} />
               <span className="text-[10px] sm:text-xs font-medium text-blue-700 dark:text-blue-400">Social Post</span>
             </button>
-            <button onClick={() => navigate('/campaigns')} className="flex flex-col items-center justify-center p-3 sm:p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg sm:rounded-xl hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 transition-all gap-1.5 sm:gap-2 border border-purple-200/50 dark:border-purple-800/30">
+            <button onClick={() => navigate('/social')} className="flex flex-col items-center justify-center p-3 sm:p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg sm:rounded-xl hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 transition-all gap-1.5 sm:gap-2 border border-purple-200/50 dark:border-purple-800/30">
               <Send className="text-purple-600 dark:text-purple-400" size={20} />
               <span className="text-[10px] sm:text-xs font-medium text-purple-700 dark:text-purple-400">Campaign</span>
             </button>

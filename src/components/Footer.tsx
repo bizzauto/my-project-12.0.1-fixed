@@ -1,11 +1,20 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Phone, MapPin, Heart, Shield } from 'lucide-react';
 
-const Footer: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate }) => {
+const ROUTE_MAP: Record<string, string> = {
+  crm: '/crm', whatsapp: '/whatsapp', automation: '/automation', creative: '/creative',
+  social: '/social', analytics: '/analytics', settings: '/settings', pricing: '/pricing',
+  contact: '/contact', about: '/about', terms: '/terms', privacy: '/privacy',
+  'api-keys': '/api-keys', landing: '/',
+};
+
+const Footer: React.FC = () => {
+  const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
   const nav = (page: string) => (e: React.MouseEvent) => {
     e.preventDefault();
-    onNavigate?.(page);
+    navigate(ROUTE_MAP[page] || '/');
   };
 
   return (

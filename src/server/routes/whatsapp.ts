@@ -31,6 +31,37 @@ async function getWhatsAppCredentials(businessId: string) {
   };
 }
 
+// WhatsApp webhook verification (Meta sends GET for webhook setup)
+router.get('/webhook/:businessId', async (req: Request, res: Response) => {
+  try {
+    const { businessId } = req.params;
+    const verifyToken = req.query['hub.verify_token'] as string;
+    const challenge = req.query['hub.challenge'] as string;
+
+    if (!verifyToken) {
+      return res.status(400).send('Missing verify_token');
+    }
+
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+    });
+
+    if (!business || !business.waWebhookSecret) {
+      return res.status(404).send('Business not found');
+    }
+
+    if (verifyToken === business.waWebhookSecret) {
+      console.log(`[WhatsApp] Webhook verified for business ${businessId}`);
+      return res.send(challenge);
+    }
+
+    return res.status(403).send('Verification failed');
+  } catch (error) {
+    console.error('[WhatsApp] Webhook verification error:', error);
+    return res.status(500).send('Verification error');
+  }
+});
+
 // WhatsApp webhook endpoint (public)
 router.post('/webhook/:businessId', async (req: Request, res: Response) => {
   try {
@@ -169,7 +200,18 @@ router.post('/webhook/:businessId', async (req: Request, res: Response) => {
           messageData.content = message.text.body;
         } else if (message.type === 'image') {
           messageData.mediaUrl = message.image.id;
-          messageData.content = message.image.caption;
+          messageData.content = message.image.caption || 'Image received';
+        } else if (message.type === 'video') {
+          messageData.mediaUrl = message.video.id;
+          messageData.content = message.video.caption || 'Video received';
+        } else if (message.type === 'audio') {
+          messageData.mediaUrl = message.audio.id;
+          messageData.content = 'Audio message';
+        } else if (message.type === 'document') {
+          messageData.mediaUrl = message.document.id;
+          messageData.content = message.document.filename || 'Document received';
+        } else {
+          messageData.content = `${message.type} message received`;
         }
 
         await prisma.message.create({
@@ -333,21 +375,33 @@ router.get('/conversation/:contactId', authenticate, async (req: AuthRequest, re
 // Send text message
 router.post('/send/text', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { contactId, content } = req.body;
+    const { contactId, content, phone, message } = req.body;
+    const textContent = content || message;
 
-    if (!contactId || !content) {
+    if (!contactId && !phone) {
       return res.status(400).json({
         success: false,
-        error: 'Contact ID and content are required',
+        error: 'Contact ID or phone number is required',
       });
     }
 
-    const contact = await prisma.contact.findFirst({
-      where: {
-        id: contactId,
-        businessId: req.user.businessId,
-      },
-    });
+    if (!textContent) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message content is required',
+      });
+    }
+
+    let contact;
+    if (contactId) {
+      contact = await prisma.contact.findFirst({
+        where: { id: contactId, businessId: req.user.businessId },
+      });
+    } else {
+      contact = await prisma.contact.findFirst({
+        where: { phone, businessId: req.user.businessId },
+      });
+    }
 
     if (!contact) {
       return res.status(404).json({
@@ -384,7 +438,7 @@ router.post('/send/text', authenticate, async (req: AuthRequest, res: Response) 
         messaging_product: 'whatsapp',
         to: contact.phone,
         type: 'text',
-        text: { body: content },
+        text: { body: textContent },
       },
       {
         headers: {
@@ -395,13 +449,13 @@ router.post('/send/text', authenticate, async (req: AuthRequest, res: Response) 
     );
 
     // Save message to DB
-    const message = await prisma.message.create({
+    const savedMessage = await prisma.message.create({
       data: {
         businessId: req.user.businessId,
-        contactId,
+        contactId: contact.id,
         direction: 'outbound',
         type: 'text',
-        content,
+        content: textContent,
         status: 'sent',
         waMessageId: response.data.messages?.[0]?.id,
       },
@@ -417,17 +471,17 @@ router.post('/send/text', authenticate, async (req: AuthRequest, res: Response) 
     await prisma.activity.create({
       data: {
         businessId: req.user.businessId,
-        contactId,
+        contactId: contact.id,
         type: 'whatsapp_sent',
         title: 'WhatsApp message sent',
-        content,
+        content: textContent,
         createdBy: req.user.id,
       },
     });
 
     res.json({
       success: true,
-      data: message,
+      data: savedMessage,
     });
   } catch (error: any) {
     console.error('Send message error:', error);
@@ -442,21 +496,32 @@ router.post('/send/text', authenticate, async (req: AuthRequest, res: Response) 
 // Send template message
 router.post('/send/template', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { contactId, templateName, languageCode = 'en', components } = req.body;
+    const { contactId, templateName, languageCode = 'en', components, phone } = req.body;
 
-    if (!contactId || !templateName) {
+    if (!contactId && !phone) {
       return res.status(400).json({
         success: false,
-        error: 'Contact ID and template name are required',
+        error: 'Contact ID or phone number is required',
       });
     }
 
-    const contact = await prisma.contact.findFirst({
-      where: {
-        id: contactId,
-        businessId: req.user.businessId,
-      },
-    });
+    if (!templateName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Template name is required',
+      });
+    }
+
+    let contact;
+    if (contactId) {
+      contact = await prisma.contact.findFirst({
+        where: { id: contactId, businessId: req.user.businessId },
+      });
+    } else {
+      contact = await prisma.contact.findFirst({
+        where: { phone, businessId: req.user.businessId },
+      });
+    }
 
     if (!contact) {
       return res.status(404).json({
@@ -502,7 +567,7 @@ router.post('/send/template', authenticate, async (req: AuthRequest, res: Respon
     const message = await prisma.message.create({
       data: {
         businessId: req.user.businessId,
-        contact: { connect: { id: contactId } },
+        contact: { connect: { id: contact.id } },
         direction: 'outbound',
         type: 'template',
         templateName,
@@ -859,21 +924,32 @@ router.get('/messages/:contactId', authenticate, async (req: AuthRequest, res: R
 // Send image message
 router.post('/send/image', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { contactId, imageUrl, caption } = req.body;
+    const { contactId, imageUrl, caption, phone } = req.body;
 
-    if (!contactId || !imageUrl) {
+    if (!contactId && !phone) {
       return res.status(400).json({
         success: false,
-        error: 'Contact ID and image URL are required',
+        error: 'Contact ID or phone number is required',
       });
     }
 
-    const contact = await prisma.contact.findFirst({
-      where: {
-        id: contactId,
-        businessId: req.user.businessId,
-      },
-    });
+    if (!imageUrl) {
+      return res.status(400).json({
+        success: false,
+        error: 'Image URL is required',
+      });
+    }
+
+    let contact;
+    if (contactId) {
+      contact = await prisma.contact.findFirst({
+        where: { id: contactId, businessId: req.user.businessId },
+      });
+    } else {
+      contact = await prisma.contact.findFirst({
+        where: { phone, businessId: req.user.businessId },
+      });
+    }
 
     if (!contact) {
       return res.status(404).json({
@@ -924,7 +1000,7 @@ router.post('/send/image', authenticate, async (req: AuthRequest, res: Response)
     const message = await prisma.message.create({
       data: {
         businessId: req.user.businessId,
-        contactId,
+        contactId: contact.id,
         direction: 'outbound',
         type: 'image',
         mediaUrl: imageUrl,

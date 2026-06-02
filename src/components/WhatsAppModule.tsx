@@ -944,10 +944,16 @@ const ChatView: React.FC<{
                         {/* Hover actions */}
                         <div className="absolute -top-2 right-2 hidden group-hover:flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg shadow-md p-1">
                           <button onClick={() => {
-                            setNewMessage((prev) => prev ? `> ${msg.content}\n\n${prev}` : `> ${msg.content}\n\n`);
+                            setMessage((prev) => prev ? `> ${msg.content}\n\n${prev}` : `> ${msg.content}\n\n`);
                             inputRef.current?.focus();
                           }} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 dark:text-gray-400" title="Reply">
                             <ArrowLeft size={14} />
+                          </button>
+                          <button onClick={() => {
+                            const emoji = '👍';
+                            setMessage((prev) => prev + emoji);
+                          }} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 dark:text-gray-400" title="React">
+                            <Smile size={14} />
                           </button>
                           <button onClick={() => {
                             const emoji = 'ðŸ‘';
@@ -1276,13 +1282,13 @@ const BroadcastView: React.FC = () => {
   const handleSend = async () => {
     setIsSending(true);
     try {
-      const phones = filteredContacts
+      const contactIds = filteredContacts
         .filter((c: WAContact) => selectedContacts.includes(c.id))
-        .map((c: WAContact) => c.phone);
-      if (selectedTemplate && phones.length > 0) {
+        .map((c: WAContact) => c.id);
+      if (selectedTemplate && contactIds.length > 0) {
         await whatsappAPI.sendBroadcast({
           templateName: selectedTemplate.name,
-          phones,
+          contactIds,
           templateId: selectedTemplate.id,
           drip: dripEnabled ? {
             minDelay: dripMinDelay,
@@ -2235,7 +2241,7 @@ const ScheduledMessagesView: React.FC = () => {
                       <span className="flex items-center gap-1"><Phone size={12} /> {msg.phone}</span>
                       {msg.type !== 'text' && <span className="flex items-center gap-1"><Tag size={12} /> {msg.type}</span>}
                     </div>
-                    {msg.error && <p className="text-xs text-red-500 mt-1">âš ï¸ {msg.error}</p>}
+                    {msg.error && <p className="text-xs text-red-500 mt-1">âš  {msg.error}</p>}
                   </div>
                   {msg.status === 'pending' && (
                     <button

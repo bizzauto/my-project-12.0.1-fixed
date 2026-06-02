@@ -11,7 +11,7 @@ import { useAuthStore } from '../lib/authStore';
 const templates = [
   { id: 't1', name: 'WhatsApp Auto-Reply', description: 'Instantly reply to WhatsApp messages with AI-generated responses', icon: 'ðŸ’¬', category: 'Messaging', triggerType: 'whatsapp_message' },
   { id: 't2', name: 'Lead Auto-Capture', description: 'Capture leads from IndiaMART, JustDial, Facebook & auto-reply', icon: 'ðŸ‘¤', category: 'Leads', triggerType: 'new_lead' },
-  { id: 't3', name: 'Review Responder', description: 'AI-powered auto-replies to Google reviews', icon: 'â­', category: 'Reviews', triggerType: 'new_review' },
+  { id: 't3', name: 'Review Responder', description: 'AI-powered auto-replies to Google reviews', icon: '⭐', category: 'Reviews', triggerType: 'new_review' },
   { id: 't4', name: 'Drip Campaign', description: 'Multi-step follow-up sequence via WhatsApp & Email', icon: 'ðŸ“§', category: 'Marketing', triggerType: 'contact_stage_change' },
   { id: 't5', name: 'Appointment Reminder', description: 'Send WhatsApp reminders before appointments', icon: 'ðŸ“…', category: 'Scheduling', triggerType: 'appointment_scheduled' },
   { id: 't6', name: 'Order Status Update', description: 'Auto-notify customers about order status changes', icon: 'ðŸ“¦', category: 'E-Commerce', triggerType: 'order_status_change' },
@@ -244,7 +244,7 @@ const AutomationPage: React.FC = () => {
     const map: Record<string, string> = {
       whatsapp_message: 'ðŸ’¬',
       new_lead: 'ðŸ‘¤',
-      new_review: 'â­',
+      new_review: '⭐',
       contact_stage_change: 'ðŸ“‹',
       appointment_scheduled: 'ðŸ“…',
       order_status_change: 'ðŸ“¦',
