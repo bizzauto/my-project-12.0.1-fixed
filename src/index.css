@@ -451,6 +451,31 @@ body {
   color: #f3f4f6;
 }
 
+/* Fix: elements with white backgrounds always get dark text in dark mode */
+.dark .bg-white,
+.dark [class*="bg-white "] {
+  color: #111827;
+}
+
+/* Also fix common input/select/textarea on white backgrounds in dark mode */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="date"],
+.dark input[type="time"],
+.dark input[type="url"],
+.dark input[type="tel"],
+.dark select,
+.dark textarea {
+  color: #111827;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #9ca3af;
+}
+
 /* Glassmorphism (alias) */
 .glass {
   background: rgba(255, 255, 255, 0.7);
