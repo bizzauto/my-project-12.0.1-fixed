@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../index.js';
+import { getSlowQueryStats } from '../middleware/slow-query-logger.js';
+import { getRateLimitStats } from '../middleware/websocket-rate-limit.js';
 
 const router = Router();
 
@@ -69,6 +71,24 @@ router.get('/metrics', async (_req: Request, res: Response) => {
   lines.push(`# HELP app_database_up Database connectivity`);
   lines.push(`# TYPE app_database_up gauge`);
   lines.push(`app_database_up ${dbUp}`);
+
+  // Slow query stats
+  const slowQueryStats = getSlowQueryStats();
+  lines.push(`# HELP app_slow_queries_total Total slow queries detected`);
+  lines.push(`# TYPE app_slow_queries_total counter`);
+  lines.push(`app_slow_queries_total ${slowQueryStats.slowQueries}`);
+  lines.push(`# HELP app_total_queries_total Total queries executed`);
+  lines.push(`# TYPE app_total_queries_total counter`);
+  lines.push(`app_total_queries_total ${slowQueryStats.totalQueries}`);
+  lines.push(`# HELP app_slow_query_threshold_ms Slow query threshold`);
+  lines.push(`# TYPE app_slow_query_threshold_ms gauge`);
+  lines.push(`app_slow_query_threshold_ms ${slowQueryStats.thresholdMs}`);
+
+  // WebSocket rate limit stats
+  const wsStats = getRateLimitStats();
+  lines.push(`# HELP app_ws_active_connections Active WebSocket connections tracked`);
+  lines.push(`# TYPE app_ws_active_connections gauge`);
+  lines.push(`app_ws_active_connections ${wsStats.activeConnections}`);
 
   res.setHeader('Content-Type', 'text/plain; version=0.0.4');
   res.send(lines.join('\n'));

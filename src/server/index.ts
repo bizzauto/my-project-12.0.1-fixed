@@ -91,6 +91,8 @@ import dataExportRoutes from './routes/data-export.js';
 import v2Routes from './routes/v2/index.js';
 import { auditMiddleware } from './services/audit.service.js';
 import dbPoolRoutes from './routes/db-pool.js';
+import auditRetentionRoutes from './routes/audit-retention.js';
+import { startSlowQueryLogger } from './middleware/slow-query-logger.js';
 
 dotenv.config();
 
@@ -108,8 +110,13 @@ const poolUrl = POOL_SIZE > 0
   ? `${process.env.DATABASE_URL}${process.env.DATABASE_URL?.includes('?') ? '&' : '?'}connection_limit=${POOL_SIZE}&pool_timeout=10`
   : process.env.DATABASE_URL;
 
+const slowQueryEnabled = process.env.SLOW_QUERY_LOG_ENABLED !== 'false' && NODE_ENV === 'production';
 export const prisma = new PrismaClient({
-  log: NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  log: [
+    'error',
+    'warn',
+    ...(slowQueryEnabled ? ['query' as const] : []),
+  ],
   datasources: {
     db: {
       url: poolUrl,
@@ -337,6 +344,9 @@ app.use('/api/store-customize', storeCustomizeRoutes);
 // Phase 3: Admin Platform Analytics (SUPER_ADMIN only)
 app.use('/api/admin', adminAnalyticsRoutes);
 
+// Audit log retention management (SUPER_ADMIN only)
+app.use('/api/admin/audit-retention', auditRetentionRoutes);
+
 // Phase 3: Monitoring & Observability (no auth — for LB/monitoring tools)
 app.use('/api', monitoringRoutes);
 
@@ -515,6 +525,9 @@ process.on('uncaughtException', async (error) => {
   setTimeout(() => process.exit(1), 1000);
 });
 
+// Start slow query logger
+startSlowQueryLogger();
+
 // Start server
 console.log(`Starting server on ${HOST}:${PORT} in ${NODE_ENV} mode`);
 app.listen(Number(PORT), () => {
@@ -524,5 +537,6 @@ app.listen(Number(PORT), () => {
 
 // Export authenticate middleware for use in routes
 export { authenticate } from './middleware/auth.js';
+export { authenticateApiKey, hashApiKey, generateApiKey } from './middleware/api-key-auth.js';
 
 export default app;
