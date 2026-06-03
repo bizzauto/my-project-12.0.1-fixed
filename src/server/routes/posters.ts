@@ -162,12 +162,12 @@ router.post('/generate-image', authenticate, async (req: AuthRequest, res: Respo
 
     let imageUrl = '';
 
-    // 1) Try Pollinations.ai (free, no API key)
+    // 1) Try Pollinations.ai (free basic tier — no custom params)
     try {
       const encoded = encodeURIComponent(fullPrompt);
-      imageUrl = `https://image.pollinations.ai/prompt/${encoded}?width=${size.width}&height=${size.height}&seed=${Date.now()}&nologo=true`;
+      imageUrl = `https://image.pollinations.ai/prompt/${encoded}?model=flux&seed=${Date.now()}`;
       // Verify the URL is reachable
-      const checkRes = await fetch(imageUrl, { method: 'HEAD', redirect: 'follow', signal: AbortSignal.timeout(15000) });
+      const checkRes = await fetch(imageUrl, { method: 'HEAD', redirect: 'follow', signal: AbortSignal.timeout(30000) });
       if (!checkRes.ok) throw new Error(`Pollinations returned ${checkRes.status}`);
     } catch (pollErr: any) {
       console.warn('Pollinations.ai failed, trying OpenRouter:', pollErr.message);
