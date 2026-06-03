@@ -194,14 +194,7 @@ export class ClaudeWhatsAppService {
       return { text: body, saved: 0 };
     }
 
-    try {
-      const apiKey = process.env.OPENROUTER_API_KEY;
-      if (!apiKey) {
-        // No AI available, naive truncation
-        return { text: body.substring(0, targetLength - 3) + '...', saved: body.length - targetLength };
-      }
-
-      const systemPrompt = `You are a message optimization assistant. Rewrite the user's message to be:
+    const systemPrompt = `You are a message optimization assistant. Rewrite the user's message to be:
 - Tone: ${options.tone}
 - Max length: ${targetLength} characters
 - Language: ${options.language === 'auto' ? 'detect from input' : options.language}
@@ -210,6 +203,40 @@ export class ClaudeWhatsAppService {
 - Use ${options.contactName ? `the recipient's name "${options.contactName}" naturally` : 'a generic greeting'}
 
 Return ONLY the rewritten message, no explanation.`;
+
+    // 1) Try Nvidia NIM (FREE)
+    try {
+      const apiKey = process.env.NVIDIA_NIM_API_KEY;
+      if (apiKey) {
+        const response = await axios.post(
+          'https://integrate.api.nvidia.com/v1/chat/completions',
+          {
+            model: 'meta/llama-3.3-70b-instruct',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: body },
+            ],
+            max_tokens: Math.min(targetLength * 2, 500),
+            temperature: 0.7,
+          },
+          {
+            headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            timeout: 10000,
+          }
+        );
+        const optimized = response.data?.choices?.[0]?.message?.content?.trim() || body;
+        return { text: optimized.substring(0, targetLength), saved: body.length - optimized.length };
+      }
+    } catch (err) {
+      console.warn('[ClaudeWhatsApp] Nvidia NIM failed, trying OpenRouter:', (err as any).message);
+    }
+
+    // 2) Fallback: OpenRouter
+    try {
+      const apiKey = process.env.OPENROUTER_API_KEY;
+      if (!apiKey) {
+        return { text: body.substring(0, targetLength - 3) + '...', saved: body.length - targetLength };
+      }
 
       const response = await axios.post(
         'https://openrouter.ai/api/v1/chat/completions',
