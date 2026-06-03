@@ -6,12 +6,12 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY prisma ./prisma/
-RUN npm install --no-audit --no-fund && npx prisma generate
+RUN npm ci --no-audit --no-fund && npx prisma generate
 
 COPY . .
 
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN npm run build && find dist -name "*.map" -delete && rm -rf node_modules
+RUN npm run build:docker && find dist -name "*.map" -delete
 
 # ---- Production stage ----
 FROM node:22-alpine
@@ -24,7 +24,8 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY prisma ./prisma/
-RUN npm install --omit=dev --no-audit --no-fund && npx prisma generate && \
+RUN npm ci --omit=dev --no-audit --no-fund && \
+    npx prisma generate && \
     find /app/node_modules -type d -name "test" -o -name "tests" -o -name "__tests__" | xargs rm -rf 2>/dev/null; \
     npm cache clean --force && rm -rf /root/.npm
 

@@ -20,3 +20,14 @@ thumbs.db
 *.tar.gz
 __pycache__
 *.pyc
+scripts
+tests
+__tests__
+*.test.*
+*.spec.*
+jest.config.*
+tsconfig*.json
+.eslintrc*
+.prettierrc*
+extra
+EXTRA

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npx prisma generate && vite build && node scripts/build-server.js",
+    "build:docker": "vite build && node scripts/build-server.js",
     "build:client": "vite build",
     "build:server": "node scripts/build-server.js",
     "preview": "vite preview",
