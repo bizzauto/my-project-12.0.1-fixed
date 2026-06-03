@@ -221,6 +221,8 @@ export const postersAPI = {
   create: (data: any) => apiClient.post('/posters', data),
   generate: (data: { templateId: string; userData: any }) =>
     apiClient.post('/posters/generate', data),
+  generateImage: (data: { prompt?: string; format?: string; headline?: string; subtitle?: string; businessName?: string; phone?: string }) =>
+    apiClient.post('/posters/generate-image', data),
   download: (id: string) => apiClient.get(`/posters/${id}/download`, { responseType: 'blob' }),
   generated: (params?: { page?: number; limit?: number; category?: string }) =>
     apiClient.get('/posters/generated', { params }),

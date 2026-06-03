@@ -567,15 +567,28 @@ const CreativeGeneratorPage: React.FC = () => {
   const handleGenerateAIImage = async () => {
     setIsGeneratingImage(true);
     try {
-      const res = await postersAPI.generate({ templateId: selectedTemplate?.id || '', userData: { headline, subtitle, businessName, phone, productName } });
-      if (res.data?.url) setAiImageUrl(res.data.url);
+      const format = FORMAT_OPTIONS[selectedFormat]?.name?.toLowerCase() || 'square';
+      const res = await postersAPI.generateImage({
+        prompt: `Create a professional ${selectedTemplate?.category || 'business'} poster`,
+        format,
+        headline,
+        subtitle,
+        businessName,
+        phone,
+      });
+      const url = res.data?.data?.url;
+      if (url) {
+        setAiImageUrl(url);
+        showToast('AI poster generated!', 'success');
+      } else {
+        showToast('No image URL returned. Try again.', 'error');
+      }
     } catch (err: any) {
       setAiImageUrl(null);
       const msg = err?.response?.data?.error || err?.message || 'AI poster generation failed. Try again later.';
       showToast(msg, 'error');
       console.error('Poster generation error:', err);
-    }
-    finally { setIsGeneratingImage(false); }
+    } finally { setIsGeneratingImage(false); }
   };
 
   const handleWhatsAppShare = () => {
