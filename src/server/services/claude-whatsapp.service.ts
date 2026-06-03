@@ -228,10 +228,31 @@ Return ONLY the rewritten message, no explanation.`;
         return { text: optimized.substring(0, targetLength), saved: body.length - optimized.length };
       }
     } catch (err) {
-      console.warn('[ClaudeWhatsApp] Nvidia NIM failed, trying OpenRouter:', (err as any).message);
+      console.warn('[ClaudeWhatsApp] Nvidia NIM failed, trying Gemini:', (err as any).message);
     }
 
-    // 2) Fallback: OpenRouter
+    // 2) Fallback: Gemini
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (apiKey) {
+        const response = await axios.post(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+          {
+            contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\nMessage: ${body}` }] }],
+          },
+          {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 10000,
+          }
+        );
+        const optimized = response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || body;
+        return { text: optimized.substring(0, targetLength), saved: body.length - optimized.length };
+      }
+    } catch (err) {
+      console.warn('[ClaudeWhatsApp] Gemini failed, trying OpenRouter:', (err as any).message);
+    }
+
+    // 3) Fallback: OpenRouter
     try {
       const apiKey = process.env.OPENROUTER_API_KEY;
       if (!apiKey) {
