@@ -294,7 +294,7 @@ const QRConnectView: React.FC<{
           <div className="inline-flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
             <button
               onClick={() => onModeChange('meta')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${connectionMode === 'meta' ? 'bg-white shadow-sm text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${connectionMode === 'meta' ? 'bg-white dark:bg-gray-600 shadow-sm text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                 }`}
             >
               <Shield size={16} />
@@ -302,7 +302,7 @@ const QRConnectView: React.FC<{
             </button>
             <button
               onClick={() => onModeChange('evolution')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${connectionMode === 'evolution' ? 'bg-white shadow-sm text-purple-700 dark:text-purple-300' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${connectionMode === 'evolution' ? 'bg-white dark:bg-gray-600 shadow-sm text-purple-700 dark:text-purple-300' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                 }`}
             >
               <Zap size={16} />
@@ -336,7 +336,7 @@ const QRConnectView: React.FC<{
                   }}
                 />
                 {connectionStatus === 'connecting' && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white/90 rounded-2xl">
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/90 dark:bg-gray-700/90 dark:text-white rounded-2xl">
                     <div className="text-center">
                       <RefreshCw size={32} className="animate-spin text-green-500 mx-auto mb-2" />
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Connecting...</p>
@@ -415,7 +415,7 @@ const QRConnectView: React.FC<{
                     {connectionStatus === 'scanning' || connectionStatus === 'connecting' ? (
                       <div className="text-center space-y-4">
                         {qrValue ? (
-                          <div className="bg-white rounded-xl p-4 border-2 border-purple-300 inline-block mx-auto">
+                          <div className="bg-white dark:bg-gray-600 dark:text-white rounded-xl p-4 border-2 border-purple-300 inline-block mx-auto">
                             {qrValue.startsWith('data:') || qrValue.startsWith('http') ? (
                               <img
                                 src={qrValue}
@@ -979,7 +979,7 @@ const ChatView: React.FC<{
                   {/* Typing indicator */}
                   {isTyping && (
                     <div className="flex justify-start">
-                      <div className="bg-white rounded-xl rounded-tl-none px-4 py-3 shadow-sm">
+                      <div className="bg-white dark:bg-gray-600 rounded-xl rounded-tl-none px-4 py-3 shadow-sm">
                         <div className="flex gap-1.5">
                           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -1004,7 +1004,7 @@ const ChatView: React.FC<{
                         <button
                           key={i}
                           onClick={() => { setMessage(suggestion); setShowAIPanel(false); inputRef.current?.focus(); }}
-                          className="w-full text-left p-2.5 bg-white rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:bg-purple-100 border border-purple-200 transition-colors"
+                          className="w-full text-left p-2.5 bg-white dark:bg-gray-600 dark:text-white rounded-lg text-sm text-gray-700 hover:bg-purple-100 border border-purple-200 dark:border-gray-500 transition-colors"
                         >
                           {suggestion}
                         </button>
@@ -1028,7 +1028,7 @@ const ChatView: React.FC<{
                         <button
                           key={template.id}
                           onClick={() => handleSendTemplate(template)}
-                          className="w-full text-left p-2.5 bg-white rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-100 border border-blue-200 transition-colors"
+                          className="w-full text-left p-2.5 bg-white dark:bg-gray-600 dark:text-white rounded-lg text-sm text-gray-700 hover:bg-blue-100 border border-blue-200 dark:border-gray-500 transition-colors"
                         >
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-medium text-blue-800 dark:text-blue-300">{template.name.replace(/_/g, ' ')}</span>
@@ -1078,7 +1078,7 @@ const ChatView: React.FC<{
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Type a message"
-                        className="w-full px-4 py-2.5 bg-white rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-gray-600 dark:text-white rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                       />
                     </div>
                     {message.trim() ? (
@@ -1600,7 +1600,7 @@ const BroadcastView: React.FC = () => {
                   {selectedTemplate.buttons && (
                     <div className="mt-2 space-y-1">
                       {selectedTemplate.buttons.map((btn, i) => (
-                        <button key={i} className="w-full py-2 bg-white rounded-lg text-sm text-blue-500 font-medium border border-gray-200 dark:border-gray-700 flex items-center justify-center gap-1.5">
+                        <button key={i} className="w-full py-2 bg-white dark:bg-gray-600 dark:text-white rounded-lg text-sm text-blue-500 font-medium border border-gray-200 dark:border-gray-600 flex items-center justify-center gap-1.5">
                           {btn.type === 'URL' ? <ExternalLink size={14} /> : <ArrowLeft size={14} />} {btn.text}
                         </button>
                       ))}
@@ -1667,7 +1667,7 @@ const TemplateManagerView: React.FC = () => {
         {/* Filters */}
         <div className="flex gap-2 mb-4">
           {(['all', 'approved', 'pending', 'rejected'] as const).map(s => (
-            <button key={s} onClick={() => setFilterStatus(s)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filterStatus === s ? 'bg-green-500 text-white' : 'bg-white text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
+            <button key={s} onClick={() => setFilterStatus(s)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filterStatus === s ? 'bg-green-500 text-white' : 'bg-white dark:bg-gray-600 dark:text-white text-gray-600 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
               {s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}

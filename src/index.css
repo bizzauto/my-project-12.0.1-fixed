@@ -451,11 +451,6 @@ body {
   color: #f3f4f6;
 }
 
-/* Fix: only elements that keep white bg in dark mode get dark text */
-.dark .bg-white {
-  color: #111827;
-}
-
 /* Glassmorphism (alias) */
 .glass {
   background: rgba(255, 255, 255, 0.7);

@@ -219,10 +219,12 @@ const CreativeGeneratorPage: React.FC = () => {
   const [colorTarget, setColorTarget] = useState<'all' | 'headline' | 'subtitle' | 'business'>('all');
   const [showQR, setShowQR] = useState(true);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [bgSolidColor, setBgSolidColor] = useState<string | null>(null);
   const [adminBackgrounds, setAdminBackgrounds] = useState<any[]>([]);
   const [showAdminBgPicker, setShowAdminBgPicker] = useState(false);
   const [showPremiumBadge, setShowPremiumBadge] = useState(true);
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
+  const [aiPrompt, setAiPrompt] = useState('');
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -371,7 +373,7 @@ const CreativeGeneratorPage: React.FC = () => {
     }
   };
 
-  const removeBackground = () => setBackgroundImage(null);
+  const removeBackground = () => { setBackgroundImage(null); setBgSolidColor(null); };
 
   const addSticker = (emoji: string) => {
     setStickers(prev => [...prev, {
@@ -609,8 +611,9 @@ const CreativeGeneratorPage: React.FC = () => {
     setIsGeneratingImage(true);
     try {
       const format = FORMAT_OPTIONS[selectedFormat]?.name?.toLowerCase() || 'square';
+      const finalPrompt = aiPrompt.trim() || `Create a professional ${selectedTemplate?.category || 'business'} poster`;
       const res = await postersAPI.generateImage({
-        prompt: `Create a professional ${selectedTemplate?.category || 'business'} poster`,
+        prompt: finalPrompt,
         format,
         headline,
         subtitle,
@@ -620,6 +623,7 @@ const CreativeGeneratorPage: React.FC = () => {
       const url = res.data?.data?.url;
       if (url) {
         setAiImageUrl(url);
+        setBackgroundImage(url);
         showToast('AI poster generated!', 'success');
       } else {
         showToast('No image URL returned. Try again.', 'error');
@@ -736,7 +740,9 @@ const CreativeGeneratorPage: React.FC = () => {
                   style={{
                     background: backgroundImage
                       ? `url(${backgroundImage}) center/cover no-repeat`
-                      : appliedBackground || `linear-gradient(135deg, ${getPaletteColors().join(', ')})`,
+                      : bgSolidColor
+                        ? bgSolidColor
+                        : appliedBackground || `linear-gradient(135deg, ${getPaletteColors().join(', ')})`,
                   }}
                 >
                     {/* Overlay */}
@@ -858,11 +864,19 @@ const CreativeGeneratorPage: React.FC = () => {
               </div>
 
               {/* AI Image Gen */}
-              <div className="mt-3 flex justify-end">
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center gap-1.5">
+                  <Zap size={13} className="text-purple-500" />
+                  <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400">AI Image Prompt</span>
+                </div>
+                <textarea value={aiPrompt} onChange={(e) => setAiPrompt(e.target.value)}
+                  placeholder="Describe your poster... (e.g. 'Modern fitness gym poster with dark background, bold text, muscle man')"
+                  className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none h-16 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  style={{ fontFamily: language === 'hi' ? "'Noto Sans Devanagari', sans-serif" : 'inherit' }} />
                 <button onClick={handleGenerateAIImage} disabled={isGeneratingImage}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-all ${aiImageUrl ? 'bg-green-500/20 text-green-600 hover:bg-green-500/30' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/25'}`}>
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium transition-all ${aiImageUrl ? 'bg-green-500/20 text-green-600 hover:bg-green-500/30' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/25'}`}>
                   {isGeneratingImage ? <RefreshCw size={13} className="animate-spin" /> : <Zap size={13} />}
-                  {isGeneratingImage ? 'Generating...' : aiImageUrl ? '✨ Regenerate' : '🚀 Generate AI Poster'}
+                  {isGeneratingImage ? 'Generating...' : aiImageUrl ? 'Regenerate' : 'Generate AI Poster'}
                 </button>
               </div>
             </div>
@@ -1072,21 +1086,33 @@ const CreativeGeneratorPage: React.FC = () => {
                     {backgroundImage ? (
                       <div className="relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
                         <img src={backgroundImage} alt="BG" className="w-full h-16 object-cover" />
-                        <button onClick={removeBackground} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"><X size={12} /></button>
+                        <button onClick={() => { removeBackground(); setBgSolidColor(null); }} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"><X size={12} /></button>
                       </div>
                     ) : (
-                      <div className="flex gap-2">
-                        <label className="flex-1 flex items-center justify-center h-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-purple-500">
-                          <Upload size={14} className="text-gray-400 mr-1" />
-                          <span className="text-[10px] text-gray-500">Upload</span>
-                          <input type="file" className="hidden" accept="image/*" onChange={handleBackgroundUpload} />
-                        </label>
-                        {adminBackgrounds.length > 0 && (
-                          <button onClick={() => setShowAdminBgPicker(!showAdminBgPicker)}
-                            className="flex items-center gap-1 px-3 h-12 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-[10px] font-medium hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all">
-                            <Image size={14} /> Admin
-                          </button>
-                        )}
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <label className="flex-1 flex items-center justify-center h-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-purple-500">
+                            <Upload size={14} className="text-gray-400 mr-1" />
+                            <span className="text-[10px] text-gray-500">Upload</span>
+                            <input type="file" className="hidden" accept="image/*" onChange={handleBackgroundUpload} />
+                          </label>
+                          {adminBackgrounds.length > 0 && (
+                            <button onClick={() => setShowAdminBgPicker(!showAdminBgPicker)}
+                              className="flex items-center gap-1 px-3 h-12 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-[10px] font-medium hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all">
+                              <Image size={14} /> Admin
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <label className="text-[10px] text-gray-500 whitespace-nowrap">Solid Color:</label>
+                          <input type="color" value={bgSolidColor || '#1a1a2e'}
+                            onChange={(e) => { setBgSolidColor(e.target.value); setBackgroundImage(null); }}
+                            className="w-8 h-8 rounded cursor-pointer border-0 p-0" />
+                          {bgSolidColor && (
+                            <button onClick={() => setBgSolidColor(null)}
+                              className="text-[10px] text-red-500 hover:text-red-600">Clear</button>
+                          )}
+                        </div>
                       </div>
                     )}
                     {showAdminBgPicker && adminBackgrounds.length > 0 && (
@@ -1631,7 +1657,9 @@ const CreativeGeneratorPage: React.FC = () => {
               style={{
                 background: backgroundImage
                   ? `url(${backgroundImage}) center/cover no-repeat`
-                  : appliedBackground || `linear-gradient(135deg, ${getPaletteColors().join(', ')})`,
+                  : bgSolidColor
+                    ? bgSolidColor
+                    : appliedBackground || `linear-gradient(135deg, ${getPaletteColors().join(', ')})`,
               }}
             >
               <div className="absolute inset-0 bg-black/25" />
