@@ -3,13 +3,27 @@ import axios from 'axios';
 import { prisma } from '../index.js';
 
 // AI Provider Configuration — lazy init to avoid crash when env vars are missing
+
+// Nvidia NIM (FREE — first priority)
+let _nvidiaClient: OpenAI | null = null;
+function getNvidiaClient(): OpenAI {
+  if (!_nvidiaClient) {
+    const apiKey = process.env.NVIDIA_NIM_API_KEY;
+    if (!apiKey) throw new Error('Nvidia NIM API key not configured');
+    _nvidiaClient = new OpenAI({
+      baseURL: 'https://integrate.api.nvidia.com/v1',
+      apiKey,
+    });
+  }
+  return _nvidiaClient;
+}
+
+// OpenRouter (fallback)
 let _openrouterClient: OpenAI | null = null;
 function getOpenRouterClient(): OpenAI {
   if (!_openrouterClient) {
     const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) {
-      throw new Error('OpenRouter API key not configured. Set OPENROUTER_API_KEY in .env');
-    }
+    if (!apiKey) throw new Error('OpenRouter API key not configured');
     _openrouterClient = new OpenAI({
       baseURL: 'https://openrouter.ai/api/v1',
       apiKey,
@@ -68,8 +82,19 @@ export class AIService {
       type = 'text',
     } = options;
 
+    // 1) Try Nvidia NIM (FREE, highest quality)
     try {
-      // Try OpenRouter first (free tier)
+      return await this.tryNvidiaNIM(prompt, {
+        model: model || 'meta/llama-3.3-70b-instruct',
+        maxTokens,
+        temperature,
+      });
+    } catch (error: any) {
+      console.warn('Nvidia NIM failed, trying OpenRouter:', error.message);
+    }
+
+    // 2) Fallback: OpenRouter
+    try {
       return await this.tryOpenRouter(prompt, {
         model: model || providers.openrouter.models.free,
         maxTokens,
@@ -79,7 +104,7 @@ export class AIService {
       console.warn('OpenRouter failed, trying Ollama:', error.message);
       
       try {
-        // Fallback to Ollama (local)
+        // 3) Fallback: Ollama (local)
         return await this.tryOllama(prompt, {
           model: model || providers.ollama.models.text,
           maxTokens,
@@ -145,6 +170,27 @@ export class AIService {
     });
 
     return { imageUrl, prompt };
+  }
+
+  /**
+   * Try Nvidia NIM (FREE — 1000 req/day)
+   */
+  private static async tryNvidiaNIM(
+    prompt: string,
+    options: { model: string; maxTokens: number; temperature: number }
+  ): Promise<string> {
+    if (!process.env.NVIDIA_NIM_API_KEY) {
+      throw new Error('Nvidia NIM API key not configured');
+    }
+
+    const response = await getNvidiaClient().chat.completions.create({
+      model: options.model,
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: options.maxTokens,
+      temperature: options.temperature,
+    });
+
+    return response.choices[0]?.message?.content || '';
   }
 
   /**
