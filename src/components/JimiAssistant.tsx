@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, MessageCircle, X, Send, Volume2, VolumeX, Bot, User, Globe, Shield } from 'lucide-react';
+import { Mic, MicOff, MessageCircle, X, Send, Volume2, VolumeX, Bot, User, Globe, Shield, Phone, PhoneCall } from 'lucide-react';
 import { jimi, LANGUAGES, Language } from '../services/jimi.service';
 import { useNavigate } from 'react-router-dom';
 
@@ -113,6 +113,21 @@ const JimiAssistant: React.FC = () => {
       setTimeout(() => navigate('/analytics'), 500);
     } else if (lower.includes('social')) {
       setTimeout(() => navigate('/social'), 500);
+    }
+
+    // Check for call action and execute it
+    if (lower.includes('call') || lower.includes('phone') || lower.includes('dial')) {
+      // Find number to call
+      const callMatch = userMessage.match(/(?:call|phone|dial|karo)\s+(?:kar)?\s*(.+)/i);
+      if (callMatch && command.action === 'call_dial') {
+        const { number } = command.params || {};
+        if (number) {
+          // Open phone dialer
+          setTimeout(() => {
+            window.location.href = `tel:${number}`;
+          }, 1000);
+        }
+      }
     }
   };
 
@@ -243,6 +258,16 @@ const JimiAssistant: React.FC = () => {
                   </div>
                 )}
               </div>
+              {/* Quick Call Button */}
+              <button
+                onClick={() => {
+                  addMessage('📞 Bola: "Call karo [name]" ya "Save karo [name] [number]"', false);
+                }}
+                className="p-2 rounded-full hover:bg-white/20 transition-colors"
+                title="Help with calls"
+              >
+                <Phone size={18} className="text-white" />
+              </button>
               <button
                 onClick={toggleMute}
                 className="p-2 rounded-full hover:bg-white/20 transition-colors"

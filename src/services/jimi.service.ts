@@ -123,13 +123,32 @@ const SWEET_RESPONSES = {
     'Happy Birthday! 🎂🎉\nJanamdin ki bahut bahut shubhkamnayein!\nBhagwan aapko hamesha khush rakhe! 💕',
     'Happy Birthday! 🎂✨\nAaj ka din aapka hai! Bahut enjoy karo!\nBest wishes! 🌸',
   ],
+  callDialing: [
+    '📞 {name} ko call kar rahi hun...\nNumber: {number}\nPhone app khulega!',
+    '📞 Abhi {name} ko dial kar rahi hun!\n{number} pe call ho raha hai...',
+  ],
+  callLog: [
+    '📞 Call History:\n{calls}\n\nAur kuch help chahiye? 📱',
+    '📱 Recent Calls:\n{calls}',
+  ],
+  callSaved: [
+    '✅ Number save ho gaya!\n📞 {name}: {number}\nAb "call {name}" bolo toh call lagegi!',
+    '💾 Saved!\n{name} ka number: {number}\nCall karne ke liye bolo!',
+  ],
+  noNumber: [
+    '🤔 {name} ka number mere paas nahi hai.\nPehle number save karo: "Save karo Rahul 9876543210"',
+    '📵 {name} ka number nahi mila.\nNumber add karo pehle!',
+  ],
 };
 
-// Notes storage (in-memory, production mein use localStorage/database)
-let userNotes: { text: string; timestamp: Date }[] = [];
+  // Notes storage (in-memory, production mein use localStorage/database)
+  let userNotes: { text: string; timestamp: Date }[] = [];
 
-// Reminders storage
-let userReminders: { text: string; time: Date; id: string }[] = [];
+  // Reminders storage
+  let userReminders: { text: string; time: Date; id: string }[] = [];
+
+  // Call history storage
+  let callHistory: { name: string; number: string; timestamp: Date; type: 'outgoing' | 'incoming' }[] = [];
 
 interface CommandResult {
   action: string;
@@ -509,6 +528,64 @@ class JimiVoiceAgent {
     if (lower.includes('birthday') || lower.includes('janamdin') || lower.includes('happy birthday') || lower.includes('wish')) {
       const randomBirthday = SWEET_RESPONSES.birthday[Math.floor(Math.random() * SWEET_RESPONSES.birthday.length)];
       return { action: 'birthday', response: randomBirthday };
+    }
+
+    // ==================== CALL COMMANDS ====================
+    
+    // Save contact number
+    if ((lower.includes('save') || lower.includes('add') || lower.includes('store')) && 
+        (lower.includes('number') || lower.includes('contact') || lower.includes('phone'))) {
+      const match = text.match(/(?:save|add|store|kar)\s+(?:kar)?\s*([A-Za-z\s]+?)\s+(\d{10,})/i);
+      if (match) {
+        const name = match[1].trim().toLowerCase();
+        const number = match[2].trim();
+        // Store in callHistory with name for later use
+        callHistory.push({ name, number, timestamp: new Date(), type: 'outgoing' });
+        const randomSave = SWEET_RESPONSES.callSaved[Math.floor(Math.random() * SWEET_RESPONSES.callSaved.length)];
+        return { action: 'number_saved', response: randomSave.replace('{name}', name).replace('{number}', number) };
+      }
+      return { action: 'save_number_help', response: 'Number save karne ke liye bolo: "Save karo Rahul 9876543210"' };
+    }
+
+    // Call a contact (click-to-call)
+    if (lower.includes('call') || lower.includes('phone') || lower.includes('dial') || lower.includes('लागो')) {
+      // Extract name from call command
+      const callMatch = text.match(/(?:call|phone|dial|karo)\s+(?:kar)?\s*(.+)/i);
+      if (callMatch) {
+        const searchName = callMatch[1].trim().toLowerCase();
+        
+        // Find number from call history
+        const contact = callHistory.find(c => 
+          c.name.toLowerCase().includes(searchName) || 
+          searchName.includes(c.name.toLowerCase())
+        );
+        
+        if (contact) {
+          const randomDial = SWEET_RESPONSES.callDialing[Math.floor(Math.random() * SWEET_RESPONSES.callDialing.length)];
+          return { 
+            action: 'call_dial', 
+            params: { name: contact.name, number: contact.number },
+            response: randomDial.replace('{name}', contact.name).replace('{number}', contact.number) 
+          };
+        } else {
+          const randomNo = SWEET_RESPONSES.noNumber[Math.floor(Math.random() * SWEET_RESPONSES.noNumber.length)];
+          return { action: 'no_number', response: randomNo.replace('{name}', searchName) };
+        }
+      }
+      
+      // If just "call" without name, show call history
+      if (lower.includes('call history') || lower.includes('call log') || lower.includes('calls dikhao')) {
+        if (callHistory.length === 0) {
+          return { action: 'call_log_empty', response: '📞 Abhi koi call history nahi hai!\nPehle kisi ko call karo ya number save karo!' };
+        }
+        const calls = callHistory.slice(-5).reverse().map((c, i) => 
+          `${i + 1}. ${c.name} - ${c.number} (${c.type})`
+        ).join('\n');
+        const randomLog = SWEET_RESPONSES.callLog[Math.floor(Math.random() * SWEET_RESPONSES.callLog.length)];
+        return { action: 'call_log', response: randomLog.replace('{calls}', calls) };
+      }
+      
+      return { action: 'call_help', response: 'Call karne ke liye bolo: "Call karo Rahul ko" ya "Save karo Rahul 9876543210"' };
     }
 
     // ==================== LEAD INFO ====================
