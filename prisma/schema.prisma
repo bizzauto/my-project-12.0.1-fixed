@@ -100,9 +100,11 @@ model Business {
   youtubeAccessToken  String?
 
   // Google Business Profile
-  gbpAccessToken String?
-  gbpAccountId   String?
-  gbpLocationId  String?
+  gbpAccessToken  String?
+  gbpRefreshToken String?
+  gbpAccountId    String?
+  gbpLocationId   String?
+  gbpTokenExpiry  DateTime?
 
   // GBP Auto-Post Configuration
   gbpAutoPostEnabled     Boolean @default(false)

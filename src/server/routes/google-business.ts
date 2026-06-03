@@ -2,8 +2,139 @@ import { Router, Response } from 'express';
 import { prisma } from '../index.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 import { GBPAutoPostService } from '../services/gbp-auto-post.service.js';
+import { encrypt } from '../utils/auth.js';
+import axios from 'axios';
 
 const router = Router();
+
+// Google Business OAuth scopes
+const GBP_SCOPES = [
+  'https://www.googleapis.com/auth/business.manage',
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/userinfo.profile',
+].join(' ');
+
+// Store OAuth state temporarily (in production, use Redis)
+const oauthStates = new Map<string, { businessId: string; expiresAt: number }>();
+
+// ── GET /api/google-business/auth/url — Generate OAuth URL ──
+router.get('/auth/url', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URL || `${req.protocol}://${req.get('host')}/api/google-business/auth/callback`;
+
+    if (!clientId) {
+      return res.status(500).json({ success: false, error: 'Google Client ID not configured' });
+    }
+
+    // Generate state token
+    const state = Buffer.from(JSON.stringify({
+      businessId: req.user.businessId,
+      timestamp: Date.now(),
+    })).toString('base64');
+
+    oauthStates.set(state, { businessId: req.user.businessId, expiresAt: Date.now() + 10 * 60 * 1000 });
+
+    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    authUrl.searchParams.set('client_id', clientId);
+    authUrl.searchParams.set('redirect_uri', redirectUri);
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('scope', GBP_SCOPES);
+    authUrl.searchParams.set('access_type', 'offline');
+    authUrl.searchParams.set('prompt', 'consent');
+    authUrl.searchParams.set('state', state);
+
+    res.json({ success: true, data: { url: authUrl.toString() } });
+  } catch (error: any) {
+    console.error('GBP auth URL error:', error);
+    res.status(500).json({ success: false, error: 'Failed to generate auth URL' });
+  }
+});
+
+// ── GET /api/google-business/auth/callback — OAuth Callback ──
+router.get('/auth/callback', async (req: AuthRequest, res: Response) => {
+  try {
+    const { code, state, error } = req.query;
+
+    if (error) {
+      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/google-business?error=${error}`);
+    }
+
+    if (!code || !state) {
+      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/google-business?error=missing_params`);
+    }
+
+    // Validate state
+    const stateData = oauthStates.get(state as string);
+    if (!stateData || stateData.expiresAt < Date.now()) {
+      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/google-business?error=invalid_state`);
+    }
+    oauthStates.delete(state as string);
+
+    // Exchange code for tokens
+    const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
+      code,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URL || `${req.protocol}://${req.get('host')}/api/google-business/auth/callback`,
+      grant_type: 'authorization_code',
+    });
+
+    const { access_token, refresh_token, expires_in } = tokenResponse.data;
+
+    // Get user info
+    const userInfo = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+
+    // Get Business accounts
+    const accountsResponse = await axios.get('https://mybusinessbusinessinformation.googleapis.com/v1/accounts', {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+
+    const accounts = accountsResponse.data?.accounts || [];
+    if (accounts.length === 0) {
+      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/google-business?error=no_business_found`);
+    }
+
+    // Use first account (or let user select)
+    const account = accounts[0];
+    const accountId = account.name?.replace('accounts/', '') || account.accountId;
+
+    // Get locations for this account
+    let locationId = null;
+    try {
+      const locationsResponse = await axios.get(
+        `https://mybusinessbusinessinformation.googleapis.com/v1/accounts/${accountId}/locations`,
+        { headers: { Authorization: `Bearer ${access_token}` } }
+      );
+      const locations = locationsResponse.data?.locations || [];
+      if (locations.length > 0) {
+        locationId = locations[0].name?.replace(`accounts/${accountId}/locations/`, '') || locations[0].locationId;
+      }
+    } catch (locErr) {
+      console.warn('Could not fetch locations:', locErr);
+    }
+
+    // Save to database
+    await prisma.business.update({
+      where: { id: stateData.businessId },
+      data: {
+        gbpAccessToken: encrypt(access_token),
+        gbpRefreshToken: refresh_token ? encrypt(refresh_token) : undefined,
+        gbpAccountId: accountId,
+        gbpLocationId: locationId,
+        gbpTokenExpiry: new Date(Date.now() + expires_in * 1000),
+      },
+    });
+
+    // Redirect to frontend with success
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/google-business?connected=true`);
+  } catch (error: any) {
+    console.error('GBP callback error:', error);
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/google-business?error=callback_failed`);
+  }
+});
 
 // Get Google Business connection status
 router.get('/status', authenticate, async (req: AuthRequest, res: Response) => {

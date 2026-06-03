@@ -424,6 +424,7 @@ export const ecommerceAPI = {
 
 // Google Business API
 export const googleBusinessAPI = {
+  getAuthUrl: () => apiClient.get('/google-business/auth/url'),
   getStatus: () => apiClient.get('/google-business/status'),
   connect: (data: any) => apiClient.post('/google-business/connect', data),
   disconnect: () => apiClient.post('/google-business/disconnect'),
