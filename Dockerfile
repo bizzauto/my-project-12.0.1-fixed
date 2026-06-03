@@ -38,6 +38,7 @@ RUN mkdir -p uploads logs && chown -R appuser:appgroup /app
 
 # Use PORT env var (default 4000)
 ENV PORT=4000
+ENV NODE_OPTIONS="--max-old-space-size=512"
 EXPOSE ${PORT}
 
 # Switch to non-root user

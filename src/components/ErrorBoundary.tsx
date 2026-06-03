@@ -1,70 +1,78 @@
-import React, { Component, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
-  fallback?: ReactNode;
   pageName?: string;
+  fallbackTitle?: string;
+  fallbackMessage?: string;
 }
 
 interface State {
   hasError: boolean;
   error: Error | null;
+  errorInfo: ErrorInfo | null;
 }
 
-/**
- * Global Error Boundary component.
- * Catches JavaScript errors anywhere in the child component tree,
- * logs them, and displays a fallback UI instead of crashing the entire app.
- * 
- * Usage:
- *   <ErrorBoundary pageName="CRM">
- *     <CRMPage />
- *   </ErrorBoundary>
- */
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    // Log error to console in development
-    console.error(`[ErrorBoundary${this.props.pageName ? ` - ${this.props.pageName}` : ''}]:`, error, errorInfo);
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    this.setState({ errorInfo });
+    console.error(`[ErrorBoundary] ${this.props.pageName || 'Page'} error:`, error, errorInfo);
   }
 
-  handleRetry = (): void => {
-    this.setState({ hasError: false, error: null });
+  handleRetry = () => {
+    this.setState({ hasError: false, error: null, errorInfo: null });
   };
 
-  render(): ReactNode {
+  render() {
     if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
-
       return (
         <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center">
-          <div className="w-16 h-16 mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mb-4">
+            <AlertTriangle size={32} className="text-red-500" />
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">
-            Something went wrong{this.props.pageName ? ` in ${this.props.pageName}` : ''}
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+            {this.props.fallbackTitle || 'Something went wrong'}
           </h3>
-          <p className="text-sm text-gray-400 mb-4 max-w-md">
-            An unexpected error occurred. Your data is safe. Try refreshing this section.
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-md">
+            {this.props.fallbackMessage || 'An unexpected error occurred. Please try again or refresh the page.'}
           </p>
-          <button
-            onClick={this.handleRetry}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
-          >
-            Try Again
-          </button>
+          {this.state.error && (
+            <details className="mb-4 w-full max-w-lg">
+              <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300">
+                Technical details
+              </summary>
+              <pre className="mt-2 text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg overflow-x-auto text-left">
+                {this.state.error.message}
+                {this.state.errorInfo?.componentStack && (
+                  <>{'\n'}{this.state.errorInfo.componentStack}</>
+                )}
+              </pre>
+            </details>
+          )}
+          <div className="flex gap-3">
+            <button
+              onClick={this.handleRetry}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
+            >
+              <RefreshCw size={14} /> Try Again
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
         </div>
       );
     }
@@ -73,4 +81,5 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
+export { ErrorBoundary };
 export default ErrorBoundary;
