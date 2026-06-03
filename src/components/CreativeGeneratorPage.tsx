@@ -761,53 +761,81 @@ const CreativeGeneratorPage: React.FC = () => {
                     </div>
                   ))}
 
-                  {/* Content */}
-                  <div className="relative z-10 p-5 md:p-7 flex flex-col items-center justify-center h-full text-center">
-                    {/* Product Image with Filters */}
-                    {productImage ? (
-                      <div className="mb-3 w-20 h-20 md:w-28 md:h-28 rounded-2xl overflow-hidden border-3 border-white/30 shadow-xl">
-                        <img src={productImage} alt={productName} className="w-full h-full object-cover" style={photoFilterStyle} />
-                      </div>
-                    ) : (
-                      <div className="text-3xl sm:text-4xl md:text-6xl mb-3 drop-shadow-lg">{selectedTemplate?.emoji || '🎨'}</div>
-                    )}
-
-                    {productName && productImage && (
-                      <p className="text-white/80 text-xs font-medium mb-1.5 drop-shadow-md"
-                        style={{ fontFamily: FONT_OPTIONS[selectedFont].family }}>{productName}</p>
-                    )}
-
-                    <h2 className="font-bold leading-tight drop-shadow-md px-2"
-                      style={{
-                        fontSize: `${textSize * 0.26}px`,
-                        color: textColor,
-                        fontFamily: FONT_OPTIONS[selectedFont].family,
-                        textTransform: textEffects.uppercase ? 'uppercase' : 'none',
-                        textAlign: textAlign,
-                        ...getTextEffectStyle(),
-                      }}
+                  {/* Content - All Draggable */}
+                  <div className="absolute inset-0 z-10">
+                    {/* Product Image - Draggable */}
+                    <div
+                      className="absolute z-20 cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-white/40 rounded-2xl transition-all"
+                      style={{ left: `${elementPositions.productImage.x}%`, top: `${elementPositions.productImage.y}%`, transform: 'translate(-50%, -50%)' }}
+                      draggable
+                      onDragEnd={(e) => handleElementDrag('productImage', e)}
                     >
-                      {headline || 'Your Headline'}
-                    </h2>
+                      {productImage ? (
+                        <div className="w-20 h-20 md:w-28 md:h-28 rounded-2xl overflow-hidden border-3 border-white/30 shadow-xl">
+                          <img src={productImage} alt={productName} className="w-full h-full object-cover" style={photoFilterStyle} />
+                        </div>
+                      ) : (
+                        <div className="text-3xl sm:text-4xl md:text-6xl drop-shadow-lg">{selectedTemplate?.emoji || '🎨'}</div>
+                      )}
+                      {productName && productImage && (
+                        <p className="text-white/80 text-xs font-medium mt-1 text-center drop-shadow-md"
+                          style={{ fontFamily: FONT_OPTIONS[selectedFont].family }}>{productName}</p>
+                      )}
+                    </div>
 
-                    <p className="mt-1.5 opacity-90 drop-shadow-md px-2 max-w-xs"
-                      style={{
-                        fontSize: `${textSize * 0.15}px`,
-                        color: textColor,
-                        fontFamily: FONT_OPTIONS[selectedFont].family,
-                        textTransform: textEffects.uppercase ? 'uppercase' : 'none',
-                        textAlign: textAlign,
-                      }}
+                    {/* Headline - Draggable */}
+                    <div
+                      className="absolute z-20 w-[85%] cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-white/40 rounded-lg px-2 py-1 transition-all"
+                      style={{ left: `${elementPositions.headline.x}%`, top: `${elementPositions.headline.y}%`, transform: 'translate(-50%, -50%)' }}
+                      draggable
+                      onDragEnd={(e) => handleElementDrag('headline', e)}
                     >
-                      {subtitle || 'Your subtitle goes here'}
-                    </p>
+                      <h2 className="font-bold leading-tight drop-shadow-md text-center"
+                        style={{
+                          fontSize: `${textSize * 0.26}px`,
+                          color: textColor,
+                          fontFamily: FONT_OPTIONS[selectedFont].family,
+                          textTransform: textEffects.uppercase ? 'uppercase' : 'none',
+                          textAlign: textAlign,
+                          ...getTextEffectStyle(),
+                        }}
+                      >
+                        {headline || 'Your Headline'}
+                      </h2>
+                    </div>
 
-                    <div className="mt-auto pt-3 w-full px-3">
+                    {/* Subtitle - Draggable */}
+                    <div
+                      className="absolute z-20 w-[80%] cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-white/40 rounded-lg px-2 py-1 transition-all"
+                      style={{ left: `${elementPositions.subtitle.x}%`, top: `${elementPositions.subtitle.y}%`, transform: 'translate(-50%, -50%)' }}
+                      draggable
+                      onDragEnd={(e) => handleElementDrag('subtitle', e)}
+                    >
+                      <p className="opacity-90 drop-shadow-md text-center max-w-xs mx-auto"
+                        style={{
+                          fontSize: `${textSize * 0.15}px`,
+                          color: textColor,
+                          fontFamily: FONT_OPTIONS[selectedFont].family,
+                          textTransform: textEffects.uppercase ? 'uppercase' : 'none',
+                          textAlign: textAlign,
+                        }}
+                      >
+                        {subtitle || 'Your subtitle goes here'}
+                      </p>
+                    </div>
+
+                    {/* Business Info - Draggable */}
+                    <div
+                      className="absolute z-20 w-[90%] cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-white/40 rounded-lg px-2 py-1 transition-all"
+                      style={{ left: `${elementPositions.businessInfo.x}%`, top: `${elementPositions.businessInfo.y}%`, transform: 'translate(-50%, -50%)' }}
+                      draggable
+                      onDragEnd={(e) => handleElementDrag('businessInfo', e)}
+                    >
                       <div className="border-t border-white/20 pt-2.5 flex items-center justify-between">
                         <div className="text-left">
                           <p className="font-semibold text-xs drop-shadow-md"
                             style={{ color: textColor, fontFamily: FONT_OPTIONS[selectedFont].family }}>
-                            {businessName || (language === 'hi' ? 'à¤µà¥à¤¯à¤µà¤¸à¤¾à¤¯' : 'Business Name')}
+                            {businessName || (language === 'hi' ? 'व्यवसाय' : 'Business Name')}
                           </p>
                           <p className="text-[11px] opacity-80 drop-shadow-md" style={{ color: textColor }}>{phone || '+91 XXXXX XXXXX'}</p>
                         </div>
@@ -982,7 +1010,7 @@ const CreativeGeneratorPage: React.FC = () => {
               </div>
               {/* Tabs */}
               <div className="flex gap-1 mb-4 overflow-x-auto">
-                {(['basic', 'photo', 'filters', 'effects', 'stickers'] as const).map(tab => (
+                {(['basic', 'photo', 'filters', 'effects', 'stickers', 'layout'] as const).map(tab => (
                   <button key={tab} onClick={() => setActiveDesignTab(tab)}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-medium whitespace-nowrap transition-all ${activeDesignTab === tab ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>
                     {tab === 'basic' && '🎨 Basic'}
@@ -990,6 +1018,7 @@ const CreativeGeneratorPage: React.FC = () => {
                     {tab === 'filters' && '🔄 Filters'}
                     {tab === 'effects' && '✨ Effects'}
                     {tab === 'stickers' && '😊 Stickers'}
+                    {tab === 'layout' && '📐 Layout'}
                   </button>
                 ))}
               </div>
@@ -1293,6 +1322,54 @@ const CreativeGeneratorPage: React.FC = () => {
                         className="aspect-square text-lg bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:scale-110 transition-all flex items-center justify-center">{s}</button>
                     ))}
                   </div>
+                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                    <p className="text-[10px] font-medium text-gray-500 mb-2">🛡️ Trust Badges</p>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {TRUST_BADGES.map((b, i) => (
+                        <button key={i} onClick={() => addSticker(b.emoji)}
+                          className="flex flex-col items-center gap-0.5 px-2 py-1.5 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg hover:scale-105 transition-all border border-amber-200 dark:border-amber-700">
+                          <span className="text-lg">{b.emoji}</span>
+                          <span className="text-[8px] text-amber-700 dark:text-amber-400 font-medium">{b.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* LAYOUT TAB */}
+              {activeDesignTab === 'layout' && (
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold text-purple-500 mb-2">📐 Drag elements on poster or use sliders</p>
+                  {Object.entries(elementPositions).map(([key, pos]) => (
+                    <div key={key} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] font-medium text-gray-600 dark:text-gray-300 capitalize">
+                          {key === 'productImage' ? '🖼 Product Image' : key === 'headline' ? '📝 Headline' : key === 'subtitle' ? '💬 Subtitle' : '🏪 Business Info'}
+                        </span>
+                        <span className="text-[9px] text-gray-400">{Math.round(pos.x)}%, {Math.round(pos.y)}%</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <div>
+                          <label className="text-[9px] text-gray-400">X</label>
+                          <input type="range" min="5" max="95" value={pos.x}
+                            onChange={(e) => setElementPositions(prev => ({ ...prev, [key]: { ...prev[key], x: Number(e.target.value) } }))}
+                            className="w-full h-1 accent-purple-500" />
+                        </div>
+                        <div>
+                          <label className="text-[9px] text-gray-400">Y</label>
+                          <input type="range" min="5" max="95" value={pos.y}
+                            onChange={(e) => setElementPositions(prev => ({ ...prev, [key]: { ...prev[key], y: Number(e.target.value) } }))}
+                            className="w-full h-1 accent-purple-500" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <button onClick={resetPositions}
+                    className="w-full py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg text-xs font-medium hover:shadow-lg transition-all flex items-center justify-center gap-1.5">
+                    <RefreshCw size={12} /> Reset Layout
+                  </button>
+                  <p className="text-[9px] text-gray-400 text-center">💡 Drag elements directly on poster or use sliders above</p>
                 </div>
               )}
             </div>
@@ -1456,24 +1533,54 @@ const CreativeGeneratorPage: React.FC = () => {
               {stickers.map(s => (
                 <div key={s.id} className="absolute z-10" style={{ left: `${s.x}%`, top: `${s.y}%`, fontSize: `${s.size}px` }}>{s.emoji}</div>
               ))}
-              <div className="relative z-10 p-5 md:p-7 flex flex-col items-center justify-center h-full text-center">
-                {productImage ? (
-                  <div className="mb-3 w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-3 border-white/30 shadow-xl">
-                    <img src={productImage} alt={productName} className="w-full h-full object-cover" style={photoFilterStyle} />
-                  </div>
-                ) : (
-                  <div className="text-4xl sm:text-5xl md:text-7xl mb-3 drop-shadow-lg">{selectedTemplate?.emoji || '🎨'}</div>
-                )}
-                {productName && productImage && (
-                  <p className="text-white/80 text-sm font-medium mb-1.5 drop-shadow-md" style={{ fontFamily: FONT_OPTIONS[selectedFont].family }}>{productName}</p>
-                )}
-                <h2 className="font-bold leading-tight drop-shadow-md px-2" style={{ fontSize: `${textSize * 0.26}px`, color: textColor, fontFamily: FONT_OPTIONS[selectedFont].family, textTransform: textEffects.uppercase ? 'uppercase' : 'none', textAlign: textAlign, ...getTextEffectStyle() }}>
-                  {headline || 'Your Headline'}
-                </h2>
-                <p className="mt-1.5 opacity-90 drop-shadow-md px-2 max-w-xs" style={{ fontSize: `${textSize * 0.15}px`, color: textColor, fontFamily: FONT_OPTIONS[selectedFont].family, textTransform: textEffects.uppercase ? 'uppercase' : 'none', textAlign: textAlign }}>
-                  {subtitle || 'Your subtitle goes here'}
-                </p>
-                <div className="mt-auto pt-3 w-full px-3">
+              <div className="absolute inset-0 z-10">
+                {/* Product Image - Draggable */}
+                <div
+                  className="absolute z-20 cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-white/40 rounded-2xl transition-all"
+                  style={{ left: `${elementPositions.productImage.x}%`, top: `${elementPositions.productImage.y}%`, transform: 'translate(-50%, -50%)' }}
+                  draggable
+                  onDragEnd={(e) => handleElementDrag('productImage', e)}
+                >
+                  {productImage ? (
+                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-3 border-white/30 shadow-xl">
+                      <img src={productImage} alt={productName} className="w-full h-full object-cover" style={photoFilterStyle} />
+                    </div>
+                  ) : (
+                    <div className="text-4xl sm:text-5xl md:text-7xl drop-shadow-lg">{selectedTemplate?.emoji || '🎨'}</div>
+                  )}
+                  {productName && productImage && (
+                    <p className="text-white/80 text-sm font-medium mt-1 text-center drop-shadow-md" style={{ fontFamily: FONT_OPTIONS[selectedFont].family }}>{productName}</p>
+                  )}
+                </div>
+                {/* Headline */}
+                <div
+                  className="absolute z-20 w-[85%] cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-white/40 rounded-lg px-2 py-1 transition-all"
+                  style={{ left: `${elementPositions.headline.x}%`, top: `${elementPositions.headline.y}%`, transform: 'translate(-50%, -50%)' }}
+                  draggable
+                  onDragEnd={(e) => handleElementDrag('headline', e)}
+                >
+                  <h2 className="font-bold leading-tight drop-shadow-md text-center" style={{ fontSize: `${textSize * 0.26}px`, color: textColor, fontFamily: FONT_OPTIONS[selectedFont].family, textTransform: textEffects.uppercase ? 'uppercase' : 'none', textAlign: textAlign, ...getTextEffectStyle() }}>
+                    {headline || 'Your Headline'}
+                  </h2>
+                </div>
+                {/* Subtitle */}
+                <div
+                  className="absolute z-20 w-[80%] cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-white/40 rounded-lg px-2 py-1 transition-all"
+                  style={{ left: `${elementPositions.subtitle.x}%`, top: `${elementPositions.subtitle.y}%`, transform: 'translate(-50%, -50%)' }}
+                  draggable
+                  onDragEnd={(e) => handleElementDrag('subtitle', e)}
+                >
+                  <p className="opacity-90 drop-shadow-md text-center max-w-xs mx-auto" style={{ fontSize: `${textSize * 0.15}px`, color: textColor, fontFamily: FONT_OPTIONS[selectedFont].family, textTransform: textEffects.uppercase ? 'uppercase' : 'none', textAlign: textAlign }}>
+                    {subtitle || 'Your subtitle goes here'}
+                  </p>
+                </div>
+                {/* Business Info */}
+                <div
+                  className="absolute z-20 w-[90%] cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-white/40 rounded-lg px-2 py-1 transition-all"
+                  style={{ left: `${elementPositions.businessInfo.x}%`, top: `${elementPositions.businessInfo.y}%`, transform: 'translate(-50%, -50%)' }}
+                  draggable
+                  onDragEnd={(e) => handleElementDrag('businessInfo', e)}
+                >
                   <div className="border-t border-white/20 pt-2.5 flex items-center justify-between">
                     <div className="text-left">
                       <p className="font-semibold text-xs drop-shadow-md" style={{ color: textColor, fontFamily: FONT_OPTIONS[selectedFont].family }}>{businessName || 'Business Name'}</p>
