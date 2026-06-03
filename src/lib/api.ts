@@ -572,6 +572,21 @@ export const voiceCallsAPI = {
   checkConnection: () => apiClient.get('/voice-calls/check'),
 };
 
+// WhatsApp Media Cleanup API
+export const whatsappMediaCleanupAPI = {
+  getStats: () => apiClient.get('/whatsapp-media/cleanup/stats'),
+  getPendingFiles: (userId?: string) => apiClient.get('/whatsapp-media/cleanup/pending', { 
+    params: userId ? { userId } : {} 
+  }),
+  getUserWarnings: () => apiClient.get('/whatsapp-media/cleanup/users'),
+  sendWarnings: () => apiClient.post('/whatsapp-media/cleanup/warn-users'),
+  exportFiles: (fileIds: string[], format: 'csv' | 'json' | 'zip') =>
+    apiClient.post('/whatsapp-media/cleanup/export', { fileIds, format }),
+  deleteFiles: (fileIds: string[], reason: string, confirmed: boolean) =>
+    apiClient.delete('/whatsapp-media/cleanup', { data: { fileIds, reason, confirmed } }),
+  triggerCleanup: () => apiClient.post('/whatsapp-media/cleanup/cleanup-trigger'),
+};
+
 // Wallet API
 export const walletAPI = {
   get: () => apiClient.get('/wallet'),
