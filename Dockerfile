@@ -34,7 +34,7 @@ COPY --from=builder /app/public ./public
 COPY start.sh ./
 RUN chmod +x start.sh
 
-RUN mkdir -p uploads logs && chown -R appuser:appgroup /app
+RUN mkdir -p uploads logs && chown -R appuser:appgroup uploads logs
 
 ENV PORT=4000
 ENV NODE_OPTIONS="--max-old-space-size=512"
