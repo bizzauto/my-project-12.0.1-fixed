@@ -96,6 +96,8 @@ model Business {
   linkedinAccessToken String?
   twitterUserId       String?
   twitterAccessToken  String?
+  youtubeChannelId    String?
+  youtubeAccessToken  String?
 
   // Google Business Profile
   gbpAccessToken String?

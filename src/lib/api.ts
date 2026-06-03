@@ -457,6 +457,9 @@ export const socialAccountsAPI = {
   connectTwitter: (data: { twitterUserId: string; twitterAccessToken: string }) =>
     apiClient.post('/social-accounts/twitter/connect', data),
   disconnectTwitter: () => apiClient.delete('/social-accounts/twitter/disconnect'),
+  connectYouTube: (data: { youtubeChannelId: string; youtubeAccessToken: string }) =>
+    apiClient.post('/social-accounts/youtube/connect', data),
+  disconnectYouTube: () => apiClient.delete('/social-accounts/youtube/disconnect'),
 };
 
 // Instagram API

@@ -498,6 +498,7 @@ export default function SettingsPage() {
             { name: 'LinkedIn', icon: '💼', color: 'blue', connected: !!business?.linkedinAccessToken, desc: 'Professional posts' },
             { name: 'Twitter/X', icon: '🐦', color: 'sky', connected: !!business?.twitterAccessToken, desc: 'Tweets and threads' },
             { name: 'Google Business', icon: '🏢', color: 'red', connected: !!business?.gbpAccessToken, desc: 'Reviews, posts, insights' },
+            { name: 'YouTube', icon: '📺', color: 'red', connected: !!business?.youtubeAccessToken, desc: 'Channel management, videos' },
             { name: 'Google OAuth', icon: '🔐', color: 'red', connected: !!user?.googleId, desc: 'Sign in with Google' },
             { name: 'Apple Sign-In', icon: '🍎', color: 'gray', connected: !!user?.appleId, desc: 'Sign in with Apple' },
           ].map((social) => (

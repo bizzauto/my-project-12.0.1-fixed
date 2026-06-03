@@ -510,6 +510,10 @@ const SocialMediaPage: React.FC = () => {
       showToast('Please enter both Twitter User ID and Access Token', 'error');
       return;
     }
+    if (platform === 'youtube' && (!connectForm.youtubeChannelId || !connectForm.youtubeAccessToken)) {
+      showToast('Please enter both YouTube Channel ID and Access Token', 'error');
+      return;
+    }
 
     setConnecting(true);
     try {
@@ -520,6 +524,8 @@ const SocialMediaPage: React.FC = () => {
         res = await socialAccountsAPI.connectLinkedIn(connectForm as any);
       } else if (platform === 'twitter') {
         res = await socialAccountsAPI.connectTwitter(connectForm as any);
+      } else if (platform === 'youtube') {
+        res = await socialAccountsAPI.connectYouTube(connectForm as any);
       }
 
       if (res?.data.success) {
@@ -549,6 +555,8 @@ const SocialMediaPage: React.FC = () => {
       } else if (platform === 'google_business') {
         window.location.href = '/app/google-business';
         return;
+      } else if (platform === 'youtube') {
+        res = await socialAccountsAPI.disconnectYouTube();
       }
 
       if (res?.data.success) {
@@ -666,6 +674,7 @@ const SocialMediaPage: React.FC = () => {
               { id: 'linkedin', name: 'LinkedIn', icon: '💼', color: 'bg-blue-700' },
               { id: 'twitter', name: 'Twitter/X', icon: '🐦', color: 'bg-gray-900 dark:bg-gray-600' },
               { id: 'google_business', name: 'Google Business', icon: '🏢', color: 'bg-red-600' },
+              { id: 'youtube', name: 'YouTube', icon: '📺', color: 'bg-red-600' },
             ].map(platform => {
               const account = socialAccounts.find(a => a.platform === platform.id);
               const isConnected = account?.connected || false;
@@ -968,8 +977,8 @@ const SocialMediaPage: React.FC = () => {
         </div>
       )}
 
-      {/* Social Accounts Connect Modal (Facebook/LinkedIn/Twitter) */}
-      {connectModal && ['facebook', 'linkedin', 'twitter'].includes(connectModal.platform) && (
+      {/* Social Accounts Connect Modal (Facebook/LinkedIn/Twitter/YouTube) */}
+      {connectModal && ['facebook', 'linkedin', 'twitter', 'youtube'].includes(connectModal.platform) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={closeConnectModal}>
           <div className="fixed inset-0 bg-black/50" />
           <div className="relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full max-w-md p-4 sm:p-5 md:p-6" onClick={e => e.stopPropagation()}>
@@ -978,16 +987,19 @@ const SocialMediaPage: React.FC = () => {
                 <div className={`p-2 rounded-lg ${
                   connectModal.platform === 'facebook' ? 'bg-blue-100 dark:bg-blue-900/30' :
                   connectModal.platform === 'linkedin' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                  connectModal.platform === 'youtube' ? 'bg-red-100 dark:bg-red-900/30' :
                   'bg-gray-100 dark:bg-gray-700'
                 }`}>
                   <span className="text-xl">
                     {connectModal.platform === 'facebook' ? '📘' :
-                     connectModal.platform === 'linkedin' ? '💼' : '🐦'}
+                     connectModal.platform === 'linkedin' ? '💼' :
+                     connectModal.platform === 'youtube' ? '📺' : '🐦'}
                   </span>
                 </div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Connect {connectModal.platform === 'facebook' ? 'Facebook' :
-                           connectModal.platform === 'linkedin' ? 'LinkedIn' : 'Twitter/X'}
+                           connectModal.platform === 'linkedin' ? 'LinkedIn' :
+                           connectModal.platform === 'youtube' ? 'YouTube' : 'Twitter/X'}
                 </h2>
               </div>
               <button onClick={closeConnectModal} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
@@ -1001,7 +1013,9 @@ const SocialMediaPage: React.FC = () => {
                   ? 'Enter your Facebook Page ID and a Page Access Token with pages_manage_posts and pages_read_engagement permissions.'
                   : connectModal.platform === 'linkedin'
                     ? 'Enter your LinkedIn Page ID (Organization URN) and an Access Token with w_organization_social and rw_organization_admin permissions.'
-                    : 'Enter your Twitter/X User ID and Bearer Token with tweet.read and tweet.write permissions.'}
+                    : connectModal.platform === 'youtube'
+                      ? 'Enter your YouTube Channel ID and an OAuth Access Token with youtube and youtube.force-ssl scopes.'
+                      : 'Enter your Twitter/X User ID and Bearer Token with tweet.read and tweet.write permissions.'}
               </p>
 
               {connectModal.platform === 'facebook' && (
@@ -1079,6 +1093,31 @@ const SocialMediaPage: React.FC = () => {
                 </>
               )}
 
+              {connectModal.platform === 'youtube' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">YouTube Channel ID</label>
+                    <input
+                      type="text"
+                      value={connectForm.youtubeChannelId || ''}
+                      onChange={e => setConnectForm(prev => ({ ...prev, youtubeChannelId: e.target.value }))}
+                      placeholder="e.g. UCxxxxxx_xxxxxxxxxxxx"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">YouTube OAuth Access Token</label>
+                    <input
+                      type="password"
+                      value={connectForm.youtubeAccessToken || ''}
+                      onChange={e => setConnectForm(prev => ({ ...prev, youtubeAccessToken: e.target.value }))}
+                      placeholder="ya29.a0AfH6S... long token"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
                   <p className="text-xs text-blue-700 dark:text-blue-300">
@@ -1087,7 +1126,9 @@ const SocialMediaPage: React.FC = () => {
                       ? 'Go to Facebook Developers → Your App → Tools → Graph API Explorer. Select your Page, get a Page Access Token with pages_manage_posts permission.'
                       : connectModal.platform === 'linkedin'
                         ? 'Go to LinkedIn Developers → Your App → Auth → Access Tokens. Request w_organization_social permission.'
-                        : 'Go to Twitter Developer Portal → Your Project → Keys and Tokens → Generate Bearer Token with Read and Write permissions.'}
+                        : connectModal.platform === 'youtube'
+                          ? 'Go to Google Cloud Console → APIs & Services → OAuth 2.0. Create credentials with YouTube Data API v3 scopes. Get your Channel ID from YouTube Studio → Advanced settings.'
+                          : 'Go to Twitter Developer Portal → Your Project → Keys and Tokens → Generate Bearer Token with Read and Write permissions.'}
                   </p>
                 </div>
 

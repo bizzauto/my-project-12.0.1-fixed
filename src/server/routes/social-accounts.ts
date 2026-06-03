@@ -24,6 +24,8 @@ router.get('/', async (req: AuthRequest, res: Response) => {
         twitterAccessToken: true,
         gbpAccessToken: true,
         gbpAccountId: true,
+        youtubeChannelId: true,
+        youtubeAccessToken: true,
       },
     });
 
@@ -56,6 +58,11 @@ router.get('/', async (req: AuthRequest, res: Response) => {
         platform: 'google_business',
         connected: !!(business.gbpAccessToken && business.gbpAccountId),
         details: business.gbpAccountId ? { accountId: business.gbpAccountId } : null,
+      },
+      {
+        platform: 'youtube',
+        connected: !!(business.youtubeChannelId && business.youtubeAccessToken),
+        details: business.youtubeChannelId ? { channelId: business.youtubeChannelId } : null,
       },
     ];
 
@@ -194,6 +201,50 @@ router.delete('/twitter/disconnect', async (req: AuthRequest, res: Response) => 
     res.json({ success: true, message: 'Twitter/X disconnected' });
   } catch (error: any) {
     res.status(500).json({ success: false, error: 'Failed to disconnect Twitter/X', details: error.message });
+  }
+});
+
+// ── YOUTUBE ──
+
+/**
+ * POST /api/social-accounts/youtube/connect
+ * Save YouTube Channel credentials
+ */
+router.post('/youtube/connect', async (req: AuthRequest, res: Response) => {
+  try {
+    const { youtubeChannelId, youtubeAccessToken } = req.body;
+
+    if (!youtubeChannelId || !youtubeAccessToken) {
+      return res.status(400).json({ success: false, error: 'youtubeChannelId and youtubeAccessToken are required' });
+    }
+
+    await prisma.business.update({
+      where: { id: req.user.businessId },
+      data: {
+        youtubeChannelId,
+        youtubeAccessToken: encrypt(youtubeAccessToken),
+      },
+    });
+
+    res.json({ success: true, message: 'YouTube channel connected successfully!' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Failed to connect YouTube', details: error.message });
+  }
+});
+
+/**
+ * DELETE /api/social-accounts/youtube/disconnect
+ * Remove YouTube credentials
+ */
+router.delete('/youtube/disconnect', async (req: AuthRequest, res: Response) => {
+  try {
+    await prisma.business.update({
+      where: { id: req.user.businessId },
+      data: { youtubeChannelId: null, youtubeAccessToken: null },
+    });
+    res.json({ success: true, message: 'YouTube disconnected' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Failed to disconnect YouTube', details: error.message });
   }
 });
 
