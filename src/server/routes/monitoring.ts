@@ -20,6 +20,10 @@ export function setGauge(name: string, value: number): void {
   gauges[name] = value;
 }
 
+export function getGauge(name: string): number {
+  return gauges[name] || 0;
+}
+
 // GET /metrics — Prometheus text format
 router.get('/metrics', async (_req: Request, res: Response) => {
   const lines: string[] = [];

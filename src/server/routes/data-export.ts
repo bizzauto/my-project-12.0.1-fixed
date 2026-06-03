@@ -150,18 +150,28 @@ router.post('/contacts/import', authenticate, async (req: AuthRequest, res: any)
 
     for (const c of contacts) {
       try {
-        if (!c.phone && !c.email) { skipped++; continue; }
+        // Validate each contact before importing
+        const phone = typeof c.phone === 'string' ? c.phone.trim() : null;
+        const email = typeof c.email === 'string' ? c.email.trim() : null;
+        const name = typeof c.name === 'string' ? c.name.trim().slice(0, 200) : 'Imported Contact';
+        const company = typeof c.company === 'string' ? c.company.trim().slice(0, 200) : null;
+        const tags = Array.isArray(c.tags) ? c.tags.filter((t: any) => typeof t === 'string').slice(0, 20) : [];
+        const dealValue = typeof c.dealValue === 'number' && c.dealValue >= 0 ? c.dealValue : 0;
+        const dealStage = typeof c.dealStage === 'string' ? c.dealStage.trim().slice(0, 50) : null;
+
+        if (!phone && !email) { skipped++; continue; }
+
         await prisma.contact.create({
           data: {
             businessId: req.user.businessId,
-            name: c.name || 'Imported Contact',
-            phone: c.phone || null,
-            email: c.email || null,
-            company: c.company || null,
-            tags: c.tags || [],
+            name,
+            phone: phone || null,
+            email: email || null,
+            company,
+            tags,
             source: 'import',
-            dealValue: c.dealValue || 0,
-            dealStage: c.dealStage || null,
+            dealValue,
+            dealStage,
           },
         });
         imported++;

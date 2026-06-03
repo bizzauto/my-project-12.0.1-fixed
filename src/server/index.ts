@@ -85,8 +85,9 @@ import { sanitizeInput } from './middleware/sanitize.js';
 import { apiVersioning } from './middleware/api-versioning.js';
 import { cacheResponse, getCacheStats, invalidateCache } from './middleware/cache.js';
 import adminAnalyticsRoutes from './routes/admin-analytics.js';
-import monitoringRoutes from './routes/monitoring.js';
+import monitoringRoutes, { incrementCounter, setGauge, getGauge } from './routes/monitoring.js';
 import dataExportRoutes from './routes/data-export.js';
+import v2Routes from './routes/v2/index.js';
 
 dotenv.config();
 
@@ -188,6 +189,48 @@ app.use('/api', (req, res, next) => {
       return originalJson(body);
     };
   }
+  next();
+});
+
+// Request counting middleware — feeds /api/metrics with real traffic data
+app.use('/api', (req, res, next) => {
+  // Skip health checks and metrics themselves
+  if (req.path.startsWith('/health') || req.path === '/metrics') {
+    return next();
+  }
+
+  // Normalize route: strip query params and IDs for grouping
+  // e.g., /contacts/abc123 → /contacts, /deals/stats → /deals/stats
+  const basePath = '/' + (req.path.split('/').filter(Boolean)[0] || 'unknown');
+  const method = req.method;
+
+  // Increment request counter: method + route
+  incrementCounter(`${method}:${basePath}`);
+
+  // Track response time
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    const status = res.statusCode;
+
+    // Count by status class (2xx, 4xx, 5xx)
+    const statusClass = `${Math.floor(status / 100)}xx`;
+    incrementCounter(`status:${statusClass}`);
+
+    // Count errors specifically
+    if (status >= 400) {
+      incrementCounter(`errors:${basePath}`);
+    }
+
+    // Update response time gauge (rolling average)
+    const currentAvg = getGauge(`${basePath}_avg_ms`);
+    const currentCount = getGauge(`${basePath}_count`);
+    const newCount = currentCount + 1;
+    const newAvg = currentAvg + (duration - currentAvg) / newCount;
+    setGauge(`${basePath}_avg_ms`, Math.round(newAvg));
+    setGauge(`${basePath}_count`, newCount);
+  });
+
   next();
 });
 
@@ -326,6 +369,9 @@ app.use('/api', monitoringRoutes);
 
 // Phase 4: Enterprise Data Export/Import
 app.use('/api/data-export', dataExportRoutes);
+
+// Phase 4: v2 API Routes (breaking changes with versioning)
+app.use('/api/v2', v2Routes);
 
 // Test endpoints (development only)
 if (NODE_ENV !== 'production') {

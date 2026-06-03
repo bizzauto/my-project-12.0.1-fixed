@@ -11,8 +11,9 @@ import { Request, Response, NextFunction } from 'express';
  * Requests without a version default to v1.
  */
 
-const CURRENT_VERSION = 'v1';
-const SUPPORTED_VERSIONS = ['v1'];
+const CURRENT_VERSION = 'v2';
+const SUPPORTED_VERSIONS = ['v1', 'v2'];
+const DEPRECATED_VERSIONS = ['v1'];
 
 export interface VersionedRequest extends Request {
   apiVersion: string;
@@ -57,7 +58,16 @@ export function apiVersioning(req: VersionedRequest, _res: Response, next: NextF
     });
   }
 
+  // Set version and deprecation headers for deprecated versions
   req.apiVersion = version;
+  if (DEPRECATED_VERSIONS.includes(version)) {
+    _res.setHeader('Deprecation', 'true');
+    _res.setHeader('Sunset', '2027-01-01');
+    _res.setHeader('X-API-Version', `${version} (deprecated, upgrade to ${CURRENT_VERSION})`);
+    _res.setHeader('Link', `</api/${CURRENT_VERSION}>; rel="successor-version"`);
+  } else {
+    _res.setHeader('X-API-Version', version);
+  }
   next();
 }
 
