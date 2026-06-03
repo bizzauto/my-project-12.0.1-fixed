@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Check, ArrowRight, ArrowLeft, Building2, MessageSquare, Zap, Star, CheckCircle, RefreshCw } from 'lucide-react';
+import { Check, ArrowRight, ArrowLeft, Building2, MessageSquare, Zap, Star, CheckCircle, RefreshCw, Upload, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../lib/authStore';
 import { whatsappAPI, googleBusinessAPI, subscriptionsAPI } from '../lib/api';
+import AutoSetupWizard from './AutoSetupWizard';
 
 type ConnectionState = 'loading' | 'connected' | 'disconnected';
 
 const OnboardingWizard: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // 0 = Quick Setup choice
   const [selectedType, setSelectedType] = useState('');
   const [waStatus, setWaStatus] = useState<ConnectionState>('loading');
   const [gbpStatus, setGbpStatus] = useState<ConnectionState>('loading');
   const [razorpayStatus, setRazorpayStatus] = useState<ConnectionState>('loading');
+  const [setupMode, setSetupMode] = useState<'choice' | 'auto' | 'manual'>('choice');
   const totalSteps = 4;
   const { user, business, setOnboardingCompleted } = useAuthStore();
   const navigate = useNavigate();
@@ -41,7 +43,7 @@ const OnboardingWizard: React.FC<{ onComplete?: () => void }> = ({ onComplete })
   }, []);
 
   const steps = [
-    { title: 'Welcome', icon: <Star size={20} className="sm:w-6 sm:h-6" /> },
+    { title: 'Setup', icon: <Sparkles size={20} className="sm:w-6 sm:h-6" /> },
     { title: 'Business', icon: <Building2 size={20} className="sm:w-6 sm:h-6" /> },
     { title: 'Connect', icon: <MessageSquare size={20} className="sm:w-6 sm:h-6" /> },
     { title: 'Done!', icon: <Check size={20} className="sm:w-6 sm:h-6" /> },
@@ -83,17 +85,71 @@ const OnboardingWizard: React.FC<{ onComplete?: () => void }> = ({ onComplete })
         </div>
 
         <div className="px-4 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8">
-          {step === 1 && (
+          {step === 1 && setupMode === 'choice' && (
             <div className="text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-50 rounded-xl sm:rounded-2xl flex items-center justify-center text-blue-600 mx-auto mb-4 sm:mb-6"><Zap size={32} className="sm:w-10 sm:h-10" /></div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">Welcome to BizzAuto Solutions!</h2>
-              <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 px-2">Hey {user?.name || 'there'}! Let's get your business set up in under 2 minutes.</p>
-              <p className="text-sm sm:text-base text-gray-500 px-2">We'll help you connect WhatsApp, add contacts, and create your first automation.</p>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mx-auto mb-4 sm:mb-6">
+                <Sparkles size={32} className="sm:w-10 sm:h-10" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
+                Welcome to BizzAuto! 🎉
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 px-2">
+                Hey {user?.name || 'there'}! Choose how you want to set up your business:
+              </p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
+                {/* Quick Setup Option */}
+                <button
+                  onClick={() => {
+                    setSetupMode('auto');
+                    setStep(1);
+                  }}
+                  className="p-6 border-2 border-blue-200 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
+                >
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 mb-3 group-hover:scale-110 transition-transform">
+                    <Upload size={24} />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-1">⚡ Quick Setup</h3>
+                  <p className="text-sm text-gray-500">
+                    Upload business card/document - we'll auto-fill everything!
+                  </p>
+                </button>
+
+                {/* Manual Setup Option */}
+                <button
+                  onClick={() => {
+                    setSetupMode('manual');
+                    setStep(2);
+                  }}
+                  className="p-6 border-2 border-gray-200 rounded-2xl hover:border-purple-500 hover:bg-purple-50 transition-all text-left group"
+                >
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 mb-3 group-hover:scale-110 transition-transform">
+                    <Building2 size={24} />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-1">✍️ Manual Setup</h3>
+                  <p className="text-sm text-gray-500">
+                    Enter details manually - full control over everything.
+                  </p>
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-400 mt-6">
+                Don't worry, you can always change details later in Settings
+              </p>
             </div>
+          )}
+
+          {step === 1 && setupMode === 'auto' && (
+            <AutoSetupWizard onComplete={(data) => {
+              console.log('Setup data:', data);
+              setStep(2);
+            }} />
           )}
           {step === 2 && (
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Tell us about your business</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                {setupMode === 'auto' ? '✅ Details saved! Choose your category' : 'Tell us about your business'}
+              </h2>
               <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
                 {['Salon & Spa', 'Restaurant', 'Gym & Fitness', 'Real Estate', 'Education', 'E-Commerce', 'Healthcare', 'Agency'].map(type => (
                   <button key={type} onClick={() => setSelectedType(type)}
@@ -163,15 +219,23 @@ const OnboardingWizard: React.FC<{ onComplete?: () => void }> = ({ onComplete })
         </div>
 
         <div className="px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-2">
-          {step > 1 ? (
+          {step > 1 && setupMode !== 'auto' ? (
             <button onClick={() => setStep(step - 1)} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-900">
               <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" /> <span className="hidden sm:inline">Back</span>
             </button>
+          ) : step > 1 && setupMode === 'auto' ? (
+            <button onClick={() => setSetupMode('choice')} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-900">
+              <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" /> <span className="hidden sm:inline">Back</span>
+            </button>
           ) : <div />}
-          <button onClick={() => step < totalSteps ? setStep(step + 1) : handleComplete()}
-            className="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-            {step < totalSteps ? 'Continue' : 'Get Started'} <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" />
-          </button>
+          {setupMode === 'auto' && step === 1 ? (
+            <div />
+          ) : (
+            <button onClick={() => step < totalSteps ? setStep(step + 1) : handleComplete()}
+              className="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+              {step < totalSteps ? 'Continue' : 'Get Started'} <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" />
+            </button>
+          )}
         </div>
       </div>
     </div>
