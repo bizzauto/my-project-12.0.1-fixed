@@ -473,7 +473,6 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div
           className="flex-1 overflow-y-auto"
           style={{
-            minHeight: 0,
             minHeight: '0px',
             paddingBottom: 'env(safe-area-inset-bottom, 0px)',
             overscrollBehavior: 'contain',

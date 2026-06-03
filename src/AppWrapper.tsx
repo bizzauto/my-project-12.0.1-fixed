@@ -13,18 +13,18 @@ import PWAInstallBanner from './components/PWAInstallBanner';
 import { lazy, Suspense } from 'react';
 const ModernPage = lazy(() => import('./components/ModernPage'));
 
-// Public pages
-import LandingPage from './components/LandingPage';
-import LoginPage from './components/LoginPage';
-import RegisterPage from './components/RegisterPage';
-import PricingPage from './components/PricingPage';
-import TermsPage from './components/TermsPage';
-import PrivacyPage from './components/PrivacyPage';
-import AboutPage from './components/AboutPage';
-import ContactPage from './components/ContactPage';
-import FeaturesPage from './components/FeaturesPage';
-import ForgotPasswordPage from './components/ForgotPasswordPage';
-import NotFoundPage from './components/NotFoundPage';
+// Public pages — lazy-loaded for code splitting
+const LandingPage = lazy(() => import('./components/LandingPage'));
+const LoginPage = lazy(() => import('./components/LoginPage'));
+const RegisterPage = lazy(() => import('./components/RegisterPage'));
+const PricingPage = lazy(() => import('./components/PricingPage'));
+const TermsPage = lazy(() => import('./components/TermsPage'));
+const PrivacyPage = lazy(() => import('./components/PrivacyPage'));
+const AboutPage = lazy(() => import('./components/AboutPage'));
+const ContactPage = lazy(() => import('./components/ContactPage'));
+const FeaturesPage = lazy(() => import('./components/FeaturesPage'));
+const ForgotPasswordPage = lazy(() => import('./components/ForgotPasswordPage'));
+const NotFoundPage = lazy(() => import('./components/NotFoundPage'));
 
 // Authenticated layout
 import AuthLayout from './layouts/AuthLayout';

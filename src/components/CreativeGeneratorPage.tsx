@@ -213,6 +213,10 @@ const CreativeGeneratorPage: React.FC = () => {
   const [language, setLanguage] = useState<'en' | 'hi'>('en');
   const [textSize, setTextSize] = useState(100);
   const [textColor, setTextColor] = useState('#FFFFFF');
+  const [headlineColor, setHeadlineColor] = useState('#FFFFFF');
+  const [subtitleColor, setSubtitleColor] = useState('#FFFFFF');
+  const [businessColor, setBusinessColor] = useState('#FFFFFF');
+  const [colorTarget, setColorTarget] = useState<'all' | 'headline' | 'subtitle' | 'business'>('all');
   const [showQR, setShowQR] = useState(true);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [adminBackgrounds, setAdminBackgrounds] = useState<any[]>([]);
@@ -267,7 +271,7 @@ const CreativeGeneratorPage: React.FC = () => {
   const [showPrompts, setShowPrompts] = useState(false);
 
   // Active design tab
-  const [activeDesignTab, setActiveDesignTab] = useState<'basic' | 'photo' | 'filters' | 'effects' | 'stickers' | 'layout'>('basic');
+  const [activeDesignTab, setActiveDesignTab] = useState<'basic' | 'photo' | 'filters' | 'effects' | 'stickers' | 'layout' | 'colors'>('basic');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Text alignment
@@ -293,7 +297,7 @@ const CreativeGeneratorPage: React.FC = () => {
 
   // Save state for undo
   const saveState = () => {
-    const state = { headline, subtitle, businessName, phone, selectedPalette, selectedFont, textColor, textSize, textAlign, bgOpacity, elementPositions };
+    const state = { headline, subtitle, businessName, phone, selectedPalette, selectedFont, textColor, headlineColor, subtitleColor, businessColor, textSize, textAlign, bgOpacity, elementPositions };
     setUndoHistory(prev => [...prev.slice(-19), state]);
     undoRef.current = undoHistory.length + 1;
   };
@@ -309,6 +313,9 @@ const CreativeGeneratorPage: React.FC = () => {
     setSelectedPalette(last.selectedPalette);
     setSelectedFont(last.selectedFont);
     setTextColor(last.textColor);
+    if (last.headlineColor) setHeadlineColor(last.headlineColor);
+    if (last.subtitleColor) setSubtitleColor(last.subtitleColor);
+    if (last.businessColor) setBusinessColor(last.businessColor);
     setTextSize(last.textSize);
     setTextAlign(last.textAlign);
     setBgOpacity(last.bgOpacity);
@@ -793,7 +800,7 @@ const CreativeGeneratorPage: React.FC = () => {
                       <h2 className="font-bold leading-tight drop-shadow-md text-center"
                         style={{
                           fontSize: `${textSize * 0.26}px`,
-                          color: textColor,
+                          color: headlineColor !== '#FFFFFF' ? headlineColor : textColor,
                           fontFamily: FONT_OPTIONS[selectedFont].family,
                           textTransform: textEffects.uppercase ? 'uppercase' : 'none',
                           textAlign: textAlign,
@@ -814,7 +821,7 @@ const CreativeGeneratorPage: React.FC = () => {
                       <p className="opacity-90 drop-shadow-md text-center max-w-xs mx-auto"
                         style={{
                           fontSize: `${textSize * 0.15}px`,
-                          color: textColor,
+                          color: subtitleColor !== '#FFFFFF' ? subtitleColor : textColor,
                           fontFamily: FONT_OPTIONS[selectedFont].family,
                           textTransform: textEffects.uppercase ? 'uppercase' : 'none',
                           textAlign: textAlign,
@@ -834,10 +841,10 @@ const CreativeGeneratorPage: React.FC = () => {
                       <div className="border-t border-white/20 pt-2.5 flex items-center justify-between">
                         <div className="text-left">
                           <p className="font-semibold text-xs drop-shadow-md"
-                            style={{ color: textColor, fontFamily: FONT_OPTIONS[selectedFont].family }}>
+                            style={{ color: businessColor !== '#FFFFFF' ? businessColor : textColor, fontFamily: FONT_OPTIONS[selectedFont].family }}>
                             {businessName || (language === 'hi' ? 'व्यवसाय' : 'Business Name')}
                           </p>
-                          <p className="text-[11px] opacity-80 drop-shadow-md" style={{ color: textColor }}>{phone || '+91 XXXXX XXXXX'}</p>
+                          <p className="text-[11px] opacity-80 drop-shadow-md" style={{ color: businessColor !== '#FFFFFF' ? businessColor : textColor }}>{phone || '+91 XXXXX XXXXX'}</p>
                         </div>
                         {showQR && phone?.replace(/\D/g, '').length >= 10 && (
                           <div className="bg-white rounded-xl p-1.5 shadow-lg flex-shrink-0">
@@ -1010,7 +1017,7 @@ const CreativeGeneratorPage: React.FC = () => {
               </div>
               {/* Tabs */}
               <div className="flex gap-1 mb-4 overflow-x-auto">
-                {(['basic', 'photo', 'filters', 'effects', 'stickers', 'layout'] as const).map(tab => (
+                {(['basic', 'photo', 'filters', 'effects', 'stickers', 'layout', 'colors'] as const).map(tab => (
                   <button key={tab} onClick={() => setActiveDesignTab(tab)}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-medium whitespace-nowrap transition-all ${activeDesignTab === tab ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>
                     {tab === 'basic' && '🎨 Basic'}
@@ -1019,6 +1026,7 @@ const CreativeGeneratorPage: React.FC = () => {
                     {tab === 'effects' && '✨ Effects'}
                     {tab === 'stickers' && '😊 Stickers'}
                     {tab === 'layout' && '📐 Layout'}
+                    {tab === 'colors' && '🎯 Colors'}
                   </button>
                 ))}
               </div>
@@ -1372,6 +1380,108 @@ const CreativeGeneratorPage: React.FC = () => {
                   <p className="text-[9px] text-gray-400 text-center">💡 Drag elements directly on poster or use sliders above</p>
                 </div>
               )}
+
+              {/* COLORS TAB */}
+              {activeDesignTab === 'colors' && (
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold text-purple-500 mb-2">🎨 Customize colors for each element</p>
+                  
+                  {/* Target selector */}
+                  <div className="flex gap-1 mb-3">
+                    {([['all', 'All'], ['headline', '📝 Headline'], ['subtitle', '💬 Subtitle'], ['business', '🏪 Business']] as const).map(([key, label]) => (
+                      <button key={key} onClick={() => setColorTarget(key as any)}
+                        className={`px-2 py-1.5 rounded-lg text-[10px] font-medium transition-all flex-1 ${colorTarget === key ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Preset colors */}
+                  <div>
+                    <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">Preset Colors</label>
+                    <div className="grid grid-cols-8 gap-1.5">
+                      {TEXT_COLORS.map((c, i) => (
+                        <button key={i} onClick={() => {
+                          if (colorTarget === 'all') { setHeadlineColor(c.color); setSubtitleColor(c.color); setBusinessColor(c.color); setTextColor(c.color); }
+                          else if (colorTarget === 'headline') setHeadlineColor(c.color);
+                          else if (colorTarget === 'subtitle') setSubtitleColor(c.color);
+                          else setBusinessColor(c.color);
+                        }}
+                          className="w-7 h-7 rounded-lg transition-all hover:scale-110 hover:ring-2 hover:ring-purple-400"
+                          style={{ backgroundColor: c.color, border: c.color === '#FFFFFF' ? '1px solid #ccc' : 'none' }} title={c.name} />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Custom color pickers per element */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 block">Custom Color Pickers</label>
+                    
+                    {/* Headline */}
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400 w-20">📝 Headline</span>
+                      <input type="color" value={headlineColor} onChange={(e) => setHeadlineColor(e.target.value)}
+                        className="w-8 h-8 rounded-lg cursor-pointer border-0" />
+                      <span className="text-[9px] text-gray-400 font-mono">{headlineColor}</span>
+                      <div className="flex-1" />
+                      <input type="text" value={headlineColor} onChange={(e) => setHeadlineColor(e.target.value)}
+                        className="w-20 px-1.5 py-0.5 text-[10px] font-mono border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white" />
+                    </div>
+                    
+                    {/* Subtitle */}
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400 w-20">💬 Subtitle</span>
+                      <input type="color" value={subtitleColor} onChange={(e) => setSubtitleColor(e.target.value)}
+                        className="w-8 h-8 rounded-lg cursor-pointer border-0" />
+                      <span className="text-[9px] text-gray-400 font-mono">{subtitleColor}</span>
+                      <div className="flex-1" />
+                      <input type="text" value={subtitleColor} onChange={(e) => setSubtitleColor(e.target.value)}
+                        className="w-20 px-1.5 py-0.5 text-[10px] font-mono border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white" />
+                    </div>
+                    
+                    {/* Business Info */}
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400 w-20">🏪 Business</span>
+                      <input type="color" value={businessColor} onChange={(e) => setBusinessColor(e.target.value)}
+                        className="w-8 h-8 rounded-lg cursor-pointer border-0" />
+                      <span className="text-[9px] text-gray-400 font-mono">{businessColor}</span>
+                      <div className="flex-1" />
+                      <input type="text" value={businessColor} onChange={(e) => setBusinessColor(e.target.value)}
+                        className="w-20 px-1.5 py-0.5 text-[10px] font-mono border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white" />
+                    </div>
+                  </div>
+
+                  {/* Gradient presets */}
+                  <div>
+                    <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">Gradient Text Presets</label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { name: 'Sunset', from: '#FF6B35', to: '#FFD700' },
+                        { name: 'Ocean', from: '#0077B6', to: '#90E0EF' },
+                        { name: 'Neon', from: '#00F5D4', to: '#00BBF9' },
+                        { name: 'Royal', from: '#7B2CBF', to: '#C77DFF' },
+                        { name: 'Fire', from: '#D00000', to: '#FFBA08' },
+                        { name: 'Gold', from: '#BF953F', to: '#FCF6B5' },
+                      ].map((g, i) => (
+                        <button key={i} onClick={() => {
+                          if (colorTarget === 'all' || colorTarget === 'headline') setHeadlineColor(g.from);
+                          if (colorTarget === 'all' || colorTarget === 'subtitle') setSubtitleColor(g.to);
+                        }}
+                          className="h-8 rounded-lg text-[9px] font-medium text-white hover:scale-105 transition-all"
+                          style={{ background: `linear-gradient(135deg, ${g.from}, ${g.to})` }} title={g.name}>
+                          {g.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button onClick={() => { setHeadlineColor('#FFFFFF'); setSubtitleColor('#FFFFFF'); setBusinessColor('#FFFFFF'); setTextColor('#FFFFFF'); setColorTarget('all'); }}
+                    className="w-full py-2 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-lg text-xs font-medium hover:shadow-lg transition-all flex items-center justify-center gap-1.5">
+                    <RefreshCw size={12} /> Reset All Colors
+                  </button>
+                  <p className="text-[9px] text-gray-400 text-center">💡 Pick element first, then choose color — or use "All" to change everything</p>
+                </div>
+              )}
             </div>
 
             {/* Quick Add Buttons */}
@@ -1559,7 +1669,7 @@ const CreativeGeneratorPage: React.FC = () => {
                   draggable
                   onDragEnd={(e) => handleElementDrag('headline', e)}
                 >
-                  <h2 className="font-bold leading-tight drop-shadow-md text-center" style={{ fontSize: `${textSize * 0.26}px`, color: textColor, fontFamily: FONT_OPTIONS[selectedFont].family, textTransform: textEffects.uppercase ? 'uppercase' : 'none', textAlign: textAlign, ...getTextEffectStyle() }}>
+                  <h2 className="font-bold leading-tight drop-shadow-md text-center" style={{ fontSize: `${textSize * 0.26}px`, color: headlineColor !== '#FFFFFF' ? headlineColor : textColor, fontFamily: FONT_OPTIONS[selectedFont].family, textTransform: textEffects.uppercase ? 'uppercase' : 'none', textAlign: textAlign, ...getTextEffectStyle() }}>
                     {headline || 'Your Headline'}
                   </h2>
                 </div>
@@ -1570,7 +1680,7 @@ const CreativeGeneratorPage: React.FC = () => {
                   draggable
                   onDragEnd={(e) => handleElementDrag('subtitle', e)}
                 >
-                  <p className="opacity-90 drop-shadow-md text-center max-w-xs mx-auto" style={{ fontSize: `${textSize * 0.15}px`, color: textColor, fontFamily: FONT_OPTIONS[selectedFont].family, textTransform: textEffects.uppercase ? 'uppercase' : 'none', textAlign: textAlign }}>
+                  <p className="opacity-90 drop-shadow-md text-center max-w-xs mx-auto" style={{ fontSize: `${textSize * 0.15}px`, color: subtitleColor !== '#FFFFFF' ? subtitleColor : textColor, fontFamily: FONT_OPTIONS[selectedFont].family, textTransform: textEffects.uppercase ? 'uppercase' : 'none', textAlign: textAlign }}>
                     {subtitle || 'Your subtitle goes here'}
                   </p>
                 </div>
@@ -1583,8 +1693,8 @@ const CreativeGeneratorPage: React.FC = () => {
                 >
                   <div className="border-t border-white/20 pt-2.5 flex items-center justify-between">
                     <div className="text-left">
-                      <p className="font-semibold text-xs drop-shadow-md" style={{ color: textColor, fontFamily: FONT_OPTIONS[selectedFont].family }}>{businessName || 'Business Name'}</p>
-                      <p className="text-[11px] opacity-80 drop-shadow-md" style={{ color: textColor }}>{phone || '+91 XXXXX XXXXX'}</p>
+                      <p className="font-semibold text-xs drop-shadow-md" style={{ color: businessColor !== '#FFFFFF' ? businessColor : textColor, fontFamily: FONT_OPTIONS[selectedFont].family }}>{businessName || 'Business Name'}</p>
+                      <p className="text-[11px] opacity-80 drop-shadow-md" style={{ color: businessColor !== '#FFFFFF' ? businessColor : textColor }}>{phone || '+91 XXXXX XXXXX'}</p>
                     </div>
                     {showQR && phone?.replace(/\D/g, '').length >= 10 && (
                       <div className="bg-white rounded-xl p-1.5 shadow-lg flex-shrink-0">

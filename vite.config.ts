@@ -57,7 +57,6 @@ export default defineConfig({
           ],
           'vendor-charts': ['recharts'],
           'vendor-utils': ['lucide-react', 'clsx', 'zustand', 'date-fns'],
-          'vendor-ai': ['openai'],
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
