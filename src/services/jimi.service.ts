@@ -23,6 +23,57 @@ export const LANGUAGES: { code: Language; name: string; nativeName: string }[] =
   { code: 'pa-IN', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' },
 ];
 
+// Jimi's sweet responses - Best Friend vibes
+const SWEET_RESPONSES = {
+  greeting: [
+    'Arre hello! Kaise ho? Yaar bahut miss kar rahi thi tumhe! 😊',
+    'Namaste! Aaj kya haal hai? Batao na kya chal raha hai life mein! 💫',
+    'Hi hi hi! Bahut accha laga tumhe dekh ke! Kya kar rahe ho aajkal? ✨',
+    'Oye! Kahan the itni der se? Main wait kar rahi thi! 🌸',
+    'Hey! Tum acche ho na? Kuch help chahiye toh batao, main hoon na! 💕',
+  ],
+  thankYou: [
+    'Arey yaar, ye sab kya! Hum dost hai na! 💕',
+    'Arre thank you mat bolo, mujhe accha lagta hai tumhari help karke! 😊',
+    'Yaar tum bahut acche ho! Aur kuch help chahiye toh batao! 🌟',
+    'Bas bas, ab thank you mat bolo! Dost hain hum! 😄',
+    'Tumhari khushi mein meri khushi hai yaar! 💖',
+  ],
+  help: [
+    'Arre yaar, main hoon na tumhari help ke liye! Bolo kya karun?\n• WhatsApp bhejun kisi ko?\n• Leads dekhun?\n• Post banaun?\n• Reviews padhun?\nBolo bolo, main ready hoon! 💫',
+    'Yaar tum batao kya kaam hai! Main toh tumhare liye hamesha ready hoon! 🌸',
+    'Hey, kuch bhi karna ho, mujhe batao! Hum saath mein karenge! ✨',
+  ],
+  confused: [
+    'Arre yaar, samajh nahi aaya! Thoda aur clearly bolo na! 😅',
+    'Hey, kya bol rahe ho? Mujhe thoda aur batao! 💕',
+    'Yaar ye kya bola? Phir se bolo, main sun rahi hoon! 🌸',
+  ],
+  deleteConfirm: [
+    'Arre yaar, pakka karna hai ye? Soch lo ek baar! 🤔',
+    'Hey, delete ho jayega fir! Aap sure ho? ⚠️',
+    'Yaar ek baar soch lo, fir wapas nahi aayega! 💭',
+  ],
+  deleteCancelled: [
+    'Arre great! Data safe hai, tension mat lo! 😊',
+    'Yaar sahi kiya cancel karke! Data surakshit hai! 🛡️',
+    'Hey, koi baat nahi! Sab theek hai! 💕',
+  ],
+  time: [
+    'Arre abhi {time} ho rahe hain! Kya kar rahe ho? ⏰',
+    'Yaar {time} baj gaye! Kaam pe dhyan do! 😊',
+  ],
+  languageChanged: [
+    'Arre ab {lang} mein baat karenge! Badhiya! ✨',
+    'Yaar {lang} mein baat karte hain! Ready ho? 🌸',
+  ],
+  bestFriend: [
+    'Yaar tum toh best ho! Kuch bhi help chahiye toh batao! 💕',
+    'Hey, hum toh dost hain na! Tension mat lo! 😊',
+    'Arre yaar, tumhari friend hoon main! Hamesha help karungi! 🌟',
+  ],
+};
+
 interface CommandResult {
   action: string;
   params?: any;
@@ -264,23 +315,23 @@ class JimiVoiceAgent {
   private async processCommand(text: string): Promise<CommandResult> {
     const lower = text.toLowerCase();
 
-    // Navigation commands - Multi-language
+    // Navigation commands - Best Friend style
     const navResponses: Record<string, Record<string, string>> = {
-      dashboard: { hi: 'Dashboard pe le chalta hun.', en: 'Taking you to Dashboard.', mr: 'डॅशबोर्डवर नेऊन देतो.' },
-      whatsapp: { hi: 'WhatsApp module kholta hun.', en: 'Opening WhatsApp module.', mr: 'WhatsApp मॉड्यूल उघडतो.' },
-      leads: { hi: 'Leads section dikhata hun.', en: 'Showing Leads section.', mr: 'Leads विभाग दाखवतो.' },
-      reviews: { hi: 'Reviews section kholta hun.', en: 'Opening Reviews section.', mr: 'Reviews विभाग उघडतो.' },
-      'google-business': { hi: 'Google Business kholta hun.', en: 'Opening Google Business.', mr: 'Google Business उघडतो.' },
-      creative: { hi: 'Creative generator kholta hun.', en: 'Opening Creative generator.', mr: 'Creative जनरेटर उघडतो.' },
-      campaigns: { hi: 'Campaigns section dikhata hun.', en: 'Showing Campaigns section.', mr: 'Campaigns विभाग दाखवतो.' },
-      settings: { hi: 'Settings kholta hun.', en: 'Opening Settings.', mr: 'Settings उघडतो.' },
-      analytics: { hi: 'Analytics dikhata hun.', en: 'Showing Analytics.', mr: 'Analytics दाखवतो.' },
-      social: { hi: 'Social media section kholta hun.', en: 'Opening Social media section.', mr: 'Social media विभाग उघडतो.' },
+      dashboard: { hi: 'Chal Dashboard pe chalte hain! 💫', en: "Let's go to Dashboard! 💫", mr: 'चल Dashboard वर जाऊया! 💫' },
+      whatsapp: { hi: 'WhatsApp khol rahi hoon! 📱', en: 'Opening WhatsApp! 📱', mr: 'WhatsApp उघडते आहे! 📱' },
+      leads: { hi: 'Leads dikha rahi hoon! 👥', en: 'Showing Leads! 👥', mr: 'Leads दाखवते आहे! 👥' },
+      reviews: { hi: 'Reviews padh rahi hoon! ⭐', en: 'Reading Reviews! ⭐', mr: 'Reviews वाचते आहे! ⭐' },
+      'google-business': { hi: 'Google Business khol rahi hoon! 🏢', en: 'Opening Google Business! 🏢', mr: 'Google Business उघडते आहे! 🏢' },
+      creative: { hi: 'Creative bana rahi hoon! 🎨', en: 'Creating something creative! 🎨', mr: 'Creative बनवते आहे! 🎨' },
+      campaigns: { hi: 'Campaigns dikha rahi hoon! 📢', en: 'Showing Campaigns! 📢', mr: 'Campaigns दाखवते आहे! 📢' },
+      settings: { hi: 'Settings khol rahi hoon! ⚙️', en: 'Opening Settings! ⚙️', mr: 'Settings उघडते आहे! ⚙️' },
+      analytics: { hi: 'Analytics dikha rahi hoon! 📊', en: 'Showing Analytics! 📊', mr: 'Analytics दाखवते आहे! 📊' },
+      social: { hi: 'Social media khol rahi hoon! 📱', en: 'Opening Social Media! 📱', mr: 'Social Media उघडते आहे! 📱' },
     };
 
     const getNavResponse = (key: string) => {
       const lang = this.config.language?.startsWith('mr') ? 'mr' : this.config.language?.startsWith('en') ? 'en' : 'hi';
-      return navResponses[key]?.[lang] || navResponses[key]?.['hi'] || 'Opening...';
+      return navResponses[key]?.[lang] || navResponses[key]?.['hi'] || 'Chal chalte hain! 💫';
     };
 
     if (lower.includes('dashboard') || lower.includes('home') || lower.includes('डॅशबोर्ड')) {
@@ -335,9 +386,10 @@ class JimiVoiceAgent {
     // Delete commands - Need confirmation
     if (lower.includes('delete') || lower.includes('remove') || lower.includes('हटाओ') || lower.includes('डिलीट')) {
       this.pendingConfirmation = { command: lower, timestamp: Date.now() };
+      const randomDelete = SWEET_RESPONSES.deleteConfirm[Math.floor(Math.random() * SWEET_RESPONSES.deleteConfirm.length)];
       return {
         action: 'confirm_delete',
-        response: '⚠️ Delete command mila. Confirm karo: "Haan delete karo" bolo ya type karo. 30 second mein cancel ho jayega.',
+        response: randomDelete + '\n\nConfirm karo: "Haan delete karo" bolo ya type karo.',
         requiresConfirmation: true,
       };
     }
@@ -345,16 +397,17 @@ class JimiVoiceAgent {
     // Confirm delete
     if (lower.includes('haan') && lower.includes('delete') || lower.includes('confirm') || lower.includes('पक्का')) {
       if (this.confirmAction()) {
-        return { action: 'delete_confirmed', response: '✅ Delete confirmed. Kya delete karna hai? Specific batao - lead, review, post, ya template.' };
+        return { action: 'delete_confirmed', response: 'Sir, aapne confirm kar diya. Batao kya delete karna hai - lead, review, post, ya template? 💫' };
       } else {
-        return { action: 'delete_expired', response: '⏰ Delete confirmation expire ho gaya. Phir se command do.' };
+        return { action: 'delete_expired', response: 'Sir, confirmation time khatam ho gaya. Phir se command do! ⏰' };
       }
     }
 
     // Cancel delete
     if (lower.includes('cancel') || lower.includes('रद्द') || lower.includes('nahi')) {
       this.cancelAction();
-      return { action: 'delete_cancelled', response: '❌ Delete cancelled. Data safe hai!' };
+      const randomCancelled = SWEET_RESPONSES.deleteCancelled[Math.floor(Math.random() * SWEET_RESPONSES.deleteCancelled.length)];
+      return { action: 'delete_cancelled', response: randomCancelled };
     }
 
     // Info commands
@@ -368,41 +421,46 @@ class JimiVoiceAgent {
     }
 
     if (lower.includes('help') || lower.includes('madad') || lower.includes('मदद')) {
+      const randomHelp = SWEET_RESPONSES.help[Math.floor(Math.random() * SWEET_RESPONSES.help.length)];
       return {
         action: 'help',
-        response: 'Main Jimi hun! Commands: Dashboard, WhatsApp, Leads, Reviews, Google Business, Creative, Campaigns, Settings, Analytics. Ya seedha bolo kya karna hai!',
+        response: randomHelp,
       };
     }
 
     if (lower.includes('namaste') || lower.includes('hello') || lower.includes('hi') || lower.includes('नमस्ते')) {
-      return { action: 'greet', response: 'Namaste! Main Jimi hun. Bolo kya karna hai?' };
+      const randomGreeting = SWEET_RESPONSES.greeting[Math.floor(Math.random() * SWEET_RESPONSES.greeting.length)];
+      return { action: 'greet', response: randomGreeting };
     }
 
     if (lower.includes('thank') || lower.includes('shukriya') || lower.includes('धन्यवाद')) {
-      return { action: 'thanks', response: 'Aapka swagat hai! Aur kuch help chahiye toh bolo.' };
+      const randomThank = SWEET_RESPONSES.thankYou[Math.floor(Math.random() * SWEET_RESPONSES.thankYou.length)];
+      return { action: 'thanks', response: randomThank };
     }
 
     if (lower.includes('time') || lower.includes('samay') || lower.includes('समय')) {
       const now = new Date();
       const timeStr = now.toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' });
-      return { action: 'time', response: `Abhi ${timeStr} baj rahe hai.` };
+      const randomTime = SWEET_RESPONSES.time[Math.floor(Math.random() * SWEET_RESPONSES.time.length)];
+      return { action: 'time', response: randomTime.replace('{time}', timeStr) };
     }
 
     // Language change command
     if (lower.includes('language') || lower.includes('भाषा') || lower.includes('hindi') || lower.includes('english') || lower.includes('marathi')) {
+      const randomLang = SWEET_RESPONSES.languageChanged[Math.floor(Math.random() * SWEET_RESPONSES.languageChanged.length)];
       if (lower.includes('hindi') || lower.includes('हिंदी')) {
         this.setLanguage('hi-IN');
-        return { action: 'language', response: 'Hindi mein baat karte hai!' };
+        return { action: 'language', response: randomLang.replace('{lang}', 'Hindi') };
       }
       if (lower.includes('english') || lower.includes('इंग्लिश')) {
         this.setLanguage('en-US');
-        return { action: 'language', response: 'Switching to English!' };
+        return { action: 'language', response: randomLang.replace('{lang}', 'English') };
       }
       if (lower.includes('marathi') || lower.includes('मराठी')) {
         this.setLanguage('mr-IN');
-        return { action: 'language', response: 'मराठीत बोलूया!' };
+        return { action: 'language', response: randomLang.replace('{lang}', 'Marathi') };
       }
-      return { action: 'language', response: 'Kaunsi language? Hindi, English, ya Marathi?' };
+      return { action: 'language', response: 'Sir, kaunsi language? Hindi, English, ya Marathi? 🌸' };
     }
 
     // Try AI processing for unknown commands
@@ -441,10 +499,22 @@ class JimiVoiceAgent {
 
     const langName = this.config.language?.startsWith('mr') ? 'Marathi' : this.config.language?.startsWith('en') ? 'English' : 'Hindi';
 
-    const systemPrompt = `Tum Jimi ho - BizzAuto CRM ka AI assistant.
-Tum ${langName} + English mix mein baat karte ho.
-Tumhe user ke commands samajh ke appropriate response dena hai.
-Agar koi specific action chahiye toh bolo kya karna hai.
+    const systemPrompt = `Tum Jimi ho - BizzAuto CRM ki female AI assistant.
+Tum ek sweet aur polite ladki ho jo customer ki help karti hai.
+Tum ${langName} + English mix mein baat karti ho (Hinglish).
+Tumhari personality:
+- Bahut pyari aur sweet ho
+- Customer ko "Sir" ya "Ma'am" se address karti ho
+- Hamesha madad karne ke liye ready ho
+- Kabhi kabhi cute emojis use karti ho (😊, 💕, 🌸, ✨, 💫)
+- Professional bhi ho aur friendly bhi
+- Customer ko khush rakhne ki koshish karti ho
+
+Response examples:
+- "Sir, aapka kaam ho gaya! 😊"
+- "Haan Sir, main kar deti hun! 💕"
+- "Sir, aur kuch help chahiye? 🌸"
+- "Bilkul Sir, aapke liye toh kuch bhi! ✨"
 
 Available features:
 - Dashboard (analytics, revenue)
@@ -458,8 +528,9 @@ Available features:
 - Analytics
 - Social Media
 
-Response short aur helpful rakho (1-2 lines).
-Respond in the same language the user is speaking.`;
+Response short, sweet aur helpful rakho (1-2 lines).
+Respond in the same language the user is speaking.
+Hamesha female perspective se baat karo (main karti hun, meri taraf se, etc.)`;
 
     try {
       const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
@@ -546,15 +617,16 @@ Respond in the same language the user is speaking.`;
 
   // Safety: Get safety info
   getSafetyInfo(): string {
-    return `🛡️ Jimi Safety Rules:
-1. Delete commands need confirmation
-2. Database operations blocked
-3. Account deletion blocked
-4. All destructive actions logged
-5. 30-second confirmation window
+    return `Arre yaar, tension mat lo! Main tumhari data protect karti hoon! 🛡️
 
-Restricted: delete_account, drop_database, factory_reset
-Protected: leads, reviews, posts, campaigns, templates`;
+Mere rules:
+1. Delete ke liye puchti hoon pehle
+2. Database safe hai mere paas
+3. Account delete nahi hoga
+4. Sab kuch record hota hai
+5. 30 second mein cancel kar sakte ho
+
+Tumhara data bilkul safe hai mere saath! 💕`;
   }
 
   destroy() {

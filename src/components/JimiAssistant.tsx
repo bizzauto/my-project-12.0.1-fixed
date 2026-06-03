@@ -16,7 +16,7 @@ const JimiAssistant: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '0',
-      text: 'Namaste! Main Jimi hun, tumhara AI assistant. Voice ya text se baat karo. "Help" bolo saari commands sunne ke liye!',
+      text: 'Arre hello! Main Jimi hoon! Tumhari best friend! 😊 Voice ya text se baat karo. "Help" bolo toh sab bataungi! 💕',
       isUser: false,
       timestamp: new Date(),
     },
@@ -136,7 +136,7 @@ const JimiAssistant: React.FC = () => {
     setSelectedLang(lang);
     jimi.setLanguage(lang);
     setShowLangMenu(false);
-    addMessage(`Language changed to ${LANGUAGES.find(l => l.code === lang)?.nativeName || lang}`, false);
+    addMessage(`Arre badhiya! Ab ${LANGUAGES.find(l => l.code === lang)?.nativeName || lang} mein baat karenge! ✨`, false);
   };
 
   return (
@@ -146,10 +146,10 @@ const JimiAssistant: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
           isOpen
-            ? 'bg-gray-600 hover:bg-gray-700'
+            ? 'bg-pink-500 hover:bg-pink-600'
             : isListening
             ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-            : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
+            : 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700'
         }`}
       >
         {isOpen ? (
@@ -157,14 +157,14 @@ const JimiAssistant: React.FC = () => {
         ) : isListening ? (
           <MicOff size={24} className="text-white" />
         ) : (
-          <Bot size={24} className="text-white" />
+          <span className="text-2xl">👩</span>
         )}
       </button>
 
       {/* Listening Indicator */}
       {isListening && !isOpen && (
-        <div className="fixed bottom-22 right-6 z-50 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium animate-pulse">
-          🎤 Listening...
+        <div className="fixed bottom-22 right-6 z-50 bg-pink-500 text-white px-3 py-1 rounded-full text-sm font-medium animate-pulse">
+          🎤 Sun rahi hoon...
         </div>
       )}
 
@@ -172,18 +172,18 @@ const JimiAssistant: React.FC = () => {
       {isOpen && (
         <div className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-48px)] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col" style={{ height: '500px', maxHeight: 'calc(100vh - 150px)' }}>
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-3 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <Bot size={24} className="text-white" />
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl">
+                👩
               </div>
               <div>
                 <h3 className="text-white font-semibold flex items-center gap-2">
-                  Jimi
+                  Jimi 💕
                   <Shield size={14} className="text-green-300" title="Protected Mode" />
                 </h3>
                 <p className="text-white/80 text-xs">
-                  {isListening ? '🎤 Listening...' : isTyping ? '🧠 Thinking...' : '🛡️ Protected • Ready'}
+                  {isListening ? '🎤 Sun rahi hoon...' : isTyping ? '🧠 Soch rahi hoon...' : '💕 Tumhari friend • Ready'}
                 </p>
               </div>
             </div>
