@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
+import { createCustomFieldSchema } from '../validations/remaining-schemas.js';
 
 const router = Router();
 
