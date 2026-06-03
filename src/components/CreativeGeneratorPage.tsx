@@ -99,7 +99,23 @@ const LOGO_STYLES: LogoStyle[] = [
   { id: 'luxury', name: 'Luxury', icon: '👑', gradient: 'from-yellow-600 to-amber-700' },
 ];
 
-const STICKERS = ['⭐', '🔥', '❤️', '✨', '🎉', '💥', '🎯', '✅', '🚀', '💰', '💎', '🏆', '🌟', '🎪', '🎨', '🛍️', '📱', '🎁', '💡', '📢', '🥇', '📣', '💫', '🎊'];
+const STICKERS = ['⭐', '🔥', '❤️', '✨', '🎉', '💥', '🎯', '✅', '🚀', '💰', '💎', '🏆', '🌟', '🎪', '🎨', '🛍️', '📱', '🎁', '💡', '📢', '🥇', '📣', '💫', '🎊', '🛡️', '🏅', '✅', '📋', '🏛️', '🔝'];
+
+const TRUST_BADGES = [
+  { emoji: '🛡️', label: 'Warranty' },
+  { emoji: '🏅', label: 'Guarantee' },
+  { emoji: '✅', label: 'Certified' },
+  { emoji: '📋', label: 'ISO' },
+  { emoji: '🏛️', label: 'ISI' },
+  { emoji: '🔝', label: 'BIS' },
+];
+
+const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
+  productImage: { x: 50, y: 15 },
+  headline: { x: 50, y: 40 },
+  subtitle: { x: 50, y: 55 },
+  businessInfo: { x: 50, y: 88 },
+};
 
 const AI_PROMPTS: Record<string, string[]> = {
   Festival: [
@@ -231,6 +247,9 @@ const CreativeGeneratorPage: React.FC = () => {
   const [showStickers, setShowStickers] = useState(false);
   const nextStickerId = useRef(0);
 
+  // Draggable element positions (percentage-based)
+  const [elementPositions, setElementPositions] = useState<Record<string, { x: number; y: number }>>(DEFAULT_POSITIONS);
+
   // Brand Kit
   const [brandKits, setBrandKits] = useState<BrandKit[]>(() => {
     try { return JSON.parse(localStorage.getItem('brandKits') || '[]'); } catch { return []; }
@@ -248,7 +267,7 @@ const CreativeGeneratorPage: React.FC = () => {
   const [showPrompts, setShowPrompts] = useState(false);
 
   // Active design tab
-  const [activeDesignTab, setActiveDesignTab] = useState<'basic' | 'photo' | 'filters' | 'effects' | 'stickers'>('basic');
+  const [activeDesignTab, setActiveDesignTab] = useState<'basic' | 'photo' | 'filters' | 'effects' | 'stickers' | 'layout'>('basic');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Text alignment
@@ -274,7 +293,7 @@ const CreativeGeneratorPage: React.FC = () => {
 
   // Save state for undo
   const saveState = () => {
-    const state = { headline, subtitle, businessName, phone, selectedPalette, selectedFont, textColor, textSize, textAlign, bgOpacity };
+    const state = { headline, subtitle, businessName, phone, selectedPalette, selectedFont, textColor, textSize, textAlign, bgOpacity, elementPositions };
     setUndoHistory(prev => [...prev.slice(-19), state]);
     undoRef.current = undoHistory.length + 1;
   };
@@ -293,6 +312,7 @@ const CreativeGeneratorPage: React.FC = () => {
     setTextSize(last.textSize);
     setTextAlign(last.textAlign);
     setBgOpacity(last.bgOpacity);
+    if (last.elementPositions) setElementPositions(last.elementPositions);
     setUndoHistory(prev => prev.slice(0, -1));
     showToast('Undone!', 'success');
   };
@@ -359,6 +379,20 @@ const CreativeGeneratorPage: React.FC = () => {
 
   const updateStickerPos = (id: string, x: number, y: number) => {
     setStickers(prev => prev.map(s => s.id === id ? { ...s, x, y } : s));
+  };
+
+  const handleElementDrag = (key: string, e: React.DragEvent) => {
+    const rect = previewRef.current?.getBoundingClientRect();
+    if (rect) {
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      setElementPositions(prev => ({ ...prev, [key]: { x: Math.max(5, Math.min(95, x)), y: Math.max(5, Math.min(95, y)) } }));
+    }
+  };
+
+  const resetPositions = () => {
+    setElementPositions(DEFAULT_POSITIONS);
+    showToast('Layout reset!', 'success');
   };
 
   const saveBrandKit = () => {
