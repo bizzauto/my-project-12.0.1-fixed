@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { MapPin, Star, Phone, Clock, Globe, Camera, Edit3, MessageSquare, Eye, Plus, CheckCircle, XCircle, AlertCircle, BarChart3, Share2, Search, ExternalLink, RefreshCw, Loader2, Zap, Calendar, Trash2, Edit } from 'lucide-react';
 import { googleBusinessAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
@@ -19,6 +20,7 @@ const Stars: React.FC<{ r: number; sz?: number }> = ({ r, sz = 18 }) => (
 
 const GoogleBusinessPage: React.FC = () => {
   const { business } = useAuthStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState<'profile' | 'reviews' | 'posts' | 'insights' | 'auto-post'>('profile');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [posts, setPosts] = useState<BusinessPost[]>([]);
@@ -44,6 +46,26 @@ const GoogleBusinessPage: React.FC = () => {
 
   const toast_ = (m: string, t = 'success') => { setToast({ m, t }); setTimeout(() => setToast(null), 3000); };
 
+  // Handle OAuth callback params
+  useEffect(() => {
+    const connected = searchParams.get('connected');
+    const error = searchParams.get('error');
+    
+    if (connected === 'true') {
+      toast_('Google Business connected successfully!', 'success');
+      setSearchParams({});
+    } else if (error) {
+      const errorMessages: Record<string, string> = {
+        'missing_params': 'Missing authentication parameters',
+        'invalid_state': 'Session expired. Please try again.',
+        'no_business_found': 'No Google Business Profile found',
+        'access_denied': 'Access denied. Please grant required permissions.',
+      };
+      toast_(errorMessages[error] || `Connection failed: ${error}`, 'error');
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -59,32 +81,28 @@ const GoogleBusinessPage: React.FC = () => {
             setReviews(Array.isArray(rd) ? rd.map((r: any) => ({
               id: r.reviewId || r.id || String(Math.random()), author: r.reviewer?.displayName || 'Anonymous',
               rating: r.starRating === 'FIVE' ? 5 : r.starRating === 'FOUR' ? 4 : r.starRating === 'THREE' ? 3 : r.starRating === 'TWO' ? 2 : 1,
-              text: r.comment || '', date: r.updateTime ? new Date(r.updateTime).toLocaleDateString() : 'Recently',
-              replied: !!r.reviewReply?.comment, replyText: r.reviewReply?.comment,
+              text: r.comment || '', date: r.updateTime || new Date().toISOString(), replied: false,
             })) : []);
           }
-        } catch {
-          setReviews([]);
-        }
+        } catch { /* Reviews not available */ }
+        
         // Fetch posts
         try {
           const postsRes = await googleBusinessAPI.getPosts();
           if (postsRes.data?.success) {
-            const pd = postsRes.data?.data?.data || [];
+            const pd = postsRes.data?.data?.localPosts || [];
             setPosts(Array.isArray(pd) ? pd.map((p: any) => ({
-              id: p.name || String(Math.random()), type: p.eventType ? 'event' : p.offerCode ? 'offer' : 'update',
-              title: p.summary?.substring(0, 60) || 'Post', content: p.summary || '',
-              startDate: p.startTime ? new Date(p.startTime).toLocaleDateString() : 'Now',
-              status: p.state === 'LIVE' ? 'active' : 'expired', views: 0, clicks: 0,
+              id: p.name || String(Math.random()), type: 'update', title: p.topicType || 'Update',
+              content: p.summary || '', startDate: p.createTime || new Date().toISOString(),
+              status: p.state || 'live', views: 0, clicks: 0,
             })) : []);
           }
-        } catch {
-          setPosts([]);
-        }
+        } catch { /* Posts not available */ }
+
         // Fetch auto-post config
         try {
           const autoPostRes = await googleBusinessAPI.getAutoPostConfig();
-          if (autoPostRes.data?.success) {
+          if (autoPostRes.data?.success && autoPostRes.data?.data) {
             setAutoPostConfig(autoPostRes.data.data);
           }
         } catch {
@@ -95,7 +113,12 @@ const GoogleBusinessPage: React.FC = () => {
         setReviews([]);
         setPosts([]);
       }
-    } catch { setConnected(false); setReviews([]); setPosts([]); } finally { setLoading(false); }
+    } catch (err) {
+      console.error('[GoogleBusiness] Fetch error:', err);
+      setConnected(false);
+      setReviews([]);
+      setPosts([]);
+    } finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
