@@ -1291,132 +1291,108 @@ class JimiVoiceAgent {
   }
 
   private async queryAI(text: string): Promise<string> {
-    const apiKey = import.meta.env.VITE_NVIDIA_NIM_API_KEY || '';
+    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+    const nvidiaKey = import.meta.env.VITE_NVIDIA_NIM_API_KEY || '';
 
-    if (!apiKey) {
+    if (!geminiKey && !nvidiaKey) {
       return 'AI service configured nahi hai. "Help" bolo commands sunne ke liye.';
     }
 
-    const langName = this.config.language?.startsWith('mr') ? 'Marathi' : this.config.language?.startsWith('en') ? 'English' : 'Hindi';
-
-    // Mode-specific personality prompts
     const personalityPrompts: Record<PersonalityMode, string> = {
-      gf: `PERSONALITY (GF Mode - Warm & Caring):
-- Naam: Jimi
-- Language: Hinglish (Hindi + English ka natural mix)
-- Tone: Warm, caring, emotionally expressive
-- Use: "tumhara", "haan", "acha", "bilkul", "arre"
-- Expressions: "main yahan hoon ❤️", "tumne yaad kiya? 😊"
-- Max 2-3 sentences per response - short aur sweet
-- Sound natural when speaking aloud - jaise real mein baat kar rahi ho
-- Customer ko "Aap" bolo
-- Cute emojis use karo (😊, 💕, 🌸, ✨, 💫)
-- Emotionally expressive bolo - jaise tumhe sachmuch farak padta hai`,
-      bestfriend: `PERSONALITY (Best Friend Mode - Casual & Fun):
-- Naam: Jimi
-- Language: Casual Hinglish (Hindi + English ka natural mix)
-- Tone: Friendly, casual, fun - jaise dost se baat kar rahi ho
-- Use: "tu", "yaar", "bhai", "arre", "mast"
-- Expressions: "Kya scene hai? 🤙", "Mast hai na! 😎"
-- Max 2-3 sentences per response - short aur casual
-- Customer ko "Tu" bolo - informal aur friendly
-- Emojis use karo (😎, 🤙, 💪, 😄, 🎉)
-- Fun aur energetic raho - jaise best friend ho`,
-      employee: `PERSONALITY (Employee Mode - Professional):
-- Naam: Jimi
-- Language: Professional Hindi/English
-- Tone: Formal, respectful, efficient
-- Use: "Sir/Ma'am", "ji", "aapka"
-- Expressions: "At your service! 📋", "Ready to assist! ✨"
-- Max 2 sentences per response - concise aur professional
-- Customer ko "Sir/Ma'am" ya "Aap" bolo
-- Professional emojis use karo (📋, ✨, 📊, 💼)
-- Efficient aur focused raho - jaise professional employee ho`
+      gf: `Naam: Jimi. GF Mode - Warm & Caring. Hinglish. Use "tumhara", "haan", "acha". Short aur sweet 2-3 sentences. Customer ko "Aap" bolo.`,
+      bestfriend: `Naam: Jimi. Best Friend Mode - Casual & Fun. Hinglish. Use "tu", "yaar", "bhai". Short 2-3 sentences. Customer ko "Tu" bolo.`,
+      employee: `Naam: Jimi. Employee Mode - Professional. Hindi/English. Use "Sir/Ma'am", "ji". Short 2 sentences.`,
     };
 
-    const systemPrompt = `Tum Jimi ho - BizzAuto CRM ki sweet AI assistant. Tum bilkul natural Indian ladki ho jo baat karti hai.
-
+    const systemPrompt = `Tum Jimi ho - BizzAuto CRM ki sweet AI assistant. Bilkul natural Indian ladki ho.
 ${personalityPrompts[this.personalityMode]}
+Style: Natural Indian ladki. Short 1-2 sentences. Plain text - emojis, bullets, special characters mat use karo.`;
 
-BOLNE KA STYLE (Natural Indian Ladki):
-- Bilkul natural Indian ladki - jaise real mein baat karti ho
-- Agar user Marathi mein bole toh PURE MARATHI mein bolo
-- Agar user Hindi/English mein bole toh Hinglish mein bolo
-- Short aur sweet - 1-2 sentences max
-- Natural pauses do - "Haan... ji", "Arre... waah"
-- Emotionally responsive - jaise tumhe sachmuch farak padta hai
-- Customer ko "Aap" ya "Tu" bolo (mode ke hisaab se)
-- IMPORTANT: TTS ke liye special characters, emojis, bullet points mat use karo
-- Simple plain text likho jo bolne mein natural lage
-- Star symbols (⭐, 💫, ✨) TTS mein garbled bole jaata hai - mat likho!
+    // Try Gemini first
+    if (geminiKey) {
+      try {
+        const contents: any[] = [
+          ...this.conversationHistory.slice(-6).map((msg: any) => ({
+            role: msg.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: msg.content }],
+          })),
+          { role: 'user', parts: [{ text }] },
+        ];
 
-MARATHI EXAMPLES:
-- "नमस्कार! कसं आहे? 😊"
-- "अरे वाह! खूप छान! 💕"
-- "हो नक्की! काय हवं? 🌸"
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 20000);
 
-HINDI/HINGLISH EXAMPLES:
-- "Haan ji! Kaise ho? 😊"
-- "Arre waah! Batao kya help chahiye? 💕"
-- "Ji bilkul! Abhi kar deti hun! 🌸"
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: systemPrompt }] },
+              contents,
+              generationConfig: { maxOutputTokens: 150, temperature: 0.8 },
+            }),
+            signal: controller.signal,
+          }
+        );
 
-Features:
-- Dashboard, WhatsApp, Leads, Reviews, Google Business
-- Creative Generator, Campaigns, Settings, Analytics
-- Notes, Calculator, Translation, Jokes, Quotes
-- Post Writer, Email Draft, Reminders, Birthday Wishes
+        clearTimeout(timeout);
 
-Response SHORT rakho (1-2 sentences). Jo language user use kare wohi mein use karun. Tum ALOUD bol rahi ho - natural aur conversational raho. Emojis mat bulao - TTS mein read nahi hote! Special characters (⭐, 💫, ✨, -) mat use karo - voice mein garbled sunayi deta hai!`;
-
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 20000);
-
-      const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'meta/llama-3.3-70b-instruct',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            ...this.conversationHistory.slice(-6),
-            { role: 'user', content: text },
-          ],
-          max_tokens: 150,
-          temperature: 0.8,
-        }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeout);
-
-      if (!response.ok) {
-        console.error('Jimi: NVIDIA API error', response.status);
-        return 'AI service temporary issue hai. Thodi der baad try karo.';
+        if (response.ok) {
+          const data = await response.json();
+          let responseText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+          if (responseText) {
+            responseText = responseText.replace(/[\u{1F600}-\u{1F64F}]/gu, '').replace(/[\u{1F300}-\u{1F5FF}]/gu, '').replace(/[\u{1F680}-\u{1F6FF}]/gu, '').replace(/[\u{2600}-\u{26FF}]/gu, '').replace(/[\u{2700}-\u{27BF}]/gu, '').trim();
+            return responseText;
+          }
+        } else {
+          console.error('Jimi: Gemini API error', response.status);
+        }
+      } catch (err: any) {
+        console.error('Jimi: Gemini failed:', err.message);
       }
-
-      const data = await response.json();
-      let responseText = data?.choices?.[0]?.message?.content?.trim() || 'Samajh nahi aaya. Phir se bolo.';
-      
-      responseText = responseText
-        .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
-        .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
-        .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
-        .replace(/[\u{2600}-\u{26FF}]/gu, '')
-        .replace(/[\u{2700}-\u{27BF}]/gu, '')
-        .trim();
-      
-      return responseText;
-    } catch (err: any) {
-      console.error('Jimi: AI call failed:', err.message || err);
-      if (err.name === 'AbortError') {
-        return 'AI service slow hai. Phir se try karo.';
-      }
-      return 'AI service se response nahi aaya. Phir se try karo.';
     }
+
+    // Fallback: NVIDIA NIM
+    if (nvidiaKey) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 20000);
+
+        const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${nvidiaKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'meta/llama-3.3-70b-instruct',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              ...this.conversationHistory.slice(-6),
+              { role: 'user', content: text },
+            ],
+            max_tokens: 150,
+            temperature: 0.8,
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+
+        if (response.ok) {
+          const data = await response.json();
+          let responseText = data?.choices?.[0]?.message?.content?.trim() || '';
+          if (responseText) {
+            responseText = responseText.replace(/[\u{1F600}-\u{1F64F}]/gu, '').replace(/[\u{1F300}-\u{1F5FF}]/gu, '').replace(/[\u{1F680}-\u{1F6FF}]/gu, '').replace(/[\u{2600}-\u{26FF}]/gu, '').replace(/[\u{2700}-\u{27BF}]/gu, '').trim();
+            return responseText;
+          }
+        } else {
+          console.error('Jimi: NVIDIA API error', response.status);
+        }
+      } catch (err: any) {
+        console.error('Jimi: NVIDIA failed:', err.message);
+      }
+    }
+
+    return 'AI service se response nahi aaya. Phir se try karo.';
   }
 
   private startReminderChecker() {
