@@ -10,6 +10,9 @@ RUN npm ci --no-audit --no-fund && npx prisma generate
 
 COPY . .
 
+# Google OAuth Client ID (public, not a secret)
+ENV VITE_GOOGLE_CLIENT_ID=813332726800-sm0j12r7n1tcljokt027ac391t2ep73m.apps.googleusercontent.com
+
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build:docker && find dist -name "*.map" -delete
 
