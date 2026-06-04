@@ -4,49 +4,49 @@ export function createRedisConnection() {
   const redisUrl = process.env.REDIS_URL;
   const redisPassword = process.env.REDIS_PASSWORD;
   
-  // If no Redis credentials, return a dummy connection that does nothing
-  if (!redisUrl && !redisPassword) {
-    console.log('Redis: No credentials - running without Redis');
-    return createDummyConnection();
+  console.log(`[Redis] REDIS_URL: ${redisUrl ? 'SET' : 'NOT SET'}, REDIS_PASSWORD: ${redisPassword ? 'SET' : 'NOT SET'}`);
+  
+  // Method 1: Try REDIS_URL (most reliable)
+  if (redisUrl) {
+    console.log('[Redis] Connecting via REDIS_URL...');
+    return connectToRedis(redisUrl);
   }
   
-  try {
-    const opts: any = {
-      maxRetriesPerRequest: null,
-      retryStrategy(times: number) {
-        if (times > 1) return null; // Stop retrying after 1 attempt
-        return 200;
-      },
-      enableOfflineQueue: false,
-      connectTimeout: 3000,
-      commandTimeout: 3000,
-    };
-
-    let client: IORedis;
-    if (redisUrl) {
-      client = new IORedis(redisUrl, opts);
-    } else {
-      client = new IORedis({
-        host: process.env.REDIS_HOST || 'coolify-redis',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-        password: redisPassword,
-        ...opts,
-      });
-    }
-
-    client.on('error', () => {}); // Suppress errors silently
-    return client;
-  } catch {
-    return createDummyConnection();
+  // Method 2: Try REDIS_PASSWORD + host/port
+  if (redisPassword) {
+    const host = process.env.REDIS_HOST || 'coolify-redis';
+    const port = process.env.REDIS_PORT || '6379';
+    const url = `redis://:${redisPassword}@${host}:${port}`;
+    console.log(`[Redis] Connecting via password to ${host}:${port}...`);
+    return connectToRedis(url);
   }
+  
+  // Method 3: Try without auth (for local dev or unauthenticated Redis)
+  const host = process.env.REDIS_HOST || 'localhost';
+  const port = process.env.REDIS_PORT || '6379';
+  console.log(`[Redis] Connecting without auth to ${host}:${port}...`);
+  return connectToRedis(`redis://${host}:${port}`);
 }
 
-function createDummyConnection(): IORedis {
-  // Return a disconnected client that won't throw errors
-  const client = new IORedis({ 
-    lazyConnect: true, 
+function connectToRedis(url: string) {
+  const client = new IORedis(url, {
+    maxRetriesPerRequest: null,
+    retryStrategy(times: number) {
+      if (times > 3) return null;
+      return Math.min(times * 200, 2000);
+    },
     enableOfflineQueue: false,
-    retryStrategy: () => null,
+    connectTimeout: 5000,
+    commandTimeout: 5000,
   });
+  
+  client.on('error', (err: any) => {
+    console.error(`[Redis] Connection error: ${err.message}`);
+  });
+  
+  client.on('connect', () => {
+    console.log('[Redis] Connected successfully');
+  });
+  
   return client;
 }

@@ -11,8 +11,10 @@ export async function initRedis(): Promise<RedisClientType | null> {
   const redisUrl = process.env.REDIS_URL;
   const password = process.env.REDIS_PASSWORD || undefined;
   
+  console.log(`[Redis Service] REDIS_URL: ${redisUrl ? 'SET' : 'NOT SET'}, REDIS_PASSWORD: ${password ? 'SET' : 'NOT SET'}`);
+  
   if (!redisUrl && !password) {
-    console.log('Redis Service: No credentials - skipping');
+    console.log('[Redis Service] No credentials - skipping');
     return null;
   }
 
@@ -21,6 +23,7 @@ export async function initRedis(): Promise<RedisClientType | null> {
     const port = process.env.REDIS_PORT || '6379';
     
     const finalUrl = redisUrl || `redis://:${password}@${host}:${port}`;
+    console.log(`[Redis Service] Connecting to ${host}:${port}...`);
 
     redisClient = createClient({
       url: finalUrl,
@@ -29,22 +32,25 @@ export async function initRedis(): Promise<RedisClientType | null> {
           if (retries > 3) return new Error('Redis failed');
           return Math.min(retries * 100, 3000);
         },
-        connectTimeout: 3000,
-        commandTimeout: 3000,
+        connectTimeout: 5000,
+        commandTimeout: 5000,
       },
     });
 
-    redisClient.on('error', () => {
+    redisClient.on('error', (err: any) => {
+      console.error(`[Redis Service] Error: ${err.message}`);
       isConnected = false;
     });
 
     redisClient.on('connect', () => {
+      console.log('[Redis Service] Connected');
       isConnected = true;
     });
 
     await redisClient.connect();
     return redisClient;
-  } catch {
+  } catch (err: any) {
+    console.error(`[Redis Service] Failed: ${err.message}`);
     return null;
   }
 }
