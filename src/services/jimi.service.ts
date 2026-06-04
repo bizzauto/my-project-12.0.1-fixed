@@ -1401,7 +1401,6 @@ Response SHORT rakho (1-2 sentences). Jo language user use kare wohi mein use ka
       const data = await response.json();
       let responseText = data?.choices?.[0]?.message?.content?.trim() || 'Samajh nahi aaya. Phir se bolo.';
       
-      // Remove emojis from AI response for better TTS
       responseText = responseText
         .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
         .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
