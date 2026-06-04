@@ -120,7 +120,7 @@ function addNaturalPatterns(text: string): string {
 // POST /api/jimi/tts - Main TTS endpoint (tries Piper > Edge > Browser)
 router.post('/tts', async (req: Request, res: Response) => {
   try {
-    const { text, lang = 'hi-IN' } = req.body;
+    const { text, lang = 'hi-IN', voiceStyle = 'sweet' } = req.body;
     if (!text) return res.status(400).json({ error: 'Text required' });
 
     const cleaned = addNaturalPatterns(cleanText(text));
@@ -136,7 +136,7 @@ router.post('/tts', async (req: Request, res: Response) => {
 
     // Try Edge TTS (natural neural voice)
     try {
-      const edgeResult = tryEdgeTTS(cleaned, lang);
+      const edgeResult = tryEdgeTTS(cleaned, lang, voiceStyle);
       if (edgeResult) {
         return res.json({ audio: edgeResult, format: 'mp3', engine: 'edge' });
       }
@@ -152,13 +152,13 @@ router.post('/tts', async (req: Request, res: Response) => {
 // POST /api/jimi/tts/edge - Edge TTS only
 router.post('/tts/edge', async (req: Request, res: Response) => {
   try {
-    const { text, lang = 'hi-IN' } = req.body;
+    const { text, lang = 'hi-IN', voiceStyle = 'sweet' } = req.body;
     if (!text) return res.status(400).json({ error: 'Text required' });
 
     const cleaned = addNaturalPatterns(cleanText(text));
     if (!cleaned) return res.json({ fallback: true, text: '' });
 
-    const edgeResult = tryEdgeTTS(cleaned, lang);
+    const edgeResult = tryEdgeTTS(cleaned, lang, voiceStyle);
     if (edgeResult) {
       return res.json({ audio: edgeResult, format: 'mp3', engine: 'edge' });
     }
@@ -172,13 +172,25 @@ router.post('/tts/edge', async (req: Request, res: Response) => {
 // POST /api/jimi/tts/kyutai - Kyutai Pocket TTS (English, CPU, free, never stops)
 router.post('/tts/kyutai', async (req: Request, res: Response) => {
   try {
-    const { text } = req.body;
+    const { text, voiceStyle = 'sweet' } = req.body;
     if (!text) return res.status(400).json({ error: 'Text required' });
 
     const cleaned = addNaturalPatterns(cleanText(text));
     if (!cleaned) return res.json({ fallback: true, text: '' });
 
     const kyutaiUrl = process.env.KYUTAI_TTS_URL || 'http://localhost:8008';
+
+    // MYRA voice presets - match Aoede (Female) from Gemini Live
+    const stylePresets: Record<string, { voice: string; speed: number; response_format: string }> = {
+      // MYRA default: Warm, caring, emotionally expressive - Aoede style
+      sweet: { voice: 'shimmer', speed: 0.92, response_format: 'mp3' },     // Soft & warm like Aoede
+      natural: { voice: 'nova', speed: 0.95, response_format: 'mp3' },      // Natural Hinglish flow
+      warm: { voice: 'shimmer', speed: 0.88, response_format: 'mp3' },      // Calm & caring
+      energetic: { voice: 'nova', speed: 1.05, response_format: 'mp3' },    // Lively & fun
+      professional: { voice: 'alloy', speed: 1.0, response_format: 'mp3' }, // Clean & clear
+    };
+
+    const style = stylePresets[voiceStyle] || stylePresets.sweet;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
@@ -189,9 +201,9 @@ router.post('/tts/kyutai', async (req: Request, res: Response) => {
       body: JSON.stringify({
         model: 'tts-1',
         input: cleaned,
-        voice: 'nova',
-        response_format: 'mp3',
-        speed: 1.1,
+        voice: style.voice,
+        response_format: style.response_format,
+        speed: style.speed,
       }),
       signal: controller.signal,
     });
@@ -258,10 +270,9 @@ function tryPiperTTS(text: string, lang: string): string | null {
 }
 
 // ==================== EDGE TTS ====================
-function tryEdgeTTS(text: string, lang: string): string | null {
+function tryEdgeTTS(text: string, lang: string, voiceStyle: string = 'sweet'): string | null {
   try {
     if (!existsSync('/usr/local/bin/edge-tts') && !existsSync('/usr/bin/edge-tts')) {
-      // Try pip-installed path
       try {
         execSync('which edge-tts', { stdio: 'pipe' });
       } catch {
@@ -269,9 +280,10 @@ function tryEdgeTTS(text: string, lang: string): string | null {
       }
     }
 
+    // MYRA-like voice map - Indian female voices
     const voiceMap: Record<string, string> = {
       'hi-IN': 'hi-IN-SwaraNeural',
-      'en-US': 'en-US-JennyNeural',
+      'en-US': 'en-IN-NeerjaNeural',  // Indian English accent
       'en-IN': 'en-IN-NeerjaNeural',
       'mr-IN': 'mr-IN-AarohiNeural',
       'ta-IN': 'ta-IN-PallaviNeural',
@@ -283,14 +295,29 @@ function tryEdgeTTS(text: string, lang: string): string | null {
       'pa-IN': 'pa-IN-GurpreetNeural',
     };
 
+    // Voice style presets for MYRA-like sound
+    const stylePresets: Record<string, { rate: string; pitch: string; volume: string }> = {
+      sweet: { rate: '-5%', pitch: '+8Hz', volume: '+0%' },      // Sweet & warm
+      natural: { rate: '+0%', pitch: '+3Hz', volume: '+0%' },    // Natural flow
+      warm: { rate: '-8%', pitch: '+5Hz', volume: '-5%' },       // Calm & caring
+      energetic: { rate: '+5%', pitch: '+10Hz', volume: '+5%' }, // Lively & fun
+      professional: { rate: '-3%', pitch: '+0Hz', volume: '+0%' },// Clean & clear
+    };
+
     const voice = voiceMap[lang] || 'hi-IN-SwaraNeural';
+    const style = stylePresets[voiceStyle] || stylePresets.sweet;
     const tmpMp3 = join(tmpdir(), `jimi-edge-${randomBytes(4).toString('hex')}.mp3`);
     const textFile = join(tmpdir(), `jimi-text-${randomBytes(4).toString('hex')}.txt`);
 
     writeFileSync(textFile, text, 'utf-8');
 
+    // Edge TTS with MYRA-like tuning
+    const rateArg = `--rate="${style.rate}"`;
+    const pitchArg = `--pitch="${style.pitch}"`;
+    const volumeArg = `--volume="${style.volume}"`;
+    
     execSync(
-      `edge-tts --voice "${voice}" --rate="-2%" --pitch="+5Hz" --file "${textFile}" --write-media "${tmpMp3}"`,
+      `edge-tts --voice "${voice}" ${rateArg} ${pitchArg} ${volumeArg} --file "${textFile}" --write-media "${tmpMp3}"`,
       { timeout: 10000, stdio: 'pipe' }
     );
 

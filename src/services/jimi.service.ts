@@ -1,5 +1,6 @@
 // Jimi AI Voice Assistant Service - Full Featured
 // Uses Web Speech API (free) + Nvidia NIM (free) for voice commands
+// MYRA-style voice: Warm, caring, emotionally expressive
 
 export interface JimiConfig {
   language?: string;
@@ -8,21 +9,24 @@ export interface JimiConfig {
   pitch?: number;
 }
 
-// Voice settings interface
+// Voice settings interface - MYRA style
 export interface VoiceSettings {
   rate: number;           // 0.5 - 1.5 (speed)
   pitch: number;          // 0.5 - 2.0 (higher = sweeter)
   volume: number;         // 0.0 - 1.0
   speakingStyle: 'warm' | 'professional' | 'casual' | 'cheerful';
+  voiceStyle: 'sweet' | 'natural' | 'warm' | 'energetic' | 'professional';
   pauseAfterFillers: boolean;
   naturalRhythm: boolean;
 }
 
+// MYRA-like default settings
 const DEFAULT_VOICE_SETTINGS: VoiceSettings = {
-  rate: 0.92,
-  pitch: 1.4,
+  rate: 0.92,           // Slightly slower for natural Hinglish
+  pitch: 1.4,           // Higher pitch for sweet female voice
   volume: 1.0,
-  speakingStyle: 'warm',
+  speakingStyle: 'warm', // MYRA: Warm, caring, emotionally expressive
+  voiceStyle: 'sweet',   // MYRA: Aoede-style sweet voice
   pauseAfterFillers: true,
   naturalRhythm: true,
 };
@@ -442,6 +446,7 @@ class JimiVoiceAgent {
   private reminderInterval: ReturnType<typeof setInterval> | null = null;
   private personalityMode: PersonalityMode = 'gf';
   private currentResponses = MODE_RESPONSES.gf;
+  private continuousListening = false;
 
   constructor(config: JimiConfig = {}) {
     this.config = {
@@ -462,6 +467,11 @@ class JimiVoiceAgent {
       try {
         this.voiceSettings = { ...DEFAULT_VOICE_SETTINGS, ...JSON.parse(savedVoice) };
       } catch {}
+    }
+    // Load continuous listening
+    const savedContinuous = localStorage.getItem('jimi_continuous_listening');
+    if (savedContinuous === 'true') {
+      this.continuousListening = true;
     }
     this.initSpeechRecognition();
     this.initSpeechSynthesis();
@@ -528,6 +538,18 @@ class JimiVoiceAgent {
     this.recognition.onend = () => {
       this.isListening = false;
       this.onListeningChange?.(false);
+      // Auto-restart in continuous mode
+      if (this.continuousListening && this.recognition) {
+        setTimeout(() => {
+          try {
+            this.recognition?.start();
+            this.isListening = true;
+            this.onListeningChange?.(true);
+          } catch (err) {
+            console.error('Jimi continuous restart error:', err);
+          }
+        }, 300);
+      }
     };
   }
 
@@ -665,6 +687,20 @@ class JimiVoiceAgent {
     return this.personalityMode;
   }
 
+  setContinuousListening(enabled: boolean) {
+    this.continuousListening = enabled;
+    localStorage.setItem('jimi_continuous_listening', enabled.toString());
+    if (enabled) {
+      this.onMessage?.('🎧 Continuous listening ON - jab tak bolo, sunti rahungi!', false);
+    } else {
+      this.onMessage?.('🔇 Continuous listening OFF', false);
+    }
+  }
+
+  getContinuousListening(): boolean {
+    return this.continuousListening;
+  }
+
   getPersonalityModes() {
     return PERSONALITY_MODES;
   }
@@ -800,12 +836,18 @@ class JimiVoiceAgent {
     const detectedLang = this.detectLanguage(text);
 
     // 1. Try Kyutai TTS (English - free, CPU, never stops mid-speech)
+    // MYRA: Aoede-style sweet voice with natural Hinglish flow
     if (detectedLang.startsWith('en')) {
       try {
         const response = await fetch('/api/jimi/tts/kyutai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: cleanText }),
+          body: JSON.stringify({ 
+            text: cleanText, 
+            voiceStyle: this.voiceSettings.voiceStyle || 'sweet', // MYRA default
+            speed: this.voiceSettings.rate || 0.92,
+            pitch: this.voiceSettings.pitch || 1.4
+          }),
           signal: AbortSignal.timeout(15000),
         });
         const data = await response.json();
@@ -819,11 +861,18 @@ class JimiVoiceAgent {
     }
 
     // 2. Try Edge TTS (Hindi/Marathi/Indian languages - free, neural voice)
+    // MYRA: SwaraNeural for Hindi, NeerjaNeural for Indian English
     try {
       const response = await fetch('/api/jimi/tts/edge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: cleanText, lang: detectedLang }),
+        body: JSON.stringify({ 
+          text: cleanText, 
+          lang: detectedLang, 
+          voiceStyle: this.voiceSettings.voiceStyle || 'sweet', // MYRA default
+          speed: this.voiceSettings.rate || 0.92,
+          pitch: this.voiceSettings.pitch || 1.4
+        }),
         signal: AbortSignal.timeout(12000),
       });
       const data = await response.json();
@@ -846,7 +895,7 @@ class JimiVoiceAgent {
 
     this.isSpeaking = true;
     this.audioElement = new Audio(`data:audio/mp3;base64,${base64}`);
-    this.audioElement.volume = 1.0;
+    this.audioElement.volume = this.voiceSettings.volume || 1.0;
 
     this.audioElement.onended = () => {
       this.isSpeaking = false;
@@ -895,7 +944,7 @@ class JimiVoiceAgent {
     if (!safetyCheck.allowed) {
       this.onMessage?.(safetyCheck.reason || 'Command blocked.', false);
       this.speak(safetyCheck.reason || 'Command blocked.');
-      return;
+      return { action: 'blocked', response: safetyCheck.reason || 'Command blocked.' };
     }
 
     const command = await this.processCommand(text);
@@ -908,6 +957,8 @@ class JimiVoiceAgent {
     if (this.conversationHistory.length > 20) {
       this.conversationHistory = this.conversationHistory.slice(-20);
     }
+
+    return command;
   }
 
   private async processCommand(text: string): Promise<CommandResult> {
@@ -1261,36 +1312,30 @@ class JimiVoiceAgent {
     }
 
     // ==================== AI PROCESSING ====================
-    // Employee mode: Sirf BizzAuto topics pe respond karo
+    // Employee mode: Sirf BizzAuto topics, but navigation commands already handled above
     if (this.personalityMode === 'employee') {
-      const bizzAutoKeywords = [
-        'lead', 'customer', 'whatsapp', 'message', 'campaign', 'review', 'dashboard',
-        'analytics', 'report', 'revenue', 'contact', 'template', 'chatbot', 'automation',
-        'google business', 'post', 'creative', 'design', 'social media', 'email',
-        'setting', 'profile', 'billing', 'plan', 'subscription', 'invoice', 'payment',
-        'order', 'product', 'service', 'appointment', 'booking', 'schedule', 'team',
-        'employee', 'staff', 'permission', 'role', 'access', 'notification', 'alert',
-        'backup', 'export', 'import', 'sync', 'api', 'integration', 'webhook',
-        'status', 'update', 'manage', 'open', 'show', 'dikhao', 'kholo', 'bhejo',
-        'bhej', 'save', 'delete', 'edit', 'add', 'create', 'new', 'naya', 'nayi',
-        'khol', 'band', 'close', 'start', 'stop', 'enable', 'disable', 'turn on',
-        'bizauto', 'bizzauto', 'crm', 'business'
+      const nonBizzAutoTopics = [
+        'joke', 'jokes', 'hasao', 'mazaak', 'funny',
+        'quote', 'quotes', 'motivate', 'motivation', 'inspire',
+        'translate', 'anuvad', 'matlab',
+        'birthday', 'janamdin',
       ];
-      const isBizzAutoQuery = bizzAutoKeywords.some(kw => lower.includes(kw));
+      const isNonBizzAuto = nonBizzAutoTopics.some(kw => lower.includes(kw));
       
-      if (isBizzAutoQuery) {
-        try {
-          const aiResponse = await this.queryAI(text);
-          return { action: 'ai', response: aiResponse };
-        } catch (err) {
-          return { action: 'unknown', response: 'Sir, BizzAuto CRM se related query batao. Main aapki help karungi! 📋' };
-        }
+      if (isNonBizzAuto) {
+        return {
+          action: 'employee_redirect',
+          response: 'Sir, main sirf BizzAuto CRM ki assistant hun. Leads, WhatsApp, campaigns, reviews, dashboard - ye sab handle kar sakti hun. Batao kya karna hai? 📋',
+        };
       }
       
-      return {
-        action: 'employee_redirect',
-        response: 'Sir, main sirf BizzAuto CRM ki assistant hun. Aapko leads, WhatsApp, campaigns, reviews, ya koi bhi CRM feature ke baare mein batati hun. Batao kya karna hai? 📋',
-      };
+      // All other queries (including CRM) → AI for detailed help
+      try {
+        const aiResponse = await this.queryAI(text);
+        return { action: 'ai', response: aiResponse };
+      } catch (err) {
+        return { action: 'unknown', response: 'Batao kya help chahiye CRM mein? 📋' };
+      }
     }
 
     try {

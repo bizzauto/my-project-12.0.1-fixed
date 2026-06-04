@@ -93,45 +93,17 @@ const JimiAssistant: React.FC = () => {
     setInputText('');
     setIsTyping(true);
 
-    await jimi.processUserInput(userMessage);
+    const command = await jimi.processUserInput(userMessage);
 
-    // Check for navigation commands
-    const lower = userMessage.toLowerCase();
-    if (lower.includes('dashboard') || lower.includes('home')) {
-      setTimeout(() => navigate('/dashboard'), 500);
-    } else if (lower.includes('whatsapp') || lower.includes('message')) {
+    // Execute actions based on command result
+    if (command?.action === 'navigate' && command.params) {
+      setTimeout(() => navigate(command.params as string), 500);
+    } else if (command?.action === 'whatsapp_send') {
       setTimeout(() => navigate('/whatsapp'), 500);
-    } else if (lower.includes('lead') || lower.includes('customer')) {
-      setTimeout(() => navigate('/leads'), 500);
-    } else if (lower.includes('review')) {
-      setTimeout(() => navigate('/reviews'), 500);
-    } else if (lower.includes('post') || lower.includes('google business')) {
-      setTimeout(() => navigate('/google-business'), 500);
-    } else if (lower.includes('creative') || lower.includes('poster')) {
-      setTimeout(() => navigate('/creative'), 500);
-    } else if (lower.includes('campaign')) {
-      setTimeout(() => navigate('/campaigns'), 500);
-    } else if (lower.includes('setting')) {
-      setTimeout(() => navigate('/settings'), 500);
-    } else if (lower.includes('analytics') || lower.includes('report')) {
-      setTimeout(() => navigate('/analytics'), 500);
-    } else if (lower.includes('social')) {
-      setTimeout(() => navigate('/social'), 500);
-    }
-
-    // Check for call action and execute it
-    if (lower.includes('call') || lower.includes('phone') || lower.includes('dial')) {
-      // Find number to call
-      const callMatch = userMessage.match(/(?:call|phone|dial|karo)\s+(?:kar)?\s*(.+)/i);
-      if (callMatch && command.action === 'call_dial') {
-        const { number } = command.params || {};
-        if (number) {
-          // Open phone dialer
-          setTimeout(() => {
-            window.location.href = `tel:${number}`;
-          }, 1000);
-        }
-      }
+    } else if (command?.action === 'call_dial' && command.params?.number) {
+      setTimeout(() => {
+        window.location.href = `tel:${command.params.number}`;
+      }, 1000);
     }
   };
 
@@ -451,6 +423,32 @@ const JimiAssistant: React.FC = () => {
                         }`}
                       >
                         {style.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Voice Style (MYRA) */}
+                <div>
+                  <div className="text-white text-xs mb-1.5">Voice Style (MYRA)</div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[
+                      { value: 'sweet', label: 'Sweet', emoji: '🍯' },
+                      { value: 'natural', label: 'Natural', emoji: '🌿' },
+                      { value: 'warm', label: 'Warm', emoji: '☀️' },
+                      { value: 'energetic', label: 'Energetic', emoji: '⚡' },
+                      { value: 'professional', label: 'Pro', emoji: '💼' },
+                    ].map(style => (
+                      <button
+                        key={style.value}
+                        onClick={() => handleVoiceSettingChange('voiceStyle', style.value)}
+                        className={`text-xs px-2 py-1.5 rounded-lg transition-all ${
+                          voiceSettings.voiceStyle === style.value
+                            ? 'bg-white text-purple-600 font-medium'
+                            : 'bg-white/20 text-white hover:bg-white/30'
+                        }`}
+                      >
+                        {style.emoji} {style.label}
                       </button>
                     ))}
                   </div>
