@@ -9,6 +9,7 @@ declare global {
 }
 
 const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
+const REDIRECT_URI = window.location.origin;
 
 const loadGsi = (): Promise<void> => {
   return new Promise((resolve) => {
@@ -75,6 +76,7 @@ const GoogleLoginButton: React.FC<Props> = ({ onError, text = 'continue_with', l
           },
           auto_select: false,
           cancel_on_tap_outside: true,
+          ux_mode: 'popup',
         });
         if (btnContainerRef.current) {
           window.google.accounts.id.renderButton(btnContainerRef.current, {
@@ -100,19 +102,45 @@ const GoogleLoginButton: React.FC<Props> = ({ onError, text = 'continue_with', l
     };
   }, [text]);
 
-  const handleFallback = useCallback(() => {
+  const handleManualGoogle = useCallback(async () => {
     if (!GOOGLE_CLIENT_ID) {
       onError?.('Google sign-in not configured. Please use email sign-up.');
       return;
     }
-    if (window.google?.accounts?.id?.prompt) {
-      try {
-        window.google.accounts.id.prompt();
-      } catch {
-        onError?.('Google sign-in is temporarily unavailable. Please use email.');
+
+    try {
+      await loadGsi();
+      if (!window.google?.accounts?.id) {
+        onError?.('Google Sign-In failed to load. Please try again.');
+        return;
       }
-    } else {
-      onError?.('Google sign-in is temporarily unavailable. Please use email.');
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: async (resp: any) => {
+          try {
+            if (resp?.credential) {
+              await callbackRef.current(resp.credential);
+              const role = useAuthStore.getState().user?.role;
+              if (role === 'SUPER_ADMIN') window.location.href = '/admin';
+              else window.location.href = '/dashboard';
+            } else {
+              onErrorRef.current?.('No credential received from Google');
+            }
+          } catch (e: any) {
+            onErrorRef.current?.(e?.message || 'Google sign-in failed');
+          }
+        },
+        auto_select: false,
+      });
+
+      window.google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          onErrorRef.current?.('Google Sign-In popup was blocked. Please allow popups or use email login.');
+        }
+      });
+    } catch {
+      onError?.('Google Sign-In encountered an error. Please try again.');
     }
   }, [onError]);
 
@@ -120,7 +148,7 @@ const GoogleLoginButton: React.FC<Props> = ({ onError, text = 'continue_with', l
     return (
       <button
         type="button"
-        onClick={handleFallback}
+        onClick={handleManualGoogle}
         className={`flex items-center justify-center gap-2.5 w-full max-w-[320px] h-11 px-4 bg-white border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-all text-sm font-medium text-gray-700 ${className}`}
       >
         <GoogleGIcon />
