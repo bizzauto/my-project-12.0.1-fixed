@@ -202,11 +202,18 @@ const LandingPage: React.FC = () => {
     return () => window.removeEventListener('scroll', h);
   }, []);
 
-  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const touchStartY = useRef(0);
+  
+  const handleTouchStart = (e: React.TouchEvent) => { 
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
   const handleTouchEnd = (e: React.TouchEvent) => {
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) setActiveSlide(p => (p + 1) % slides.length);
+    const diffX = touchStartX.current - e.changedTouches[0].clientX;
+    const diffY = touchStartY.current - e.changedTouches[0].clientY;
+    // Only handle horizontal swipes (ignore vertical scroll)
+    if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 2) {
+      if (diffX > 0) setActiveSlide(p => (p + 1) % slides.length);
       else setActiveSlide(p => (p - 1 + slides.length) % slides.length);
     }
   };
@@ -266,7 +273,7 @@ const LandingPage: React.FC = () => {
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Everything you need to grow</h2>
             <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-2">One platform. All the tools. Zero complexity.</p>
           </div>
-          <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center" style={{ touchAction: 'pan-y' }}>
             <div key={`i-${activeSlide}`} className="animate-fade-in-up order-2 lg:order-1">
               <div className={`inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${slides[activeSlide].gradient} mb-4 sm:mb-6 shadow-lg text-white`}>{slides[activeSlide].icon}</div>
               <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">{slides[activeSlide].title}</h3>
