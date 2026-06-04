@@ -375,42 +375,6 @@ const MODE_RESPONSES = {
 
 // Default to GF mode
 const SWEET_RESPONSES = MODE_RESPONSES.gf;
-    'Yaad rakhungi! 📝 "{note}" ✨',
-  ],
-  translation: [
-    'Translation: {translated} ✨',
-  ],
-  calculator: [
-    'Answer hai: {result} 🧮',
-    'Calculation: {result} ✨',
-  ],
-  postWriter: [
-    'Post likh diya:\n\n{post}\n\nAb isse Google Business pe daal dun? 🌸',
-  ],
-  emailDraft: [
-    'Email draft taiyar hai:\n\n{email}\n\nCopy kar lo ya bhejun? 📧',
-  ],
-  birthday: [
-    'Happy Birthday! 🎂🎉\nJanamdin ki bahut bahut shubhkamnayein!\nBhagwan aapko hamesha khush rakhe! 💕',
-    'Happy Birthday! 🎂✨\nAaj ka din aapka hai! Bahut enjoy karo!\nBest wishes! 🌸',
-  ],
-  callDialing: [
-    '📞 {name} ko call kar rahi hun...\nNumber: {number}\nPhone app khulega!',
-    '📞 Abhi {name} ko dial kar rahi hun!\n{number} pe call ho raha hai...',
-  ],
-  callLog: [
-    '📞 Call History:\n{calls}\n\nAur kuch help chahiye? 📱',
-    '📱 Recent Calls:\n{calls}',
-  ],
-  callSaved: [
-    '✅ Number save ho gaya!\n📞 {name}: {number}\nAb "call {name}" bolo toh call lagegi!',
-    '💾 Saved!\n{name} ka number: {number}\nCall karne ke liye bolo!',
-  ],
-  noNumber: [
-    '🤔 {name} ka number mere paas nahi hai.\nPehle number save karo: "Save karo Rahul 9876543210"',
-    '📵 {name} ka number nahi mila.\nNumber add karo pehle!',
-  ],
-};
 
   // Notes storage (in-memory, production mein use localStorage/database)
   let userNotes: { text: string; timestamp: Date }[] = [];
