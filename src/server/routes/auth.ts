@@ -69,6 +69,148 @@ const socialAuthLimiter = rateLimit({
 // Google OAuth Client for verifying ID tokens
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// ==================== GOOGLE OAUTH REDIRECT FLOW ====================
+// GET /api/auth/google/url - Generate Google OAuth URL for redirect
+router.get('/google/url', (req: Request, res: Response) => {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+  const frontendUrl = (req.query.redirect as string) || `${process.env.FRONTEND_URL || 'https://bizzautoai.com'}`;
+
+  if (!clientId) {
+    return res.redirect(`${frontendUrl}/login?error=google_not_configured`);
+  }
+
+  const scopes = ['openid', 'email', 'profile'].join(' ');
+  const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  url.searchParams.set('client_id', clientId);
+  url.searchParams.set('redirect_uri', redirectUri);
+  url.searchParams.set('response_type', 'code');
+  url.searchParams.set('scope', scopes);
+  url.searchParams.set('access_type', 'offline');
+  url.searchParams.set('prompt', 'consent');
+  url.searchParams.set('state', frontendUrl);
+
+  res.redirect(url.toString());
+});
+
+// GET /api/auth/google/callback - Handle Google OAuth callback
+router.get('/google/callback', async (req: Request, res: Response) => {
+  const frontendUrl = req.query.state as string || process.env.FRONTEND_URL || 'https://bizzautoai.com';
+
+  try {
+    const { code } = req.query;
+    if (!code) {
+      return res.redirect(`${frontendUrl}/login?error=no_code`);
+    }
+
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+
+    // Exchange code for tokens
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+      }),
+    });
+
+    const tokenData: any = await tokenRes.json();
+    if (!tokenData.id_token) {
+      console.error('Google token exchange failed:', tokenData);
+      return res.redirect(`${frontendUrl}/login?error=token_exchange_failed`);
+    }
+
+    // Verify the ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: tokenData.id_token,
+      audience: clientId,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      return res.redirect(`${frontendUrl}/login?error=no_email`);
+    }
+
+    const { email, name, sub: googleId, picture } = payload;
+
+    // Find or create user
+    let user = await prisma.user.findFirst({
+      where: { OR: [{ googleId }, { email }] },
+      include: { business: true },
+    });
+
+    if (user) {
+      if (!user.googleId) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { googleId, image: picture || user.image },
+          include: { business: true },
+        });
+      }
+      if (!user.image && picture) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { image: picture },
+          include: { business: true },
+        });
+      }
+    } else {
+      const userName = name || email.split('@')[0];
+      user = await prisma.user.create({
+        data: {
+          email,
+          name: userName,
+          googleId,
+          image: picture || null,
+          emailVerified: new Date(),
+          password: await hashPassword(crypto.randomBytes(32).toString('hex')),
+          role: 'USER',
+        },
+        include: { business: true },
+      });
+
+      const business = await prisma.business.create({
+        data: {
+          name: `${userName}'s Business`,
+          type: 'SERVICE',
+          userId: user.id,
+        },
+      });
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { businessId: business.id },
+        include: { business: true },
+      });
+    }
+
+    // Generate JWT
+    const token = generateToken(user.id, user.role);
+    const refreshToken = generateRefreshToken(user.id);
+
+    // Redirect to frontend with tokens
+    const params = new URLSearchParams({
+      token,
+      refreshToken,
+      userId: user.id,
+      role: user.role || 'USER',
+      name: user.name || '',
+      email: user.email || '',
+    });
+    if (user.businessId) params.set('businessId', user.businessId);
+
+    res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+  } catch (error: any) {
+    console.error('Google OAuth callback error:', error);
+    res.redirect(`${frontendUrl}/login?error=auth_failed`);
+  }
+});
+
 // Apple's JWKS endpoint for token verification
 const APPLE_KEYS_URL = 'https://appleid.apple.com/auth/keys';
 

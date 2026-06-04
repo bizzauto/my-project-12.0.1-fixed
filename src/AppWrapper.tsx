@@ -24,6 +24,7 @@ const AboutPage = lazy(() => import('./components/AboutPage'));
 const ContactPage = lazy(() => import('./components/ContactPage'));
 const FeaturesPage = lazy(() => import('./components/FeaturesPage'));
 const ForgotPasswordPage = lazy(() => import('./components/ForgotPasswordPage'));
+const AuthCallback = lazy(() => import('./components/AuthCallback'));
 const NotFoundPage = lazy(() => import('./components/NotFoundPage'));
 
 // Authenticated layout
@@ -161,6 +162,7 @@ function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/terms" element={<TermsPage />} />

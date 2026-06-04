@@ -1,38 +1,6 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useAuthStore } from '../lib/authStore';
+import React from 'react';
 
-declare global {
-  interface Window {
-    google?: any;
-    __gsiLoaded?: boolean;
-  }
-}
-
-const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
-const REDIRECT_URI = window.location.origin;
-
-const loadGsi = (): Promise<void> => {
-  return new Promise((resolve) => {
-    if (typeof window === 'undefined') return resolve();
-    if (window.google?.accounts?.id) return resolve();
-    if (document.getElementById('google-gsi-script')) {
-      const wait = () => {
-        if (window.google?.accounts?.id) resolve();
-        else setTimeout(wait, 50);
-      };
-      wait();
-      return;
-    }
-    const s = document.createElement('script');
-    s.id = 'google-gsi-script';
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.async = true;
-    s.defer = true;
-    s.onload = () => resolve();
-    s.onerror = () => resolve();
-    document.head.appendChild(s);
-  });
-};
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 interface Props {
   onError?: (msg: string) => void;
@@ -42,128 +10,20 @@ interface Props {
 }
 
 const GoogleLoginButton: React.FC<Props> = ({ onError, text = 'continue_with', label = 'Continue with Google', className = '' }) => {
-  const btnContainerRef = useRef<HTMLDivElement | null>(null);
-  const [ready, setReady] = useState(false);
-  const [sdkFailed, setSdkFailed] = useState(false);
-  const { googleLogin } = useAuthStore();
-  const callbackRef = useRef(googleLogin);
-  callbackRef.current = googleLogin;
-  const onErrorRef = useRef(onError);
-  onErrorRef.current = onError;
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_URL}/api/auth/google/url?redirect=${encodeURIComponent(window.location.origin)}`;
+  };
 
-  useEffect(() => {
-    if (!GOOGLE_CLIENT_ID) { setSdkFailed(true); return; }
-    let mounted = true;
-    loadGsi().then(() => {
-      if (!mounted) return;
-      if (!window.google?.accounts?.id) { setSdkFailed(true); return; }
-      try {
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: async (resp: any) => {
-            try {
-              if (resp?.credential) {
-                await callbackRef.current(resp.credential);
-                const role = useAuthStore.getState().user?.role;
-                if (role === 'SUPER_ADMIN') window.location.href = '/admin';
-                else window.location.href = '/dashboard';
-              } else {
-                onErrorRef.current?.('No credential returned from Google');
-              }
-            } catch (e: any) {
-              onErrorRef.current?.(e?.message || 'Google sign-in failed');
-            }
-          },
-          auto_select: false,
-          cancel_on_tap_outside: true,
-          ux_mode: 'popup',
-        });
-        if (btnContainerRef.current) {
-          window.google.accounts.id.renderButton(btnContainerRef.current, {
-            type: 'standard',
-            theme: 'outline',
-            size: 'large',
-            text,
-            shape: 'rectangular',
-            logo_alignment: 'left',
-            width: 320,
-          });
-        }
-        setReady(true);
-      } catch (e) {
-        setSdkFailed(true);
-      }
-    });
-    return () => {
-      mounted = false;
-      if (btnContainerRef.current) {
-        try { btnContainerRef.current.innerHTML = ''; } catch {}
-      }
-    };
-  }, [text]);
-
-  const handleManualGoogle = useCallback(async () => {
-    if (!GOOGLE_CLIENT_ID) {
-      onError?.('Google sign-in not configured. Please use email sign-up.');
-      return;
-    }
-
-    try {
-      await loadGsi();
-      if (!window.google?.accounts?.id) {
-        onError?.('Google Sign-In failed to load. Please try again.');
-        return;
-      }
-
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: async (resp: any) => {
-          try {
-            if (resp?.credential) {
-              await callbackRef.current(resp.credential);
-              const role = useAuthStore.getState().user?.role;
-              if (role === 'SUPER_ADMIN') window.location.href = '/admin';
-              else window.location.href = '/dashboard';
-            } else {
-              onErrorRef.current?.('No credential received from Google');
-            }
-          } catch (e: any) {
-            onErrorRef.current?.(e?.message || 'Google sign-in failed');
-          }
-        },
-        auto_select: false,
-      });
-
-      window.google.accounts.id.prompt((notification: any) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          onErrorRef.current?.('Google Sign-In popup was blocked. Please allow popups or use email login.');
-        }
-      });
-    } catch {
-      onError?.('Google Sign-In encountered an error. Please try again.');
-    }
-  }, [onError]);
-
-  if (sdkFailed || !GOOGLE_CLIENT_ID) {
-    return (
+  return (
+    <div className={`flex justify-center w-full ${className}`}>
       <button
         type="button"
-        onClick={handleManualGoogle}
-        className={`flex items-center justify-center gap-2.5 w-full max-w-[320px] h-11 px-4 bg-white border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-all text-sm font-medium text-gray-700 ${className}`}
+        onClick={handleGoogleLogin}
+        className="flex items-center justify-center gap-2.5 w-full max-w-[320px] h-11 px-4 bg-white border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-all text-sm font-medium text-gray-700"
       >
         <GoogleGIcon />
         {label}
       </button>
-    );
-  }
-
-  return (
-    <div className={`flex justify-center w-full ${className}`}>
-      <div
-        ref={btnContainerRef}
-        className="w-full max-w-[320px] h-11 flex items-center justify-center"
-        style={{ minHeight: 44, opacity: ready ? 1 : 0.6 }}
-      />
     </div>
   );
 };
