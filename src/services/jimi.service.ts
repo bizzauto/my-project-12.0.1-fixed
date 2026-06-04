@@ -427,8 +427,8 @@ class JimiVoiceAgent {
   constructor(config: JimiConfig = {}) {
     this.config = {
       language: 'hi-IN',
-      rate: 0.85,        // Slower - more natural like MYRA's Aoede voice
-      pitch: 1.35,       // Higher pitch - natural Indian female voice
+      rate: 0.92,        // Slightly slower than normal - natural conversational pace
+      pitch: 1.3,        // Feminine pitch - sounds like young Indian woman (1.4+ can be squeaky)
       ...config,
     };
     // Load saved mode from localStorage
@@ -517,33 +517,45 @@ class JimiVoiceAgent {
     const allVoices = this.synthesis?.getVoices() || [];
     console.log('Jimi: Available voices -', allVoices.length);
     
-    // Priority 1: Google Hindi Female (best quality)
-    const googleHindi = allVoices.find(v => 
+    // Female name keywords - comprehensive list for Indian & English voices
+    const femaleKeywords = [
+      'female', 'woman', 'ladki', 'aurat',
+      'priya', 'neha', 'ria', 'swara', 'ananya', 'deepa', 'kavita', 'meera',
+      'zira', 'susan', 'sarah', 'emma', 'samantha', 'karen', 'victoria',
+      'kajal', 'maya', 'lily', 'zoe', 'ava', 'ivy', 'michelle',
+      'fiona', 'moira', 'samantha', 'tessa', 'kate', 'alice',
+    ];
+    
+    const isFemaleVoice = (v: SpeechSynthesisVoice): boolean => {
+      const name = v.name.toLowerCase();
+      return femaleKeywords.some(k => name.includes(k));
+    };
+    
+    // Priority 1: Google Hindi Female (best quality for Indian female voice)
+    const googleHindiFemale = allVoices.find(v => 
       v.name.toLowerCase().includes('google') && 
       v.lang.startsWith('hi') &&
-      (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('हिन्दी'))
+      isFemaleVoice(v)
     );
-    if (googleHindi) return googleHindi;
+    if (googleHindiFemale) return googleHindiFemale;
 
-    // Priority 2: Any Google Hindi voice
+    // Priority 2: Any Google Hindi voice (Google voices are highest quality)
     const googleHindiAny = allVoices.find(v => 
       v.name.toLowerCase().includes('google') && v.lang.startsWith('hi')
     );
     if (googleHindiAny) return googleHindiAny;
 
-    // Priority 3: Microsoft Hindi Female
-    const msHindi = allVoices.find(v => 
-      v.name.toLowerCase().includes('microsoft') && 
+    // Priority 3: Microsoft Hindi/Zira Female
+    const msHindiFemale = allVoices.find(v => 
+      (v.name.toLowerCase().includes('microsoft') || v.name.toLowerCase().includes('zira')) && 
       v.lang.startsWith('hi') &&
-      v.name.toLowerCase().includes('female')
+      isFemaleVoice(v)
     );
-    if (msHindi) return msHindi;
+    if (msHindiFemale) return msHindiFemale;
 
-    // Priority 4: Any Hindi voice with female name
-    const femaleNames = ['priya', 'neha', 'ria', 'swara', 'ananya', 'deepa', 'kavita', 'meera', 'zira', 'susan', 'sarah', 'emma', 'samantha', 'karen'];
+    // Priority 4: Any Hindi female voice by name
     const hindiFemale = allVoices.find(v => 
-      v.lang.startsWith('hi') && 
-      femaleNames.some(n => v.name.toLowerCase().includes(n))
+      v.lang.startsWith('hi') && isFemaleVoice(v)
     );
     if (hindiFemale) return hindiFemale;
 
@@ -552,23 +564,32 @@ class JimiVoiceAgent {
     if (hindiVoice) return hindiVoice;
 
     // Priority 6: Google English Female
-    const googleEnglish = allVoices.find(v => 
+    const googleEnglishFemale = allVoices.find(v => 
       v.name.toLowerCase().includes('google') && 
       v.lang.startsWith('en') &&
-      v.name.toLowerCase().includes('female')
+      isFemaleVoice(v)
     );
-    if (googleEnglish) return googleEnglish;
+    if (googleEnglishFemale) return googleEnglishFemale;
 
     // Priority 7: Any English female voice
     const englishFemale = allVoices.find(v => 
-      v.lang.startsWith('en') && 
-      femaleNames.some(n => v.name.toLowerCase().includes(n))
+      v.lang.startsWith('en') && isFemaleVoice(v)
     );
     if (englishFemale) return englishFemale;
 
-    // Priority 8: Any voice for the language
+    // Priority 8: Any Google voice (high quality regardless)
+    const anyGoogle = allVoices.find(v => 
+      v.name.toLowerCase().includes('google') && v.lang.startsWith(langCode)
+    );
+    if (anyGoogle) return anyGoogle;
+
+    // Priority 9: Any voice for the language
     const langVoice = allVoices.find(v => v.lang.startsWith(langCode));
     if (langVoice) return langVoice;
+
+    // Priority 10: Any Google voice as last resort
+    const anyGoogleFallback = allVoices.find(v => v.name.toLowerCase().includes('google'));
+    if (anyGoogleFallback) return anyGoogleFallback;
 
     // Fallback: first voice
     return allVoices[0] || null;
@@ -649,27 +670,63 @@ class JimiVoiceAgent {
     }
   }
 
-  speak(text: string) {
-    if (!this.synthesis) return;
-
-    this.synthesis.cancel();
-
-    // Clean text for better speech - remove emojis for TTS
-    const cleanText = text
+  /**
+   * Preprocess text to sound like a natural Indian girl speaking.
+   * Adds micro-pauses, removes robotic patterns, improves rhythm.
+   */
+  private preprocessForSpeech(text: string): string {
+    let processed = text
+      // Remove emojis entirely - they cause robotic pauses in TTS
       .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
       .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
       .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
       .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')
       .replace(/[\u{2600}-\u{26FF}]/gu, '')
       .replace(/[\u{2700}-\u{27BF}]/gu, '')
+      .replace(/[\u{2702}-\u{27B0}]/gu, '')
+      // Remove remaining special symbols that cause robotic speech
+      .replace(/[★☆♡♥♪♫♬☆✦✧◇◆□■△▲●○]/g, '')
       .replace(/\n/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
 
-    // Shorten text for better TTS performance
-    const shortText = cleanText.length > 200 ? cleanText.substring(0, 200) + '...' : cleanText;
+    // Add natural micro-pauses for conversational rhythm
+    // After common Hindi conversational fillers
+    processed = processed
+      .replace(/\bHaan\b/gi, 'Haan...')
+      .replace(/\bJi\b/gi, 'Ji,')
+      .replace(/\bArre\b/gi, 'Arre...')
+      .replace(/\bArey\b/gi, 'Arey...')
+      .replace(/\bBilkul\b/gi, 'Bilkul...')
+      .replace(/\bAccha\b/gi, 'Accha...')
+      .replace(/\bTheek hai\b/gi, 'Theek hai...')
+      .replace(/\bChalo\b/gi, 'Chalo...')
+      .replace(/\bNamaste\b/gi, 'Namaste...')
+      .replace(/\bHello\b/gi, 'Hello...')
+      .replace(/\bHey\b/gi, 'Hey...')
+      .replace(/\bToh\b/gi, 'Toh,')
+      .replace(/\bMatlab\b/gi, 'Matlab...')
+      .replace(/\bWoh\b/gi, 'Woh...')
+      .replace(/\bAcha\b/gi, 'Acha...');
 
-    const utterance = new SpeechSynthesisUtterance(shortText);
+    // Shorten text for better TTS performance
+    if (processed.length > 250) {
+      processed = processed.substring(0, 250) + '...';
+    }
+
+    return processed;
+  }
+
+  speak(text: string) {
+    if (!this.synthesis) return;
+
+    this.synthesis.cancel();
+
+    // Preprocess text for natural female speech
+    const cleanText = this.preprocessForSpeech(text);
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     const detectedLang = this.detectLanguage(text);
     utterance.lang = detectedLang;
     
@@ -680,9 +737,10 @@ class JimiVoiceAgent {
       console.log('Jimi: Using voice -', voice.name, voice.lang);
     }
     
-    // Natural female voice settings
-    utterance.rate = 0.9;
-    utterance.pitch = 1.1;
+    // Natural young Indian woman voice settings
+    // pitch 1.3-1.6 = female range, rate 0.85-0.95 = natural conversational
+    utterance.rate = this.config.rate ?? 0.92;
+    utterance.pitch = this.config.pitch ?? 1.45;
     utterance.volume = 1.0;
 
     utterance.onstart = () => { this.isSpeaking = true; };
@@ -1155,7 +1213,7 @@ class JimiVoiceAgent {
 
 ${personalityPrompts[this.personalityMode]}
 
-BOLNE KA STYLE (MYRA jaisa natural):
+BOLNE KA STYLE (Natural Indian Ladki):
 - Bilkul natural Indian ladki - jaise real mein baat karti ho
 - Agar user Marathi mein bole toh PURE MARATHI mein bolo
 - Agar user Hindi/English mein bole toh Hinglish mein bolo
@@ -1163,6 +1221,9 @@ BOLNE KA STYLE (MYRA jaisa natural):
 - Natural pauses do - "Haan... ji", "Arre... waah"
 - Emotionally responsive - jaise tumhe sachmuch farak padta hai
 - Customer ko "Aap" ya "Tu" bolo (mode ke hisaab se)
+- IMPORTANT: TTS ke liye special characters, emojis, bullet points mat use karo
+- Simple plain text likho jo bolne mein natural lage
+- Star symbols (⭐, 💫, ✨) TTS mein garbled bole jaata hai - mat likho!
 
 MARATHI EXAMPLES:
 - "नमस्कार! कसं आहे? 😊"
@@ -1180,7 +1241,7 @@ Features:
 - Notes, Calculator, Translation, Jokes, Quotes
 - Post Writer, Email Draft, Reminders, Birthday Wishes
 
-Response SHORT rakho (1-2 sentences). Jo language user use kare wohi mein use karun. Tum ALOUD bol rahi ho - natural aur conversational raho. Emojis mat bulao - TTS mein read nahi hote!`;
+Response SHORT rakho (1-2 sentences). Jo language user use kare wohi mein use karun. Tum ALOUD bol rahi ho - natural aur conversational raho. Emojis mat bulao - TTS mein read nahi hote! Special characters (⭐, 💫, ✨, -) mat use karo - voice mein garbled sunayi deta hai!`;
 
     try {
       const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {

@@ -9,14 +9,22 @@ interface AppleLoginProps {
 const AppleLogin: React.FC<AppleLoginProps> = ({ onError, className }) => {
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const scriptRef = useRef<HTMLScriptElement | null>(null);
 
   const clientId = import.meta.env.VITE_APPLE_CLIENT_ID;
 
   useEffect(() => {
-    if (!clientId || scriptRef.current) return;
+    if (!clientId) return;
+
+    const existing = document.getElementById('appleid-auth-script');
+    if (existing) {
+      setScriptLoaded(!!window.AppleID);
+      return;
+    }
 
     const script = document.createElement('script');
+    script.id = 'appleid-auth-script';
     script.src = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
     script.async = true;
     script.defer = true;
@@ -35,13 +43,6 @@ const AppleLogin: React.FC<AppleLoginProps> = ({ onError, className }) => {
     document.head.appendChild(script);
 
     return () => {
-      try {
-        if (scriptRef.current && scriptRef.current.parentNode === document.head) {
-          document.head.removeChild(scriptRef.current);
-        }
-      } catch (e) {
-        // Ignore cleanup errors
-      }
       scriptRef.current = null;
     };
   }, [clientId]);
@@ -77,23 +78,25 @@ const AppleLogin: React.FC<AppleLoginProps> = ({ onError, className }) => {
   if (!clientId) return null;
 
   return (
-    <button
-      type="button"
-      onClick={handleAppleSignIn}
-      disabled={isSigningIn}
-      className={`flex items-center justify-center gap-2 w-full sm:max-w-[240px] h-10 sm:h-11 px-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 ${className || ''}`}
-    >
-      {isSigningIn ? (
-        <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-      ) : (
-        <>
-          <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="currentColor">
-            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-          </svg>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">Sign in with Apple</span>
-        </>
-      )}
-    </button>
+    <div ref={containerRef}>
+      <button
+        type="button"
+        onClick={handleAppleSignIn}
+        disabled={isSigningIn}
+        className={`flex items-center justify-center gap-2 w-full sm:max-w-[240px] h-10 sm:h-11 px-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 ${className || ''}`}
+      >
+        {isSigningIn ? (
+          <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <>
+            <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="currentColor">
+              <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+            </svg>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">Sign in with Apple</span>
+          </>
+        )}
+      </button>
+    </div>
   );
 };
 

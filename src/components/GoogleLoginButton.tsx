@@ -28,7 +28,7 @@ const loadGsi = (): Promise<void> => {
     s.async = true;
     s.defer = true;
     s.onload = () => resolve();
-    s.onerror = () => resolve(); // don't reject — we'll show fallback
+    s.onerror = () => resolve();
     document.head.appendChild(s);
   });
 };
@@ -41,10 +41,14 @@ interface Props {
 }
 
 const GoogleLoginButton: React.FC<Props> = ({ onError, text = 'continue_with', label = 'Continue with Google', className = '' }) => {
-  const btnRef = useRef<HTMLDivElement | null>(null);
+  const btnContainerRef = useRef<HTMLDivElement | null>(null);
   const [ready, setReady] = useState(false);
   const [sdkFailed, setSdkFailed] = useState(false);
   const { googleLogin } = useAuthStore();
+  const callbackRef = useRef(googleLogin);
+  callbackRef.current = googleLogin;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) { setSdkFailed(true); return; }
@@ -58,24 +62,22 @@ const GoogleLoginButton: React.FC<Props> = ({ onError, text = 'continue_with', l
           callback: async (resp: any) => {
             try {
               if (resp?.credential) {
-                await googleLogin(resp.credential);
-                // The auth store will update; AuthLayout/ProtectedRoute will route.
-                // Also do a hard navigate in case state subscriptions are missed:
+                await callbackRef.current(resp.credential);
                 const role = useAuthStore.getState().user?.role;
                 if (role === 'SUPER_ADMIN') window.location.href = '/admin';
                 else window.location.href = '/dashboard';
               } else {
-                onError?.('No credential returned from Google');
+                onErrorRef.current?.('No credential returned from Google');
               }
             } catch (e: any) {
-              onError?.(e?.message || 'Google sign-in failed');
+              onErrorRef.current?.(e?.message || 'Google sign-in failed');
             }
           },
           auto_select: false,
           cancel_on_tap_outside: true,
         });
-        if (btnRef.current) {
-          window.google.accounts.id.renderButton(btnRef.current, {
+        if (btnContainerRef.current) {
+          window.google.accounts.id.renderButton(btnContainerRef.current, {
             type: 'standard',
             theme: 'outline',
             size: 'large',
@@ -90,8 +92,13 @@ const GoogleLoginButton: React.FC<Props> = ({ onError, text = 'continue_with', l
         setSdkFailed(true);
       }
     });
-    return () => { mounted = false; };
-  }, [googleLogin, onError, text]);
+    return () => {
+      mounted = false;
+      if (btnContainerRef.current) {
+        try { btnContainerRef.current.innerHTML = ''; } catch {}
+      }
+    };
+  }, [text]);
 
   const handleFallback = useCallback(() => {
     if (!GOOGLE_CLIENT_ID) {
@@ -125,21 +132,10 @@ const GoogleLoginButton: React.FC<Props> = ({ onError, text = 'continue_with', l
   return (
     <div className={`flex justify-center w-full ${className}`}>
       <div
-        ref={btnRef}
+        ref={btnContainerRef}
         className="w-full max-w-[320px] h-11 flex items-center justify-center"
         style={{ minHeight: 44, opacity: ready ? 1 : 0.6 }}
-      >
-        {!ready && (
-          <button
-            type="button"
-            disabled
-            className="flex items-center justify-center gap-2.5 w-full h-11 px-4 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-400"
-          >
-            <GoogleGIcon />
-            {label}
-          </button>
-        )}
-      </div>
+      />
     </div>
   );
 };
