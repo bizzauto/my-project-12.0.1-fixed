@@ -270,6 +270,7 @@ const globalApiLimiter = rateLimit({
   message: { success: false, error: 'Too many requests. Please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: false,
   skip: (req) => req.path.startsWith('/health'), // Skip health checks
 });
 app.use('/api', globalApiLimiter);
@@ -281,6 +282,7 @@ const writeLimiter = rateLimit({
   message: { success: false, error: 'Too many write requests. Please slow down.' },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: false,
 });
 // Apply write limiter to high-risk mutation routes
 const mutationRoutes = ['/contacts', '/campaigns', '/posts', '/documents', '/leads', '/workflows', '/email', '/sms-marketing'];
