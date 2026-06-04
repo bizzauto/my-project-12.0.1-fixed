@@ -7,7 +7,69 @@ import { randomBytes } from 'crypto';
 
 const router = Router();
 
-// ==================== JIMI NATURAL VOICE TTS ====================
+// ==================== JIMI AI CHAT ====================
+// POST /api/jimi/chat - AI chat using server-side NVIDIA NIM API
+router.post('/chat', async (req: Request, res: Response) => {
+  try {
+    const { text, language = 'hi-IN', personalityMode = 'gf', history = [] } = req.body;
+    if (!text) return res.status(400).json({ error: 'Text required' });
+
+    const apiKey = process.env.NVIDIA_NIM_API_KEY || process.env.VITE_NVIDIA_NIM_API_KEY || '';
+    if (!apiKey) {
+      return res.json({ 
+        reply: 'AI service configured nahi hai. "Help" bolo commands sunne ke liye.' 
+      });
+    }
+
+    const langName = language.startsWith('mr') ? 'Marathi' : language.startsWith('en') ? 'English' : 'Hindi';
+
+    const personalityPrompts: Record<string, string> = {
+      gf: `Naam: Jimi. Language: Hinglish. Tone: Warm, caring. Use "tumhara", "haan", "acha". Max 2 sentences. Natural Indian girl.`,
+      bestfriend: `Naam: Jimi. Language: Casual Hinglish. Tone: Friendly, fun. Use "tu", "yaar". Max 2 sentences.`,
+      employee: `Naam: Jimi. Language: Professional Hindi/English. Tone: Formal, respectful. Use "Sir/Ma'am". Max 2 sentences.`,
+    };
+
+    const systemPrompt = `Tum Jimi ho - BizzAuto CRM ki sweet AI assistant. ${personalityPrompts[personalityMode] || personalityPrompts.gf}
+BOLNE KA STYLE: Natural Indian ladki. Short aur sweet. TTS ke liye emojis mat use karo. Plain text likho.`;
+
+    const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'meta/llama-3.3-70b-instruct',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...history.slice(-6),
+          { role: 'user', content: text },
+        ],
+        max_tokens: 150,
+        temperature: 0.8,
+      }),
+    });
+
+    const data: any = await response.json();
+    let reply = data?.choices?.[0]?.message?.content?.trim() || 'Samajh nahi aaya. Phir se bolo.';
+
+    // Remove emojis for TTS
+    reply = reply
+      .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+      .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
+      .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+      .replace(/[\u{2600}-\u{26FF}]/gu, '')
+      .replace(/[\u{2700}-\u{27BF}]/gu, '')
+      .trim();
+
+    res.json({ reply });
+  } catch (error: any) {
+    console.error('Jimi chat error:', error.message);
+    res.json({ reply: 'AI service se response nahi aaya. Phir se try karo.' });
+  }
+});
+
+// ==================== JIMI VOICE TTS ====================
 
 // Clean text for TTS
 function cleanText(text: string): string {

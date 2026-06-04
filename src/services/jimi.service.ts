@@ -1298,8 +1298,35 @@ class JimiVoiceAgent {
   }
 
   private async queryAI(text: string): Promise<string> {
-    const apiKey = import.meta.env.VITE_NVIDIA_NIM_API_KEY || '';
+    // Try backend API first (API key is on server side)
+    try {
+      const apiUrl = (import.meta as any).env?.VITE_API_URL || '';
+      if (apiUrl) {
+        const response = await fetch(`${apiUrl}/api/jimi/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            language: this.config.language,
+            personalityMode: this.personalityMode,
+            history: this.conversationHistory.slice(-6),
+          }),
+          signal: AbortSignal.timeout(15000),
+        });
 
+        if (response.ok) {
+          const data = await response.json();
+          if (data.reply) {
+            return data.reply;
+          }
+        }
+      }
+    } catch (err) {
+      console.log('Jimi: Backend AI failed, trying direct API');
+    }
+
+    // Fallback: Direct NVIDIA NIM API call
+    const apiKey = import.meta.env.VITE_NVIDIA_NIM_API_KEY || '';
     if (!apiKey) {
       return 'AI service configured nahi hai. "Help" bolo commands sunne ke liye.';
     }
