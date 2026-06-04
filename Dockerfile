@@ -20,7 +20,9 @@ RUN npm run build:docker && find dist -name "*.map" -delete
 # ---- Production stage ----
 FROM node:22-alpine
 
-RUN apk add --no-cache openssl wget
+# Install Python for Edge TTS (Jimi natural voice)
+RUN apk add --no-cache openssl wget python3 py3-pip && \
+    pip3 install --break-system-packages edge-tts
 
 RUN addgroup -g 1001 -S appgroup && adduser -S appuser -u 1001 -G appgroup
 
