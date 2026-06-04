@@ -1,12 +1,31 @@
 // Jimi AI Voice Assistant Service - Full Featured
 // Uses Web Speech API (free) + Nvidia NIM (free) for voice commands
 
-interface JimiConfig {
+export interface JimiConfig {
   language?: string;
   voice?: string;
   rate?: number;
   pitch?: number;
 }
+
+// Voice settings interface
+export interface VoiceSettings {
+  rate: number;           // 0.5 - 1.5 (speed)
+  pitch: number;          // 0.5 - 2.0 (higher = sweeter)
+  volume: number;         // 0.0 - 1.0
+  speakingStyle: 'warm' | 'professional' | 'casual' | 'cheerful';
+  pauseAfterFillers: boolean;
+  naturalRhythm: boolean;
+}
+
+const DEFAULT_VOICE_SETTINGS: VoiceSettings = {
+  rate: 0.92,
+  pitch: 1.4,
+  volume: 1.0,
+  speakingStyle: 'warm',
+  pauseAfterFillers: true,
+  naturalRhythm: true,
+};
 
 export type Language = 'hi-IN' | 'en-US' | 'mr-IN' | 'ta-IN' | 'te-IN' | 'bn-IN' | 'gu-IN' | 'kn-IN' | 'ml-IN' | 'pa-IN';
 
@@ -427,19 +446,47 @@ class JimiVoiceAgent {
   constructor(config: JimiConfig = {}) {
     this.config = {
       language: 'hi-IN',
-      rate: 0.92,        // Natural conversational pace (0.9x-1.0x)
-      pitch: 1.4,        // Sweet female voice (200-240 Hz range)
+      rate: 0.92,
+      pitch: 1.4,
       ...config,
     };
-    // Load saved mode from localStorage
+    // Load saved settings
     const savedMode = localStorage.getItem('jimi_personality_mode') as PersonalityMode;
     if (savedMode && MODE_RESPONSES[savedMode]) {
       this.personalityMode = savedMode;
       this.currentResponses = MODE_RESPONSES[savedMode];
     }
+    // Load voice settings
+    const savedVoice = localStorage.getItem('jimi_voice_settings');
+    if (savedVoice) {
+      try {
+        this.voiceSettings = { ...DEFAULT_VOICE_SETTINGS, ...JSON.parse(savedVoice) };
+      } catch {}
+    }
     this.initSpeechRecognition();
     this.initSpeechSynthesis();
     this.startReminderChecker();
+  }
+
+  // ==================== VOICE SETTINGS ====================
+  private voiceSettings: VoiceSettings = { ...DEFAULT_VOICE_SETTINGS };
+
+  getVoiceSettings(): VoiceSettings {
+    return { ...this.voiceSettings };
+  }
+
+  updateVoiceSettings(settings: Partial<VoiceSettings>) {
+    this.voiceSettings = { ...this.voiceSettings, ...settings };
+    this.config.rate = this.voiceSettings.rate;
+    this.config.pitch = this.voiceSettings.pitch;
+    localStorage.setItem('jimi_voice_settings', JSON.stringify(this.voiceSettings));
+  }
+
+  resetVoiceSettings() {
+    this.voiceSettings = { ...DEFAULT_VOICE_SETTINGS };
+    this.config.rate = DEFAULT_VOICE_SETTINGS.rate;
+    this.config.pitch = DEFAULT_VOICE_SETTINGS.pitch;
+    localStorage.removeItem('jimi_voice_settings');
   }
 
   private initSpeechRecognition() {
@@ -823,12 +870,13 @@ class JimiVoiceAgent {
     const voice = this.findBestVoiceForLang(utterance.lang);
     if (voice) {
       utterance.voice = voice;
-      console.log('Jimi: Browser voice -', voice.name);
+      console.log('Jimi: Voice -', voice.name);
     }
     
-    utterance.rate = 0.92;
-    utterance.pitch = 1.4;
-    utterance.volume = 1.0;
+    // Apply voice settings
+    utterance.rate = this.voiceSettings.rate;
+    utterance.pitch = this.voiceSettings.pitch;
+    utterance.volume = this.voiceSettings.volume;
 
     utterance.onstart = () => { this.isSpeaking = true; };
     utterance.onend = () => { this.isSpeaking = false; };

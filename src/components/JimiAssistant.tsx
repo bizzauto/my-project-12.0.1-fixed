@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, MessageCircle, X, Send, Volume2, VolumeX, Bot, User, Globe, Shield, Phone, PhoneCall, Heart, Users, Briefcase } from 'lucide-react';
-import { jimi, LANGUAGES, Language, PERSONALITY_MODES, PersonalityMode } from '../services/jimi.service';
+import { Mic, MicOff, MessageCircle, X, Send, Volume2, VolumeX, Bot, User, Globe, Shield, Phone, PhoneCall, Heart, Users, Briefcase, Settings, RotateCcw } from 'lucide-react';
+import { jimi, LANGUAGES, Language, PERSONALITY_MODES, PersonalityMode, VoiceSettings } from '../services/jimi.service';
 import { useNavigate } from 'react-router-dom';
 
 interface Message {
@@ -28,6 +28,8 @@ const JimiAssistant: React.FC = () => {
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [selectedMode, setSelectedMode] = useState<PersonalityMode>(jimi.getPersonalityMode());
   const [showModeMenu, setShowModeMenu] = useState(false);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(jimi.getVoiceSettings());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -167,21 +169,32 @@ const JimiAssistant: React.FC = () => {
 
   const previewVoice = () => {
     const previewTexts: Record<string, string> = {
-      'hi-IN': 'Namaste! Main Jimi hun. Kaise ho aap? 😊',
-      'en-US': 'Hello! I am Jimi. How are you? 😊',
-      'mr-IN': 'नमस्कार! मी जिमी आहे. कसे आहात? 😊',
-      'ta-IN': 'வணக்கம்! நான் ஜிமி. எப்படி இருக்கிறீர்கள்? 😊',
-      'te-IN': 'నమస్కారం! నేను జిమ్మీ. ఎలా ఉన్నారు? 😊',
-      'bn-IN': 'নমস্কার! আমি জিমি. কেমন আছেন? 😊',
-      'gu-IN': 'નમસ્તે! હું જિમી છું. કેમ છો? 😊',
-      'kn-IN': 'ನಮಸ್ಕಾರ! ನಾನು ಜಿಮ್ಮಿ. ಹವಾಗಿದ್ದೀರಾ? 😊',
-      'ml-IN': 'നമസ്കാരം! ഞാൻ ജിമ്മി ആണ്. എങ്ങനെ ഇരിക്കുന്നു? 😊',
-      'pa-IN': 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਜਿਮੀ ਹਾਂ. ਕਿਵੇਂ ਹੋ? 😊',
+      'hi-IN': 'Namaste! Main Jimi hun. Kaise ho aap? Voice settings try karo!',
+      'en-US': 'Hello! I am Jimi. How are you? Try the voice settings!',
     };
     const text = previewTexts[selectedLang] || previewTexts['hi-IN'];
     jimi.speak(text);
-    addMessage(`🎤 Voice preview: "${text}"`, false);
+    addMessage(`🎤 Preview: "${text}"`, false);
   };
+
+  const handleVoiceSettingChange = (key: keyof VoiceSettings, value: any) => {
+    const newSettings = { ...voiceSettings, [key]: value };
+    setVoiceSettings(newSettings);
+    jimi.updateVoiceSettings({ [key]: value });
+  };
+
+  const resetVoiceSettings = () => {
+    jimi.resetVoiceSettings();
+    setVoiceSettings(jimi.getVoiceSettings());
+    addMessage('🔄 Voice settings reset to default!', false);
+  };
+
+  const speakingStyles = [
+    { value: 'warm', label: 'Warm & Sweet', desc: 'Friendly, caring tone' },
+    { value: 'professional', label: 'Professional', desc: 'Formal, business tone' },
+    { value: 'casual', label: 'Casual', desc: 'Relaxed, chatty tone' },
+    { value: 'cheerful', label: 'Cheerful', desc: 'Upbeat, energetic tone' },
+  ] as const;
 
   return (
     <>
@@ -317,6 +330,14 @@ const JimiAssistant: React.FC = () => {
               >
                 <Phone size={18} className="text-white" />
               </button>
+              {/* Voice Settings Button */}
+              <button
+                onClick={() => setShowVoiceSettings(!showVoiceSettings)}
+                className="p-2 rounded-full hover:bg-white/20 transition-colors"
+                title="Voice Settings"
+              >
+                <Settings size={18} className="text-white" />
+              </button>
               <button
                 onClick={toggleMute}
                 className="p-2 rounded-full hover:bg-white/20 transition-colors"
@@ -329,6 +350,130 @@ const JimiAssistant: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* Voice Settings Panel */}
+          {showVoiceSettings && (
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-3 border-b border-purple-400">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-white font-semibold text-sm flex items-center gap-2">
+                  <Settings size={14} /> Voice Settings
+                </h4>
+                <div className="flex gap-2">
+                  <button onClick={previewVoice} className="text-xs bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded-lg">
+                    🔊 Test
+                  </button>
+                  <button onClick={resetVoiceSettings} className="text-xs bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded-lg flex items-center gap-1">
+                    <RotateCcw size={10} /> Reset
+                  </button>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                {/* Speed (Rate) */}
+                <div>
+                  <div className="flex justify-between text-white text-xs mb-1">
+                    <span>Speed</span>
+                    <span>{voiceSettings.rate.toFixed(2)}x</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="1.5"
+                    step="0.05"
+                    value={voiceSettings.rate}
+                    onChange={(e) => handleVoiceSettingChange('rate', parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-white/30 rounded-lg appearance-none cursor-pointer accent-white"
+                  />
+                  <div className="flex justify-between text-[10px] text-white/60 mt-0.5">
+                    <span>Slow</span>
+                    <span>Normal</span>
+                    <span>Fast</span>
+                  </div>
+                </div>
+
+                {/* Pitch */}
+                <div>
+                  <div className="flex justify-between text-white text-xs mb-1">
+                    <span>Pitch (Sweetness)</span>
+                    <span>{voiceSettings.pitch.toFixed(1)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2.0"
+                    step="0.1"
+                    value={voiceSettings.pitch}
+                    onChange={(e) => handleVoiceSettingChange('pitch', parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-white/30 rounded-lg appearance-none cursor-pointer accent-white"
+                  />
+                  <div className="flex justify-between text-[10px] text-white/60 mt-0.5">
+                    <span>Deep</span>
+                    <span>Natural</span>
+                    <span>Sweet</span>
+                  </div>
+                </div>
+
+                {/* Volume */}
+                <div>
+                  <div className="flex justify-between text-white text-xs mb-1">
+                    <span>Volume</span>
+                    <span>{Math.round(voiceSettings.volume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={voiceSettings.volume}
+                    onChange={(e) => handleVoiceSettingChange('volume', parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-white/30 rounded-lg appearance-none cursor-pointer accent-white"
+                  />
+                </div>
+
+                {/* Speaking Style */}
+                <div>
+                  <div className="text-white text-xs mb-1.5">Speaking Style</div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {speakingStyles.map(style => (
+                      <button
+                        key={style.value}
+                        onClick={() => handleVoiceSettingChange('speakingStyle', style.value)}
+                        className={`text-xs px-2 py-1.5 rounded-lg transition-all ${
+                          voiceSettings.speakingStyle === style.value
+                            ? 'bg-white text-purple-600 font-medium'
+                            : 'bg-white/20 text-white hover:bg-white/30'
+                        }`}
+                      >
+                        {style.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Toggle Options */}
+                <div className="flex gap-3 text-white text-xs">
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={voiceSettings.pauseAfterFillers}
+                      onChange={(e) => handleVoiceSettingChange('pauseAfterFillers', e.target.checked)}
+                      className="rounded accent-white"
+                    />
+                    Natural Pauses
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={voiceSettings.naturalRhythm}
+                      onChange={(e) => handleVoiceSettingChange('naturalRhythm', e.target.checked)}
+                      className="rounded accent-white"
+                    />
+                    Rhythm
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
