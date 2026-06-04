@@ -100,6 +100,7 @@ import storePublicRoutes from './routes/store-public.js';
 import storeFeaturesRoutes from './routes/store-features.js';
 import storeAdvancedRoutes from './routes/store-advanced.js';
 import storeCustomizeRoutes from './routes/store-customize.js';
+import jimiTtsRoutes from './routes/jimi-tts.js';
 import { securityHeaders, apiSecurityHeaders } from './middleware/security.js';
 import { validateCSRF } from './middleware/csrf.js';
 import { sanitizeInput } from './middleware/sanitize.js';
@@ -392,6 +393,7 @@ app.use('/api/pipelines', pipelinesRoutes);
 app.use('/api/store-features', storeFeaturesRoutes);
 app.use('/api/store-advanced', storeAdvancedRoutes);
 app.use('/api/store-customize', storeCustomizeRoutes);
+app.use('/api/jimi', jimiTtsRoutes);
 
 // Phase 3: Admin Platform Analytics (SUPER_ADMIN only)
 app.use('/api/admin', adminAnalyticsRoutes);
