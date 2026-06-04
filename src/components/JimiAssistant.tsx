@@ -177,7 +177,7 @@ const JimiAssistant: React.FC = () => {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
+        className={`fixed bottom-20 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
           isOpen
             ? 'bg-pink-500 hover:bg-pink-600'
             : isListening
@@ -196,14 +196,14 @@ const JimiAssistant: React.FC = () => {
 
       {/* Listening Indicator */}
       {isListening && !isOpen && (
-        <div className="fixed bottom-22 right-6 z-50 bg-pink-500 text-white px-3 py-1 rounded-full text-sm font-medium animate-pulse">
+        <div className="fixed bottom-36 right-6 z-50 bg-pink-500 text-white px-3 py-1 rounded-full text-sm font-medium animate-pulse">
           🎤 Sun rahi hoon...
         </div>
       )}
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-48px)] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col" style={{ height: '500px', maxHeight: 'calc(100vh - 150px)' }}>
+        <div className="fixed bottom-38 right-6 z-50 w-[360px] max-w-[calc(100vw-48px)] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col" style={{ height: '500px', maxHeight: 'calc(100vh - 150px)' }}>
           {/* Header */}
           <div className="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
