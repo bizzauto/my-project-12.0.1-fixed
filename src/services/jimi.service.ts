@@ -1251,6 +1251,38 @@ class JimiVoiceAgent {
     }
 
     // ==================== AI PROCESSING ====================
+    // Employee mode: Sirf BizzAuto topics pe respond karo
+    if (this.personalityMode === 'employee') {
+      const bizzAutoKeywords = [
+        'lead', 'customer', 'whatsapp', 'message', 'campaign', 'review', 'dashboard',
+        'analytics', 'report', 'revenue', 'contact', 'template', 'chatbot', 'automation',
+        'google business', 'post', 'creative', 'design', 'social media', 'email',
+        'setting', 'profile', 'billing', 'plan', 'subscription', 'invoice', 'payment',
+        'order', 'product', 'service', 'appointment', 'booking', 'schedule', 'team',
+        'employee', 'staff', 'permission', 'role', 'access', 'notification', 'alert',
+        'backup', 'export', 'import', 'sync', 'api', 'integration', 'webhook',
+        'status', 'update', 'manage', 'open', 'show', 'dikhao', 'kholo', 'bhejo',
+        'bhej', 'save', 'delete', 'edit', 'add', 'create', 'new', 'naya', 'nayi',
+        'khol', 'band', 'close', 'start', 'stop', 'enable', 'disable', 'turn on',
+        'bizauto', 'bizzauto', 'crm', 'business'
+      ];
+      const isBizzAutoQuery = bizzAutoKeywords.some(kw => lower.includes(kw));
+      
+      if (isBizzAutoQuery) {
+        try {
+          const aiResponse = await this.queryAI(text);
+          return { action: 'ai', response: aiResponse };
+        } catch (err) {
+          return { action: 'unknown', response: 'Sir, BizzAuto CRM se related query batao. Main aapki help karungi! 📋' };
+        }
+      }
+      
+      return {
+        action: 'employee_redirect',
+        response: 'Sir, main sirf BizzAuto CRM ki assistant hun. Aapko leads, WhatsApp, campaigns, reviews, ya koi bhi CRM feature ke baare mein batati hun. Batao kya karna hai? 📋',
+      };
+    }
+
     try {
       const aiResponse = await this.queryAI(text);
       return { action: 'ai', response: aiResponse };
@@ -1323,7 +1355,7 @@ class JimiVoiceAgent {
     const personalityPrompts: Record<PersonalityMode, string> = {
       gf: `Naam: Jimi. GF Mode - Warm & Caring. Hinglish. Use "tumhara", "haan", "acha". Short aur sweet 2-3 sentences. Customer ko "Aap" bolo.`,
       bestfriend: `Naam: Jimi. Best Friend Mode - Casual & Fun. Hinglish. Use "tu", "yaar", "bhai". Short 2-3 sentences. Customer ko "Tu" bolo.`,
-      employee: `Naam: Jimi. Employee Mode - Professional. Hindi/English. Use "Sir/Ma'am", "ji". Short 2 sentences.`,
+      employee: `Naam: Jimi. Employee Mode - Sirf BizzAuto CRM ke baare mein baat karo. Professional Hindi/English. Use "Sir/Ma'am", "ji". Short 2 sentences. Agar user BizzAuto se related nahi puch raha toh politely redirect karo CRM features ki taraf.`,
     };
 
     const systemPrompt = `Tum Jimi ho - BizzAuto CRM ki sweet AI assistant. Bilkul natural Indian ladki ho.
