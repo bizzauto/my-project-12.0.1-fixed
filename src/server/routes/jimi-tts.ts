@@ -169,6 +169,49 @@ router.post('/tts/edge', async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/jimi/tts/kyutai - Kyutai Pocket TTS (English, CPU, free, never stops)
+router.post('/tts/kyutai', async (req: Request, res: Response) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'Text required' });
+
+    const cleaned = addNaturalPatterns(cleanText(text));
+    if (!cleaned) return res.json({ fallback: true, text: '' });
+
+    const kyutaiUrl = process.env.KYUTAI_TTS_URL || 'http://localhost:8008';
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    const response = await fetch(`${kyutaiUrl}/v1/audio/speech`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'tts-1',
+        input: cleaned,
+        voice: 'nova',
+        response_format: 'mp3',
+        speed: 1.1,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      console.error('[Jimi Kyutai] TTS error:', response.status);
+      return res.json({ fallback: true, text: cleaned });
+    }
+
+    const buffer = await response.arrayBuffer();
+    const audio = Buffer.from(buffer).toString('base64');
+    res.json({ audio, format: 'mp3', engine: 'kyutai' });
+  } catch (error: any) {
+    console.error('[Jimi Kyutai] TTS failed:', error.message);
+    res.json({ fallback: true, text: req.body.text || '' });
+  }
+});
+
 // ==================== PIPER TTS ====================
 function tryPiperTTS(text: string, lang: string): string | null {
   try {

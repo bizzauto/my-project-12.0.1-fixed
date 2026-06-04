@@ -799,33 +799,43 @@ class JimiVoiceAgent {
 
     const detectedLang = this.detectLanguage(text);
 
-    // Try backend Edge TTS first (free, natural neural voice)
-    try {
-      const apiUrl = (import.meta as any).env?.VITE_API_URL || '';
-      if (apiUrl) {
-        const response = await fetch(`${apiUrl}/api/jimi/tts/edge`, {
+    // 1. Try Kyutai TTS (English - free, CPU, never stops mid-speech)
+    if (detectedLang.startsWith('en')) {
+      try {
+        const response = await fetch('/api/jimi/tts/kyutai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            text: cleanText,
-            lang: detectedLang,
-          }),
-          signal: AbortSignal.timeout(8000), // 8 second timeout
+          body: JSON.stringify({ text: cleanText }),
+          signal: AbortSignal.timeout(15000),
         });
-
         const data = await response.json();
-
         if (data.audio) {
-          // Got natural audio from Edge TTS
           this.playBase64Audio(data.audio);
           return;
         }
+      } catch (err) {
+        console.log('Jimi: Kyutai TTS unavailable');
       }
-    } catch (err) {
-      console.log('Jimi: Backend TTS unavailable, using browser TTS');
     }
 
-    // Fallback: Browser TTS
+    // 2. Try Edge TTS (Hindi/Marathi/Indian languages - free, neural voice)
+    try {
+      const response = await fetch('/api/jimi/tts/edge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: cleanText, lang: detectedLang }),
+        signal: AbortSignal.timeout(12000),
+      });
+      const data = await response.json();
+      if (data.audio) {
+        this.playBase64Audio(data.audio);
+        return;
+      }
+    } catch (err) {
+      console.log('Jimi: Edge TTS unavailable');
+    }
+
+    // 3. Browser TTS fallback
     this.speakBrowserTTS(cleanText, detectedLang);
   }
 
