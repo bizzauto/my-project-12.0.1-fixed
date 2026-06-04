@@ -494,7 +494,14 @@ class JimiVoiceAgent {
   private initSpeechSynthesis() {
     this.synthesis = window.speechSynthesis;
     this.loadVoices();
-    this.synthesis?.addEventListener('voiceschanged', () => this.loadVoices());
+    // Voices load asynchronously in some browsers
+    this.synthesis?.addEventListener('voiceschanged', () => {
+      this.loadVoices();
+      console.log('Jimi: Voices loaded -', this.availableVoices.length, 'voices');
+      // Log Hindi voices for debugging
+      const hindiVoices = this.availableVoices.filter(v => v.lang.startsWith('hi'));
+      console.log('Jimi: Hindi voices -', hindiVoices.map(v => v.name));
+    });
   }
 
   private loadVoices() {
@@ -506,57 +513,65 @@ class JimiVoiceAgent {
   private findBestVoiceForLang(lang: string): SpeechSynthesisVoice | null {
     const langCode = lang.split('-')[0];
     
-    // Premium Indian female voices - Google's best sounding voices
-    const premiumVoices = [
-      'google हिन्दी', 'google hindi female', 'google india', 
-      'microsoft hemapriya', 'microsoft shalini', 'microsoft kalpana',
-      'google uk english female', 'google uk english male',
-      'samantha', 'karen', 'zira', 'susan', 'sarah', 'emma',
-      'priya', 'neha', 'ria', 'swara', 'ananya', 'deepa', 'kavita', 'meera'
-    ];
+    // Get all available voices
+    const allVoices = this.synthesis?.getVoices() || [];
+    console.log('Jimi: Available voices -', allVoices.length);
     
-    // Step 1: Premium Indian female voice
-    const premiumVoice = this.availableVoices.find(v => 
-      v.lang.startsWith(langCode) && v.lang.includes('IN') &&
-      premiumVoices.some(k => v.name.toLowerCase().includes(k.toLowerCase()))
-    );
-    if (premiumVoice) return premiumVoice;
-
-    // Step 2: Any Indian voice (IN locale)
-    const indianVoice = this.availableVoices.find(v => 
-      v.lang.startsWith(langCode) && v.lang.includes('IN')
-    );
-    if (indianVoice) return indianVoice;
-
-    // Step 3: Google Hindi voice (best quality)
-    const googleHindi = this.availableVoices.find(v => 
-      v.name.toLowerCase().includes('google') && v.lang.startsWith('hi')
+    // Priority 1: Google Hindi Female (best quality)
+    const googleHindi = allVoices.find(v => 
+      v.name.toLowerCase().includes('google') && 
+      v.lang.startsWith('hi') &&
+      (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('हिन्दी'))
     );
     if (googleHindi) return googleHindi;
 
-    // Step 4: Any Hindi voice
-    const hindiVoice = this.availableVoices.find(v => v.lang.startsWith('hi'));
+    // Priority 2: Any Google Hindi voice
+    const googleHindiAny = allVoices.find(v => 
+      v.name.toLowerCase().includes('google') && v.lang.startsWith('hi')
+    );
+    if (googleHindiAny) return googleHindiAny;
+
+    // Priority 3: Microsoft Hindi Female
+    const msHindi = allVoices.find(v => 
+      v.name.toLowerCase().includes('microsoft') && 
+      v.lang.startsWith('hi') &&
+      v.name.toLowerCase().includes('female')
+    );
+    if (msHindi) return msHindi;
+
+    // Priority 4: Any Hindi voice with female name
+    const femaleNames = ['priya', 'neha', 'ria', 'swara', 'ananya', 'deepa', 'kavita', 'meera', 'zira', 'susan', 'sarah', 'emma', 'samantha', 'karen'];
+    const hindiFemale = allVoices.find(v => 
+      v.lang.startsWith('hi') && 
+      femaleNames.some(n => v.name.toLowerCase().includes(n))
+    );
+    if (hindiFemale) return hindiFemale;
+
+    // Priority 5: Any Hindi voice
+    const hindiVoice = allVoices.find(v => v.lang.startsWith('hi'));
     if (hindiVoice) return hindiVoice;
 
-    // Step 5: Google English voice
-    const googleEnglish = this.availableVoices.find(v => 
-      v.name.toLowerCase().includes('google') && v.lang.startsWith('en')
+    // Priority 6: Google English Female
+    const googleEnglish = allVoices.find(v => 
+      v.name.toLowerCase().includes('google') && 
+      v.lang.startsWith('en') &&
+      v.name.toLowerCase().includes('female')
     );
     if (googleEnglish) return googleEnglish;
 
-    // Step 6: Any English female voice
-    const englishFemale = this.availableVoices.find(v => 
+    // Priority 7: Any English female voice
+    const englishFemale = allVoices.find(v => 
       v.lang.startsWith('en') && 
-      premiumVoices.some(k => v.name.toLowerCase().includes(k.toLowerCase()))
+      femaleNames.some(n => v.name.toLowerCase().includes(n))
     );
     if (englishFemale) return englishFemale;
 
-    // Step 7: Any voice for the language
-    const langVoice = this.availableVoices.find(v => v.lang.startsWith(langCode));
+    // Priority 8: Any voice for the language
+    const langVoice = allVoices.find(v => v.lang.startsWith(langCode));
     if (langVoice) return langVoice;
 
-    // Step 8: Fallback - first available voice
-    return this.availableVoices[0] || null;
+    // Fallback: first voice
+    return allVoices[0] || null;
   }
 
   setMessageCallback(callback: JimiCallback) {
@@ -641,42 +656,41 @@ class JimiVoiceAgent {
 
     // Clean text for better speech - remove emojis for TTS
     const cleanText = text
-      .replace(/[\u{1F600}-\u{1F64F}]/gu, '')  // Remove emoticons
-      .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')  // Remove misc symbols
-      .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')  // Remove transport
-      .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')  // Remove flags
-      .replace(/[\u{2600}-\u{26FF}]/gu, '')    // Remove misc symbols
-      .replace(/[\u{2700}-\u{27BF}]/gu, '')    // Remove dingbats
-      .replace(/\n/g, ' ')                      // Newlines to spaces
-      .replace(/\s+/g, ' ')                     // Multiple spaces to single
+      .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+      .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
+      .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+      .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')
+      .replace(/[\u{2600}-\u{26FF}]/gu, '')
+      .replace(/[\u{2700}-\u{27BF}]/gu, '')
+      .replace(/\n/g, ' ')
+      .replace(/\s+/g, ' ')
       .trim();
 
-    // Add natural pauses for human-like speech
-    const naturalText = cleanText
-      .replace(/\./g, '...')      
-      .replace(/,/g, '..')        
-      .replace(/!/g, '!..')       
-      .replace(/\?/g, '?..')
-      .replace(/haan ji/gi, 'haan... ji')
-      .replace(/ji bilkul/gi, 'ji... bilkul')
-      .replace(/arre waah/gi, 'arre... waah')
-      .replace(/acha ji/gi, 'acha... ji')
-      .replace(/theek hai/gi, 'theek hai...');
+    // Shorten text for better TTS performance
+    const shortText = cleanText.length > 200 ? cleanText.substring(0, 200) + '...' : cleanText;
 
-    const utterance = new SpeechSynthesisUtterance(naturalText);
+    const utterance = new SpeechSynthesisUtterance(shortText);
     const detectedLang = this.detectLanguage(text);
     utterance.lang = detectedLang;
-    utterance.rate = this.config.rate || 0.82;   // Slower - very natural
-    utterance.pitch = this.config.pitch || 1.3;   // Natural female pitch
-    utterance.volume = 1.0;
-
+    
+    // Find the best Indian female voice
     const voice = this.findBestVoiceForLang(detectedLang);
     if (voice) {
       utterance.voice = voice;
+      console.log('Jimi: Using voice -', voice.name, voice.lang);
     }
+    
+    // Natural female voice settings
+    utterance.rate = 0.9;
+    utterance.pitch = 1.1;
+    utterance.volume = 1.0;
 
     utterance.onstart = () => { this.isSpeaking = true; };
     utterance.onend = () => { this.isSpeaking = false; };
+    utterance.onerror = (e) => { 
+      console.error('Jimi TTS error:', e);
+      this.isSpeaking = false; 
+    };
 
     this.synthesis.speak(utterance);
   }
