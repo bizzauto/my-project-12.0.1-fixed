@@ -9,15 +9,19 @@ export async function initRedis(): Promise<RedisClientType | null> {
   }
 
   try {
+    const redisUrl = process.env.REDIS_URL;
+    const password = process.env.REDIS_PASSWORD || undefined;
     const host = process.env.REDIS_HOST || 'coolify-redis';
     const port = process.env.REDIS_PORT || '6379';
-    const password = process.env.REDIS_PASSWORD || undefined;
-    const redisUrl = process.env.REDIS_URL || (password
+    
+    const finalUrl = redisUrl || (password
       ? `redis://:${password}@${host}:${port}`
       : `redis://${host}:${port}`);
+    
+    console.log('Redis Service: Using URL =', !!redisUrl, ', Password =', !!password);
 
     redisClient = createClient({
-      url: redisUrl,
+      url: finalUrl,
       socket: {
         reconnectStrategy: (retries) => {
           if (retries > 20) {
