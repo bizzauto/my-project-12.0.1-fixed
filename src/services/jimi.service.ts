@@ -429,8 +429,8 @@ class JimiVoiceAgent {
   constructor(config: JimiConfig = {}) {
     this.config = {
       language: 'hi-IN',
-      rate: 0.95,
-      pitch: 1.2,
+      rate: 0.85,        // Slower - more natural like MYRA's Aoede voice
+      pitch: 1.35,       // Higher pitch - natural Indian female voice
       ...config,
     };
     // Load saved mode from localStorage
@@ -508,18 +508,21 @@ class JimiVoiceAgent {
   private findBestVoiceForLang(lang: string): SpeechSynthesisVoice | null {
     const langCode = lang.split('-')[0];
     
-    // Indian female voice names - these are common across browsers
-    const indianFemaleNames = ['priya', 'neha', 'ria', 'kanya', 'mahila', 'swara', 'ananya', 'deepa', 'kavita', 'meera', 'aditi', 'shruti', 'pooja', 'sonia', 'rinku', 'google हिन्दी', 'google india', 'microsoft hemapriya', 'microsoft shalini', 'microsoft kalpana'];
+    // Premium Indian female voices - Google's best sounding voices
+    const premiumVoices = [
+      'google हिन्दी', 'google hindi female', 'google india', 
+      'microsoft hemapriya', 'microsoft shalini', 'microsoft kalpana',
+      'google uk english female', 'google uk english male',
+      'samantha', 'karen', 'zira', 'susan', 'sarah', 'emma',
+      'priya', 'neha', 'ria', 'swara', 'ananya', 'deepa', 'kavita', 'meera'
+    ];
     
-    // English female voice names
-    const englishFemaleNames = ['female', 'woman', 'girl', 'samantha', 'karen', 'zira', 'susan', 'sarah', 'emma', 'google uk english female', 'microsoft zira', 'microsoft hazel'];
-    
-    // Step 1: Try to find exact Indian female voice for the language
-    const indianFemaleVoice = this.availableVoices.find(v => 
+    // Step 1: Premium Indian female voice
+    const premiumVoice = this.availableVoices.find(v => 
       v.lang.startsWith(langCode) && v.lang.includes('IN') &&
-      indianFemaleNames.some(k => v.name.toLowerCase().includes(k))
+      premiumVoices.some(k => v.name.toLowerCase().includes(k.toLowerCase()))
     );
-    if (indianFemaleVoice) return indianFemaleVoice;
+    if (premiumVoice) return premiumVoice;
 
     // Step 2: Any Indian voice (IN locale)
     const indianVoice = this.availableVoices.find(v => 
@@ -527,28 +530,26 @@ class JimiVoiceAgent {
     );
     if (indianVoice) return indianVoice;
 
-    // Step 3: Hindi female voice (fallback for all Indian languages)
-    const hindiFemaleVoice = this.availableVoices.find(v => 
-      v.lang.startsWith('hi') && v.lang.includes('IN') &&
-      indianFemaleNames.some(k => v.name.toLowerCase().includes(k))
+    // Step 3: Google Hindi voice (best quality)
+    const googleHindi = this.availableVoices.find(v => 
+      v.name.toLowerCase().includes('google') && v.lang.startsWith('hi')
     );
-    if (hindiFemaleVoice) return hindiFemaleVoice;
+    if (googleHindi) return googleHindi;
 
     // Step 4: Any Hindi voice
     const hindiVoice = this.availableVoices.find(v => v.lang.startsWith('hi'));
     if (hindiVoice) return hindiVoice;
 
-    // Step 5: English female voice with Indian context
-    const indianEnglishFemale = this.availableVoices.find(v => 
-      v.lang.startsWith('en') && v.lang.includes('IN') &&
-      englishFemaleNames.some(k => v.name.toLowerCase().includes(k))
+    // Step 5: Google English voice
+    const googleEnglish = this.availableVoices.find(v => 
+      v.name.toLowerCase().includes('google') && v.lang.startsWith('en')
     );
-    if (indianEnglishFemale) return indianEnglishFemale;
+    if (googleEnglish) return googleEnglish;
 
     // Step 6: Any English female voice
     const englishFemale = this.availableVoices.find(v => 
       v.lang.startsWith('en') && 
-      englishFemaleNames.some(k => v.name.toLowerCase().includes(k))
+      premiumVoices.some(k => v.name.toLowerCase().includes(k.toLowerCase()))
     );
     if (englishFemale) return englishFemale;
 
@@ -556,7 +557,7 @@ class JimiVoiceAgent {
     const langVoice = this.availableVoices.find(v => v.lang.startsWith(langCode));
     if (langVoice) return langVoice;
 
-    // Step 8: Fallback
+    // Step 8: Fallback - first available voice
     return this.availableVoices[0] || null;
   }
 
@@ -640,11 +641,18 @@ class JimiVoiceAgent {
 
     this.synthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Add natural pauses for more human-like speech
+    const naturalText = text
+      .replace(/\./g, '...')      // Natural pause at periods
+      .replace(/,/g, '..')        // Slight pause at commas
+      .replace(/!/g, '!..')       // Pause after exclamation
+      .replace(/\?/g, '?..');     // Pause after question
+
+    const utterance = new SpeechSynthesisUtterance(naturalText);
     const detectedLang = this.detectLanguage(text);
     utterance.lang = detectedLang;
-    utterance.rate = this.config.rate || 0.95;
-    utterance.pitch = this.config.pitch || 1.2;
+    utterance.rate = this.config.rate || 0.85;   // Slower for natural sound
+    utterance.pitch = this.config.pitch || 1.35;  // Higher for female voice
     utterance.volume = 1.0;
 
     const voice = this.findBestVoiceForLang(detectedLang);
