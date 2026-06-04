@@ -183,6 +183,12 @@ const JimiAssistant: React.FC = () => {
     jimi.updateVoiceSettings({ [key]: value });
   };
 
+  const saveVoiceSettings = () => {
+    jimi.updateVoiceSettings(voiceSettings);
+    setShowVoiceSettings(false);
+    addMessage('✅ Voice settings saved!', false);
+  };
+
   const resetVoiceSettings = () => {
     jimi.resetVoiceSettings();
     setVoiceSettings(jimi.getVoiceSettings());
@@ -470,6 +476,22 @@ const JimiAssistant: React.FC = () => {
                     />
                     Rhythm
                   </label>
+                </div>
+
+                {/* Save & Close Buttons */}
+                <div className="flex gap-2 pt-2 border-t border-white/20">
+                  <button
+                    onClick={saveVoiceSettings}
+                    className="flex-1 bg-white text-purple-600 font-semibold py-2 rounded-lg text-sm hover:bg-white/90 transition-colors"
+                  >
+                    Save & Close
+                  </button>
+                  <button
+                    onClick={() => setShowVoiceSettings(false)}
+                    className="px-3 py-2 bg-white/20 text-white rounded-lg text-sm hover:bg-white/30 transition-colors"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
             </div>
