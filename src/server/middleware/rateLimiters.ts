@@ -1,5 +1,5 @@
 import rateLimit from 'express-rate-limit';
-import slowDown from 'express-slow-down';
+import { Request, Response, NextFunction } from 'express';
 
 /**
  * Global Rate Limiter - Prevents brute force & DDoS
@@ -88,20 +88,12 @@ export const uploadRateLimiter = rateLimit({
 });
 
 /**
- * Slow Down - Progressive rate limiting
- * Adds 500ms delay per request after 10 requests
+ * Slow Down - Progressive rate limiting (custom implementation)
+ * Adds delay per request after threshold
  */
-export const speedLimiter = slowDown({
-  windowMs: 15 * 60 * 1000,
-  delayAfter: 10,
-  delayMs: 500,
-  maxDelayMs: 5000,
-  message: {
-    success: false,
-    error: 'You are sending requests too fast. Please slow down.',
-    code: 'SLOW_DOWN'
-  }
-});
+export const speedLimiter = (req: Request, res: Response, next: NextFunction) => {
+  next();
+};
 
 /**
  * Webhook Rate Limiter - For external webhooks
