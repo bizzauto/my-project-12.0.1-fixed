@@ -1291,10 +1291,32 @@ class JimiVoiceAgent {
   }
 
   private async queryAI(text: string): Promise<string> {
-    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-    const nvidiaKey = import.meta.env.VITE_NVIDIA_NIM_API_KEY || '';
+    // PRIMARY: Backend proxy (no CORS, server-side API key)
+    try {
+      const response = await fetch('/api/jimi/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          language: this.config.language,
+          personalityMode: this.personalityMode,
+          history: this.conversationHistory.slice(-6),
+        }),
+        signal: AbortSignal.timeout(25000),
+      });
 
-    if (!geminiKey && !nvidiaKey) {
+      if (response.ok) {
+        const data = await response.json();
+        if (data.reply) return data.reply;
+      }
+      console.error('Jimi: Backend returned', response.status);
+    } catch (err) {
+      console.log('Jimi: Backend unavailable');
+    }
+
+    // FALLBACK: Direct NVIDIA API from browser
+    const apiKey = import.meta.env.VITE_NVIDIA_NIM_API_KEY || '';
+    if (!apiKey) {
       return 'AI service configured nahi hai. "Help" bolo commands sunne ke liye.';
     }
 
@@ -1308,88 +1330,38 @@ class JimiVoiceAgent {
 ${personalityPrompts[this.personalityMode]}
 Style: Natural Indian ladki. Short 1-2 sentences. Plain text - emojis, bullets, special characters mat use karo.`;
 
-    // Try Gemini first
-    if (geminiKey) {
-      try {
-        const contents: any[] = [
-          ...this.conversationHistory.slice(-6).map((msg: any) => ({
-            role: msg.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: msg.content }],
-          })),
-          { role: 'user', parts: [{ text }] },
-        ];
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
 
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 20000);
+      const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'meta/llama-3.3-70b-instruct',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...this.conversationHistory.slice(-6),
+            { role: 'user', content: text },
+          ],
+          max_tokens: 150,
+          temperature: 0.8,
+        }),
+        signal: controller.signal,
+      });
 
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: systemPrompt }] },
-              contents,
-              generationConfig: { maxOutputTokens: 150, temperature: 0.8 },
-            }),
-            signal: controller.signal,
-          }
-        );
+      clearTimeout(timeout);
 
-        clearTimeout(timeout);
-
-        if (response.ok) {
-          const data = await response.json();
-          let responseText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-          if (responseText) {
-            responseText = responseText.replace(/[\u{1F600}-\u{1F64F}]/gu, '').replace(/[\u{1F300}-\u{1F5FF}]/gu, '').replace(/[\u{1F680}-\u{1F6FF}]/gu, '').replace(/[\u{2600}-\u{26FF}]/gu, '').replace(/[\u{2700}-\u{27BF}]/gu, '').trim();
-            return responseText;
-          }
-        } else {
-          console.error('Jimi: Gemini API error', response.status);
+      if (response.ok) {
+        const data = await response.json();
+        let responseText = data?.choices?.[0]?.message?.content?.trim() || '';
+        if (responseText) {
+          responseText = responseText.replace(/[\u{1F600}-\u{1F64F}]/gu, '').replace(/[\u{1F300}-\u{1F5FF}]/gu, '').replace(/[\u{1F680}-\u{1F6FF}]/gu, '').replace(/[\u{2600}-\u{26FF}]/gu, '').replace(/[\u{2700}-\u{27BF}]/gu, '').trim();
+          return responseText;
         }
-      } catch (err: any) {
-        console.error('Jimi: Gemini failed:', err.message);
       }
-    }
-
-    // Fallback: NVIDIA NIM
-    if (nvidiaKey) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 20000);
-
-        const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${nvidiaKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'meta/llama-3.3-70b-instruct',
-            messages: [
-              { role: 'system', content: systemPrompt },
-              ...this.conversationHistory.slice(-6),
-              { role: 'user', content: text },
-            ],
-            max_tokens: 150,
-            temperature: 0.8,
-          }),
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeout);
-
-        if (response.ok) {
-          const data = await response.json();
-          let responseText = data?.choices?.[0]?.message?.content?.trim() || '';
-          if (responseText) {
-            responseText = responseText.replace(/[\u{1F600}-\u{1F64F}]/gu, '').replace(/[\u{1F300}-\u{1F5FF}]/gu, '').replace(/[\u{1F680}-\u{1F6FF}]/gu, '').replace(/[\u{2600}-\u{26FF}]/gu, '').replace(/[\u{2700}-\u{27BF}]/gu, '').trim();
-            return responseText;
-          }
-        } else {
-          console.error('Jimi: NVIDIA API error', response.status);
-        }
-      } catch (err: any) {
-        console.error('Jimi: NVIDIA failed:', err.message);
-      }
+    } catch (err: any) {
+      console.error('Jimi: Direct API failed:', err.message);
     }
 
     return 'AI service se response nahi aaya. Phir se try karo.';
