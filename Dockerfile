@@ -14,6 +14,7 @@ COPY . .
 ENV VITE_GOOGLE_CLIENT_ID=813332726800-sm0j12r7n1tcljokt027ac391t2ep73m.apps.googleusercontent.com
 ENV GOOGLE_CLIENT_ID=813332726800-sm0j12r7n1tcljokt027ac391t2ep73m.apps.googleusercontent.com
 ENV VITE_NVIDIA_NIM_API_KEY=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
+ENV NVIDIA_NIM_API_KEY=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
 
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build:docker && find dist -name "*.map" -delete

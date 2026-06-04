@@ -15,7 +15,10 @@ router.post('/chat', async (req: Request, res: Response) => {
     if (!text) return res.status(400).json({ error: 'Text required' });
 
     const apiKey = process.env.NVIDIA_NIM_API_KEY || process.env.VITE_NVIDIA_NIM_API_KEY || '';
+    console.log('[Jimi Chat] API key present:', !!apiKey, ', length:', apiKey.length);
+    
     if (!apiKey) {
+      console.error('[Jimi Chat] No NVIDIA API key found!');
       return res.json({ 
         reply: 'AI service configured nahi hai. "Help" bolo commands sunne ke liye.' 
       });
@@ -50,7 +53,16 @@ BOLNE KA STYLE: Natural Indian ladki. Short aur sweet. TTS ke liye emojis mat us
       }),
     });
 
+    console.log('[Jimi Chat] NVIDIA API response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Jimi Chat] NVIDIA API error:', response.status, errorText.substring(0, 200));
+      return res.json({ reply: 'AI service temporary issue hai. Thodi der baad try karo.' });
+    }
+
     const data: any = await response.json();
+    console.log('[Jimi Chat] Response:', JSON.stringify(data).substring(0, 200));
     let reply = data?.choices?.[0]?.message?.content?.trim() || 'Samajh nahi aaya. Phir se bolo.';
 
     // Remove emojis for TTS
