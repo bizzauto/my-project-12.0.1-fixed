@@ -78,9 +78,16 @@ const AvaExecutiveAssistant: React.FC = () => {
   const synthesisRef = useRef<SpeechSynthesis | null>(null);
 
   const LANGUAGES = [
-    { code: 'en-IN', name: 'English', nativeName: 'English' },
-    { code: 'hi-IN', name: 'Hindi', nativeName: 'हिन्दी' },
-    { code: 'mr-IN', name: 'Marathi', nativeName: 'मराठी' },
+    { code: 'en-IN', name: 'English', nativeName: 'English', flag: '🇮🇳' },
+    { code: 'hi-IN', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
+    { code: 'mr-IN', name: 'Marathi', nativeName: 'मराठी', flag: '🇮🇳' },
+    { code: 'gu-IN', name: 'Gujarati', nativeName: 'ગુજરાતી', flag: '🇮🇳' },
+    { code: 'ta-IN', name: 'Tamil', nativeName: 'தமிழ்', flag: '🇮🇳' },
+    { code: 'te-IN', name: 'Telugu', nativeName: 'తెలుగు', flag: '🇮🇳' },
+    { code: 'bn-IN', name: 'Bengali', nativeName: 'বাংলা', flag: '🇮🇳' },
+    { code: 'kn-IN', name: 'Kannada', nativeName: 'ಕನ್ನಡ', flag: '🇮🇳' },
+    { code: 'ml-IN', name: 'Malayalam', nativeName: 'മലയാളം', flag: '🇮🇳' },
+    { code: 'pa-IN', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
   ];
 
   useEffect(() => {
@@ -173,6 +180,8 @@ const AvaExecutiveAssistant: React.FC = () => {
     synthesisRef.current?.cancel();
     setIsSpeaking(true);
     
+    console.log('Ava speaking with language:', selectedLang);
+    
     try {
       // Try Edge TTS with NeerjaNeural voice (BEST quality - FREE)
       const response = await fetch('/api/jimi/tts/edge', {
@@ -186,6 +195,7 @@ const AvaExecutiveAssistant: React.FC = () => {
       });
       
       const data = await response.json();
+      console.log('Edge TTS response:', data.engine || 'fallback');
       
       if (data.audio && !data.fallback) {
         // Play Edge TTS audio (NeerjaNeural voice)
@@ -193,14 +203,13 @@ const AvaExecutiveAssistant: React.FC = () => {
         audio.volume = 1.0;
         audio.onended = () => setIsSpeaking(false);
         audio.onerror = () => {
-          // Fallback to browser TTS
           speakWithBrowser(text);
         };
         await audio.play();
         return;
       }
     } catch (error) {
-      console.log('Edge TTS failed, using browser fallback');
+      console.log('Edge TTS failed, using browser fallback:', error);
     }
     
     // Fallback to browser SpeechSynthesis with Neerja voice
@@ -215,23 +224,35 @@ const AvaExecutiveAssistant: React.FC = () => {
     
     synthesisRef.current.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-IN';
+    
+    // Set language based on selected language
+    utterance.lang = selectedLang || 'en-IN';
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
     
     // Find Neerja or any Indian English female voice
     const voices = synthesisRef.current.getVoices();
+    console.log('Available voices:', voices.filter(v => v.lang.includes('IN')).map(v => `${v.name} (${v.lang})`));
+    
+    // Priority: Neerja > Neural > Indian > Female
     const preferredVoice = voices.find(v => 
-      v.name.includes('Neerja') || 
-      v.name.includes('Neural') ||
-      v.name.includes('Indian') ||
-      (v.lang === 'en-IN' && v.name.includes('Female'))
-    ) || voices.find(v => v.lang === 'en-IN');
+      v.name.includes('Neerja')
+    ) || voices.find(v => 
+      v.name.includes('Neural')
+    ) || voices.find(v => 
+      v.lang === 'en-IN' && v.name.includes('Female')
+    ) || voices.find(v => 
+      v.lang.startsWith('hi') || v.lang.startsWith('en-IN')
+    ) || voices.find(v => 
+      v.lang.includes('IN')
+    );
     
     if (preferredVoice) {
       utterance.voice = preferredVoice;
-      console.log('Using voice:', preferredVoice.name);
+      console.log('Using voice:', preferredVoice.name, preferredVoice.lang);
+    } else {
+      console.log('No Indian voice found, using default');
     }
     
     utterance.onstart = () => setIsSpeaking(true);
@@ -527,21 +548,59 @@ const AvaExecutiveAssistant: React.FC = () => {
                   title="Change Language"
                 >
                   <Globe size={18} className="text-white" />
+                  <span className="text-white text-xs hidden sm:inline">
+                    {LANGUAGES.find(l => l.code === selectedLang)?.nativeName}
+                  </span>
                 </button>
                 {showLangMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50">
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50 max-h-80 overflow-y-auto">
+                    {/* Preview Button */}
+                    <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-600">
+                      <button
+                        onClick={() => {
+                          speakText('Hello! I am Ava, your executive assistant. Neerja voice is active.');
+                        }}
+                        className="w-full px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 flex items-center justify-center gap-1"
+                      >
+                        🔊 Preview Voice
+                      </button>
+                    </div>
+                    {/* Language List */}
                     {LANGUAGES.map(lang => (
                       <button
                         key={lang.code}
                         onClick={() => {
                           setSelectedLang(lang.code);
                           setShowLangMenu(false);
+                          // Speak confirmation in selected language
+                          const confirmTexts: Record<string, string> = {
+                            'en-IN': 'Language changed to English. Neerja voice active.',
+                            'hi-IN': 'भाषा हिंदी में बदल दी गई। नीरजा आवाज़ सक्रिय।',
+                            'mr-IN': 'भाषा मराठीत बदलली. नीरजा आवाज सक्रिय.',
+                            'gu-IN': 'ભાષા ગુજરાતીમાં બદલી. નીરજા અવાજ સક્રિય.',
+                            'ta-IN': 'மொழி தமிழில் மாற்றப்பட்டது. நீரஜா குரல் செயல்படுகிறது.',
+                            'te-IN': 'భాషా తెలుగులో మార్చబడింది. నీరజా వాయిస్ యాక్టివ్.',
+                            'bn-IN': 'ভাষা বাংলায় পরিবর্তন করা হয়েছে। নীরজা ভয়েস সক্রিয়।',
+                            'kn-IN': 'ಭಾಷೆ ಕನ್ನಡಕ್ಕೆ ಬದಲಾಯಿಸಲಾಗಿದೆ. ನೀರಜಾ ಧ್ವನಿ ಸಕ್ರಿಯ.',
+                            'ml-IN': 'ഭാഷ മലയാളത്തിലേക്ക് മാറ്റി. നീരജ വോയ്സ് ആക്റ്റീവ്.',
+                            'pa-IN': 'ਭਾਸ਼ਾ ਪੰਜਾਬੀ ਵਿੱਚ ਬਦਲੀ। ਨੀਰਜਾ ਵੌਿਸ ਐਕਟਿਵ।'
+                          };
+                          setTimeout(() => {
+                            speakText(confirmTexts[lang.code] || 'Language changed');
+                          }, 300);
                         }}
-                        className={`w-full px-4 py-2 text-left text-sm flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                        className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
                           selectedLang === lang.code ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
                         }`}
                       >
-                        <span>{lang.nativeName}</span>
+                        <span className="text-lg">{lang.flag}</span>
+                        <div className="flex-1">
+                          <div className="font-medium">{lang.nativeName}</div>
+                          <div className="text-xs text-gray-400">{lang.name}</div>
+                        </div>
+                        {selectedLang === lang.code && (
+                          <span className="text-blue-500">✓</span>
+                        )}
                       </button>
                     ))}
                   </div>
