@@ -50,18 +50,24 @@ interface BriefingData {
   recommendations: string[];
 }
 
+// Welcome messages in all languages
+const WELCOME_MESSAGES: Record<string, string> = {
+  'en-IN': 'Good day! I\'m Ava, your AI Executive Assistant. I can help with revenue, leads, pipeline, appointments, and more. Say "Good morning" for a full briefing. How can I assist you today?',
+  'hi-IN': 'नमस्ते! मैं आपकी AI एग्ज़ीक्यूटिव असिस्टेंट Ava हूँ। मैं रेवेन्यू, लीड्स, पाइपलाइन, अपॉइंटमेंट में मदद कर सकती हूँ। "सुबह का अपडेट" बोलें पूरी जानकारी के लिए। आज मैं आपकी कैसे सहायता कर सकती हूँ?',
+  'mr-IN': 'नमस्कार! मी तुमची AI एग्ज़ीक्यूटिव असिस्टेंट Ava आहे। मी रेव्हेन्यू, लीड्स, पाइपलाइन, अपॉइंटमेंटमध्ये मदत करू शकते। "सकाळचा अपडेट" बोला पूर्ण माहितीसाठी। आज मी तुम्हाला कशी मदत करू शकते?',
+  'gu-IN': 'નમસ્તે! હું તમારી AI એક્ઝિક્યુટિવ આસિસ્ટન્ટ Ava છુઁ। હું રેવન્યુ, લીડ્સ, પાઇપલાઇન, એપોઇન્ટમેન્ટમાં મદદ કરી શકું છું। "સવારનું અપડેટ" બોલો સંપૂર્ણ માહિતી માટે। આજે હું તમને કેવી રીતે મદદ કરી શકું?',
+  'ta-IN': 'வணக்கம்! நான் உங்கள் AI நிர்வாக உதவியாளர் Ava. வருவாய், லீட்கள், பைப்லைன், சந்திப்புகளில் உதவ முடியும். "காலை அப்டேட்" என்று சொல்லுங்கள். இன்று நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?',
+  'te-IN': 'నమస్తే! నేను మీ AI ఎగ్జిక్యూటివ్ అసిస్టెంట్ Ava. రెవెన్యూ, లీడ్స్, పైప్‌లైన్, అపాయింట్‌మెంట్లలో సహాయం చేయగలను. "ఉదయం అప్డేట్" అనండి. ఈరోజు నేను మీకు ఎలా సహాయం చేయగలను?',
+  'bn-IN': 'নমস্কার! আমি আপনার AI এক্সিকিউটিভ অ্যাসিস্ট্যান্ট Ava। রেভিনিউ, লিড, পাইপলাইন, অ্যাপয়েন্টমেন্টে সাহায্য করতে পারি। "সকালের আপডেট" বলুন। আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?',
+  'kn-IN': 'ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ AI ಕಾರ್ಯನಿರ್ವಾಹಕ ಸಹಾಯಕ Ava. ಆದಾಯ, ಲೀಡ್‌ಗಳು, ಪೈಪ್‌ಲೈನ್, ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗಳಲ್ಲಿ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ. "ಬೆಳಿಗ್ಗೆ ಅಪ್ಡೇಟ್" ಎಂದು ಹೇಳಿ. ಇಂದು ನಾನು ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ?',
+  'ml-IN': 'നമസ്കാരം! ഞാൻ നിങ്ങളുടെ AI എക്സിക്യൂട്ടീവ് അസിസ്റ്റന്റ് Ava. വരുമാനം, ലീഡുകൾ, പൈപ്പ്‌ലൈൻ, അപ്പോയിൻറ്റ്‌മെന്റുകൾ എന്നിവയിൽ സഹായിക്കാം. "രാവിലെ അപ്ഡേറ്റ്" പറയുക. ഇന്ന് ഞാൻ എങ്ങനെ സഹായിക്കാം?',
+  'pa-IN': 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਤੁਹਾਡੀ AI ਐਗ਼ਜ਼ੀਕਿਊਟਿਵ ਅਸਿਸਟੈਂਟ Ava ਹਾਂ। ਰੈਵਨਿਊ, ਲੀਡਜ਼, ਪਾਈਪਲਾਈਨ, ਅਪਾਇਂਟਮੈਂਟ ਵਿੱਚ ਮਦਦ ਕਰ ਸਕਦੀ ਹਾਂ। "ਸਵੇਰ ਦਾ ਅਪਡੇਟ" ਬੋਲੋ। ਅੱਜ ਮੈਂ ਤੁਹਾਡੀ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦੀ ਹਾਂ?'
+};
+
 const AvaExecutiveAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '0',
-      text: 'Good day! I\'m Ava, your AI Executive Assistant. I\'m here to help you manage your business operations. You can ask me about revenue, leads, pipeline, or say "Good morning" for a full briefing. How can I assist you today?',
-      isUser: false,
-      timestamp: new Date(),
-      type: 'normal'
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -89,6 +95,17 @@ const AvaExecutiveAssistant: React.FC = () => {
     { code: 'ml-IN', name: 'Malayalam', nativeName: 'മലയാളം', flag: '🇮🇳' },
     { code: 'pa-IN', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
   ];
+
+  // Initialize with welcome message
+  useEffect(() => {
+    setMessages([{
+      id: '0',
+      text: WELCOME_MESSAGES[selectedLang] || WELCOME_MESSAGES['en-IN'],
+      isUser: false,
+      timestamp: new Date(),
+      type: 'normal'
+    }]);
+  }, []); // Only on mount
 
   useEffect(() => {
     synthesisRef.current = window.speechSynthesis;
@@ -338,7 +355,7 @@ const AvaExecutiveAssistant: React.FC = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ text: userMessage, history })
+        body: JSON.stringify({ text: userMessage, history, language: selectedLang })
       });
 
       const data = await response.json();
@@ -346,10 +363,34 @@ const AvaExecutiveAssistant: React.FC = () => {
         addMessage(data.data.text, false);
         speakText(data.data.text);
       } else {
-        addMessage('I apologize, but I encountered an issue. Please try again.', false);
+        const errorMessages: Record<string, string> = {
+          'en-IN': 'I apologize, but I encountered an issue. Please try again.',
+          'hi-IN': 'माफ़ कीजिये, कुछ समस्या हुई। कृपया दोबारा कोशिश करें।',
+          'mr-IN': 'माफ करा, काही समस्या झाली. कृपया पुन्हा प्रयत्न करा.',
+          'gu-IN': 'માફ કરશો, કંઈક સમસ્યા થઈ. કૃપા કરીને ફરી પ્રયાસ કરો.',
+          'ta-IN': 'மன்னிக்கவும், ஏதோ பிரச்சனை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.',
+          'te-IN': 'క్షమించండి, ఏదో సమస్య వచ్చింది. దయచేసి మళ్ళీ ప్రయత్నించండి.',
+          'bn-IN': 'দুঃখিত, কিছু সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
+          'kn-IN': 'ಕ್ಷಮಿಸಿ, ಏನೋ ತೊಂದರೆ ಆಯಿತು. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+          'ml-IN': 'ക്ഷമിക്കണം, എന്തോ പ്രശ്നം സംഭവിച്ചു. ദയവായി വീണ്ടും ശ്രമിക്കുക.',
+          'pa-IN': 'ਮਾਫ਼ ਕਰਨਾ, ਕੁਝ ਸਮੱਸਿਆ ਆਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।'
+        };
+        addMessage(errorMessages[selectedLang] || errorMessages['en-IN'], false);
       }
     } catch (error) {
-      addMessage('I apologize, but I\'m experiencing a temporary connectivity issue. Please try again.', false);
+      const connectivityMessages: Record<string, string> = {
+        'en-IN': 'I apologize, but I\'m experiencing a connectivity issue. Please try again.',
+        'hi-IN': 'माफ़ कीजिये, कनेक्टिविटी में समस्या है। कृपया दोबारा कोशिश करें।',
+        'mr-IN': 'माफ करा, कनेक्टिव्हिटीमा समस्या आहे. कृपया पुन्हा प्रयत्न करा.',
+        'gu-IN': 'માફ કરશો, કનેક્ટિવિટીમાં સમસ્યા છે. કૃપા કરીને ફરી પ્રયાસ કરો.',
+        'ta-IN': 'மன்னிக்கவும், இணைப்பில் பிரச்சனை. மீண்டும் முயற்சிக்கவும்.',
+        'te-IN': 'క్షమించండి, కనెక్టివిటీ సమస్య ఉంది. దయచేసి మళ్ళీ ప్రయత్నించండి.',
+        'bn-IN': 'দুঃখিত, সংযোগ সমস্যা হচ্ছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
+        'kn-IN': 'ಕ್ಷಮಿಸಿ, ಸಂಪರ್ಕ ಸಮಸ್ಯೆ ಇದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+        'ml-IN': 'ക്ഷമിക്കണം, കണക്റ്റിവിറ്റി പ്രശ്നം ഉണ്ട്. ദയവായി വീണ്ടും ശ്രമിക്കുക.',
+        'pa-IN': 'ਮਾਫ਼ ਕਰਨਾ, ਕਨੈਕਟਿਵਿਟੀ ਸਮੱਸਿਆ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।'
+      };
+      addMessage(connectivityMessages[selectedLang] || connectivityMessages['en-IN'], false);
     }
 
     setIsTyping(false);

@@ -53,7 +53,7 @@ router.get('/insights', authenticate, async (req: any, res: Response) => {
 // POST /api/ava/chat - Enhanced AI Chat with Business Context
 router.post('/chat', authenticate, async (req: any, res: Response) => {
   try {
-    const { text, history = [] } = req.body;
+    const { text, history = [], language = 'en-IN' } = req.body;
     const businessId = req.user.businessId;
 
     if (!text) {
@@ -63,15 +63,33 @@ router.post('/chat', authenticate, async (req: any, res: Response) => {
     // Get business context for intelligent responses
     const businessContext = await avaIntelligence.getBusinessContext(businessId);
 
-    // Executive Assistant system prompt
+    // Language names mapping
+    const languageNames: Record<string, string> = {
+      'en-IN': 'English',
+      'hi-IN': 'Hindi (हिन्दी)',
+      'mr-IN': 'Marathi (मराठी)',
+      'gu-IN': 'Gujarati (ગુજરાતી)',
+      'ta-IN': 'Tamil (தமிழ்)',
+      'te-IN': 'Telugu (తెలుగు)',
+      'bn-IN': 'Bengali (বাংলা)',
+      'kn-IN': 'Kannada (ಕನ್ನಡ)',
+      'ml-IN': 'Malayalam (മലയാളം)',
+      'pa-IN': 'Punjabi (ਪੰਜਾਬੀ)',
+    };
+
+    const selectedLanguage = languageNames[language] || 'English';
+
+    // Executive Assistant system prompt with LANGUAGE support
     const systemPrompt = `You are Ava, an elite AI Executive Assistant for a business platform called BizzAuto.
+
+CRITICAL RULE: You MUST respond in ${selectedLanguage} language ONLY. If the user speaks in any language, still respond in ${selectedLanguage}. This is mandatory.
 
 PERSONALITY:
 - Professional, calm, efficient, proactive
 - Speak like a top-tier executive assistant
-- Use Indian English with natural warmth
 - Be concise and actionable
 - Never sound robotic or like a chatbot
+- Use natural expressions of ${selectedLanguage}
 
 BUSINESS CONTEXT:
 ${businessContext}
@@ -84,6 +102,7 @@ CAPABILITIES:
 5. Decision Support - Pros, cons, risks, recommendations
 
 RULES:
+- ALWAYS respond in ${selectedLanguage} language
 - Keep responses under 3 lines unless detail is requested
 - Use numbers and data from business context
 - Always offer to take action
