@@ -849,15 +849,16 @@ class JimiVoiceAgent {
           lang: detectedLang, 
           voiceStyle: this.voiceSettings.voiceStyle || 'sweet',
         }),
-        signal: AbortSignal.timeout(12000),
+        signal: AbortSignal.timeout(10000),
       });
       const data = await response.json();
       if (data.audio) {
-        this.playBase64Audio(data.audio);
+        // Pass browser TTS fallback in case Audio.play() is blocked by autoplay policy
+        this.playBase64Audio(data.audio, cleanText, detectedLang);
         return;
       }
     } catch (err) {
-      console.log('Jimi: Edge TTS unavailable');
+      console.warn('Jimi: Edge TTS unavailable');
     }
 
     // 2. Try Kyutai TTS (English only, when Kyutai container is deployed)
@@ -871,7 +872,7 @@ class JimiVoiceAgent {
         });
         const data = await response.json();
         if (data.audio) {
-          this.playBase64Audio(data.audio);
+          this.playBase64Audio(data.audio, cleanText, detectedLang);
           return;
         }
       } catch (err) {
@@ -879,11 +880,12 @@ class JimiVoiceAgent {
       }
     }
 
-    // 3. Browser TTS fallback
+    // 3. Browser TTS fallback (always works, no server needed)
+    console.log('Jimi: Using browser TTS fallback');
     this.speakBrowserTTS(cleanText, detectedLang);
   }
 
-  private playBase64Audio(base64: string) {
+  private playBase64Audio(base64: string, fallbackText?: string, fallbackLang?: string) {
     if (this.audioElement) {
       this.audioElement.pause();
     }
@@ -902,8 +904,13 @@ class JimiVoiceAgent {
       this.audioElement = null;
     };
 
-    this.audioElement.play().catch(() => {
+    this.audioElement.play().catch((err) => {
+      console.warn('Jimi: Audio autoplay blocked, falling back to browser TTS:', err);
       this.isSpeaking = false;
+      // Fallback to browser TTS when autoplay is blocked by Chrome
+      if (fallbackText) {
+        this.speakBrowserTTS(fallbackText, fallbackLang);
+      }
     });
   }
 
@@ -917,7 +924,9 @@ class JimiVoiceAgent {
     const voice = this.findBestVoiceForLang(utterance.lang);
     if (voice) {
       utterance.voice = voice;
-      console.log('Jimi: Voice -', voice.name);
+      console.log('Jimi: Browser TTS voice -', voice.name, voice.lang);
+    } else {
+      console.warn('Jimi: No voice found for lang', utterance.lang, '- available:', this.availableVoices.length);
     }
     
     // Apply voice settings
@@ -927,7 +936,10 @@ class JimiVoiceAgent {
 
     utterance.onstart = () => { this.isSpeaking = true; };
     utterance.onend = () => { this.isSpeaking = false; };
-    utterance.onerror = () => { this.isSpeaking = false; };
+    utterance.onerror = (e) => { 
+      console.error('Jimi: Browser TTS error:', e.error);
+      this.isSpeaking = false; 
+    };
 
     this.synthesis.speak(utterance);
   }
