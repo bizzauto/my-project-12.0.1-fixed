@@ -295,6 +295,14 @@ export const subscriptionsAPI = {
     apiClient.post('/subscriptions/verify', data),
 };
 
+// Admission Form API
+export const admissionAPI = {
+  submit: (data: FormData) => apiClient.post('/admission/submit', data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  getStatus: () => apiClient.get('/admission/status'),
+};
+
 // Webhooks API
 export const webhooksAPI = {
   list: () => apiClient.get('/webhooks'),

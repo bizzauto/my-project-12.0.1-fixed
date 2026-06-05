@@ -39,6 +39,7 @@ interface AuthState {
   isLoading: boolean;
   isInitialized: boolean;
   onboardingCompleted: boolean;
+  admissionCompleted: boolean;
   isDemoMode: boolean;
 
   initialize: () => Promise<void>;
@@ -58,6 +59,7 @@ interface AuthState {
   appleLogin: (credential: string, name?: string) => Promise<void>;
   updateProfile: (data: { name?: string; phone?: string }) => Promise<void>;
   setOnboardingCompleted: (val: boolean) => void;
+  setAdmissionCompleted: (val: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -68,6 +70,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
   isInitialized: false,
   onboardingCompleted: false,
+  admissionCompleted: false,
   isDemoMode: false,
 
   initialize: async () => {
@@ -111,6 +114,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isInitialized: true,
         isLoading: false,
         onboardingCompleted: true,
+        admissionCompleted: true,
         isDemoMode: true,
       });
       return;
@@ -126,6 +130,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       const res = await authAPI.getProfile();
       const { user, business } = res.data.data;
       const onboardingCompleted = localStorage.getItem('onboardingCompleted') === 'true';
+      const admissionCompleted = localStorage.getItem('admissionCompleted') === 'true';
+      
+      // Sync admission status from business data if available
+      if (business?.admissionCompleted) {
+        localStorage.setItem('admissionCompleted', 'true');
+      }
+      
       set({
         token,
         user,
@@ -134,6 +145,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isInitialized: true,
         isLoading: false,
         onboardingCompleted,
+        admissionCompleted: admissionCompleted || business?.admissionCompleted || false,
       });
     } catch {
       localStorage.removeItem('token');
@@ -208,14 +220,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('onboardingCompleted');
+    localStorage.removeItem('admissionCompleted');
     localStorage.removeItem('demoMode');
-    set({ user: null, business: null, token: null, isAuthenticated: false, onboardingCompleted: false });
+    set({ user: null, business: null, token: null, isAuthenticated: false, onboardingCompleted: false, admissionCompleted: false });
   },
 
   demoLogin: () => {
     // Enable demo mode
     localStorage.setItem('demoMode', 'true');
     localStorage.setItem('onboardingCompleted', 'true');
+    localStorage.setItem('admissionCompleted', 'true');
 
     const demoUser: User = {
       id: 'demo-user-id',
@@ -249,6 +263,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       isAuthenticated: true,
       isLoading: false,
       onboardingCompleted: true,
+      admissionCompleted: true,
       isDemoMode: true,
     });
   },
@@ -267,5 +282,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   setOnboardingCompleted: (val) => {
     localStorage.setItem('onboardingCompleted', val ? 'true' : 'false');
     set({ onboardingCompleted: val });
+  },
+
+  setAdmissionCompleted: (val) => {
+    localStorage.setItem('admissionCompleted', val ? 'true' : 'false');
+    set({ admissionCompleted: val });
   },
 }));

@@ -74,11 +74,14 @@ model Business {
   usersLimit    Int @default(1)
 
   // Subscription
-  plan            Plan      @default(FREE)
-  planStartedAt   DateTime?
-  planExpiresAt   DateTime?
-  razorpaySubId   String?
-  razorpayOrderId String?
+  plan              Plan      @default(FREE)
+  planStartedAt     DateTime?
+  planExpiresAt     DateTime?
+  razorpaySubId     String?
+  razorpayOrderId   String?
+
+  // Admission Form
+  admissionCompleted Boolean @default(false)
 
   // WhatsApp Config
   wabaId          String?

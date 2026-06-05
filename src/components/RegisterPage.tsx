@@ -31,7 +31,8 @@ const RegisterPage: React.FC = () => {
         businessName: form.businessName,
         businessType: form.businessType,
       });
-      navigate('/dashboard', { replace: true });
+      // Redirect to ResorPay board for plan selection after registration
+      navigate('/resorpay', { replace: true });
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     }

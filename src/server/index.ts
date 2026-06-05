@@ -121,6 +121,7 @@ import { circuitBreaker } from './services/circuit-breaker.service.js';
 import { shutdownWebhookWorker } from './services/webhook-retry.service.js';
 import { startAuditPruneCron, stopAuditPruneCron } from './services/audit-prune.service.js';
 import adminInfrastructureRoutes from './routes/admin-infrastructure.js';
+import admissionRoutes from './routes/admission.js';
 
 dotenv.config();
 
@@ -389,7 +390,8 @@ app.use('/api/ledger', ledgerRoutes);
 app.use('/api/goals', goalsRoutes);
 app.use('/api/crm-invoices', crmInvoicesRoutes);
 app.use('/api/deals', dealsRoutes);
-app.use('/api/pipelines', pipelinesRoutes);
+  app.use('/api/pipelines', pipelinesRoutes);
+  app.use('/api/admission', admissionRoutes);
 app.use('/api/store-features', storeFeaturesRoutes);
 app.use('/api/store-advanced', storeAdvancedRoutes);
 app.use('/api/store-customize', storeCustomizeRoutes);

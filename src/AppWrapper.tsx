@@ -88,6 +88,8 @@ const UserProfile = lazy(() => import('./components/UserProfile'));
 const SettingsPage = lazy(() => import('./components/SettingsPage'));
 const SuperAdminDashboard = lazy(() => import('./components/SuperAdminDashboard'));
 const OnboardingWizard = lazy(() => import('./components/OnboardingWizard'));
+const ResorPayBoard = lazy(() => import('./components/ResorPayBoard'));
+const AdmissionForm = lazy(() => import('./components/AdmissionForm'));
 const EmailLeadImporter = lazy(() => import('./components/EmailLeadImporter'));
 const EmailMarketingPage = lazy(() => import('./components/EmailMarketingPage'));
 const WorkflowBuilder = lazy(() => import('./components/WorkflowBuilder'));
@@ -109,6 +111,7 @@ const SnapshotManager = lazy(() => import('./components/SnapshotManager'));
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isInitialized, onboardingCompleted } = useAuthStore();
   const location = useLocation();
+  const admissionCompleted = localStorage.getItem('admissionCompleted') === 'true';
 
   if (!isInitialized) {
     return <PageSkeleton />;
@@ -121,6 +124,14 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   // Check if onboarding is required (only redirect if not already on /onboarding)
   if (!onboardingCompleted && !location.pathname.startsWith('/onboarding')) {
     return <Navigate to="/onboarding" replace />;
+  }
+
+  // Check if admission form is completed (skip for admission-related pages)
+  if (!admissionCompleted && 
+      !location.pathname.startsWith('/admission-form') && 
+      !location.pathname.startsWith('/resorpay') &&
+      !location.pathname.startsWith('/onboarding')) {
+    return <Navigate to="/admission-form" replace />;
   }
 
   return <ErrorBoundary pageName={location.pathname}>{children}</ErrorBoundary>;
@@ -177,6 +188,26 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <OnboardingWizard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ResorPay Board - Plan Selection & Payment */}
+      <Route
+        path="/resorpay"
+        element={
+          <ProtectedRoute>
+            <ResorPayBoard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admission Form - Post Payment */}
+      <Route
+        path="/admission-form"
+        element={
+          <ProtectedRoute>
+            <AdmissionForm />
           </ProtectedRoute>
         }
       />
