@@ -2,6 +2,7 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { prisma } from '../index.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
+import { checkUserLimit } from '../middleware/planLimits.js';
 import { hashPassword } from '../utils/auth.js';
 
 const router = Router();
@@ -128,9 +129,9 @@ router.get('/members', async (req: any, res: any) => {
   }
 });
 
-// ==================== INVITE USER ====================
+// ==================== INVITE USER (with plan limit check) ====================
 
-router.post('/invite', requireRole('OWNER', 'ADMIN'), async (req: any, res: any) => {
+router.post('/invite', requireRole('OWNER', 'ADMIN'), checkUserLimit, async (req: any, res: any) => {
   try {
     const { email, name, role, phone } = req.body;
 

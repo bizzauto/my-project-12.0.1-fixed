@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../index.js';
 import { authenticate } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
+import { checkContactLimit } from '../middleware/planLimits.js';
 import { createContactSchema, updateContactSchema, importContactsSchema } from '../validations/schemas.js';
 
 const router = Router();
@@ -117,8 +118,8 @@ router.get('/:id', authenticate, async (req: any, res: any) => {
   }
 });
 
-// Create contact
-router.post('/', authenticate, validate(createContactSchema), async (req: any, res: any) => {
+// Create contact (with plan limit check)
+router.post('/', authenticate, checkContactLimit, validate(createContactSchema), async (req: any, res: any) => {
   try {
     const { name, phone, email, tags, customFields, pipelineId, stageId } = req.body;
 
@@ -272,7 +273,7 @@ router.delete('/:id', authenticate, async (req: any, res: any) => {
 });
 
 // Import contacts from CSV
-router.post('/import', authenticate, validate(importContactsSchema), async (req: any, res: any) => {
+router.post('/import', authenticate, checkContactLimit, validate(importContactsSchema), async (req: any, res: any) => {
   try {
     const { contacts } = req.body;
 

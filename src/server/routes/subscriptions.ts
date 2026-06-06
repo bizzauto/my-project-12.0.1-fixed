@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../index.js';
 import { authenticate, requireBusinessOwner } from '../middleware/auth.js';
+import { getUsageStats, PLAN_LIMITS } from '../middleware/planLimits.js';
 import razorpayService from '../services/razorpay.service.js';
 import { AutoOnboardingService } from '../services/auto-onboarding.service.js';
 
@@ -31,6 +32,28 @@ router.get('/current', authenticate, async (req: any, res: any) => {
     });
   } catch (error: any) {
     res.status(500).json({ success: false, error: 'Failed to fetch subscription', details: error.message });
+  }
+});
+
+// Get usage stats for current business
+router.get('/usage', authenticate, async (req: any, res: any) => {
+  try {
+    const stats = await getUsageStats(req.user.businessId);
+    if (!stats) {
+      return res.status(404).json({ success: false, error: 'Business not found' });
+    }
+    res.json({ success: true, data: stats });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Failed to fetch usage', details: error.message });
+  }
+});
+
+// Get plan limits reference
+router.get('/limits', authenticate, async (req: any, res: any) => {
+  try {
+    res.json({ success: true, data: PLAN_LIMITS });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Failed to fetch limits' });
   }
 });
 

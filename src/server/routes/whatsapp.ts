@@ -2,6 +2,7 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../index.js';
 import { authenticate, requireBusinessOwner, AuthRequest } from '../middleware/auth.js';
+import { checkMessageLimit } from '../middleware/planLimits.js';
 import axios from 'axios';
 import { encrypt, decrypt } from '../utils/auth.js';
 
@@ -372,8 +373,8 @@ router.get('/conversation/:contactId', authenticate, async (req: AuthRequest, re
   }
 });
 
-// Send text message
-router.post('/send/text', authenticate, async (req: AuthRequest, res: Response) => {
+// Send text message (with plan limit check)
+router.post('/send/text', authenticate, checkMessageLimit, async (req: AuthRequest, res: Response) => {
   try {
     const { contactId, content, phone, message } = req.body;
     const textContent = content || message;
@@ -493,8 +494,8 @@ router.post('/send/text', authenticate, async (req: AuthRequest, res: Response) 
   }
 });
 
-// Send template message
-router.post('/send/template', authenticate, async (req: AuthRequest, res: Response) => {
+// Send template message (with plan limit check)
+router.post('/send/template', authenticate, checkMessageLimit, async (req: AuthRequest, res: Response) => {
   try {
     const { contactId, templateName, languageCode = 'en', components, phone } = req.body;
 
