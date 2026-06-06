@@ -73,10 +73,11 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // GET /api/auth/google/url - Generate Google OAuth URL for redirect
 router.get('/google/url', (req: Request, res: Response) => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URL || `https://bizzautoai.com/api/auth/google/callback`;
+  const redirectUri = process.env.GOOGLE_AUTH_REDIRECT_URL || `https://bizzautoai.com/api/auth/google/callback`;
   const frontendUrl = (req.query.redirect as string) || `${process.env.FRONTEND_URL || 'https://bizzautoai.com'}`;
 
   if (!clientId) {
+    console.warn('[WARN] GOOGLE_CLIENT_ID is not set — Google OAuth login will not work.');
     return res.redirect(`${frontendUrl}/login?error=google_not_configured`);
   }
 
@@ -96,12 +97,12 @@ router.get('/google/url', (req: Request, res: Response) => {
 // GET /api/auth/google/link-url - Generate Google OAuth URL for linking to existing account
 router.get('/google/link-url', authenticate, (req: AuthRequest, res: Response) => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  console.log('[DEBUG] GOOGLE_CLIENT_ID:', clientId ? 'SET' : 'NOT SET', clientId?.substring(0, 20));
-  const redirectUri = process.env.GOOGLE_REDIRECT_URL || `https://bizzautoai.com/api/auth/google/callback`;
+  const redirectUri = process.env.GOOGLE_AUTH_REDIRECT_URL || `https://bizzautoai.com/api/auth/google/callback`;
   const frontendUrl = (req.query.redirect as string) || `${process.env.FRONTEND_URL || 'https://bizzautoai.com'}`;
 
   if (!clientId) {
-    return res.status(400).json({ error: 'Google OAuth not configured' });
+    console.warn('[WARN] GOOGLE_CLIENT_ID is not set — Google OAuth linking will not work.');
+    return res.status(400).json({ error: 'Google OAuth not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your .env file.' });
   }
 
   // Create a JWT with the user's ID and mode=link
@@ -170,7 +171,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
 
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URL || `https://bizzautoai.com/api/auth/google/callback`;
+    const redirectUri = process.env.GOOGLE_AUTH_REDIRECT_URL || `https://bizzautoai.com/api/auth/google/callback`;
 
     // Exchange code for tokens
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {

@@ -25,6 +25,10 @@ services:
       - EVOLUTION_API_URL=${EVOLUTION_API_URL:-http://evolution-api:8080}
       - EVOLUTION_API_KEY=${EVOLUTION_API_KEY}
       - EVOLUTION_INSTANCE_NAME=${EVOLUTION_INSTANCE_NAME:-bizzauto}
+      # === Google OAuth ===
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_AUTH_REDIRECT_URL=${GOOGLE_AUTH_REDIRECT_URL:-https://bizzautoai.com/api/auth/google/callback}
     depends_on:
       - postgres
       - redis

@@ -156,7 +156,7 @@ export const inputSanitizer = (req: Request, res: Response, next: NextFunction) 
 export const sqlInjectionHeaders = (req: Request, res: Response, next: NextFunction) => {
   // Check for suspicious patterns in query
   const suspiciousPatterns = [
-    /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|TRUNCATE)\b/i,
+    /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|TRUNCATE)\b)/i,
     /(--|;|\/\*|\*\/|@@|@)/,
     /(OR|AND)\s+\d+\s*=\s*\d+/i
   ];
