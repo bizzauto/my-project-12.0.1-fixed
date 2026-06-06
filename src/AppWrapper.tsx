@@ -8,6 +8,7 @@ import { ToastProvider } from './components/Toast';
 import ThemeSelector from './components/ThemeSelector';
 import NetworkStatus from './components/NetworkStatus';
 import { UIModeProvider, useUIMode } from './contexts/UIModeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import UIModeToggle from './components/UIModeToggle';
 import PWAInstallBanner from './components/PWAInstallBanner';
 import CookieConsentBanner from './components/CookieConsentBanner';
@@ -43,7 +44,7 @@ const AI_ROUTES = new Set([
   '/snapshots', '/bulk-import', '/import-leads', '/shipping-settings',
   '/documents', '/profile', '/settings', '/billing', '/team', '/api-keys',
   '/audit-log', '/store-share', '/support-tickets', '/notification-preferences',
-  '/webhooks',
+  '/webhooks', '/referrals',
 ]);
 
 const ModeAwareAuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -111,6 +112,7 @@ const StatusPage = lazy(() => import('./components/StatusPage'));
 const NotificationPreferencesPage = lazy(() => import('./components/NotificationPreferencesPage'));
 const ApiDocsPage = lazy(() => import('./components/ApiDocsPage'));
 const WebhooksPage = lazy(() => import('./components/WebhooksPage'));
+const ReferralsPage = lazy(() => import('./components/ReferralsPage'));
 const BlogManager = lazy(() => import('./components/BlogManager'));
 const ReviewRequests = lazy(() => import('./components/ReviewRequests'));
 const AgencyDashboard = lazy(() => import('./components/AgencyDashboard'));
@@ -340,6 +342,13 @@ function AppRoutes() {
         <ProtectedRoute>
           <ModeAwareAuthLayout>
             <WebhooksPage />
+          </ModeAwareAuthLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/referrals" element={
+        <ProtectedRoute>
+          <ModeAwareAuthLayout>
+            <ReferralsPage />
           </ModeAwareAuthLayout>
         </ProtectedRoute>
       } />
@@ -721,11 +730,13 @@ export { ProtectedRoute, SuperAdminRoute };
 export default function AppWrapper() {
   return (
       <ErrorBoundary>
-        <UIModeProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </UIModeProvider>
+        <LanguageProvider>
+          <UIModeProvider>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </UIModeProvider>
+        </LanguageProvider>
       </ErrorBoundary>
   );
 }

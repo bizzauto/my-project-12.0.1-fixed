@@ -50,6 +50,7 @@ model User {
   themePref     ThemePreference?
   aiContents    AIContent[]
   agencies      Agency[]
+  platformReferral PlatformReferral?
 
   @@index([businessId])
   @@index([appleId])
@@ -3094,5 +3095,58 @@ model PlatformEarning {
 
   @@index([businessId])
   @@index([createdAt])
+  @@index([status])
+}
+
+// ==================== AFFILIATE / REFERRAL SYSTEM (Platform-level) ====================
+
+model PlatformReferral {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  referralCode  String   @unique
+  totalReferrals Int     @default(0)
+  totalEarnings  Float   @default(0)
+  pendingPayout  Float   @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  rewards       PlatformReferralReward[]
+  payouts       PlatformReferralPayout[]
+
+  @@index([referralCode])
+}
+
+model PlatformReferralReward {
+  id            String   @id @default(cuid())
+  referrerId    String   // Who referred
+  refereeId     String   // Who was referred
+  referralId    String
+  referral      PlatformReferral @relation(fields: [referralId], references: [id])
+  rewardType    String   // "signup" | "subscription" | "usage"
+  rewardAmount  Float
+  currency      String   @default("INR")
+  status        String   @default("pending") // pending, credited, expired
+  creditedAt    DateTime?
+  createdAt     DateTime @default(now())
+
+  @@index([referrerId])
+  @@index([refereeId])
+  @@index([status])
+}
+
+model PlatformReferralPayout {
+  id            String   @id @default(cuid())
+  referralId    String
+  referral      PlatformReferral @relation(fields: [referralId], references: [id])
+  amount        Float
+  method        String   // "bank_transfer" | "upi" | "credit"
+  status        String   @default("pending") // pending, processing, completed, failed
+  transactionId String?
+  processedAt   DateTime?
+  createdAt     DateTime @default(now())
+
+  @@index([referralId])
   @@index([status])
 }

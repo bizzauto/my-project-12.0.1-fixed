@@ -33,6 +33,7 @@ import {
 } from './middleware/ipSecurity.js';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/user.js';
+import referralRoutes from './routes/referrals.js';
 import aiRoutes from './routes/ai.js';
 import analyticsRoutes from './routes/analytics.js';
 import appointmentsRoutes from './routes/appointments.js';
@@ -330,6 +331,7 @@ app.use('/api/auth', authRateLimiter);
 app.use('/api/auth/login', loginRateLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/referrals', referralRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/appointments', appointmentsRoutes);

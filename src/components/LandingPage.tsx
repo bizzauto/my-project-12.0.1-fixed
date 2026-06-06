@@ -10,6 +10,7 @@ import LandingPageBottom from './LandingPageBottom';
 import PublicNavbar from './PublicNavbar';
 import { useAuthStore } from '../lib/authStore';
 import { useThemeStore } from '../lib/themeStore';
+import { useLanguage, languages } from '../contexts/LanguageContext';
 
 const useInView = (threshold = 0.15) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -190,6 +191,8 @@ const slides = [
 const LandingPage: React.FC = () => {
   const { demoLogin } = useAuthStore();
   const { isDark, toggle } = useThemeStore();
+  const { language, setLanguage, t } = useLanguage();
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -226,6 +229,36 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-white dark:bg-[#0A0F1C] text-gray-900 dark:text-white transition-colors duration-300">
       <PublicNavbar isDark={isDark} onToggleDark={toggle} />
 
+      {/* Language Selector - Floating */}
+      <div className="fixed top-20 right-4 z-50">
+        <div className="relative">
+          <button
+            onClick={() => setShowLangMenu(!showLangMenu)}
+            className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg text-sm"
+          >
+            <Globe size={16} />
+            <span>{languages.find(l => l.code === language)?.native}</span>
+            <ChevronDown size={14} />
+          </button>
+          {showLangMenu && (
+            <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl overflow-hidden">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => { setLanguage(lang.code as any); setShowLangMenu(false); }}
+                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between ${
+                    language === lang.code ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600' : ''
+                  }`}
+                >
+                  <span>{lang.native}</span>
+                  {language === lang.code && <CheckCircle size={14} className="text-emerald-500" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Hero */}
       <section className="relative overflow-hidden pt-12 pb-16 sm:pt-16 sm:pb-20 lg:pt-24 lg:pb-32">
         <div className="absolute inset-0"><div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-emerald-500/10 dark:bg-emerald-500/8 rounded-full blur-[150px]" /><div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-teal-500/10 dark:bg-teal-500/8 rounded-full blur-[150px]" /></div>
@@ -236,13 +269,13 @@ const LandingPage: React.FC = () => {
               <span className="w-2 h-2 bg-emerald-500 rounded-full pulse-dot" /><span className="text-emerald-700 dark:text-emerald-400">Trusted by 10,000+ businesses across India</span>
             </div>
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-[1.1] tracking-tight text-gray-900 dark:text-white">
-              Automate your business<br />
-              <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">with WhatsApp & AI</span>
+              {t('hero_title').split(' ').slice(0, 3).join(' ')}<br />
+              <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">{t('hero_title').split(' ').slice(3).join(' ')}</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">CRM, WhatsApp marketing, AI content, automation — all in one powerful platform. Built specifically for Indian businesses.</p>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">{t('hero_subtitle')}</p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-6 px-4 sm:px-0">
-              <Link to="/register" className="group w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-base sm:text-lg">Start Free Trial<ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" /></Link>
-              <button onClick={() => setShowVideo(true)} className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center gap-2 transition-all text-base sm:text-lg"><Play size={20} /> Watch Demo</button>
+              <Link to="/register" className="group w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-base sm:text-lg">{t('hero_cta')}<ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" /></Link>
+              <button onClick={() => setShowVideo(true)} className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center gap-2 transition-all text-base sm:text-lg"><Play size={20} /> {t('hero_cta2')}</button>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-500 px-4">
               <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-emerald-500" /> 7-day free trial</span>
@@ -269,8 +302,8 @@ const LandingPage: React.FC = () => {
       <Section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 relative">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
-            <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-full px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-medium mb-3 sm:mb-4"><Sparkles size={14} /> Features</div>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Everything you need to grow</h2>
+            <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-full px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-medium mb-3 sm:mb-4"><Sparkles size={14} /> {t('nav_features')}</div>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">{t('features_title')}</h2>
             <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-2">One platform. All the tools. Zero complexity.</p>
           </div>
           <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center" style={{ touchAction: 'pan-y' }}>
