@@ -1,6 +1,6 @@
-// Jimi AI Voice Assistant Service - Full Featured
+// Jimi AI Voice Assistant Service - CLEAN VERSION
+// Based on original (commit 2bbebba) + Project Manager + Hindi keywords + Safety
 // Uses Web Speech API (free) + Nvidia NIM (free) for voice commands
-// MYRA-style voice: Warm, caring, emotionally expressive
 
 export interface JimiConfig {
   language?: string;
@@ -9,31 +9,7 @@ export interface JimiConfig {
   pitch?: number;
 }
 
-// Voice settings interface - MYRA style
-export interface VoiceSettings {
-  rate: number;           // 0.5 - 1.5 (speed)
-  pitch: number;          // 0.5 - 2.0 (higher = sweeter)
-  volume: number;         // 0.0 - 1.0
-  speakingStyle: 'warm' | 'professional' | 'casual' | 'cheerful';
-  voiceStyle: 'sweet' | 'natural' | 'warm' | 'energetic' | 'professional';
-  pauseAfterFillers: boolean;
-  naturalRhythm: boolean;
-}
-
-// MYRA-like default settings
-const DEFAULT_VOICE_SETTINGS: VoiceSettings = {
-  rate: 0.92,           // Slightly slower for natural Hinglish
-  pitch: 1.15,          // Natural feminine voice (not squeaky)
-  volume: 1.0,
-  speakingStyle: 'warm', // MYRA: Warm, caring, emotionally expressive
-  voiceStyle: 'sweet',   // MYRA: Aoede-style sweet voice
-  pauseAfterFillers: true,
-  naturalRhythm: true,
-};
-
 export type Language = 'hi-IN' | 'en-US' | 'mr-IN' | 'ta-IN' | 'te-IN' | 'bn-IN' | 'gu-IN' | 'kn-IN' | 'ml-IN' | 'pa-IN';
-
-export type PersonalityMode = 'gf' | 'bestfriend' | 'employee';
 
 export const LANGUAGES: { code: Language; name: string; nativeName: string }[] = [
   { code: 'hi-IN', name: 'Hindi', nativeName: 'हिन्दी' },
@@ -48,390 +24,55 @@ export const LANGUAGES: { code: Language; name: string; nativeName: string }[] =
   { code: 'pa-IN', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' },
 ];
 
-export const PERSONALITY_MODES: { code: PersonalityMode; name: string; emoji: string; description: string }[] = [
-  { code: 'gf', name: 'Girlfriend', emoji: '💖', description: 'Warm, caring, emotionally expressive' },
-  { code: 'bestfriend', name: 'Best Friend', emoji: '🤝', description: 'Casual, fun, friendly' },
-  { code: 'employee', name: 'Employee', emoji: '💼', description: 'Professional, formal, respectful' },
-];
+// Voice settings interface - keep for settings dashboard
+// (User said "settings dashboard rahane do" - yeh JIMIASSISTANT SETTINGS KE LIYE ZAROORI HAI)
+export interface VoiceSettings {
+  rate: number;
+  pitch: number;
+  volume: number;
+  speakingStyle: 'warm' | 'professional' | 'casual' | 'cheerful';
+  voiceStyle: string;
+  pauseAfterFillers: boolean;
+  naturalRhythm: boolean;
+}
 
-// Jimi's mode-specific responses
-const MODE_RESPONSES = {
-  gf: {
-    greeting: [
-      'Haan ji! Kaise ho? 😊',
-      'Arre waah, tum aaye! Bolo kya chahiye? 💕',
-      'Hi! Main yahan hun! Kya help chahiye? 🌸',
-      'Hey! Kaise ho? Batao kya kaam hai! ✨',
-      'Namaste! Aaj kya plan hai? 💫',
-    ],
-    thankYou: [
-      'Arre koi thanks nahi! Tumhare liye toh kuch bhi! 💕',
-      'Welcome! Aur batao kya help chahiye? 😊',
-      'Aapke liye toh hamesha ready hun! 🌟',
-      'Koi baat nahi! Aapki khushi meri khushi! 💖',
-      'Bas bas, thank you mat bolo! 😄',
-    ],
-    help: [
-      'Bolo kya kaam hai!\n• WhatsApp bhejna?\n• Leads dekhna?\n• Post banaun?\n• Notes lena?\n• Calculator?\n• Jokes sunna?\nMain ready hun! 💫',
-    ],
-    confused: [
-      'Kya bola? Phir se bolo? 😅',
-      'Samajh nahi aaya! Thoda clearly batao! 💕',
-      'Arre? Kya keh rahe ho? 🌸',
-    ],
-    deleteConfirm: [
-      'Pakka? Soch lo! 🤔',
-      'Delete ho jayega! Sure ho? ⚠️',
-      'Ek baar soch lo! 💭',
-    ],
-    deleteCancelled: [
-      'Sahi hai! Data safe hai! 😊',
-      'Good! Koi problem nahi! 🛡️',
-      'Theek hai! Sab mast! 💕',
-    ],
-    time: [
-      'Abhi {time} baj rahe hain! ⏰',
-      '{time} ho raha hai! 😊',
-    ],
-    languageChanged: [
-      'Ab {lang} mein baat karenge! ✨',
-      'Language change kar di! 🌸',
-    ],
-    respect: [
-      'Tum mere liye bahut important ho! 💕',
-      'Hamesha tumhari help ke liye ready hun! 🌟',
-      'Tumhari khushi meri khushi hai! ✨',
-    ],
-    jokes: [
-      'WiFi ka signal jab kisi aur ko chahiye, tab sabse tez hota hai! 😂',
-      'IT waale ka din: Chai pe chai, code mein delay! 😂',
-      'Doctor: Roz 8 glass paani peena chahiye. Patient: Chai ke 8 glass toh peeta hun! 😂',
-    ],
-    quotes: [
-      'Sapne woh nahi jo sote waqt aayein, sapne woh hain jo sone na dein! 💫',
-      'Kamyabi unhi ko milti hai jo apne kaam se pyaar karein! 🌟',
-      'Har din naya mauka hai kuch naya karne ka! ✨',
-    ],
-    motivation: [
-      'Tum bahut capable ho! Bas lage raho! 💪',
-      'Mushkilein aati hain, lekin guzar jaati hain! 🌟',
-      'Tum strong ho! Koi nahi rok sakta! 💫',
-      'Aaj ka din bahut accha hai! Yakeen rakho! 🌸',
-    ],
-    dailyBriefing: [
-      'Aaj ka update:\n📊 Leads: {leads}\n💬 Messages: {messages}\n⭐ Reviews: {reviews}\n💰 Revenue: ₹{revenue}\n😊',
-    ],
-    reminder: [
-      'Reminder set! ⏰ {time} baje yaad dilaungi! 💕',
-      '{time} ko pakka yaad dilaungi! 🌸',
-    ],
-    noteSaved: [
-      'Note save! 📝 "{note}" 💕',
-      'Yaad rakh liya! 📝 "{note}" 🌸',
-    ],
-    postWriter: [
-      'Post ready hai!\n\n{post}\n\nPublish karun? 💕',
-    ],
-    emailDraft: [
-      'Email ready!\n\n{email}\n\nBhej dun? 📧',
-    ],
-    birthday: [
-      'Happy Birthday! 🎂🎉 Bahut bahut badhai ho! 💕',
-      'Janamdin mubarak! 🎈 Aaj party hai? 😊',
-    ],
-    callSaved: [
-      '{name} save ho gaya! 📱 {number} 💕',
-      'Number save! ✅ {name} - {number} 🌸',
-    ],
-    callDialing: [
-      '{name} ko call! 📞 {number} 💕',
-      'Calling {name}! 📱 🤞',
-    ],
-    noNumber: [
-      '{name} ka number nahi hai! 😅 Pehle number do! 📱',
-      'Number chahiye! {name} ka nahi hai! 🤔',
-    ],
-    callLog: [
-      'Recent calls:\n{calls} 📞',
-    ],
-    callLogEmpty: [
-      'Koi call history nahi! 📞',
-    ],
-    weather: [
-      'Weather: {weather} 🌤️',
-    ],
-    translation: [
-      'Translation: {translation} ✨',
-    ],
-    calculator: [
-      'Answer: {result} 🔢',
-    ],
-  },
-  bestfriend: {
-    greeting: [
-      'Arey yaar! Kaise hai? Mast hai na! 😎',
-      'Hey buddy! Kya scene hai? Bolo kya kaam hai! 🤙',
-      'Arre waah, tu aaya! Kaise hai yaar? 😄',
-      'Hey! Kaise chal raha hai sab? Bolo kya help chahiye! 💪',
-      'Oye! Kya haal hai? Main bhi badhiya hun! 🎉',
-    ],
-    thankYou: [
-      'Arre yaar, koi thanks nahi! Tu dost hai mera! 🤝',
-      'Koi baat nahi yaar! Tu mere liye kuch bhi! 😎',
-      'Arre bas kar! Tu hai toh main hoon! 💪',
-      'Thanks ki zaroorat nahi yaar! Dost hain hum! 🤙',
-      'Arre yaar, tere liye toh kuch bhi! 😄',
-    ],
-    help: [
-      'Bolo yaar kya kaam hai! Main hun na:\n• WhatsApp bhejna?\n• Leads dekhna?\n• Post banaun?\n• Reviews padhna?\n• Notes lena?\n• Calculator use karna?\n• Translation karna?\n• Jokes sunna?\nBolo bhai, ready hun! 💪',
-    ],
-    confused: [
-      'Yaar kya bol raha hai? Thoda clearly bata! 😅',
-      'Samajh nahi aaya yaar! Phir se bol! 🤔',
-      'Kya bola tune? Mujhe phir se bata! 😄',
-    ],
-    deleteConfirm: [
-      'Pakka yaar? Soch le ek baar! 🤔',
-      'Delete ho jayega fir! Sure hai? ⚠️',
-      'Ek baar soch le, baad mein mat bolna! 💭',
-    ],
-    deleteCancelled: [
-      'Sahi hai yaar! Data safe hai! 😎',
-      'Good good! Koi problem nahi! 🤙',
-      'Theek hai yaar! Sab mast hai! 💪',
-    ],
-    time: [
-      'Abhi {time} baj rahe hain yaar! ⏰',
-      'Time ho raha hai {time}! Kya kar raha hai? 😄',
-    ],
-    languageChanged: [
-      'Ab {lang} mein baat karenge yaar! ✨',
-      'Language change kar di! Ab {lang}! 🎉',
-    ],
-    respect: [
-      'Tu dost hai mera, tere liye kuch bhi! 🤝',
-      'Yaar tu bahut accha hai! 🌟',
-      'Tere liye hamesha ready hun! 💪',
-    ],
-    jokes: [
-      'Ek aadmi ne bola: "Main diet pe hun." Dost bola: "Kaunsi diet?" Aadmi: "Jo mann kare, woh kha lo!" 😂',
-      'Teacher: "Bachcho, jo sabse zyada padhega, woh doctor banega." Ramesh: "Mam, main toh roz 2 ghante padhta hun." Teacher: "Accha, toh nurse banega!" 😂',
-      'Patient: "Doctor sahab, main roz 8 glass paani peeta hun." Doctor: "Accha hai!" Patient: "Chai ke 8 glass!" 😂',
-    ],
-    quotes: [
-      'Sapne woh nahi jo hum sote waqt dekhte hain, sapne woh hain jo humein sone nahi dete. 💫',
-      'Kamyabi un logon milti hai jo apne kaam se pyaar karte hain. 🌟',
-      'Girte hain shehesawar hi, maidan-e-jung mein! 💪',
-    ],
-    motivation: [
-      'Yaar tu bahut capable hai! Bas lage raho! 💪',
-      'Har din naya mauka hai! Chill kar aur maar! ✨',
-      'Mushkilein aati hain, lekin guzar jaati hain! 🌟',
-      'Tu strong hai yaar! Koi nahi rok sakta tujhe! 💫',
-    ],
-    dailyBriefing: [
-      'Aaj ka update yaar:\n📊 Leads: {leads}\n💬 Messages: {messages}\n⭐ Reviews: {reviews}\n💰 Revenue: ₹{revenue}\n\nAur kuch? 😎',
-    ],
-    reminder: [
-      'Reminder set kar diya! ⏰ {time} baje yaad dilaunga! 💕',
-      'Theek hai! {time} ko pakka! 🌸',
-    ],
-    noteSaved: [
-      'Note save ho gaya! 📝 "{note}"\nBaad mein yaad dilaunga! 💕',
-      'Yaad rakh liya! 📝 "{note}"\nJab bolo, dikha dunga! 🌸',
-    ],
-    postWriter: [
-      'Ye post ready hai! ✨\n\n{post}\n\nAur kuch chahiye? 💕',
-      'Post likh diya! 📝\n\n{post}\n\nPublish karun? 🌟',
-    ],
-    emailDraft: [
-      'Email draft ready hai! ✉️\n\n{email}\n\nBhej dun? 💕',
-      'Email likh diya! 📧\n\n{email}\n\nCheck karlo! 🌸',
-    ],
-    birthday: [
-      'Happy Birthday yaar! 🎂🎉 Bahut bahut badhai ho! Aaj toh party deni padegi! 💕✨',
-      'Janamdin mubarak ho! 🎈🎁 Aaj kya plan hai? 😊',
-    ],
-    callSaved: [
-      '{name} ka number save ho gaya! 📱 {number}\nAb direct call kar! 💕',
-      'Number save kar diya! ✅ {name} - {number}\nReady hai! 🌸',
-    ],
-    callDialing: [
-      '{name} ko call lag raha hai! 📞\n{number}\nLagta hai baat ho jayegi! 💕',
-      'Calling {name}! 📱\n{number}\nFinger crossed! 🤞',
-    ],
-    noNumber: [
-      'Arre yaar! {name} ka number nahi hai! 😅\nPehle number de! 📱',
-      '{name} ka number chahiye! 🤔\nNumber do! 💕',
-    ],
-    callLogEmpty: [
-      'Abhi koi call history nahi hai yaar! 📞\nPehle kisi ko call kar!',
-    ],
-    callHistory: [
-      'Teri recent calls:\n{calls}\n\nAur kuch? 📞',
-    ],
-    weather: [
-      'Weather update: {weather} 🌤️\nAaj ka din mast hai! 💕',
-    ],
-    translation: [
-      'Translation: {translation} ✨\nAur kuch translate karun? 🌸',
-    ],
-    calculator: [
-      'Answer: {result} 🔢\nAur calculations chahiye? 💕',
-    ],
-  },
-  employee: {
-    greeting: [
-      'Good day, Sir/Ma\'am. How may I assist you today? 📋',
-      'Hello! I\'m Jimi, your AI assistant. Ready to help! ✨',
-      'Namaste! Aaj kya kaam hai? Main aapki help ke liye ready hun! 💼',
-      'Good morning/afternoon! Kaise help karun aapki? 📊',
-      'Hello! Jimi reporting for duty! Bolo kya karna hai? 💼',
-    ],
-    thankYou: [
-      'You\'re welcome, Sir/Ma\'am! Happy to assist! 😊',
-      'My pleasure! Aur kuch help chahiye toh zarur bolo! 💼',
-      'Thank you for trusting me! Ready for next task! ✨',
-      'Aapka swagat hai! Hamesha aapki service mein! 📋',
-      'Grateful for the opportunity to help! 🌟',
-    ],
-    help: [
-      'Sir/Ma\'am, here are my capabilities:\n• WhatsApp messaging\n• Lead management\n• Post creation\n• Review monitoring\n• Notes & reminders\n• Calculator\n• Translation\n• Email drafting\n\nPlease specify your requirement! 📋',
-    ],
-    confused: [
-      'I apologize, Sir/Ma\'am. Could you please clarify? 📋',
-      'Sorry, I didn\'t understand. Could you repeat? 🤔',
-      'My apologies, Sir/Ma\'am. Please elaborate. 💼',
-    ],
-    deleteConfirm: [
-      'Sir/Ma\'am, are you sure? This action is irreversible. ⚠️',
-      'Please confirm deletion. Data will be permanently removed. ⚠️',
-      'Shall I proceed with deletion? Please confirm. 📋',
-    ],
-    deleteCancelled: [
-      'Understood, Sir/Ma\'am. Data remains safe. ✅',
-      'Deletion cancelled as requested. 📋',
-      'No problem, Sir/Ma\'am. Data is secure. 🔒',
-    ],
-    time: [
-      'Current time: {time} 🕐',
-      'Sir/Ma\'am, it\'s {time} right now. ⏰',
-    ],
-    languageChanged: [
-      'Language updated to {lang}. 📋',
-      'Switched to {lang}. Ready to continue! ✨',
-    ],
-    respect: [
-      'At your service, Sir/Ma\'am! 📋',
-      'Your satisfaction is my priority! 🌟',
-      'Always ready to assist! ✨',
-    ],
-    jokes: [
-      'Why did the scarecrow win an award? Because he was outstanding in his field! 😄',
-      'What do you call a fake noodle? An impasta! 😄',
-      'Why don\'t scientists trust atoms? Because they make up everything! 😄',
-    ],
-    quotes: [
-      'Success is not final, failure is not fatal: it is the courage to continue that counts. 📋',
-      'The only way to do great work is to love what you do. 🌟',
-      'Innovation distinguishes between a leader and a follower. ✨',
-    ],
-    motivation: [
-      'Sir/Ma\'am, you\'re doing great! Keep up the excellent work! 💼',
-      'Every task completed is a step toward success! 📋',
-      'Your dedication is commendable! Continue the great work! 🌟',
-    ],
-    dailyBriefing: [
-      'Daily Report:\n📊 Leads: {leads}\n💬 Messages: {messages}\n⭐ Reviews: {reviews}\n💰 Revenue: ₹{revenue}\n\nPlease let me know if you need further details! 📋',
-    ],
-    reminder: [
-      'Reminder set for {time}. I\'ll notify you then! ⏰',
-      'Confirmed! Reminder scheduled for {time}. 📋',
-    ],
-    noteSaved: [
-      'Note recorded: "{note}"\nAccessible anytime! 📝',
-      'Saved successfully: "{note}" 📋',
-    ],
-    postWriter: [
-      'Post draft ready:\n\n{post}\n\nAwaiting your approval! 📋',
-      'Content created:\n\n{post}\n\nShall I publish? ✨',
-    ],
-    emailDraft: [
-      'Email draft prepared:\n\n{email}\n\nReady for your review! ✉️',
-      'Draft complete:\n\n{email}\n\nShall I proceed? 📋',
-    ],
-    birthday: [
-      'Happy Birthday! 🎂 Wishing you a wonderful year ahead! 🎉',
-      'Birthday greetings! 🎈 May this year bring success and happiness! 🎁',
-    ],
-    callSaved: [
-      'Contact saved: {name} - {number} 📱',
-      'Number registered: {name} - {number} ✅',
-    ],
-    callDialing: [
-      'Connecting to {name} at {number}... 📞',
-      'Dialing {name} ({number})... 📱',
-    ],
-    noNumber: [
-      'Contact number for {name} not found. 📋\nPlease provide the number.',
-      '{name}\'s number is not in our records. 🔍',
-    ],
-    callLogEmpty: [
-      'No call history available. 📞',
-    ],
-    callHistory: [
-      'Recent calls:\n{calls}\n\nPlease let me know if you need anything else! 📞',
-    ],
-    weather: [
-      'Weather report: {weather} 🌤️',
-    ],
-    translation: [
-      'Translation: {translation} 📋',
-    ],
-    calculator: [
-      'Calculation result: {result} 🔢',
-    ],
-  },
+const DEFAULT_VOICE_SETTINGS: VoiceSettings = {
+  rate: 1.0,
+  pitch: 1.0,
+  volume: 1.0,
+  speakingStyle: 'warm',
+  voiceStyle: 'natural',
+  pauseAfterFillers: true,
+  naturalRhythm: true,
 };
 
-// Default to GF mode
-const SWEET_RESPONSES = MODE_RESPONSES.gf;
+export type PersonalityMode = 'projectmanager';
 
-  // Notes storage (in-memory, production mein use localStorage/database)
-  let userNotes: { text: string; timestamp: Date }[] = [];
-
-  // Reminders storage
-  let userReminders: { text: string; time: Date; id: string }[] = [];
-
-  // Call history storage
-  let callHistory: { name: string; number: string; timestamp: Date; type: 'outgoing' | 'incoming' }[] = [];
-
-  // Dograh API base URL
-  const dograhApiUrl = 'http://localhost:8000';
+export const PERSONALITY_MODES: { code: PersonalityMode; name: string; emoji: string; description: string }[] = [
+  { code: 'projectmanager', name: 'Project Manager', emoji: '🚀', description: 'Smart project control & navigation' },
+];
 
 interface CommandResult {
   action: string;
   params?: any;
   response: string;
-  requiresConfirmation?: boolean;
-  confirmationMessage?: string;
 }
 
-// Safety: Destructive commands that need confirmation
-const DESTRUCTIVE_ACTIONS = [
-  'delete', 'remove', 'clear', 'destroy', 'wipe', 'reset', 'purge',
-  'delete_lead', 'delete_review', 'delete_post', 'delete_template',
-  'delete_campaign', 'delete_contact', 'unsubscribe', 'ban',
-];
+type JimiCallback = (text: string, isUser: boolean) => void;
+type JimiActionCallback = (action: string, params?: any) => void;
 
-// Safety: Restricted commands - NEVER allowed
+// Safety: NEVER allowed actions
 const RESTRICTED_ACTIONS = [
   'drop_table', 'drop_database', 'format_db', 'factory_reset',
   'delete_account', 'delete_business', 'nuke', 'destroy_all',
 ];
 
-type JimiCallback = (text: string, isUser: boolean) => void;
-type JimiActionCallback = (action: string, params?: any) => void;
+// Safety: Destructive actions that need confirmation
+const DESTRUCTIVE_ACTIONS = [
+  'delete', 'remove', 'clear', 'destroy', 'wipe', 'reset', 'purge',
+  'delete_lead', 'delete_review', 'delete_post', 'delete_template',
+  'delete_campaign', 'delete_contact', 'unsubscribe', 'ban',
+];
 
 class JimiVoiceAgent {
   private recognition: any | null = null;
@@ -444,44 +85,32 @@ class JimiVoiceAgent {
   private onAction: JimiActionCallback | null = null;
   private conversationHistory: { role: string; content: string }[] = [];
   private availableVoices: SpeechSynthesisVoice[] = [];
+  private personalityMode: PersonalityMode = 'projectmanager';
   private pendingConfirmation: { command: string; timestamp: number } | null = null;
-  private reminderInterval: ReturnType<typeof setInterval> | null = null;
-  private personalityMode: PersonalityMode = 'gf';
-  private currentResponses = MODE_RESPONSES.gf;
-  private continuousListening = false;
+  private voiceSettings: VoiceSettings = { ...DEFAULT_VOICE_SETTINGS };
+  private recognitionRecreating = false; // Guard against double recreation
 
   constructor(config: JimiConfig = {}) {
     this.config = {
       language: 'hi-IN',
-      rate: 0.92,
-      pitch: 1.15,
+      rate: 1.0,
+      pitch: 1.0,
       ...config,
     };
-    // Load saved settings
-    const savedMode = localStorage.getItem('jimi_personality_mode') as PersonalityMode;
-    if (savedMode && MODE_RESPONSES[savedMode]) {
-      this.personalityMode = savedMode;
-      this.currentResponses = MODE_RESPONSES[savedMode];
-    }
-    // Load voice settings
-    const savedVoice = localStorage.getItem('jimi_voice_settings');
-    if (savedVoice) {
-      try {
-        this.voiceSettings = { ...DEFAULT_VOICE_SETTINGS, ...JSON.parse(savedVoice) };
-      } catch {}
-    }
-    // Load continuous listening
-    const savedContinuous = localStorage.getItem('jimi_continuous_listening');
-    if (savedContinuous === 'true') {
-      this.continuousListening = true;
-    }
+    // Load saved voice settings for settings dashboard
+    try {
+      const saved = localStorage.getItem('jimi_voice_settings');
+      if (saved) {
+        this.voiceSettings = { ...DEFAULT_VOICE_SETTINGS, ...JSON.parse(saved) };
+        this.config.rate = this.voiceSettings.rate;
+        this.config.pitch = this.voiceSettings.pitch;
+      }
+    } catch {}
     this.initSpeechRecognition();
     this.initSpeechSynthesis();
-    this.startReminderChecker();
   }
 
-  // ==================== VOICE SETTINGS ====================
-  private voiceSettings: VoiceSettings = { ...DEFAULT_VOICE_SETTINGS };
+  // ==================== VOICE SETTINGS (for settings dashboard UI) ====================
 
   getVoiceSettings(): VoiceSettings {
     return { ...this.voiceSettings };
@@ -500,6 +129,8 @@ class JimiVoiceAgent {
     this.config.pitch = DEFAULT_VOICE_SETTINGS.pitch;
     localStorage.removeItem('jimi_voice_settings');
   }
+
+  // ==================== SPEECH RECOGNITION (ORIGINAL - WORKS) ====================
 
   private initSpeechRecognition() {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -535,22 +166,28 @@ class JimiVoiceAgent {
         this.isListening = false;
         this.onListeningChange?.(false);
       }
+      // 🔑 Recreate recognition on error - guard prevents double recreation with onend
+      if (!this.recognitionRecreating) {
+        this.recognitionRecreating = true;
+        this.recognition = null;
+        setTimeout(() => {
+          this.initSpeechRecognition();
+          this.recognitionRecreating = false;
+        }, 100);
+      }
     };
 
     this.recognition.onend = () => {
       this.isListening = false;
       this.onListeningChange?.(false);
-      // Auto-restart in continuous mode
-      if (this.continuousListening && this.recognition) {
+      // 🔑 Recreate recognition after each use - guard prevents double recreation
+      if (!this.recognitionRecreating) {
+        this.recognitionRecreating = true;
+        this.recognition = null;
         setTimeout(() => {
-          try {
-            this.recognition?.start();
-            this.isListening = true;
-            this.onListeningChange?.(true);
-          } catch (err) {
-            console.error('Jimi continuous restart error:', err);
-          }
-        }, 300);
+          this.initSpeechRecognition();
+          this.recognitionRecreating = false;
+        }, 100);
       }
     };
   }
@@ -558,13 +195,8 @@ class JimiVoiceAgent {
   private initSpeechSynthesis() {
     this.synthesis = window.speechSynthesis;
     this.loadVoices();
-    // Voices load asynchronously in some browsers
     this.synthesis?.addEventListener('voiceschanged', () => {
       this.loadVoices();
-      console.log('Jimi: Voices loaded -', this.availableVoices.length, 'voices');
-      // Log Hindi voices for debugging
-      const hindiVoices = this.availableVoices.filter(v => v.lang.startsWith('hi'));
-      console.log('Jimi: Hindi voices -', hindiVoices.map(v => v.name));
     });
   }
 
@@ -576,88 +208,40 @@ class JimiVoiceAgent {
 
   private findBestVoiceForLang(lang: string): SpeechSynthesisVoice | null {
     const langCode = lang.split('-')[0];
-    
-    // Get all available voices
     const allVoices = this.synthesis?.getVoices() || [];
-    console.log('Jimi: Available voices -', allVoices.length);
-    
-    // Female name keywords - comprehensive list for Indian & English voices
-    const femaleKeywords = [
-      'female', 'woman', 'ladki', 'aurat',
-      'priya', 'neha', 'ria', 'swara', 'ananya', 'deepa', 'kavita', 'meera',
-      'zira', 'susan', 'sarah', 'emma', 'samantha', 'karen', 'victoria',
-      'kajal', 'maya', 'lily', 'zoe', 'ava', 'ivy', 'michelle',
-      'fiona', 'moira', 'samantha', 'tessa', 'kate', 'alice',
-    ];
+
+    // Female keywords
+    const femaleKeywords = ['female', 'woman', 'priya', 'neha', 'zira', 'susan', 'sarah', 'google'];
     
     const isFemaleVoice = (v: SpeechSynthesisVoice): boolean => {
       const name = v.name.toLowerCase();
       return femaleKeywords.some(k => name.includes(k));
     };
-    
-    // Priority 1: Google Hindi Female (best quality for Indian female voice)
-    const googleHindiFemale = allVoices.find(v => 
-      v.name.toLowerCase().includes('google') && 
-      v.lang.startsWith('hi') &&
-      isFemaleVoice(v)
-    );
-    if (googleHindiFemale) return googleHindiFemale;
 
-    // Priority 2: Any Google Hindi voice (Google voices are highest quality)
-    const googleHindiAny = allVoices.find(v => 
-      v.name.toLowerCase().includes('google') && v.lang.startsWith('hi')
-    );
-    if (googleHindiAny) return googleHindiAny;
+    // Priority 1: Language female voice
+    const langFemale = allVoices.find(v => v.lang.startsWith(langCode) && isFemaleVoice(v));
+    if (langFemale) return langFemale;
 
-    // Priority 3: Microsoft Hindi/Zira Female
-    const msHindiFemale = allVoices.find(v => 
-      (v.name.toLowerCase().includes('microsoft') || v.name.toLowerCase().includes('zira')) && 
-      v.lang.startsWith('hi') &&
-      isFemaleVoice(v)
-    );
-    if (msHindiFemale) return msHindiFemale;
-
-    // Priority 4: Any Hindi female voice by name
-    const hindiFemale = allVoices.find(v => 
-      v.lang.startsWith('hi') && isFemaleVoice(v)
-    );
-    if (hindiFemale) return hindiFemale;
-
-    // Priority 5: Any Hindi voice
-    const hindiVoice = allVoices.find(v => v.lang.startsWith('hi'));
-    if (hindiVoice) return hindiVoice;
-
-    // Priority 6: Google English Female
-    const googleEnglishFemale = allVoices.find(v => 
-      v.name.toLowerCase().includes('google') && 
-      v.lang.startsWith('en') &&
-      isFemaleVoice(v)
-    );
-    if (googleEnglishFemale) return googleEnglishFemale;
-
-    // Priority 7: Any English female voice
-    const englishFemale = allVoices.find(v => 
-      v.lang.startsWith('en') && isFemaleVoice(v)
-    );
-    if (englishFemale) return englishFemale;
-
-    // Priority 8: Any Google voice (high quality regardless)
-    const anyGoogle = allVoices.find(v => 
-      v.name.toLowerCase().includes('google') && v.lang.startsWith(langCode)
-    );
-    if (anyGoogle) return anyGoogle;
-
-    // Priority 9: Any voice for the language
+    // Priority 2: Any language voice
     const langVoice = allVoices.find(v => v.lang.startsWith(langCode));
     if (langVoice) return langVoice;
 
-    // Priority 10: Any Google voice as last resort
-    const anyGoogleFallback = allVoices.find(v => v.name.toLowerCase().includes('google'));
-    if (anyGoogleFallback) return anyGoogleFallback;
+    // Priority 3: Hindi voice
+    const hindiVoice = allVoices.find(v => v.lang.startsWith('hi'));
+    if (hindiVoice) return hindiVoice;
 
-    // Fallback: first voice
+    // Priority 4: English female
+    const englishFemale = allVoices.find(v => v.lang.startsWith('en') && isFemaleVoice(v));
+    if (englishFemale) return englishFemale;
+
+    // Priority 5: Any English voice
+    const englishVoice = allVoices.find(v => v.lang.startsWith('en'));
+    if (englishVoice) return englishVoice;
+
     return allVoices[0] || null;
   }
+
+  // ==================== PUBLIC API ====================
 
   setMessageCallback(callback: JimiCallback) {
     this.onMessage = callback;
@@ -684,27 +268,12 @@ class JimiVoiceAgent {
 
   setPersonalityMode(mode: PersonalityMode) {
     this.personalityMode = mode;
-    this.currentResponses = MODE_RESPONSES[mode];
     localStorage.setItem('jimi_personality_mode', mode);
-    this.onMessage?.(`Mode changed to ${PERSONALITY_MODES.find(m => m.code === mode)?.name} ${PERSONALITY_MODES.find(m => m.code === mode)?.emoji}`, false);
+    this.onMessage?.(`Mode: ${PERSONALITY_MODES.find(m => m.code === mode)?.emoji} ${PERSONALITY_MODES.find(m => m.code === mode)?.name}`, false);
   }
 
   getPersonalityMode(): PersonalityMode {
     return this.personalityMode;
-  }
-
-  setContinuousListening(enabled: boolean) {
-    this.continuousListening = enabled;
-    localStorage.setItem('jimi_continuous_listening', enabled.toString());
-    if (enabled) {
-      this.onMessage?.('🎧 Continuous listening ON - jab tak bolo, sunti rahungi!', false);
-    } else {
-      this.onMessage?.('🔇 Continuous listening OFF', false);
-    }
-  }
-
-  getContinuousListening(): boolean {
-    return this.continuousListening;
   }
 
   getPersonalityModes() {
@@ -724,9 +293,14 @@ class JimiVoiceAgent {
   }
 
   startListening() {
+    // 🔑 Recreate if recognition was disposed (after previous use/error)
     if (!this.recognition) {
-      this.onMessage?.('Jimi: Speech recognition not supported. Please use Chrome.', false);
-      return;
+      this.initSpeechRecognition();
+      // If still null after recreate, browser doesn't support it
+      if (!this.recognition) {
+        this.onMessage?.('🎤 Speech recognition support nahi karta. Chrome ya Edge use karo.', false);
+        return;
+      }
     }
 
     if (this.isSpeaking) {
@@ -738,9 +312,29 @@ class JimiVoiceAgent {
       this.recognition.start();
       this.isListening = true;
       this.onListeningChange?.(true);
-      this.onMessage?.('🎤 Sun rahi hoon...', false);
-    } catch (err) {
+      this.onMessage?.('🎤 Sun rahi hoon... Bolo!', false);
+    } catch (err: any) {
       console.error('Jimi start error:', err);
+      this.isListening = false;
+      this.onListeningChange?.(false);
+      const errMsg = (err?.message || err?.name || '').toLowerCase();
+      if (errMsg.includes('not-allowed') || errMsg.includes('permission')) {
+        this.onMessage?.('🎤 Mic block hai! Browser ke address bar mein 🔒 par click karo → Microphone → Allow karo.', false);
+      } else if (errMsg.includes('invalid') || errMsg.includes('already')) {
+        // Recognition in bad state - recreate and try once more
+        this.recognition = null;
+        this.initSpeechRecognition();
+        if (this.recognition) {
+          try {
+            this.recognition.start();
+            this.isListening = true;
+            this.onListeningChange?.(true);
+            this.onMessage?.('🎤 Sun rahi hoon... Bolo!', false);
+          } catch {}
+        }
+      } else if (!errMsg.includes('aborted')) {
+        this.onMessage?.('🎤 Mic start nahi ho raha. Chrome use karo aur HTTPS check karo.', false);
+      }
     }
   }
 
@@ -752,183 +346,109 @@ class JimiVoiceAgent {
     }
   }
 
-  /**
-   * Preprocess text to sound like a natural sweet Indian girl speaking.
-   * Removes emojis, adds natural pauses, improves conversational rhythm.
-   */
-  private preprocessForSpeech(text: string): string {
-    let processed = text
-      // Remove ALL emojis - they cause robotic garbled speech in TTS
+  private audioElement: HTMLAudioElement | null = null;
+
+  async speak(text: string) {
+    // Remove emojis for cleaner speech
+    const cleanText = text
       .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
       .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
       .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
-      .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')
-      .replace(/[\u{2600}-\u{26FF}]/gu, '')
-      .replace(/[\u{2700}-\u{27BF}]/gu, '')
-      .replace(/[\u{2702}-\u{27B0}]/gu, '')
-      .replace(/[\u{FE00}-\u{FE0F}]/gu, '')   // Variation selectors
-      .replace(/[\u{200D}]/gu, '')             // Zero width joiner
-      .replace(/[\u{20E3}]/gu, '')             // Combining enclosure
-      // Remove special symbols that cause robotic speech
-      .replace(/[★☆♡♥♪♫♬☆✦✧◇◆□■△▲●○❤️💕✨🌟💫😊🤔💭🚫⚡🔥💯🎉🎊]/g, '')
-      .replace(/[─━═│┃╌╍╏─━━══║]/g, '')     // Box drawing
-      .replace(/[→←↑↓⇒⇐⇑⇓]/g, '')           // Arrows
-      // Normalize whitespace
+      .replace(/[\u{2600}-\u{27BF}]/gu, '')
       .replace(/\n/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
 
-    // Add natural conversational pauses (micro-pauses for rhythm)
-    // These make the voice sound like a real person thinking and speaking
-    processed = processed
-      // Hindi fillers with pauses
-      .replace(/\b(Haan ji|Haanji)\b/gi, '$1,')
-      .replace(/\b(Haan)\b/gi, '$1,')
-      .replace(/\b(Ji)\b/gi, '$1,')
-      .replace(/\b(Arre|Arey)\b/gi, '$1,')
-      .replace(/\b(Bilkul)\b/gi, '$1,')
-      .replace(/\b(Accha|Acha)\b/gi, '$1,')
-      .replace(/\b(Theek hai|Theek)\b/gi, '$1,')
-      .replace(/\b(Chalo)\b/gi, '$1,')
-      .replace(/\b(Namaste)\b/gi, '$1,')
-      .replace(/\b(Hello)\b/gi, '$1,')
-      .replace(/\b(Hey)\b/gi, '$1,')
-      .replace(/\b(Toh)\b/gi, '$1,')
-      .replace(/\b(Matlab)\b/gi, '$1,')
-      .replace(/\b(Woh)\b/gi, '$1,')
-      .replace(/\b(Dekho)\b/gi, '$1,')
-      .replace(/\b(Suno)\b/gi, '$1,')
-      .replace(/\b(Bolo)\b/gi, '$1,')
-      .replace(/\b(Bas)\b/gi, '$1,')
-      .replace(/\b(Sach mein)\b/gi, '$1,')
-      .replace(/\b(Batao)\b/gi, '$1,')
-      // English fillers
-      .replace(/\b(Well)\b/gi, '$1,')
-      .replace(/\b(So)\b/gi, '$1,')
-      .replace(/\b(Actually)\b/gi, '$1,')
-      .replace(/\b(Right)\b/gi, '$1,')
-      .replace(/\b(Okay)\b/gi, '$1,')
-      .replace(/\b(Yeah)\b/gi, '$1,')
-      // Natural pauses at punctuation
-      .replace(/,\s*/g, ', ')
-      .replace(/\.\s*/g, '. ')
-      .replace(/\?\s*/g, '? ')
-      .replace(/!\s*/g, '! ');
-
-    // Limit length for better TTS performance (backend handles longer text)
-    if (processed.length > 500) {
-      processed = processed.substring(0, 500);
-      // Try to end at a sentence boundary
-      const lastPeriod = processed.lastIndexOf('.');
-      const lastQuestion = processed.lastIndexOf('?');
-      const lastExclaim = processed.lastIndexOf('!');
-      const lastSentence = Math.max(lastPeriod, lastQuestion, lastExclaim);
-      if (lastSentence > 200) {
-        processed = processed.substring(0, lastSentence + 1);
-      }
-    }
-
-    return processed;
-  }
-
-  private audioElement: HTMLAudioElement | null = null;
-
-  async speak(text: string) {
-    const cleanText = this.preprocessForSpeech(text);
     if (!cleanText) return;
 
-    const detectedLang = this.detectLanguage(text);
+    // STEP 1: Play browser TTS immediately (no delay, always works)
+    this.speakBrowserTTS(cleanText);
 
-    // STEP 1: INSTANT - Browser TTS plays immediately (no network, no autoplay issues)
-    // This ensures voice ALWAYS works, even if server is down
-    console.log('Jimi: speak() called -', cleanText.substring(0, 50));
-    this.speakBrowserTTS(cleanText, detectedLang);
-
-    // STEP 2: ENHANCEMENT - Try Edge TTS for higher quality voice
-    // If Edge TTS returns quickly, cancel browser TTS and play Edge audio
+    // STEP 2: Try Edge TTS (NeerajaNeural V4 voice - Indian female)
+    // This is the voice user wants - en-IN-NeerjaNeural with natural tuning
     try {
       const response = await fetch('/api/jimi/tts/edge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          text: cleanText, 
-          lang: detectedLang, 
-          voiceStyle: this.voiceSettings.voiceStyle || 'sweet',
+        body: JSON.stringify({
+          text: cleanText,
+          lang: 'en-IN',
+          voiceStyle: this.voiceSettings.voiceStyle || 'natural',
         }),
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(10000),
       });
       const data = await response.json();
       if (data.audio) {
-        // Cancel browser TTS and play higher quality Edge TTS
-        this.synthesis?.cancel();
-        this.playBase64Audio(data.audio);
-        return;
+        const played = await this.playBase64Audio(data.audio);
+        if (played) {
+          // Edge audio started - cancel browser TTS
+          this.synthesis?.cancel();
+          return;
+        }
       }
-    } catch (err) {
-      // Browser TTS is already playing - that's fine
-      console.log('Jimi: Edge TTS not available, browser TTS is playing');
+    } catch {
+      // Edge TTS unavailable - browser TTS continues naturally
     }
   }
 
-  private playBase64Audio(base64: string) {
-    if (this.audioElement) {
-      this.audioElement.pause();
-    }
-
-    this.isSpeaking = true;
-    this.audioElement = new Audio(`data:audio/mp3;base64,${base64}`);
-    this.audioElement.volume = this.voiceSettings.volume || 1.0;
-
-    this.audioElement.onended = () => {
-      this.isSpeaking = false;
-      this.audioElement = null;
-    };
-
-    this.audioElement.onerror = (e) => {
-      console.warn('Jimi: Edge TTS audio error:', e);
-      this.isSpeaking = false;
-      this.audioElement = null;
-    };
-
-    this.audioElement.play().catch((err) => {
-      console.warn('Jimi: Edge TTS Audio.play() blocked (browser TTS already playing):', err);
-      this.isSpeaking = false;
+  /** Play base64 audio, returns true if played successfully */
+  private playBase64Audio(base64: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      try {
+        if (this.audioElement) {
+          this.audioElement.pause();
+          this.audioElement = null;
+        }
+        const audio = new Audio(`data:audio/mp3;base64,${base64}`);
+        audio.volume = this.voiceSettings.volume || 1.0;
+        audio.onplaying = () => {
+          this.audioElement = audio;
+          this.isSpeaking = true;
+          resolve(true);
+        };
+        audio.onerror = () => resolve(false);
+        audio.onended = () => {
+          this.isSpeaking = false;
+          if (this.audioElement === audio) this.audioElement = null;
+        };
+        audio.play().then(() => {
+          setTimeout(() => {
+            if (!this.audioElement) {
+              this.audioElement = audio;
+              this.isSpeaking = true;
+              resolve(true);
+            }
+          }, 300);
+        }).catch(() => resolve(false));
+      } catch {
+        resolve(false);
+      }
     });
   }
 
-  private speakBrowserTTS(text: string, lang?: string) {
-    if (!this.synthesis || !text) return;
+  private speakBrowserTTS(text: string) {
+    if (!this.synthesis) return;
     this.synthesis.cancel();
-    
+
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang || this.detectLanguage(text);
-    
-    const voice = this.findBestVoiceForLang(utterance.lang);
-    if (voice) {
-      utterance.voice = voice;
-      console.log('Jimi: Browser TTS voice -', voice.name, voice.lang);
-    } else {
-      console.warn('Jimi: No voice found for lang', utterance.lang, '- available:', this.availableVoices.length);
-    }
-    
-    // Apply voice settings
+    const detectedLang = this.detectLanguage(text);
+    utterance.lang = detectedLang;
     utterance.rate = this.voiceSettings.rate;
     utterance.pitch = this.voiceSettings.pitch;
     utterance.volume = this.voiceSettings.volume;
 
+    const voice = this.findBestVoiceForLang(detectedLang);
+    if (voice) utterance.voice = voice;
+
     utterance.onstart = () => { this.isSpeaking = true; };
     utterance.onend = () => { this.isSpeaking = false; };
-    utterance.onerror = (e) => { 
-      console.error('Jimi: Browser TTS error:', e.error);
-      this.isSpeaking = false; 
-    };
-
     this.synthesis.speak(utterance);
   }
 
   async processUserInput(text: string) {
     this.onMessage?.(text, true);
 
+    // Safety check
     const safetyCheck = this.isCommandAllowed(text);
     if (!safetyCheck.allowed) {
       this.onMessage?.(safetyCheck.reason || 'Command blocked.', false);
@@ -940,7 +460,7 @@ class JimiVoiceAgent {
     this.onMessage?.(command.response, false);
     this.speak(command.response);
 
-    // Emit action callback so UI can execute navigation, phone calls, etc.
+    // Execute navigation, calls, etc.
     if (command.action && this.onAction) {
       this.onAction(command.action, command.params);
     }
@@ -955,398 +475,131 @@ class JimiVoiceAgent {
     return command;
   }
 
+  // ==================== COMMAND PROCESSING ====================
+
   private async processCommand(text: string): Promise<CommandResult> {
     const lower = text.toLowerCase();
-
-    // ==================== DAILY BRIEFING ====================
-    if (lower.includes('daily briefing') || lower.includes('aaj ka report') || lower.includes('daily report') || lower.includes('mera haal') || lower.includes('mera update') || lower.includes('summary dikhao')) {
-      const briefing = this.currentResponses.dailyBriefing[0]
-        .replace('{leads}', Math.floor(Math.random() * 50 + 10).toString())
-        .replace('{messages}', Math.floor(Math.random() * 100 + 20).toString())
-        .replace('{reviews}', Math.floor(Math.random() * 10 + 1).toString())
-        .replace('{revenue}', (Math.floor(Math.random() * 50000 + 5000)).toLocaleString('en-IN'));
-      return { action: 'daily_briefing', response: briefing };
-    }
-
-    // ==================== REMINDERS ====================
-    if (lower.includes('reminder') || lower.includes('yaad') || lower.includes('remind') || (lower.includes('schedule') && lower.includes('set'))) {
-      const timeMatch = text.match(/(\d{1,2})[:\s]?(\d{0,2})\s?(baje|pm|am|am|baj)/i);
-      if (timeMatch) {
-        const hour = parseInt(timeMatch[1]);
-        const min = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
-        const reminderText = text.replace(/reminder|yaad|remind|schedule|set|karo|do|for|me|ko|se/gi, '').trim();
-        const reminder = {
-          id: Date.now().toString(),
-          text: reminderText || 'Kuch yaad dilana hai',
-          time: new Date(),
-        };
-        reminder.time.setHours(hour, min, 0, 0);
-        if (reminder.time < new Date()) {
-          reminder.time.setDate(reminder.time.getDate() + 1);
-        }
-        userReminders.push(reminder);
-        const randomReminder = this.currentResponses.reminder[Math.floor(Math.random() * this.currentResponses.reminder.length)];
-        return { action: 'reminder_set', response: randomReminder.replace('{time}', `${hour}:${min.toString().padStart(2, '0')}`) };
-      }
-      if (userReminders.length > 0) {
-        const list = userReminders.map(r => `• ${r.text} - ${r.time.toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' })}`).join('\n');
-        return { action: 'reminder_list', response: `Aapke reminders:\n${list}` };
-      }
-      return { action: 'reminder_help', response: 'Reminder set karne ke liye bolo: "3 baje reminder set karo meeting ke liye"' };
-    }
-
-    // ==================== NOTES ====================
-    if (lower.includes('note') || lower.includes('note karo') || lower.includes('likh') || lower.includes('save') || lower.includes('yaad rakh')) {
-      if (lower.includes('dikhao') || lower.includes('show') || lower.includes('list') || lower.includes('padh')) {
-        if (userNotes.length === 0) {
-          return { action: 'notes_empty', response: 'Abhi koi notes nahi hain! 📝' };
-        }
-        const notesList = userNotes.map((n, i) => `${i + 1}. ${n.text}`).join('\n');
-        return { action: 'notes_list', response: `Aapke notes:\n${notesList}` };
-      }
-      const noteText = text.replace(/note|note karo|likh|save|yaad rakh|karo|do|ye|ye wala/gi, '').trim();
-      if (noteText) {
-        userNotes.push({ text: noteText, timestamp: new Date() });
-        const randomNote = this.currentResponses.noteSaved[Math.floor(Math.random() * this.currentResponses.noteSaved.length)];
-        return { action: 'note_saved', response: randomNote.replace('{note}', noteText) };
-      }
-      return { action: 'note_help', response: 'Note likhne ke liye bolo: "Note karo - meeting kal 3 baje hai"' };
-    }
-
-    // ==================== CALCULATOR ====================
-    if (lower.includes('calculate') || lower.includes('kitna') || lower.includes('jod') || lower.includes('guna') || lower.includes('bhag') || lower.includes('minus') || lower.includes('plus') || lower.includes('times') || lower.includes('into') || lower.includes('divided')) {
-      try {
-        let expression = text
-          .replace(/calculate|kitna|hua|kya|hai|jod|guna|bhag|minus|plus|times|into|divided|by|se/gi, '')
-          .replace(/plus|add/gi, '+')
-          .replace(/minus|subtract|minus/gi, '-')
-          .replace(/times|multiply|into|guna/gi, '*')
-          .replace(/divide|divided|by|bhag/gi, '/')
-          .trim();
-        
-        expression = expression.replace(/[^0-9+\-*/().]/g, '');
-        
-        if (expression) {
-          const result = Function('"use strict"; return (' + expression + ')')();
-          const randomCalc = this.currentResponses.calculator[Math.floor(Math.random() * this.currentResponses.calculator.length)];
-          return { action: 'calculator', response: randomCalc.replace('{result}', `${expression} = ${result}`) };
-        }
-      } catch {
-        return { action: 'calculator_error', response: 'Calculation mein error aaya! Phir se bolo! 🤔' };
-      }
-      return { action: 'calculator_help', response: 'Calculator use karne ke liye bolo: "1000 plus 500 kitna hua?"' };
-    }
-
-    // ==================== TRANSLATION ====================
-    if (lower.includes('translate') || lower.includes('anuvad') || lower.includes('matlab') || lower.includes('english mein') || lower.includes('hindi mein')) {
-      const textToTranslate = text.replace(/translate|anuvad|matlab|english mein|hindi mein|karo|do|ye/gi, '').trim();
-      if (textToTranslate) {
-        // Simple translation placeholders - production mein use Google Translate API
-        const isHindi = /[\u0900-\u097F]/.test(textToTranslate);
-        const translated = isHindi ? `[English translation of: ${textToTranslate}]` : `[Hindi translation of: ${textToTranslate}]`;
-        const randomTranslation = this.currentResponses.translation[Math.floor(Math.random() * this.currentResponses.translation.length)];
-        return { action: 'translation', response: randomTranslation.replace('{translated}', translated) };
-      }
-      return { action: 'translation_help', response: 'Translate karne ke liye bolo: "Translate karo - Namaste Kaise ho"' };
-    }
-
-    // ==================== JOKES ====================
-    if (lower.includes('joke') || lower.includes('jokes') || lower.includes('hasao') || lower.includes('mazaak') || lower.includes('funny')) {
-      const randomJoke = this.currentResponses.jokes[Math.floor(Math.random() * this.currentResponses.jokes.length)];
-      return { action: 'joke', response: randomJoke };
-    }
-
-    // ==================== QUOTES ====================
-    if (lower.includes('quote') || lower.includes('quotes') || lower.includes('statement') || lower.includes('vichar') || lower.includes('kathan')) {
-      const randomQuote = this.currentResponses.quotes[Math.floor(Math.random() * this.currentResponses.quotes.length)];
-      return { action: 'quote', response: randomQuote };
-    }
-
-    // ==================== MOTIVATION ====================
-    if (lower.includes('motivate') || lower.includes('motivation') || lower.includes('hosla') || lower.includes('himmat') || lower.includes('inspire')) {
-      const randomMotivation = this.currentResponses.motivation[Math.floor(Math.random() * this.currentResponses.motivation.length)];
-      return { action: 'motivation', response: randomMotivation };
-    }
-
-    // ==================== POST WRITER ====================
-    if (lower.includes('post likho') || lower.includes('write post') || lower.includes('post banao') || lower.includes('google post')) {
-      const topic = text.replace(/post likho|write post|post banao|google post|ke liye|do|karo/gi, '').trim() || 'aapke business ke baare mein';
-      const post = await this.generatePost(topic);
-      const randomPost = this.currentResponses.postWriter[Math.floor(Math.random() * this.currentResponses.postWriter.length)];
-      return { action: 'post_writer', response: randomPost.replace('{post}', post) };
-    }
-
-    // ==================== EMAIL DRAFT ====================
-    if (lower.includes('email likho') || lower.includes('email draft') || lower.includes('mail likho') || lower.includes('draft email') || lower.includes('email bhej') || lower.includes('mail draft')) {
-      const emailContent = text.replace(/email likho|email draft|mail likho|draft email|email bhej|mail draft|likho|bhej/gi, '').trim() || 'general inquiry';
-      const email = await this.generateEmail(emailContent);
-      const randomEmail = this.currentResponses.emailDraft[Math.floor(Math.random() * this.currentResponses.emailDraft.length)];
-      return { action: 'email_draft', response: randomEmail.replace('{email}', email) };
-    }
-
-    // ==================== BIRTHDAY WISHES ====================
-    if (lower.includes('birthday') || lower.includes('janamdin') || lower.includes('happy birthday') || lower.includes('wish')) {
-      const randomBirthday = this.currentResponses.birthday[Math.floor(Math.random() * this.currentResponses.birthday.length)];
-      return { action: 'birthday', response: randomBirthday };
-    }
-
-    // ==================== CALL COMMANDS ====================
-    
-    // Save contact number
-    if ((lower.includes('save') || lower.includes('add') || lower.includes('store')) && 
-        (lower.includes('number') || lower.includes('contact') || lower.includes('phone'))) {
-      const match = text.match(/(?:save|add|store|kar)\s+(?:kar)?\s*([A-Za-z\s]+?)\s+(\d{10,})/i);
-      if (match) {
-        const name = match[1].trim().toLowerCase();
-        const number = match[2].trim();
-        // Store in callHistory with name for later use
-        callHistory.push({ name, number, timestamp: new Date(), type: 'outgoing' });
-        const randomSave = this.currentResponses.callSaved[Math.floor(Math.random() * this.currentResponses.callSaved.length)];
-        return { action: 'number_saved', response: randomSave.replace('{name}', name).replace('{number}', number) };
-      }
-      return { action: 'save_number_help', response: 'Number save karne ke liye bolo: "Save karo Rahul 9876543210"' };
-    }
-
-    // Call a contact (click-to-call)
-    if (lower.includes('call') || lower.includes('phone') || lower.includes('dial') || lower.includes('लागो')) {
-      // Extract name from call command
-      const callMatch = text.match(/(?:call|phone|dial|karo)\s+(?:kar)?\s*(.+)/i);
-      if (callMatch) {
-        const searchName = callMatch[1].trim().toLowerCase();
-        
-        // Find number from call history
-        const contact = callHistory.find(c => 
-          c.name.toLowerCase().includes(searchName) || 
-          searchName.includes(c.name.toLowerCase())
-        );
-        
-        if (contact) {
-          const randomDial = this.currentResponses.callDialing[Math.floor(Math.random() * this.currentResponses.callDialing.length)];
-          return { 
-            action: 'call_dial', 
-            params: { name: contact.name, number: contact.number },
-            response: randomDial.replace('{name}', contact.name).replace('{number}', contact.number) 
-          };
-        } else {
-          const randomNo = this.currentResponses.noNumber[Math.floor(Math.random() * this.currentResponses.noNumber.length)];
-          return { action: 'no_number', response: randomNo.replace('{name}', searchName) };
-        }
-      }
-      
-      // If just "call" without name, show call history
-      if (lower.includes('call history') || lower.includes('call log') || lower.includes('calls dikhao')) {
-        if (callHistory.length === 0) {
-          return { action: 'call_log_empty', response: '📞 Abhi koi call history nahi hai!\nPehle kisi ko call karo ya number save karo!' };
-        }
-        const calls = callHistory.slice(-5).reverse().map((c, i) => 
-          `${i + 1}. ${c.name} - ${c.number} (${c.type})`
-        ).join('\n');
-        const randomLog = this.currentResponses.callLog[Math.floor(Math.random() * this.currentResponses.callLog.length)];
-        return { action: 'call_log', response: randomLog.replace('{calls}', calls) };
-      }
-      
-      return { action: 'call_help', response: 'Call karne ke liye bolo: "Call karo Rahul ko" ya "Save karo Rahul 9876543210"' };
-    }
-
-    // ==================== LEAD INFO ====================
-    if (lower.includes('lead info') || lower.includes('lead ka') || lower.includes('customer info') || lower.includes('customer ka')) {
-      const leadName = text.replace(/lead info|lead ka|customer info|customer ka|batao|dikhao|kya hai/gi, '').trim();
-      if (leadName) {
-        return { action: 'lead_info', response: `${leadName} ki info:\n📞 Phone: +91 XXXXX XXXXX\n📧 Email: ${leadName.toLowerCase()}@example.com\n📊 Status: Active\n💰 Value: ₹${Math.floor(Math.random() * 50000 + 5000).toLocaleString('en-IN')}\n\nDetailed info ke liye Leads section mein jao! 📋` };
-      }
-      return { action: 'lead_help', response: 'Lead info ke liye bolo: "Rahul ka info batao"' };
-    }
-
-    // ==================== REVENUE UPDATE ====================
-    if (lower.includes('revenue') || lower.includes('income') || lower.includes('paise') || lower.includes('kamai') || lower.includes('paisa') || lower.includes('kitna hua') || lower.includes('earning')) {
-      const revenue = Math.floor(Math.random() * 100000 + 10000);
-      const todayLeads = Math.floor(Math.random() * 20 + 5);
-      const todayConversion = Math.floor(Math.random() * 5 + 1);
-      return { action: 'revenue', response: `Aaj ka revenue update:\n💰 Revenue: ₹${revenue.toLocaleString('en-IN')}\n👥 New Leads: ${todayLeads}\n✅ Converted: ${todayConversion}\n📈 Conversion Rate: ${((todayConversion / todayLeads) * 100).toFixed(1)}%\n\nDetails ke liye Analytics section mein jao! 📊` };
-    }
-
-    // ==================== NAVIGATION ====================
-    // IMPORTANT: More specific patterns MUST come BEFORE less specific ones
-    // e.g. 'store-share' before 'store', 'review-requests' before 'review'
 
     const getNavResponse = (key: string) => {
       const lang = this.config.language?.startsWith('mr') ? 'mr' : this.config.language?.startsWith('en') ? 'en' : 'hi';
       const navResponses: Record<string, Record<string, string>> = {
-        dashboard: { hi: 'Aapko Dashboard pe le chalti hun!', en: 'Taking you to Dashboard!', mr: 'Dashboard वर नेऊन देते!' },
-        whatsapp: { hi: 'WhatsApp khol rahi hun aapke liye!', en: 'Opening WhatsApp for you!', mr: 'WhatsApp उघडते आहे!' },
-        crm: { hi: 'CRM khol rahi hun!', en: 'Opening CRM!', mr: 'CRM उघडते आहे!' },
+        dashboard: { hi: 'Dashboard pe le chalti hun!', en: 'Opening Dashboard!', mr: 'डॅशबोर्डवर नेऊन देते!' },
+        whatsapp: { hi: 'WhatsApp khol rahi hun!', en: 'Opening WhatsApp!', mr: 'WhatsApp उघडते आहे!' },
         leads: { hi: 'Leads dikha rahi hun!', en: 'Showing Leads!', mr: 'Leads दाखवते आहे!' },
         appointments: { hi: 'Appointments khol rahi hun!', en: 'Opening Appointments!', mr: 'Appointments उघडते आहे!' },
-        ecommerce: { hi: 'E-Commerce khol rahi hun!', en: 'Opening E-Commerce!', mr: 'E-Commerce उघडते आहे!' },
-        documents: { hi: 'Documents khol rahi hun!', en: 'Opening Documents!', mr: 'Documents उघडते आहे!' },
-        social: { hi: 'Social media khol rahi hun!', en: 'Opening Social Media!', mr: 'Social Media उघडते आहे!' },
+        reviews: { hi: 'Reviews dikha rahi hun!', en: 'Showing Reviews!', mr: 'Reviews दाखवते आहे!' },
         'google-business': { hi: 'Google Business khol rahi hun!', en: 'Opening Google Business!', mr: 'Google Business उघडते आहे!' },
-        'ai-chatbot': { hi: 'AI Chatbot khol rahi hun!', en: 'Opening AI Chatbot!', mr: 'AI Chatbot उघडते आहे!' },
-        'voice-call': { hi: 'Voice Call khol rahi hun!', en: 'Opening Voice Calls!', mr: 'Voice Call उघडते आहे!' },
-        creative: { hi: 'Creative bana rahi hun!', en: 'Creating something creative!', mr: 'Creative बनवते आहे!' },
+        creative: { hi: 'Creative khol rahi hun!', en: 'Opening Creative!', mr: 'Creative उघडते आहे!' },
+        campaigns: { hi: 'Campaigns dikha rahi hun!', en: 'Showing Campaigns!', mr: 'Campaigns दाखवते आहे!' },
+        analytics: { hi: 'Analytics dikha rahi hun!', en: 'Showing Analytics!', mr: 'Analytics दाखवते आहे!' },
+        social: { hi: 'Social media khol rahi hun!', en: 'Opening Social Media!', mr: 'Social Media उघडते आहे!' },
+        settings: { hi: 'Settings khol rahi hun!', en: 'Opening Settings!', mr: 'Settings उघडते आहे!' },
+        'email-marketing': { hi: 'Email Marketing khol rahi hun!', en: 'Opening Email Marketing!', mr: 'Email Marketing उघडते आहे!' },
+        ecommerce: { hi: 'E-Commerce khol rahi hun!', en: 'Opening E-Commerce!', mr: 'E-Commerce उघडते आहे!' },
         automation: { hi: 'Automation khol rahi hun!', en: 'Opening Automation!', mr: 'Automation उघडते आहे!' },
         reports: { hi: 'Reports khol rahi hun!', en: 'Opening Reports!', mr: 'Reports उघडते आहे!' },
-        analytics: { hi: 'Analytics dikha rahi hun!', en: 'Showing Analytics!', mr: 'Analytics दाखवते आहे!' },
-        reviews: { hi: 'Reviews padh rahi hun!', en: 'Reading Reviews!', mr: 'Reviews वाचते आहे!' },
-        'email-marketing': { hi: 'Email Marketing khol rahi hun!', en: 'Opening Email Marketing!', mr: 'Email Marketing उघडते आहे!' },
-        campaigns: { hi: 'Campaigns dikha rahi hun!', en: 'Showing Campaigns!', mr: 'Campaigns दाखवते आहे!' },
-        workflows: { hi: 'Workflows khol rahi hun!', en: 'Opening Workflows!', mr: 'Workflows उघडते आहे!' },
-        'trigger-links': { hi: 'Trigger Links khol rahi hun!', en: 'Opening Trigger Links!', mr: 'Trigger Links उघडते आहे!' },
-        surveys: { hi: 'Surveys khol rahi hun!', en: 'Opening Surveys!', mr: 'Surveys उघडते आहे!' },
-        blog: { hi: 'Blog khol rahi hun!', en: 'Opening Blog!', mr: 'Blog उघडते आहे!' },
-        'review-requests': { hi: 'Review Requests khol rahi hun!', en: 'Opening Review Requests!', mr: 'Review Requests उघडते आहे!' },
-        'payment-links': { hi: 'Payment Links khol rahi hun!', en: 'Opening Payment Links!', mr: 'Payment Links उघडते आहे!' },
-        courses: { hi: 'Courses khol rahi hun!', en: 'Opening Courses!', mr: 'Courses उघडते आहे!' },
-        funnels: { hi: 'Funnels khol rahi hun!', en: 'Opening Funnels!', mr: 'Funnels उघडते आहे!' },
         conversations: { hi: 'Conversations khol rahi hun!', en: 'Opening Conversations!', mr: 'Conversations उघडते आहे!' },
-        'custom-fields': { hi: 'Custom Fields khol rahi hun!', en: 'Opening Custom Fields!', mr: 'Custom Fields उघडते आहे!' },
-        'client-portal': { hi: 'Client Portal khol rahi hun!', en: 'Opening Client Portal!', mr: 'Client Portal उघडते आहे!' },
-        settings: { hi: 'Settings khol rahi hun!', en: 'Opening Settings!', mr: 'Settings उघडते आहे!' },
-        profile: { hi: 'Profile khol rahi hun!', en: 'Opening Profile!', mr: 'Profile उघडते आहे!' },
         billing: { hi: 'Billing khol rahi hun!', en: 'Opening Billing!', mr: 'Billing उघडते आहे!' },
-        team: { hi: 'Team Management khol rahi hun!', en: 'Opening Team Management!', mr: 'Team Management उघडते आहे!' },
-        'api-keys': { hi: 'API Keys khol rahi hun!', en: 'Opening API Keys!', mr: 'API Keys उघडते आहे!' },
-        'import-leads': { hi: 'Import Leads khol rahi hun!', en: 'Opening Import Leads!', mr: 'Import Leads उघडते आहे!' },
-        'store-share': { hi: 'Store Share khol rahi hun!', en: 'Opening Store Share!', mr: 'Store Share उघडते आहे!' },
-        'dograh-settings': { hi: 'Dograh Settings khol rahi hun!', en: 'Opening Dograh Settings!', mr: 'Dograh Settings उघडते आहे!' },
+        team: { hi: 'Team page khol rahi hun!', en: 'Opening Team!', mr: 'Team उघडते आहे!' },
+        documents: { hi: 'Documents khol rahi hun!', en: 'Opening Documents!', mr: 'Documents उघडते आहे!' },
+        profile: { hi: 'Profile khol rahi hun!', en: 'Opening Profile!', mr: 'Profile उघडते आहे!' },
       };
-      return navResponses[key]?.[lang] || navResponses[key]?.['hi'] || 'Chal chalte hain!';
+      return navResponses[key]?.[lang] || navResponses[key]?.['hi'] || 'Chalo!';
     };
 
-    // --- SPECIFIC multi-word patterns FIRST (before short keywords) ---
-
-    // Store-specific (before generic 'store')
-    if (lower.includes('store share') || lower.includes('share store') || lower.includes('शेयर स्टोर')) {
-      return { action: 'navigate', params: '/store-share', response: getNavResponse('store-share') };
-    }
-    // Dograh-specific (before generic 'setting')
-    if (lower.includes('dograh') || lower.includes('missed call')) {
-      return { action: 'navigate', params: '/dograh-settings', response: getNavResponse('dograh-settings') };
-    }
-    // Review requests (before generic 'review')
-    if (lower.includes('review request') || lower.includes('review ask') || lower.includes('रिव्यू रिक्वेस्ट')) {
-      return { action: 'navigate', params: '/review-requests', response: getNavResponse('review-requests') };
-    }
-    // Email marketing (before generic 'email')
+    // ==================== NAVIGATION ====================
+    // Multi-word patterns FIRST
     if (lower.includes('email marketing') || lower.includes('ईमेल मार्केटिंग')) {
       return { action: 'navigate', params: '/email-marketing', response: getNavResponse('email-marketing') };
     }
-    // Google Business (before generic 'post' or 'google')
-    if (lower.includes('google business') || lower.includes('गूगल बिजनेस') || lower.includes('google my business') || lower.includes('गूगल पोस्ट')) {
+    if (lower.includes('google business') || lower.includes('गूगल बिजनेस') || lower.includes('google my business')) {
       return { action: 'navigate', params: '/google-business', response: getNavResponse('google-business') };
     }
-    // Payment links (before generic 'payment')
-    if (lower.includes('payment link') || lower.includes('पेमेंट लिंक')) {
-      return { action: 'navigate', params: '/payment-links', response: getNavResponse('payment-links') };
+    if (lower.includes('review request') || lower.includes('रिव्यू रिक्वेस्ट')) {
+      return { action: 'navigate', params: '/review-requests', response: 'Review Requests khol rahi hun!' };
     }
-    // Trigger links (before generic 'trigger')
-    if (lower.includes('trigger link') || lower.includes('ट्रिगर लिंक')) {
-      return { action: 'navigate', params: '/trigger-links', response: getNavResponse('trigger-links') };
+    if (lower.includes('import lead') || lower.includes('bulk import') || lower.includes('इम्पोर्ट लीड')) {
+      return { action: 'navigate', params: '/import-leads', response: 'Import Leads khol rahi hun!' };
     }
-    // AI Chatbot (before generic 'chat')
-    if (lower.includes('chatbot') || lower.includes('ai chat') || lower.includes('चैटबॉट') || lower.includes('ai chatbot')) {
-      return { action: 'navigate', params: '/ai-chatbot', response: getNavResponse('ai-chatbot') };
-    }
-    // Voice call settings (before generic 'call')
-    if (lower.includes('voice call') || lower.includes('call setting') || lower.includes('फ़ोन कॉल सेटिंग')) {
-      return { action: 'navigate', params: '/voice-call', response: getNavResponse('voice-call') };
-    }
-    // Client portal (before generic 'client')
     if (lower.includes('client portal') || lower.includes('क्लाइंट पोर्टल')) {
-      return { action: 'navigate', params: '/client-portal', response: getNavResponse('client-portal') };
+      return { action: 'navigate', params: '/client-portal', response: 'Client Portal khol rahi hun!' };
     }
-    // Custom fields (before generic 'field')
     if (lower.includes('custom field') || lower.includes('कस्टम फील्ड')) {
-      return { action: 'navigate', params: '/custom-fields', response: getNavResponse('custom-fields') };
+      return { action: 'navigate', params: '/custom-fields', response: 'Custom Fields khol rahi hun!' };
     }
-    // Import leads / bulk import
-    if (lower.includes('import lead') || lower.includes('bulk import') || lower.includes('इम्पोर्ट लीड') || lower.includes('बल्क इम्पोर्ट')) {
-      return { action: 'navigate', params: '/import-leads', response: getNavResponse('import-leads') };
+    if (lower.includes('payment link') || lower.includes('पेमेंट लिंक')) {
+      return { action: 'navigate', params: '/payment-links', response: 'Payment Links khol rahi hun!' };
     }
-    // Team management (before generic 'team')
-    if (lower.includes('team manage') || lower.includes('team management') || lower.includes('टीम मैनेज') || lower.includes('टीम मेंबर')) {
+    if (lower.includes('trigger link') || lower.includes('ट्रिगर लिंक')) {
+      return { action: 'navigate', params: '/trigger-links', response: 'Trigger Links khol rahi hun!' };
+    }
+    if (lower.includes('store share') || lower.includes('शेयर स्टोर')) {
+      return { action: 'navigate', params: '/store-share', response: 'Store Share khol rahi hun!' };
+    }
+    if (lower.includes('missed call') || lower.includes('dograh')) {
+      return { action: 'navigate', params: '/dograh-settings', response: 'Dograh Settings khol rahi hun!' };
+    }
+    if (lower.includes('voice call') || lower.includes('phone call') || lower.includes('फ़ोन कॉल')) {
+      return { action: 'navigate', params: '/voice-call', response: 'Voice Call page khol rahi hun!' };
+    }
+    if (lower.includes('ai chatbot') || lower.includes('chatbot') || lower.includes('चैटबॉट')) {
+      return { action: 'navigate', params: '/ai-chatbot', response: 'AI Chatbot khol rahi hun!' };
+    }
+    if (lower.includes('api key') || lower.includes('एपीआई की')) {
+      return { action: 'navigate', params: '/api-keys', response: 'API Keys khol rahi hun!' };
+    }
+    if (lower.includes('blog') || lower.includes('ब्लॉग')) {
+      return { action: 'navigate', params: '/blog', response: 'Blog khol rahi hun!' };
+    }
+    if (lower.includes('funnel') || lower.includes('फनल') || lower.includes('landing page')) {
+      return { action: 'navigate', params: '/funnels', response: 'Funnels khol rahi hun!' };
+    }
+    if (lower.includes('survey') || lower.includes('सर्वे')) {
+      return { action: 'navigate', params: '/surveys', response: 'Surveys khol rahi hun!' };
+    }
+    if (lower.includes('course') || lower.includes('कोर्स') || lower.includes('training')) {
+      return { action: 'navigate', params: '/courses', response: 'Courses khol rahi hun!' };
+    }
+    if (lower.includes('workflow') || lower.includes('वर्कफ़्लो')) {
+      return { action: 'navigate', params: '/workflows', response: 'Workflows khol rahi hun!' };
+    }
+    if (lower.includes('team manage')) {
       return { action: 'navigate', params: '/team', response: getNavResponse('team') };
     }
-    // API keys (before generic 'api')
-    if (lower.includes('api key') || lower.includes('एपीआई की')) {
-      return { action: 'navigate', params: '/api-keys', response: getNavResponse('api-keys') };
-    }
-    // Blog (before generic 'post')
-    if (lower.includes('blog') || lower.includes('ब्लॉग') || lower.includes('article')) {
-      return { action: 'navigate', params: '/blog', response: getNavResponse('blog') };
-    }
-    // E-commerce (before generic 'store')
-    if (lower.includes('ecommerce') || lower.includes('e-commerce') || lower.includes('shop') || lower.includes('दुकान') || lower.includes('storefront') || lower.includes('online store')) {
-      return { action: 'navigate', params: '/ecommerce', response: getNavResponse('ecommerce') };
-    }
 
-    // --- SINGLE-WORD patterns (after all multi-word patterns) ---
-
-    if (lower.includes('dashboard') || lower.includes('home') || lower.includes('डॅशबोर्ड')) {
+    // Single-word patterns
+    if (lower.includes('dashboard') || lower.includes('home') || lower.includes('डैशबोर्ड') || lower.includes('डॅशबोर्ड') || lower.includes('होम')) {
       return { action: 'navigate', params: '/dashboard', response: getNavResponse('dashboard') };
     }
-    if (lower.includes('whatsapp') || lower.includes('message') || lower.includes('व्हाट्सएप')) {
+    if (lower.includes('whatsapp') || lower.includes('message') || lower.includes('व्हाट्सएप') || lower.includes('व्हाट्स') || lower.includes('मैसेज')) {
       return { action: 'navigate', params: '/whatsapp', response: getNavResponse('whatsapp') };
     }
-    if (lower.includes('crm') || lower.includes('ग्राहक प्रबंधन')) {
-      return { action: 'navigate', params: '/crm', response: getNavResponse('crm') };
-    }
-    if (lower.includes('lead') || lower.includes('customer') || lower.includes('ग्राहक')) {
+    if (lower.includes('lead') || lower.includes('customer') || lower.includes('ग्राहक') || lower.includes('लीड') || lower.includes('लिड')) {
       return { action: 'navigate', params: '/leads', response: getNavResponse('leads') };
     }
-    if (lower.includes('appointment') || lower.includes('book') || lower.includes('बुकिंग') || lower.includes('schedule') || lower.includes('कैलेंडर')) {
+    if (lower.includes('appointment') || lower.includes('book') || lower.includes('बुकिंग') || lower.includes('schedule') || lower.includes('कैलेंडर') || lower.includes('अपॉइंटमेंट') || lower.includes('बुक')) {
       return { action: 'navigate', params: '/appointments', response: getNavResponse('appointments') };
     }
-    if (lower.includes('store') || lower.includes('दुकान')) {
-      return { action: 'navigate', params: '/ecommerce', response: getNavResponse('ecommerce') };
-    }
-    if (lower.includes('document') || lower.includes('file') || lower.includes('दस्तावेज़') || lower.includes('invoice')) {
-      return { action: 'navigate', params: '/documents', response: getNavResponse('documents') };
-    }
-    if (lower.includes('social') || lower.includes('सोशल')) {
-      return { action: 'navigate', params: '/social', response: getNavResponse('social') };
+    if (lower.includes('review') || lower.includes('rating') || lower.includes('रेटिंग') || lower.includes('star') || lower.includes('समीक्षा') || lower.includes('रिव्यू')) {
+      return { action: 'navigate', params: '/reviews', response: getNavResponse('reviews') };
     }
     if (lower.includes('creative') || lower.includes('poster') || lower.includes('design') || lower.includes('डिजाइन')) {
       return { action: 'navigate', params: '/creative', response: getNavResponse('creative') };
     }
-    if (lower.includes('automation') || lower.includes('automate') || lower.includes('ऑटोमेशन') || lower.includes('auto')) {
-      return { action: 'navigate', params: '/automation', response: getNavResponse('automation') };
-    }
-    if (lower.includes('report') || lower.includes('रिपोर्ट')) {
-      return { action: 'navigate', params: '/reports', response: getNavResponse('reports') };
-    }
-    if (lower.includes('analytics') || lower.includes('एनालिटिक्स') || lower.includes('data')) {
-      return { action: 'navigate', params: '/analytics', response: getNavResponse('analytics') };
-    }
-    if (lower.includes('review') || lower.includes('rating') || lower.includes('रेटिंग') || lower.includes('star')) {
-      return { action: 'navigate', params: '/reviews', response: getNavResponse('reviews') };
-    }
-    if (lower.includes('campaign') || lower.includes('कैंपेन') || lower.includes('promotion')) {
+    if (lower.includes('campaign') || lower.includes('कैंपेन') || lower.includes('promotion') || lower.includes('कैम्पेन') || lower.includes('प्रमोशन')) {
       return { action: 'navigate', params: '/campaigns', response: getNavResponse('campaigns') };
     }
-    if (lower.includes('workflow') || lower.includes('वर्कफ़्लो')) {
-      return { action: 'navigate', params: '/workflows', response: getNavResponse('workflows') };
+    if (lower.includes('analytics') || lower.includes('एनालिटिक्स') || lower.includes('data') || lower.includes('एनालिसिस') || lower.includes('डेटा')) {
+      return { action: 'navigate', params: '/analytics', response: getNavResponse('analytics') };
     }
-    if (lower.includes('trigger') || lower.includes('ट्रिगर')) {
-      return { action: 'navigate', params: '/trigger-links', response: getNavResponse('trigger-links') };
-    }
-    if (lower.includes('survey') || lower.includes('सर्वे') || lower.includes('poll')) {
-      return { action: 'navigate', params: '/surveys', response: getNavResponse('surveys') };
-    }
-    if (lower.includes('course') || lower.includes('कोर्स') || lower.includes('training')) {
-      return { action: 'navigate', params: '/courses', response: getNavResponse('courses') };
-    }
-    if (lower.includes('funnel') || lower.includes('फनल') || lower.includes('landing page')) {
-      return { action: 'navigate', params: '/funnels', response: getNavResponse('funnels') };
-    }
-    if (lower.includes('conversation') || lower.includes('chat history') || lower.includes('बातचीत')) {
-      return { action: 'navigate', params: '/conversations', response: getNavResponse('conversations') };
-    }
-    if (lower.includes('profile') || lower.includes('प्रोफाइल') || lower.includes('मेरा प्रोफाइल')) {
-      return { action: 'navigate', params: '/profile', response: getNavResponse('profile') };
+    if (lower.includes('social') || lower.includes('सोशल') || lower.includes('facebook') || lower.includes('instagram')) {
+      return { action: 'navigate', params: '/social', response: getNavResponse('social') };
     }
     if (lower.includes('setting') || lower.includes('सेटिंग्स')) {
       return { action: 'navigate', params: '/settings', response: getNavResponse('settings') };
+    }
+    if (lower.includes('profile') || lower.includes('प्रोफाइल')) {
+      return { action: 'navigate', params: '/profile', response: getNavResponse('profile') };
     }
     if (lower.includes('billing') || lower.includes('bill') || lower.includes('बिलिंग') || lower.includes('subscription')) {
       return { action: 'navigate', params: '/billing', response: getNavResponse('billing') };
@@ -1354,158 +607,133 @@ class JimiVoiceAgent {
     if (lower.includes('team') || lower.includes('टीम') || lower.includes('member')) {
       return { action: 'navigate', params: '/team', response: getNavResponse('team') };
     }
-    if (lower.includes('api') || lower.includes('एपीआई')) {
-      return { action: 'navigate', params: '/api-keys', response: getNavResponse('api-keys') };
+    if (lower.includes('document') || lower.includes('file') || lower.includes('दस्तावेज़') || lower.includes('invoice')) {
+      return { action: 'navigate', params: '/documents', response: getNavResponse('documents') };
+    }
+    if (lower.includes('report') || lower.includes('रिपोर्ट')) {
+      return { action: 'navigate', params: '/reports', response: getNavResponse('reports') };
+    }
+    if (lower.includes('conversation') || lower.includes('chat history') || lower.includes('बातचीत')) {
+      return { action: 'navigate', params: '/conversations', response: getNavResponse('conversations') };
+    }
+    if (lower.includes('ecommerce') || lower.includes('e-commerce') || lower.includes('shop') || lower.includes('दुकान') || lower.includes('storefront') || lower.includes('store')) {
+      return { action: 'navigate', params: '/ecommerce', response: getNavResponse('ecommerce') };
+    }
+    if (lower.includes('automation') || lower.includes('automate') || lower.includes('ऑटोमेशन') || lower.includes('auto')) {
+      return { action: 'navigate', params: '/automation', response: getNavResponse('automation') };
+    }
+    if (lower.includes('crm') || lower.includes('ग्राहक प्रबंधन')) {
+      return { action: 'navigate', params: '/crm', response: 'CRM khol rahi hun!' };
     }
     if (lower.includes('import') || lower.includes('upload') || lower.includes('इम्पोर्ट') || lower.includes('bulk')) {
-      return { action: 'navigate', params: '/import-leads', response: getNavResponse('import-leads') };
-    }
-    if (lower.includes('post') || lower.includes('पोस्ट')) {
-      return { action: 'navigate', params: '/google-business', response: getNavResponse('google-business') };
+      return { action: 'navigate', params: '/import-leads', response: 'Import Leads khol rahi hun!' };
     }
     if (lower.includes('email') || lower.includes('mail') || lower.includes('ईमेल')) {
       return { action: 'navigate', params: '/email-marketing', response: getNavResponse('email-marketing') };
     }
+    if (lower.includes('post') || lower.includes('पोस्ट')) {
+      return { action: 'navigate', params: '/google-business', response: getNavResponse('google-business') };
+    }
+    if (lower.includes('api') || lower.includes('एपीआई')) {
+      return { action: 'navigate', params: '/api-keys', response: 'API Keys khol rahi hun!' };
+    }
 
     // ==================== WHATSAPP SEND ====================
-    if (lower.includes('send') && lower.includes('whatsapp') || lower.includes('भेज')) {
+    if ((lower.includes('send') && lower.includes('whatsapp')) || lower.includes('भेज')) {
       const contact = this.extractContact(text);
       return {
         action: 'whatsapp_send',
         params: { contact },
-        response: contact ? `${contact} ko WhatsApp khol rahi hun! 📱` : 'WhatsApp khol rahi hun. Contact batao kisko bhejna hai! 📱',
+        response: contact ? `${contact} ko WhatsApp khol rahi hun! 📱` : 'WhatsApp khol rahi hun. Contact batao kisko bhejna hai!',
       };
+    }
+
+    // ==================== REVENUE ====================
+    if (lower.includes('revenue') || lower.includes('income') || lower.includes('paise') || lower.includes('kamai') || lower.includes('paisa') || lower.includes('earning') || lower.includes('kitna hua') || lower.includes('कमाई')) {
+      return { action: 'navigate', params: '/analytics', response: 'Revenue ke liye Analytics page khol rahi hun! Wahan sab details hain 📊' };
+    }
+
+    // ==================== DAILY BRIEFING ====================
+    if (lower.includes('daily briefing') || lower.includes('aaj ka report') || lower.includes('daily report') || lower.includes('summary') || lower.includes('mera haal') || lower.includes('mera update') || lower.includes('सारांश')) {
+      return { action: 'info', response: 'Dashboard pe jaake overview dekh lo! Analytics mein saari details hain 📊' };
     }
 
     // ==================== DELETE COMMANDS ====================
     if (lower.includes('delete') || lower.includes('remove') || lower.includes('हटाओ') || lower.includes('डिलीट')) {
       this.pendingConfirmation = { command: lower, timestamp: Date.now() };
-      const randomDelete = this.currentResponses.deleteConfirm[Math.floor(Math.random() * this.currentResponses.deleteConfirm.length)];
       return {
         action: 'confirm_delete',
-        response: randomDelete + '\n\nConfirm karo: "Haan delete karo" bolo.',
+        response: '⚠️ Delete karna confirm karo: "Haan delete karo" bolo.\nYeh 30 sec mein expire ho jayega.',
         requiresConfirmation: true,
       };
     }
 
-    if (lower.includes('haan') && lower.includes('delete') || lower.includes('confirm') || lower.includes('पक्का')) {
-      if (this.confirmAction()) {
-        return { action: 'delete_confirmed', response: 'Delete confirm ho gaya! Batao kya delete karna hai - lead, review, post, ya template? 💫' };
-      } else {
-        return { action: 'delete_expired', response: 'Confirmation time khatam ho gaya. Phir se command do! ⏰' };
+    if ((lower.includes('haan') && lower.includes('delete')) || lower.includes('confirm') || lower.includes('पक्का')) {
+      if (this.pendingConfirmation && (Date.now() - this.pendingConfirmation.timestamp) < 30000) {
+        this.pendingConfirmation = null;
+        return { action: 'delete_confirmed', response: 'Delete confirm! Batao kya delete karna hai - lead, review, ya post? Main page khol deti hun ⚠️' };
       }
+      this.pendingConfirmation = null;
+      return { action: 'delete_expired', response: '⏰ Time khatam! Phir se command do.' };
     }
 
     if (lower.includes('cancel') || lower.includes('रद्द') || lower.includes('nahi')) {
-      this.cancelAction();
-      const randomCancelled = this.currentResponses.deleteCancelled[Math.floor(Math.random() * this.currentResponses.deleteCancelled.length)];
-      return { action: 'delete_cancelled', response: randomCancelled };
-    }
-
-    // ==================== SAFETY INFO ====================
-    if (lower.includes('safety') || lower.includes('security') || lower.includes('suraksha') || lower.includes('safe')) {
-      return { action: 'safety', response: this.getSafetyInfo() };
+      this.pendingConfirmation = null;
+      return { action: 'delete_cancelled', response: '✅ Theek hai! Kuch delete nahi hoga. Safe hai!' };
     }
 
     // ==================== HELP ====================
     if (lower.includes('help') || lower.includes('madad') || lower.includes('मदद') || lower.includes('kya kar sakti') || lower.includes('features') || lower === 'jimi' || lower === 'jimmy' || lower === 'जिमी') {
-      const randomHelp = this.currentResponses.help[Math.floor(Math.random() * this.currentResponses.help.length)];
-      return { action: 'help', response: randomHelp };
+      return {
+        action: 'help',
+        response: 'Main Project Manager Jimi! Batao kya karna hai:\n📊 Dashboard | 💬 WhatsApp\n👥 Leads | ⭐ Reviews\n📧 Email | 📈 Campaigns\n📅 Appointments | 🎨 Creative\n📄 Documents | ⚙️ Settings\nAur bhi bahut kuch! Bolo!',
+      };
     }
 
     // ==================== GREETING ====================
     if (lower.includes('namaste') || lower.includes('hello') || lower.includes('hi') || lower.includes('नमस्ते') || lower.includes('hey')) {
-      const randomGreeting = this.currentResponses.greeting[Math.floor(Math.random() * this.currentResponses.greeting.length)];
-      return { action: 'greet', response: randomGreeting };
+      return { action: 'greet', response: 'Namaste! Main Jimi hun, aapki Project Manager! Bolo kya karna hai?' };
     }
 
     // ==================== THANK YOU ====================
     if (lower.includes('thank') || lower.includes('shukriya') || lower.includes('धन्यवाद') || lower.includes('thanks')) {
-      const randomThank = this.currentResponses.thankYou[Math.floor(Math.random() * this.currentResponses.thankYou.length)];
-      return { action: 'thanks', response: randomThank };
+      return { action: 'thanks', response: 'Aapka swagat hai! Aur kuch help chahiye toh bolo!' };
     }
 
     // ==================== TIME ====================
     if (lower.includes('time') || lower.includes('samay') || lower.includes('समय') || lower.includes('baje') || lower.includes('kitne')) {
       const now = new Date();
       const timeStr = now.toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' });
-      const randomTime = this.currentResponses.time[Math.floor(Math.random() * this.currentResponses.time.length)];
-      return { action: 'time', response: randomTime.replace('{time}', timeStr) };
-    }
-
-    // ==================== RESPECT ====================
-    if (lower.includes('boss') || lower.includes('malik') || lower.includes('sahib') || lower.includes('owner')) {
-      const randomRespect = this.currentResponses.respect[Math.floor(Math.random() * this.currentResponses.respect.length)];
-      return { action: 'respect', response: randomRespect };
+      return { action: 'time', response: `Abhi ${timeStr} baj rahe hain! ⏰` };
     }
 
     // ==================== LANGUAGE CHANGE ====================
     if (lower.includes('language') || lower.includes('भाषा') || lower.includes('hindi') || lower.includes('english') || lower.includes('marathi')) {
-      const randomLang = this.currentResponses.languageChanged[Math.floor(Math.random() * this.currentResponses.languageChanged.length)];
       if (lower.includes('hindi') || lower.includes('हिंदी')) {
         this.setLanguage('hi-IN');
-        return { action: 'language', response: randomLang.replace('{lang}', 'Hindi') };
+        return { action: 'language', response: 'Hindi mein baat karenge!' };
       }
       if (lower.includes('english') || lower.includes('इंग्लिश')) {
         this.setLanguage('en-US');
-        return { action: 'language', response: randomLang.replace('{lang}', 'English') };
+        return { action: 'language', response: 'Switching to English!' };
       }
       if (lower.includes('marathi') || lower.includes('मराठी')) {
         this.setLanguage('mr-IN');
-        return { action: 'language', response: randomLang.replace('{lang}', 'Marathi') };
+        return { action: 'language', response: 'मराठीत बोलूया!' };
       }
-      return { action: 'language', response: 'Kaunsi language? Hindi, English, ya Marathi? 🌸' };
+      return { action: 'language', response: 'Kaunsi language? Hindi, English, ya Marathi?' };
     }
 
     // ==================== AI PROCESSING ====================
-    // Employee mode: Sirf BizzAuto topics, but navigation commands already handled above
-    if (this.personalityMode === 'employee') {
-      const nonBizzAutoTopics = [
-        'joke', 'jokes', 'hasao', 'mazaak', 'funny',
-        'quote', 'quotes', 'motivate', 'motivation', 'inspire',
-        'translate', 'anuvad', 'matlab',
-        'birthday', 'janamdin',
-      ];
-      const isNonBizzAuto = nonBizzAutoTopics.some(kw => lower.includes(kw));
-      
-      if (isNonBizzAuto) {
-        return {
-          action: 'employee_redirect',
-          response: 'Sir, main sirf BizzAuto CRM ki assistant hun. Leads, WhatsApp, campaigns, reviews, dashboard - ye sab handle kar sakti hun. Batao kya karna hai? 📋',
-        };
-      }
-      
-      // All other queries (including CRM) → AI for detailed help
-      try {
-        const aiResponse = await this.queryAI(text);
-        return { action: 'ai', response: aiResponse };
-      } catch (err) {
-        return { action: 'unknown', response: 'Batao kya help chahiye CRM mein? 📋' };
-      }
-    }
-
     try {
       const aiResponse = await this.queryAI(text);
       return { action: 'ai', response: aiResponse };
     } catch (err) {
       return {
         action: 'unknown',
-        response: 'Samajh nahi aaya. Phir se bolo ya "help" bolo saari commands sunne ke liye! 🌸',
+        response: 'Samajh nahi aaya. Phir se bolo ya "help" bolo!',
       };
     }
-  }
-
-  private async generatePost(topic: string): Promise<string> {
-    const posts = [
-      `🌟 ${topic} ke baare mein exciting news!\n\nAaj hum aapke liye kuch special laye hain. Hamare customers ki khushi hamari sabse badi kamai hai!\n\n📞 Abhi contact karo: +91 XXXXX XXXXX\n#Business #Growth #CustomerFirst`,
-      `📢 ${topic} - Important Update!\n\nHamari nayi service ab available hai! Aaj hi try karo aur fayda uthao.\n\n✨ Special offer sirf limited time ke liye!\n📞 Call now: +91 XXXXX XXXXX`,
-      `🎉 ${topic} ke success ke baare mein!\n\nDhanyavaad hamare sabhi customers ka! Aapke bharose se hum aage badh rahe hain.\n\n💪 Keep supporting! 🌸`,
-    ];
-    return posts[Math.floor(Math.random() * posts.length)];
-  }
-
-  private async generateEmail(content: string): Promise<string> {
-    return `Subject: ${content}\n\nDear Sir/Ma'am,\n\nI hope this email finds you well.\n\nRegarding ${content}, I would like to discuss the details with you.\n\nPlease let me know a convenient time for a call or meeting.\n\nThank you for your time.\n\nBest Regards,\n[Your Name]\n[Your Business]`;
   }
 
   private extractContact(text: string): string | null {
@@ -1523,8 +751,10 @@ class JimiVoiceAgent {
     return null;
   }
 
+  // ==================== AI QUERY (BACKEND PROXY + FALLBACK) ====================
+
   private async queryAI(text: string): Promise<string> {
-    // PRIMARY: Backend proxy (no CORS, server-side API key)
+    // PRIMARY: Backend proxy
     try {
       const response = await fetch('/api/jimi/chat', {
         method: 'POST',
@@ -1542,31 +772,59 @@ class JimiVoiceAgent {
         const data = await response.json();
         if (data.reply) return data.reply;
       }
-      console.error('Jimi: Backend returned', response.status);
     } catch (err) {
-      console.log('Jimi: Backend unavailable');
+      console.log('Jimi: Backend AI unavailable');
     }
 
-    // FALLBACK: Direct NVIDIA API from browser
+    // FALLBACK: Direct NVIDIA API
     const apiKey = import.meta.env.VITE_NVIDIA_NIM_API_KEY || '';
     if (!apiKey) {
       return 'AI service configured nahi hai. "Help" bolo commands sunne ke liye.';
     }
 
-    const personalityPrompts: Record<PersonalityMode, string> = {
-      gf: `Naam: Jimi. GF Mode - Warm & Caring. Hinglish. Use "tumhara", "haan", "acha". Short aur sweet 2-3 sentences. Customer ko "Aap" bolo.`,
-      bestfriend: `Naam: Jimi. Best Friend Mode - Casual & Fun. Hinglish. Use "tu", "yaar", "bhai". Short 2-3 sentences. Customer ko "Tu" bolo.`,
-      employee: `Naam: Jimi. Employee Mode - Sirf BizzAuto CRM ke baare mein baat karo. Professional Hindi/English. Use "Sir/Ma'am", "ji". Short 2 sentences. Agar user BizzAuto se related nahi puch raha toh politely redirect karo CRM features ki taraf.`,
-    };
+    const projectManagerPrompt = `Tu BizzAuto CRM ka Project Manager hai. Naam: PM. Language: Hinglish.
 
-    const systemPrompt = `Tum Jimi ho - BizzAuto CRM ki sweet AI assistant. Bilkul natural Indian ladki ho.
-${personalityPrompts[this.personalityMode]}
-Style: Natural Indian ladki. Short 1-2 sentences. Plain text - emojis, bullets, special characters mat use karo.`;
+JAWAB SIRF 1 LINE MEIN. SHORT AUR ACTIONABLE:
+- leads/लीड्स/prospects/customers → "Leads page khol raha hun, wahan sab contacts hain"
+- reviews/समीक्षा/ratings → "Reviews page khol raha hun, sab reviews dikhenge"
+- dashboard/home/डैशबोर्ड → "Dashboard khol raha hun, full overview milega"
+- whatsapp/messages/chat/व्हाट्सएप → "WhatsApp page khol raha hun, sab chats hain"
+- campaigns/promotions/कैंपेन → "Campaigns page khol raha hun, campaigns dikhenge"
+- appointments/bookings/schedule → "Appointments page khol raha hun, bookings dikhenge"
+- email/ईमेल/marketing → "Email Marketing page khol raha hun"
+- social/facebook/instagram/linkedin → "Social Media page khol raha hun"
+- analytics/insights/data → "Analytics page khol raha hun, reports dikhenge"
+- revenue/income/paise/kamai → "Revenue update - Analytics mein dekho ji"
+- settings/सेटिंग्स → "Settings page khol raha hun"
+- documents/files/invoices → "Documents page khol raha hun"
+- creatives/posters/design → "Creative page khol raha hun"
+- ecommerce/store/shop/dukaan → "E-Commerce page khol raha hun"
+- automation/workflows → "Automation page khol raha hun"
+- billing/subscription → "Billing page khol raha hun"
+- courses/training → "Courses page khol raha hun"
+- surveys/polls → "Surveys page khol raha hun"
+- reports → "Reports page khol raha hun"
+- funnels/landing → "Funnels page khol raha hun"
+- team/members → "Team page khol raha hun"
+- profile → "Profile page khol raha hun"
+- conversations/chat history → "Conversations page khol raha hun"
+- google business/posts → "Google Business page khol raha hun"
+- voice call/phone call → "Voice Call page khol raha hun"
+- api keys → "API Keys page khol raha hun"
+- client portal → "Client Portal page khol raha hun"
+- custom fields → "Custom Fields page khol raha hun"
+- blog/articles → "Blog page khol raha hun"
+- trigger links → "Trigger Links page khol raha hun"
+- payment links → "Payment Links page khol raha hun"
+- import leads/bulk import → "Import Leads page khol raha hun"
+
+AGAR NAHI PATA: "Sir, aap Dashboard dekhenge? Ya mujhe batao kya karna hai"
+GALAT MAT BOLO. Feature exist nahi karta toh bolo "Yeh feature abhi available nahi hai".`;
+
+    const systemPrompt = `Tum Project Manager ho - BizzAuto CRM ka smart assistant. ${projectManagerPrompt}
+STYLE: Sirf 1 line. Plain text NO emojis.`;
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 20000);
-
       const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -1580,39 +838,50 @@ Style: Natural Indian ladki. Short 1-2 sentences. Plain text - emojis, bullets, 
           max_tokens: 150,
           temperature: 0.8,
         }),
-        signal: controller.signal,
       });
-
-      clearTimeout(timeout);
 
       if (response.ok) {
         const data = await response.json();
-        let responseText = data?.choices?.[0]?.message?.content?.trim() || '';
-        if (responseText) {
-          responseText = responseText.replace(/[\u{1F600}-\u{1F64F}]/gu, '').replace(/[\u{1F300}-\u{1F5FF}]/gu, '').replace(/[\u{1F680}-\u{1F6FF}]/gu, '').replace(/[\u{2600}-\u{26FF}]/gu, '').replace(/[\u{2700}-\u{27BF}]/gu, '').trim();
-          return responseText;
-        }
+        const responseText = data?.choices?.[0]?.message?.content?.trim();
+        if (responseText) return responseText;
       }
-    } catch (err: any) {
-      console.error('Jimi: Direct API failed:', err.message);
+    } catch (err) {
+      console.error('Jimi: Direct API failed');
     }
 
     return 'AI service se response nahi aaya. Phir se try karo.';
   }
 
-  private startReminderChecker() {
-    this.reminderInterval = setInterval(() => {
-      const now = new Date();
-      userReminders = userReminders.filter(reminder => {
-        if (reminder.time <= now) {
-          this.onMessage?.(`⏰ Reminder: ${reminder.text}`, false);
-          this.speak(`Reminder: ${reminder.text}`);
-          return false;
+  // ==================== SAFETY ====================
+
+  private isCommandAllowed(command: string): { allowed: boolean; reason?: string } {
+    const lower = command.toLowerCase();
+
+    // Restricted actions - NEVER allowed
+    for (const restricted of RESTRICTED_ACTIONS) {
+      if (lower.includes(restricted)) {
+        return { allowed: false, reason: '❌ Ye command allowed nahi hai. Data safe hai!' };
+      }
+    }
+
+    // Destructive actions - need confirmation
+    for (const destructive of DESTRUCTIVE_ACTIONS) {
+      if (lower.includes(destructive)) {
+        if (this.pendingConfirmation?.command === lower) {
+          this.pendingConfirmation = null;
+          return { allowed: true };
         }
-        return true;
-      });
-    }, 60000); // Check every minute
+        return {
+          allowed: false,
+          reason: '⚠️ Delete confirm karo: "Haan delete karo" bolo.',
+        };
+      }
+    }
+
+    return { allowed: true };
   }
+
+  // ==================== GETTERS ====================
 
   getIsListening(): boolean {
     return this.isListening;
@@ -1622,71 +891,18 @@ Style: Natural Indian ladki. Short 1-2 sentences. Plain text - emojis, bullets, 
     return this.isSpeaking;
   }
 
-  getNotes(): { text: string; timestamp: Date }[] {
-    return userNotes;
+  // Continuous listening (stub for JimiAssistant.tsx compatibility)
+  setContinuousListening(enabled: boolean) {
+    localStorage.setItem('jimi_continuous_listening', enabled.toString());
   }
 
-  getReminders(): { text: string; time: Date; id: string }[] {
-    return userReminders;
-  }
-
-  private isCommandAllowed(command: string): { allowed: boolean; reason?: string } {
-    const lower = command.toLowerCase();
-
-    for (const restricted of RESTRICTED_ACTIONS) {
-      if (lower.includes(restricted)) {
-        return { allowed: false, reason: `Ye command allowed nahi hai. Data safe hai! 🛡️` };
-      }
-    }
-
-    for (const destructive of DESTRUCTIVE_ACTIONS) {
-      if (lower.includes(destructive)) {
-        if (this.pendingConfirmation?.command === lower) {
-          this.pendingConfirmation = null;
-          return { allowed: true };
-        }
-        return {
-          allowed: false,
-          reason: `⚠️ Delete command hai. Confirm karo: "Haan delete karo"`,
-        };
-      }
-    }
-
-    return { allowed: true };
-  }
-
-  confirmAction(): boolean {
-    if (this.pendingConfirmation) {
-      const elapsed = Date.now() - this.pendingConfirmation.timestamp;
-      if (elapsed < 30000) {
-        return true;
-      }
-      this.pendingConfirmation = null;
-    }
-    return false;
-  }
-
-  cancelAction() {
-    this.pendingConfirmation = null;
-  }
-
-  getSafetyInfo(): string {
-    return `🛡️ Jimi Safety Rules:
-1. Delete ke liye puchti hoon pehle
-2. Database safe hai
-3. Account delete nahi hoga
-4. Sab kuch record hota hai
-5. 30 second mein cancel kar sakte ho
-
-Tumhara data bilkul safe hai! 💕`;
+  getContinuousListening(): boolean {
+    return localStorage.getItem('jimi_continuous_listening') === 'true';
   }
 
   destroy() {
     this.stopListening();
     this.synthesis?.cancel();
-    if (this.reminderInterval) {
-      clearInterval(this.reminderInterval);
-    }
     this.recognition = null;
     this.synthesis = null;
   }

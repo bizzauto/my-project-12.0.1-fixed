@@ -30,6 +30,7 @@ const JimiAssistant: React.FC = () => {
   const [showModeMenu, setShowModeMenu] = useState(false);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(jimi.getVoiceSettings());
+  const [continuousListening, setContinuousListening] = useState(jimi.getContinuousListening());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -228,7 +229,7 @@ const JimiAssistant: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-white font-semibold flex items-center gap-2">
-                  Jimi {PERSONALITY_MODES.find(m => m.code === selectedMode)?.emoji}
+                  Jimi0 (Backup) {PERSONALITY_MODES.find(m => m.code === selectedMode)?.emoji}
                   <Shield size={14} className="text-green-300" title="Protected Mode" />
                 </h3>
                 <p className="text-white/80 text-xs">
@@ -345,7 +346,7 @@ const JimiAssistant: React.FC = () => {
 
           {/* Voice Settings Panel */}
           {showVoiceSettings && (
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-3 border-b border-purple-400">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-3 border-b border-purple-400 overflow-y-auto" style={{ maxHeight: '350px' }}>
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-white font-semibold text-sm flex items-center gap-2">
                   <Settings size={14} /> Voice Settings
@@ -447,6 +448,7 @@ const JimiAssistant: React.FC = () => {
                   <div className="text-white text-xs mb-1.5">Voice Style (MYRA)</div>
                   <div className="grid grid-cols-3 gap-1.5">
                     {[
+                      { value: 'myra', label: 'MYRA', emoji: '🎯' },
                       { value: 'sweet', label: 'Sweet', emoji: '🍯' },
                       { value: 'natural', label: 'Natural', emoji: '🌿' },
                       { value: 'warm', label: 'Warm', emoji: '☀️' },
@@ -562,14 +564,51 @@ const JimiAssistant: React.FC = () => {
           <div className="border-t border-gray-200 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-800">
             <div className="flex items-center gap-2">
               <button
-                onClick={handleToggleListening}
-                className={`p-3 rounded-full transition-all ${
+                onClick={() => {
+                  // Single click: toggle mic on/off (one-time talk)
+                  if (continuousListening) {
+                    // In continuous mode, stop/start listening
+                    if (isListening) {
+                      jimi.stopListening();
+                    } else {
+                      setIsTyping(true);
+                      jimi.startListening();
+                    }
+                  } else {
+                    handleToggleListening();
+                  }
+                }}
+                onDoubleClick={() => {
+                  // Double-click: toggle continuous listening mode
+                  const newState = !continuousListening;
+                  setContinuousListening(newState);
+                  jimi.setContinuousListening(newState);
+                  if (newState) {
+                    addMessage('🎧 Continuous listening ON - bolte raho, main sunti rahungi!', false);
+                    // Auto-start listening
+                    setIsTyping(true);
+                    jimi.startListening();
+                  } else {
+                    addMessage('🔇 Continuous listening OFF', false);
+                    jimi.stopListening();
+                  }
+                }}
+                className={`p-3 rounded-full transition-all relative ${
                   isListening
                     ? 'bg-red-500 text-white animate-pulse'
+                    : continuousListening
+                    ? 'bg-green-500 text-white hover:bg-green-600'
                     : 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/60'
                 }`}
+                title={continuousListening ? '🔴 Click to stop | Green = Continuous mode' : 'Click: talk once | Double-click: continuous listening'}
               >
                 {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                {continuousListening && !isListening && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-ping" />
+                )}
+                {continuousListening && (
+                  <span className="absolute -bottom-1 -right-1 bg-green-500 text-white text-[8px] px-1.5 rounded-full leading-none font-bold">∞</span>
+                )}
               </button>
               <input
                 ref={inputRef}
