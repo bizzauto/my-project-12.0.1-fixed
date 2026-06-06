@@ -45,6 +45,11 @@ const AI_ROUTES = new Set([
   '/documents', '/profile', '/settings', '/billing', '/team', '/api-keys',
   '/audit-log', '/store-share', '/support-tickets', '/notification-preferences',
   '/webhooks', '/referrals', '/revenue', '/qr-generator', '/audit-export',
+  '/smart-reply', '/content-scheduler', '/voice-to-text', '/campaign-roi',
+  '/customer-journey', '/bulk-messaging', '/appointment-booking', '/inventory',
+  '/sso-config', '/custom-roles', '/sla-management', '/data-backup',
+  '/landing-page-builder', '/ab-testing', '/google-ads', '/facebook-leads',
+  '/ai-sales-assistant',
 ]);
 
 const ModeAwareAuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -121,6 +126,23 @@ const ReviewRequests = lazy(() => import('./components/ReviewRequests'));
 const AgencyDashboard = lazy(() => import('./components/AgencyDashboard'));
 const MissedCallSettings = lazy(() => import('./components/MissedCallSettings'));
 const SnapshotManager = lazy(() => import('./components/SnapshotManager'));
+const SmartReplyPage = lazy(() => import('./components/SmartReplyPage'));
+const AIContentSchedulerPage = lazy(() => import('./components/AIContentSchedulerPage'));
+const VoiceToTextPage = lazy(() => import('./components/VoiceToTextPage'));
+const CampaignROIPage = lazy(() => import('./components/CampaignROIPage'));
+const CustomerJourneyPage = lazy(() => import('./components/CustomerJourneyPage'));
+const BulkMessagingPage = lazy(() => import('./components/BulkMessagingPage'));
+const AppointmentBookingPage = lazy(() => import('./components/AppointmentBookingPage'));
+const InventoryManagementPage = lazy(() => import('./components/InventoryManagementPage'));
+const SSOConfigPage = lazy(() => import('./components/SSOConfigPage'));
+const CustomRolesPage = lazy(() => import('./components/CustomRolesPage'));
+const SLAManagementPage = lazy(() => import('./components/SLAManagementPage'));
+const DataBackupPage = lazy(() => import('./components/DataBackupPage'));
+const LandingPageBuilderPage = lazy(() => import('./components/LandingPageBuilderPage'));
+const ABTestingPage = lazy(() => import('./components/ABTestingPage'));
+const GoogleAdsPage = lazy(() => import('./components/GoogleAdsPage'));
+const FacebookLeadAdsPage = lazy(() => import('./components/FacebookLeadAdsPage'));
+const AISalesAssistantPage = lazy(() => import('./components/AISalesAssistantPage'));
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -734,6 +756,25 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* New SaaS Features */}
+      <Route path="/smart-reply" element={<ProtectedRoute><ModeAwareAuthLayout><SmartReplyPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/content-scheduler" element={<ProtectedRoute><ModeAwareAuthLayout><AIContentSchedulerPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/voice-to-text" element={<ProtectedRoute><ModeAwareAuthLayout><VoiceToTextPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/campaign-roi" element={<ProtectedRoute><ModeAwareAuthLayout><CampaignROIPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/customer-journey" element={<ProtectedRoute><ModeAwareAuthLayout><CustomerJourneyPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/bulk-messaging" element={<ProtectedRoute><ModeAwareAuthLayout><BulkMessagingPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/appointment-booking" element={<ProtectedRoute><ModeAwareAuthLayout><AppointmentBookingPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/inventory" element={<ProtectedRoute><ModeAwareAuthLayout><InventoryManagementPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/sso-config" element={<ProtectedRoute><ModeAwareAuthLayout><SSOConfigPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/custom-roles" element={<ProtectedRoute><ModeAwareAuthLayout><CustomRolesPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/sla-management" element={<ProtectedRoute><ModeAwareAuthLayout><SLAManagementPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/data-backup" element={<ProtectedRoute><ModeAwareAuthLayout><DataBackupPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/landing-page-builder" element={<ProtectedRoute><ModeAwareAuthLayout><LandingPageBuilderPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/ab-testing" element={<ProtectedRoute><ModeAwareAuthLayout><ABTestingPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/google-ads" element={<ProtectedRoute><ModeAwareAuthLayout><GoogleAdsPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/facebook-leads" element={<ProtectedRoute><ModeAwareAuthLayout><FacebookLeadAdsPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/ai-sales-assistant" element={<ProtectedRoute><ModeAwareAuthLayout><AISalesAssistantPage /></ModeAwareAuthLayout></ProtectedRoute>} />
 
       {/* Redirects */}
       <Route path="/404" element={<NotFoundPage />} />
