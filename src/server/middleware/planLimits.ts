@@ -77,7 +77,7 @@ const PLAN_LIMITS: Record<string, PlanLimits> = {
     users: 999999,
     posts: 10000,
     posters: 10000,
-    aiCredits: 999999,
+    aiCredits: 10000,
   },
 };
 

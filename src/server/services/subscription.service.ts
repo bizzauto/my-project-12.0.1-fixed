@@ -76,8 +76,8 @@ const plans: SubscriptionPlan[] = [
     description: 'Custom solution for large organizations',
     price: 0,
     billingPeriod: 'monthly',
-    features: ['Unlimited Contacts', 'Unlimited Users', 'Unlimited Messages', 'Unlimited AI Credits', 'White-label', 'Custom Integrations'],
-    limits: { contacts: 999999999, users: 999999, messagesPerMonth: 999999999, aiCredits: 999999, storage: 999999 },
+    features: ['Unlimited Contacts', 'Unlimited Users', 'Unlimited Messages', '10,000 AI Credits', 'White-label', 'Custom Integrations'],
+    limits: { contacts: 999999999, users: 999999, messagesPerMonth: 999999999, aiCredits: 10000, storage: 999999 },
     active: true,
   },
 ];
