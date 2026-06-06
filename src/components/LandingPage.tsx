@@ -277,6 +277,9 @@ const LandingPage: React.FC = () => {
               <Link to="/register" className="group w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-base sm:text-lg">{t('hero_cta')}<ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" /></Link>
               <button onClick={() => setShowVideo(true)} className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center gap-2 transition-all text-base sm:text-lg"><Play size={20} /> {t('hero_cta2')}</button>
             </div>
+            <Link to="/login" className="text-sm text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors underline underline-offset-4">
+              Already have an account? Sign In
+            </Link>
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-500 px-4">
               <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-emerald-500" /> 7-day free trial</span>
               <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-emerald-500" /> No credit card</span>

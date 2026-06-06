@@ -116,6 +116,14 @@ const PublicNavbar: React.FC<PublicNavbarProps> = ({ isDark: forcedDark, onToggl
                 {l.label}
               </Link>
             ))}
+            <div className="border-t border-gray-200 dark:border-white/10 pt-2 mt-2 space-y-2">
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg font-medium">
+                Sign In
+              </Link>
+              <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-medium">
+                Get Started Free
+              </Link>
+            </div>
           </div>
         </div>
       )}
