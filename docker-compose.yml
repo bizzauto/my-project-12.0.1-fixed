@@ -29,6 +29,7 @@ services:
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - GOOGLE_AUTH_REDIRECT_URL=${GOOGLE_AUTH_REDIRECT_URL:-https://bizzautoai.com/api/auth/google/callback}
+      - GOOGLE_BUSINESS_REDIRECT_URL=${GOOGLE_BUSINESS_REDIRECT_URL:-https://bizzautoai.com/api/google-business/auth/callback}
     depends_on:
       - postgres
       - redis
