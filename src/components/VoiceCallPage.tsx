@@ -1,11 +1,13 @@
-﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import {
   Phone, PhoneCall, PhoneOff, Mic, MicOff, Volume2,
   PhoneIncoming, PhoneOutgoing, Search, RefreshCw, Loader2,
-  Globe, Wifi, Play, FileText
+  Globe, Wifi, Play, FileText, Settings
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RT, ResponsiveContainer } from 'recharts';
 import { voiceCallsAPI, walletAPI } from '../lib/api';
+
+const DograhSettings = lazy(() => import('./DograhSettings'));
 
 interface CallRecord {
   id: string;
@@ -55,6 +57,7 @@ const VoiceCallPage: React.FC = () => {
   const [walletBalance, setWalletBalance] = useState(0);
   const [selectedCall, setSelectedCall] = useState<CallRecord | null>(null);
   const [dialing, setDialing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'calls' | 'settings'>('calls');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadData = useCallback(async () => {
@@ -238,6 +241,35 @@ const VoiceCallPage: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-5 md:p-6 lg:p-8 animate-fade-in-up">
+      {/* Tab Navigation */}
+      <div className="flex items-center gap-1 mb-6 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 w-fit">
+        <button
+          onClick={() => setActiveTab('calls')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'calls'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+          }`}
+        >
+          <Phone size={16} /> Calls
+        </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'settings'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+          }`}
+        >
+          <Settings size={16} /> Voice AI Settings
+        </button>
+      </div>
+
+      {activeTab === 'settings' ? (
+        <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 className="animate-spin text-blue-600" size={32} /></div>}>
+          <DograhSettings />
+        </Suspense>
+      ) : (<>
       {/* Active Call Overlay */}
       {isCallActive && (
         <div className="fixed inset-0 z-50 bg-gradient-to-b from-blue-900/95 to-purple-900/95 flex flex-col items-center justify-center text-white animate-fade-in-up">
@@ -506,6 +538,7 @@ const VoiceCallPage: React.FC = () => {
         }}
         contacts={calls}
       />
+      </>)}
     </div>
   );
 };
