@@ -56,10 +56,13 @@ const GoogleBusinessPage: React.FC = () => {
       setSearchParams({});
     } else if (error) {
       const errorMessages: Record<string, string> = {
-        'missing_params': 'Missing authentication parameters',
+        'missing_params': 'Missing authentication parameters. Please try again.',
         'invalid_state': 'Session expired. Please try again.',
         'no_business_found': 'No Google Business Profile found',
         'access_denied': 'Access denied. Please grant required permissions.',
+        'api_not_enabled': 'Google Business Profile API is not enabled. Please enable it in Google Cloud Console > APIs & Services > Library.',
+        'token_expired': 'Authentication expired. Please try again.',
+        'callback_failed': 'Connection failed. Please check that Google Business Profile API is enabled and try again.'
       };
       toast_(errorMessages[error] || `Connection failed: ${error}`, 'error');
       setSearchParams({});

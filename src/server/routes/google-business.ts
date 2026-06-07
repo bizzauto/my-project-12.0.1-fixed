@@ -160,7 +160,7 @@ router.get('/auth/callback', async (req: AuthRequest, res: Response) => {
     });
 
     // Redirect to frontend with success
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/google-business?connected=true`);
+    res.redirect(`${process.env.FRONTEND_URL || 'https://bizzautoai.com'}/google-business?connected=true`);
   } catch (error: any) {
     console.error('GBP callback error:', error?.message || error);
     console.error('GBP callback error stack:', error?.stack);
