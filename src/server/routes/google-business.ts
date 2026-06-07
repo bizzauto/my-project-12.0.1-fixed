@@ -113,8 +113,10 @@ router.get('/auth/callback', async (req: AuthRequest, res: Response) => {
       });
     } catch (apiErr: any) {
       const status = apiErr.response?.status;
+      const errorBody = apiErr.response?.data?.error;
+      console.error(`[GBP] Accounts API error: ${status}`, errorBody ? JSON.stringify(errorBody) : apiErr.message);
       if (status === 403) {
-        console.error('GBP API 403 — Google Business Profile API not enabled in Google Cloud Console');
+        console.error('[GBP] 403 — Google Business Profile API may need approval. Visit: https://developers.google.com/my-business/content/basic-setup');
         return res.redirect(`${process.env.FRONTEND_URL || 'https://bizzautoai.com'}/google-business?error=api_not_enabled`);
       }
       if (status === 401) {
