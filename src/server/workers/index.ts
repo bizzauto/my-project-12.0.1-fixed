@@ -10,9 +10,14 @@ import { createRedisConnection } from '../utils/redis-connection.js';
 
 // Redis connection
 const redisConnection = createRedisConnection();
+const redisAvailable = redisConnection !== null;
 
-// Queues
-export const queues = {
+if (!redisAvailable) {
+  console.log('[Workers] Redis not available — background jobs disabled. App will run without queues.');
+}
+
+// Queues (only created if Redis is available)
+export const queues = redisAvailable ? {
   whatsappMessages: new Queue('whatsapp-messages', { connection: redisConnection }),
   emails: new Queue('emails', { connection: redisConnection }),
   socialPublish: new Queue('social-publish', { connection: redisConnection }),
@@ -21,14 +26,22 @@ export const queues = {
   campaignScheduler: new Queue('campaign-scheduler', { connection: redisConnection }),
   gbpAutoPost: new Queue('gbp-auto-post', { connection: redisConnection }),
   webhookRetry: webhookDeliveryQueue,
-};
+} : {} as any;
 
-/**
- * Job Workers
- */
+// ==================== JOB WORKERS (only if Redis is available) ====================
+
+let whatsappWorker: Worker | null = null;
+let emailWorker: Worker | null = null;
+let socialPublishWorker: Worker | null = null;
+let googleSheetsSyncWorker: Worker | null = null;
+let leadProcessingWorker: Worker | null = null;
+let campaignSchedulerWorker: Worker | null = null;
+let gbpAutoPostWorker: Worker | null = null;
+
+if (redisAvailable) {
 
 // WhatsApp Message Worker
-const whatsappWorker = new Worker(
+whatsappWorker = new Worker(
   'whatsapp-messages',
   async (job: Job) => {
     // Handle scheduled messages
@@ -114,7 +127,7 @@ const whatsappWorker = new Worker(
 );
 
 // Email Worker
-const emailWorker = new Worker(
+emailWorker = new Worker(
   'emails',
   async (job: Job) => {
     const { businessId, to, subject, text, html, attachments } = job.data;
@@ -128,7 +141,7 @@ const emailWorker = new Worker(
 );
 
 // Social Media Publishing Worker
-const socialPublishWorker = new Worker(
+socialPublishWorker = new Worker(
   'social-publish',
   async (job: Job) => {
     const { postId, businessId } = job.data;
@@ -181,7 +194,7 @@ const socialPublishWorker = new Worker(
 );
 
 // Google Sheets Sync Worker
-const googleSheetsSyncWorker = new Worker(
+googleSheetsSyncWorker = new Worker(
   'google-sheets-sync',
   async (job: Job) => {
     const { businessId, type, options } = job.data;
@@ -199,7 +212,7 @@ const googleSheetsSyncWorker = new Worker(
 );
 
 // Lead Processing Worker
-const leadProcessingWorker = new Worker(
+leadProcessingWorker = new Worker(
   'lead-processing',
   async (job: Job) => {
     const { businessId, leadData, source } = job.data;
@@ -403,7 +416,7 @@ function calculateLeadScore(leadData: any): { score: number; factors: Array<{ fa
 }
 
 // Campaign Scheduler Worker
-const campaignSchedulerWorker = new Worker(
+campaignSchedulerWorker = new Worker(
   'campaign-scheduler',
   async (job: Job) => {
     const { campaignId } = job.data;
@@ -653,7 +666,7 @@ async function publishToGBP(businessId: string, post: any) {
 }
 
 // GBP Auto-Post Worker
-const gbpAutoPostWorker = new Worker(
+gbpAutoPostWorker = new Worker(
   'gbp-auto-post',
   async (job: Job) => {
     const { type, businessId } = job.data;
@@ -707,6 +720,8 @@ const gbpAutoPostWorker = new Worker(
   }
 );
 
+} // end if (redisAvailable)
+
 /**
  * Export workers
  */
@@ -726,18 +741,23 @@ export const workers = {
 export async function shutdownWorkers() {
   console.log('Shutting down workers...');
   
+  if (!redisAvailable) {
+    console.log('No Redis — no workers to shut down');
+    return;
+  }
+  
   await Promise.all([
-    whatsappWorker.close(),
-    emailWorker.close(),
-    socialPublishWorker.close(),
-    googleSheetsSyncWorker.close(),
-    leadProcessingWorker.close(),
-    campaignSchedulerWorker.close(),
-    gbpAutoPostWorker.close(),
+    whatsappWorker?.close(),
+    emailWorker?.close(),
+    socialPublishWorker?.close(),
+    googleSheetsSyncWorker?.close(),
+    leadProcessingWorker?.close(),
+    campaignSchedulerWorker?.close(),
+    gbpAutoPostWorker?.close(),
     shutdownWebhookWorker(),
   ]);
 
-  await redisConnection.quit();
+  await redisConnection?.quit();
   console.log('All workers shut down successfully');
 }
 

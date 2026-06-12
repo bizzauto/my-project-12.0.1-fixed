@@ -70,21 +70,26 @@ const CONCURRENCY = 5;
 
 import { createRedisConnection } from '../utils/redis-connection.js';
 const redisConnection = createRedisConnection();
+const redisAvailable = redisConnection !== null;
+
+if (!redisAvailable) {
+  console.log('[WebhookRetry] Redis not available — webhook retry queue disabled');
+}
 
 // ==================== QUEUE ====================
 
-export const webhookDeliveryQueue = new Queue(QUEUE_NAME, {
+export const webhookDeliveryQueue = redisAvailable ? new Queue(QUEUE_NAME, {
   connection: redisConnection,
   defaultJobOptions: {
-    attempts: MAX_RETRIES + 1, // BullMQ retries (we also do manual re-enqueue for backoff)
+    attempts: MAX_RETRIES + 1,
     backoff: {
       type: 'exponential',
-      delay: 60_000, // Base delay — overridden by manual scheduling
+      delay: 60_000,
     },
-    removeOnComplete: { age: 86_400, count: 1000 }, // Keep 1 day or 1000 jobs
-    removeOnFail: { age: 604_800, count: 5000 },    // Keep 7 days of failures
+    removeOnComplete: { age: 86_400, count: 1000 },
+    removeOnFail: { age: 604_800, count: 5000 },
   },
-});
+}) : null as any;
 
 // ==================== DELIVERY FUNCTIONS ====================
 
@@ -97,7 +102,11 @@ export async function enqueueDelivery(
   event: string,
   payload: Record<string, unknown>,
   options?: { delay?: number }
-): Promise<Job<WebhookDeliveryPayload>> {
+): Promise<Job<WebhookDeliveryPayload> | null> {
+  if (!webhookDeliveryQueue) {
+    console.warn('[WebhookRetry] Redis not available — cannot enqueue delivery');
+    return null;
+  }
   return webhookDeliveryQueue.add(
     'deliver',
     { webhookId, businessId, event, payload, attempt: 0 },
@@ -164,7 +173,7 @@ async function deliverWebhook(
 
 // ==================== WORKER ====================
 
-const webhookWorker = new Worker<WebhookDeliveryPayload>(
+const webhookWorker = redisAvailable ? new Worker<WebhookDeliveryPayload>(
   QUEUE_NAME,
   async (job: Job<WebhookDeliveryPayload>): Promise<WebhookDeliveryResult> => {
     const { webhookId, businessId, event, payload, attempt = 0 } = job.data;
@@ -254,10 +263,10 @@ const webhookWorker = new Worker<WebhookDeliveryPayload>(
     connection: redisConnection,
     concurrency: CONCURRENCY,
   }
-);
+) : null;
 
 // Worker event handlers
-webhookWorker.on('completed', (job, result) => {
+webhookWorker?.on('completed', (job, result) => {
   if (result?.success) {
     // Log successful delivery to Activity for visibility
     // Fire-and-forget — don't block the worker
@@ -279,7 +288,7 @@ webhookWorker.on('completed', (job, result) => {
   }
 });
 
-webhookWorker.on('failed', (job, error) => {
+webhookWorker?.on('failed', (job, error) => {
   console.error(
     `[WebhookRetry] Worker error for job ${job?.id}: ${error.message}`
   );
@@ -291,6 +300,9 @@ webhookWorker.on('failed', (job, error) => {
  * Get delivery statistics (approximate, based on queue state).
  */
 export async function getWebhookDeliveryStats(): Promise<WebhookDeliveryStats> {
+  if (!webhookDeliveryQueue) {
+    return { total: 0, successful: 0, failed: 0, pending: 0, deadLettered: 0, retrying: 0 };
+  }
   const [waiting, active, completed, failed] = await Promise.all([
     webhookDeliveryQueue.getWaitingCount(),
     webhookDeliveryQueue.getActiveCount(),
@@ -312,6 +324,7 @@ export async function getWebhookDeliveryStats(): Promise<WebhookDeliveryStats> {
  * Retry a dead-lettered webhook delivery.
  */
 export async function retryDelivery(jobId: string): Promise<boolean> {
+  if (!webhookDeliveryQueue) return false;
   const job = await webhookDeliveryQueue.getJob(jobId);
   if (!job) return false;
 
@@ -365,6 +378,7 @@ export async function triggerWebhookDelivery(
 // ==================== SHUTDOWN ====================
 
 export async function shutdownWebhookWorker(): Promise<void> {
+  if (!webhookWorker) return;
   console.log('[WebhookRetry] Shutting down worker...');
   await webhookWorker.close();
   console.log('[WebhookRetry] Worker shut down');

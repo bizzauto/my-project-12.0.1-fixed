@@ -2,24 +2,36 @@ import IORedis from 'ioredis';
 
 let redisDisabled = false;
 
+export function isRedisDisabled(): boolean {
+  return redisDisabled;
+}
+
 export function createRedisConnection() {
   if (redisDisabled) return null;
 
   const redisUrl = process.env.REDIS_URL;
   const redisPassword = process.env.REDIS_PASSWORD;
+  const redisHost = process.env.REDIS_HOST;
 
-  console.log(`[Redis] REDIS_URL: ${redisUrl ? 'SET' : 'NOT SET'}, REDIS_PASSWORD: ${redisPassword ? 'SET' : 'NOT SET'}`);
+  console.log(`[Redis] REDIS_URL: ${redisUrl ? 'SET' : 'NOT SET'}, REDIS_PASSWORD: ${redisPassword ? 'SET' : 'NOT SET'}, REDIS_HOST: ${redisHost || 'NOT SET'}`);
 
-  if (!redisUrl && !redisPassword) {
+  if (!redisUrl && !redisPassword && !redisHost) {
     console.log('[Redis] No credentials configured — Redis disabled');
     redisDisabled = true;
     return null;
   }
 
   if (redisUrl) {
-    const hasAuth = redisUrl.includes('@');
-    if (!hasAuth) {
-      console.log('[Redis] REDIS_URL has no password — treating as no auth. Redis disabled.');
+    const hasAt = redisUrl.includes('@');
+    if (!hasAt) {
+      console.log('[Redis] REDIS_URL has no @ (no auth) — Redis disabled.');
+      redisDisabled = true;
+      return null;
+    }
+    const schemeFree = redisUrl.replace(/^rediss?:\/\//, '');
+    const passwordPart = schemeFree.split('@')[0];
+    if (!passwordPart || passwordPart === ':' || passwordPart === '') {
+      console.log('[Redis] REDIS_URL has empty password — Redis disabled.');
       redisDisabled = true;
       return null;
     }
@@ -33,6 +45,12 @@ export function createRedisConnection() {
     const url = `redis://:${redisPassword}@${host}:${port}`;
     console.log(`[Redis] Connecting via password to ${host}:${port}...`);
     return connectToRedis(url);
+  }
+
+  if (redisHost) {
+    console.log('[Redis] REDIS_HOST set but no password — Redis disabled.');
+    redisDisabled = true;
+    return null;
   }
 
   return null;
@@ -51,13 +69,20 @@ function connectToRedis(url: string) {
     lazyConnect: true,
   });
 
+  function handleNoAuth(ctx: string) {
+    return (err: any) => {
+      if (err?.message?.includes('NOAUTH') || err?.message?.includes('AUTH') || err?.message?.includes('ERR')) {
+        console.error(`[Redis] NOAUTH ${ctx} — credentials rejected. Redis permanently disabled.`);
+        redisDisabled = true;
+        try { client.destroy(); } catch {}
+        return true;
+      }
+      return false;
+    };
+  }
+
   client.on('error', (err: any) => {
-    if (err.message?.includes('NOAUTH') || err.message?.includes('AUTH')) {
-      console.error('[Redis] NOAUTH — credentials rejected. Redis permanently disabled.');
-      redisDisabled = true;
-      try { client.destroy(); } catch {}
-      return;
-    }
+    if (handleNoAuth('error event')(err)) return;
     console.error(`[Redis] Connection error: ${err.message}`);
   });
 
@@ -70,11 +95,8 @@ function connectToRedis(url: string) {
   });
 
   client.connect().catch((err: any) => {
-    if (err.message?.includes('NOAUTH') || err.message?.includes('AUTH')) {
-      console.error('[Redis] NOAUTH on connect — Redis disabled.');
-    } else {
-      console.error(`[Redis] Connect failed: ${err.message}`);
-    }
+    if (handleNoAuth('on connect')(err)) return;
+    console.error(`[Redis] Connect failed: ${err.message}`);
     redisDisabled = true;
     try { client.destroy(); } catch {}
   });

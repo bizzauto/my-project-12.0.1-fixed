@@ -6,20 +6,24 @@ import { createRedisConnection } from '../utils/redis-connection.js';
 // Redis connection
 const redisConnection = createRedisConnection();
 
-// Queue for GBP auto-posts
-export const gbpAutoPostQueue = new Queue('gbp-auto-post', {
+if (!redisConnection) {
+  console.log('[GBP Auto-Post] Redis not available — worker disabled');
+}
+
+// Queue for GBP auto-posts (only if Redis available)
+export const gbpAutoPostQueue = redisConnection ? new Queue('gbp-auto-post', {
   connection: redisConnection,
   defaultJobOptions: {
     removeOnComplete: 100,
     removeOnFail: 50,
   },
-});
+}) : null;
 
 /**
  * GBP Auto-Post Worker
  * Runs every minute to check if any business needs an auto-post
  */
-const gbpAutoPostWorker = new Worker(
+const gbpAutoPostWorker = redisConnection ? new Worker(
   'gbp-auto-post',
   async (job: Job) => {
     const { type, businessId } = job.data;
@@ -92,12 +96,16 @@ const gbpAutoPostWorker = new Worker(
     connection: redisConnection,
     concurrency: 5,
   }
-);
+) : null;
 
 /**
  * Schedule recurring check every minute
  */
 export async function startAutoPostScheduler() {
+  if (!gbpAutoPostQueue) {
+    console.log('[GBP Auto-Post] Redis not available — scheduler disabled');
+    return;
+  }
   // Add initial check job
   await gbpAutoPostQueue.add(
     'check-all-businesses',
@@ -117,6 +125,7 @@ export async function startAutoPostScheduler() {
  * Stop the auto-post scheduler
  */
 export async function stopAutoPostScheduler() {
+  if (!gbpAutoPostQueue) return;
   const repeatableJobs = await gbpAutoPostQueue.getRepeatableJobs();
   for (const job of repeatableJobs) {
     await gbpAutoPostQueue.removeRepeatable(job.key);
@@ -125,29 +134,29 @@ export async function stopAutoPostScheduler() {
 }
 
 // Worker event handlers
-gbpAutoPostWorker.on('completed', (job) => {
+gbpAutoPostWorker?.on('completed', (job) => {
   if (job.data.type === 'check-and-post') {
     console.log(`✅ Auto-post check completed: ${job.returnvalue?.posted || 0} posts created`);
   }
 });
 
-gbpAutoPostWorker.on('failed', (job, err) => {
+gbpAutoPostWorker?.on('failed', (job, err) => {
   console.error(`❌ Auto-post job failed:`, err.message);
 });
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   await stopAutoPostScheduler();
-  await gbpAutoPostWorker.close();
-  await gbpAutoPostQueue.close();
-  await redisConnection.quit();
+  await gbpAutoPostWorker?.close();
+  await gbpAutoPostQueue?.close();
+  await redisConnection?.quit();
 });
 
 process.on('SIGINT', async () => {
   await stopAutoPostScheduler();
-  await gbpAutoPostWorker.close();
-  await gbpAutoPostQueue.close();
-  await redisConnection.quit();
+  await gbpAutoPostWorker?.close();
+  await gbpAutoPostQueue?.close();
+  await redisConnection?.quit();
 });
 
 export default {

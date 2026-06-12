@@ -21,6 +21,28 @@ export async function initRedis(): Promise<IORedis | null> {
     return null;
   }
 
+  if (redisUrl && !redisUrl.includes('@')) {
+    console.log('[Redis Service] REDIS_URL has no password (no @) — Redis disabled');
+    redisDisabled = true;
+    return null;
+  }
+
+  if (redisUrl) {
+    const schemeFree = redisUrl.replace(/^rediss?:\/\//, '');
+    const passwordPart = schemeFree.split('@')[0];
+    if (!passwordPart || passwordPart === ':' || passwordPart === '') {
+      console.log('[Redis Service] REDIS_URL has empty password — Redis disabled');
+      redisDisabled = true;
+      return null;
+    }
+  }
+
+  if (!redisUrl && !process.env.REDIS_HOST) {
+    console.log('[Redis Service] No URL or host — Redis disabled');
+    redisDisabled = true;
+    return null;
+  }
+
   try {
     const host = process.env.REDIS_HOST || 'coolify-redis';
     const port = process.env.REDIS_PORT || '6379';
@@ -37,14 +59,15 @@ export async function initRedis(): Promise<IORedis | null> {
       enableOfflineQueue: false,
       connectTimeout: 5000,
       commandTimeout: 5000,
+      lazyConnect: true,
     });
 
     redisClient.on('error', (err: any) => {
-      if (err.message?.includes('NOAUTH')) {
-        console.error('[Redis Service] NOAUTH — credentials rejected. Disabling Redis for this session.');
+      if (err.message?.includes('NOAUTH') || err.message?.includes('AUTH')) {
+        console.error('[Redis Service] NOAUTH — credentials rejected. Redis permanently disabled.');
         redisDisabled = true;
         isConnected = false;
-        redisClient?.disconnect();
+        try { redisClient?.destroy(); } catch {}
         redisClient = null;
         return;
       }
@@ -63,6 +86,18 @@ export async function initRedis(): Promise<IORedis | null> {
 
     redisClient.on('close', () => {
       isConnected = false;
+    });
+
+    redisClient.connect().catch((err: any) => {
+      if (err.message?.includes('NOAUTH') || err.message?.includes('AUTH')) {
+        console.error('[Redis Service] NOAUTH on connect — Redis permanently disabled.');
+        redisDisabled = true;
+      } else {
+        console.error(`[Redis Service] Connect failed: ${err.message}`);
+      }
+      isConnected = false;
+      try { redisClient?.destroy(); } catch {}
+      redisClient = null;
     });
 
     return redisClient;

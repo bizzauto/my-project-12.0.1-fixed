@@ -949,11 +949,15 @@ router.post('/schedule', authenticate, async (req: AuthRequest, res: Response) =
     // Add to BullMQ scheduler queue with delay
     const delay = scheduledDate.getTime() - Date.now();
     const { queues } = await import('../workers/index.js');
-    await queues.whatsappMessages.add(
-      'scheduled-message',
-      { scheduledMessageId: scheduledMessage.id, businessId: req.user.businessId },
-      { delay }
-    );
+    if (queues.whatsappMessages) {
+      await queues.whatsappMessages.add(
+        'scheduled-message',
+        { scheduledMessageId: scheduledMessage.id, businessId: req.user.businessId },
+        { delay }
+      );
+    } else {
+      console.warn('[WhatsApp] Redis not available — scheduled message created but not queued');
+    }
 
     res.json({ success: true, data: scheduledMessage });
   } catch (error: any) {
