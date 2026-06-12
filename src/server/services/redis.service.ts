@@ -1,10 +1,10 @@
-import { createClient, RedisClientType } from 'redis';
+import IORedis from 'ioredis';
 
-let redisClient: RedisClientType | null = null;
+let redisClient: IORedis | null = null;
 let isConnected = false;
 let redisDisabled = false;
 
-export async function initRedis(): Promise<RedisClientType | null> {
+export async function initRedis(): Promise<IORedis | null> {
   if (redisDisabled) return null;
   if (redisClient && isConnected) {
     return redisClient;
@@ -28,16 +28,15 @@ export async function initRedis(): Promise<RedisClientType | null> {
     const finalUrl = redisUrl || `redis://:${password}@${host}:${port}`;
     console.log(`[Redis Service] Connecting to ${host}:${port}...`);
 
-    redisClient = createClient({
-      url: finalUrl,
-      socket: {
-        reconnectStrategy: (retries) => {
-          if (redisDisabled || retries > 2) return new Error('Redis disabled');
-          return Math.min(retries * 100, 3000);
-        },
-        connectTimeout: 5000,
-        commandTimeout: 5000,
+    redisClient = new IORedis(finalUrl, {
+      maxRetriesPerRequest: null,
+      retryStrategy(times: number) {
+        if (redisDisabled || times > 3) return null;
+        return Math.min(times * 200, 2000);
       },
+      enableOfflineQueue: false,
+      connectTimeout: 5000,
+      commandTimeout: 5000,
     });
 
     redisClient.on('error', (err: any) => {
@@ -45,7 +44,7 @@ export async function initRedis(): Promise<RedisClientType | null> {
         console.error('[Redis Service] NOAUTH — credentials rejected. Disabling Redis for this session.');
         redisDisabled = true;
         isConnected = false;
-        redisClient?.disconnect().catch(() => {});
+        redisClient?.disconnect();
         redisClient = null;
         return;
       }
@@ -58,15 +57,23 @@ export async function initRedis(): Promise<RedisClientType | null> {
       isConnected = true;
     });
 
-    await redisClient.connect();
+    redisClient.on('ready', () => {
+      isConnected = true;
+    });
+
+    redisClient.on('close', () => {
+      isConnected = false;
+    });
+
     return redisClient;
   } catch (err: any) {
     console.error(`[Redis Service] Failed: ${err.message}`);
+    redisDisabled = true;
     return null;
   }
 }
 
-export function getRedisClient(): RedisClientType | null {
+export function getRedisClient(): IORedis | null {
   return redisClient;
 }
 
@@ -83,14 +90,14 @@ export const cacheHelpers = {
     }
 
     try {
-      const cached = await redisClient.get(key as string);
+      const cached = await redisClient.get(key);
       if (cached) {
-        return JSON.parse(cached as string) as T;
+        return JSON.parse(cached) as T;
       }
 
       const data = await callback();
       if (data) {
-        await redisClient.setEx(key, expirationSeconds, JSON.stringify(data));
+        await redisClient.setex(key, expirationSeconds, JSON.stringify(data));
       }
       return data;
     } catch (error) {
@@ -106,7 +113,7 @@ export const cacheHelpers = {
     try {
       const keys = await redisClient.keys(pattern);
       if (keys.length > 0) {
-        await redisClient.del(keys);
+        await redisClient.del(...keys);
         console.log(`🗑️ Invalidated ${keys.length} cache keys matching: ${pattern}`);
       }
     } catch (error) {
@@ -119,7 +126,7 @@ export const cacheHelpers = {
     if (!redisClient || !isConnected) return;
 
     try {
-      await redisClient.setEx(`user:${userId}:${key}`, ttl, JSON.stringify(data));
+      await redisClient.setex(`user:${userId}:${key}`, ttl, JSON.stringify(data));
     } catch (error) {
       console.error('User cache error:', error);
     }
@@ -129,8 +136,8 @@ export const cacheHelpers = {
     if (!redisClient || !isConnected) return null;
 
     try {
-      const data = await redisClient.get(`user:${userId}:${key}` as string);
-      return data ? JSON.parse(data as string) : null;
+      const data = await redisClient.get(`user:${userId}:${key}`);
+      return data ? JSON.parse(data) : null;
     } catch (error) {
       console.error('User cache get error:', error);
       return null;
@@ -142,7 +149,7 @@ export const cacheHelpers = {
     if (!redisClient || !isConnected) return;
 
     try {
-      await redisClient.setEx(`business:${businessId}:${key}`, ttl, JSON.stringify(data));
+      await redisClient.setex(`business:${businessId}:${key}`, ttl, JSON.stringify(data));
     } catch (error) {
       console.error('Business cache error:', error);
     }
@@ -152,8 +159,8 @@ export const cacheHelpers = {
     if (!redisClient || !isConnected) return null;
 
     try {
-      const data = await redisClient.get(`business:${businessId}:${key}` as string);
-      return data ? JSON.parse(data as string) : null;
+      const data = await redisClient.get(`business:${businessId}:${key}`);
+      return data ? JSON.parse(data) : null;
     } catch (error) {
       console.error('Business cache get error:', error);
       return null;

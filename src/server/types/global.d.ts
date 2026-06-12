@@ -34,13 +34,13 @@ declare module 'ioredis' {
 
 // Module declarations for relative imports used in the codebase
 declare module './redis' {
-  import { RedisClientType } from 'redis';
-  export const redisClient: RedisClientType | null;
+  import IORedis from 'ioredis';
+  export const redisClient: IORedis | null;
 }
 
 declare module './redis.js' {
-  import { RedisClientType } from 'redis';
-  export const redisClient: RedisClientType | null;
+  import IORedis from 'ioredis';
+  export const redisClient: IORedis | null;
 }
 
 // Extend Socket types for custom server methods

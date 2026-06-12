@@ -61,7 +61,7 @@ export function setupWebSocket(httpServer: HttpServer) {
 
     // Store connection in Redis
     if (redisClient) {
-      await redisClient?.hSet(`socket:${socket.userId}`, {
+      await redisClient?.hset(`socket:${socket.userId}`, {
         socketId: socket.id,
         connectedAt: new Date().toISOString(),
         plan: socket.plan || 'FREE',
@@ -147,7 +147,7 @@ export function setupWebSocket(httpServer: HttpServer) {
       console.log(`🔌 User disconnected: ${socket.userId}`);
       cleanupSocketLimits(socket.id);
       if (redisClient) {
-        await redisClient?.hDel(`socket:${socket.userId}`, 'socketId');
+        await redisClient?.hdel(`socket:${socket.userId}`, 'socketId');
       }
     });
   });
