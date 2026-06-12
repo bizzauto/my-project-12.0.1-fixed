@@ -16,13 +16,17 @@ export function createRedisConnection() {
     return null;
   }
 
-  // Method 1: Try REDIS_URL (most reliable)
   if (redisUrl) {
+    const hasAuth = redisUrl.includes('@');
+    if (!hasAuth) {
+      console.log('[Redis] REDIS_URL has no password — treating as no auth. Redis disabled.');
+      redisDisabled = true;
+      return null;
+    }
     console.log('[Redis] Connecting via REDIS_URL...');
     return connectToRedis(redisUrl);
   }
 
-  // Method 2: Try REDIS_PASSWORD + host/port
   if (redisPassword) {
     const host = process.env.REDIS_HOST || 'coolify-redis';
     const port = process.env.REDIS_PORT || '6379';
@@ -38,26 +42,41 @@ function connectToRedis(url: string) {
   const client = new IORedis(url, {
     maxRetriesPerRequest: null,
     retryStrategy(times: number) {
-      if (times > 3) return null;
+      if (redisDisabled || times > 2) return null;
       return Math.min(times * 200, 2000);
     },
     enableOfflineQueue: false,
-    connectTimeout: 5000,
-    commandTimeout: 5000,
+    connectTimeout: 3000,
+    commandTimeout: 3000,
+    lazyConnect: true,
   });
 
   client.on('error', (err: any) => {
-    if (err.message?.includes('NOAUTH')) {
-      console.error('[Redis] NOAUTH — credentials rejected. Disabling Redis for this session.');
+    if (err.message?.includes('NOAUTH') || err.message?.includes('AUTH')) {
+      console.error('[Redis] NOAUTH — credentials rejected. Redis permanently disabled.');
       redisDisabled = true;
-      client.disconnect();
+      try { client.destroy(); } catch {}
       return;
     }
     console.error(`[Redis] Connection error: ${err.message}`);
   });
 
   client.on('connect', () => {
+    console.log('[Redis] TCP connected, waiting for ready...');
+  });
+
+  client.on('ready', () => {
     console.log('[Redis] Connected successfully');
+  });
+
+  client.connect().catch((err: any) => {
+    if (err.message?.includes('NOAUTH') || err.message?.includes('AUTH')) {
+      console.error('[Redis] NOAUTH on connect — Redis disabled.');
+    } else {
+      console.error(`[Redis] Connect failed: ${err.message}`);
+    }
+    redisDisabled = true;
+    try { client.destroy(); } catch {}
   });
 
   return client;

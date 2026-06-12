@@ -9,7 +9,13 @@ echo "REDIS_PASSWORD set: $([ -n \"$REDIS_PASSWORD\" ] && echo 'YES' || echo 'NO
 echo "REDIS_HOST set: $([ -n \"$REDIS_HOST\" ] && echo 'YES' || echo 'NO')"
 echo "All env vars with REDIS: $(env | grep -i redis | head -5)"
 
-# Build REDIS_URL only if not already set by Coolify
+# If REDIS_URL exists but has NO password (no @ sign), treat it as unauthenticated
+if [ -n "$REDIS_URL" ] && echo "$REDIS_URL" | grep -qE '^redis://[^@]*$'; then
+  echo "WARNING: REDIS_URL has no password ($REDIS_URL) — clearing it to prevent NOAUTH errors"
+  unset REDIS_URL
+fi
+
+# Build REDIS_URL only if not already set
 # IMPORTANT: Only build URL WITH auth. Never connect without password.
 if [ -z "$REDIS_URL" ]; then
   if [ -n "$REDIS_PASSWORD" ]; then
@@ -19,7 +25,6 @@ if [ -z "$REDIS_URL" ]; then
     echo "Built REDIS_URL with password for ${host}:${port}"
   else
     echo "No REDIS_URL or REDIS_PASSWORD set — Redis will be disabled"
-    # Clear any REDIS_HOST that would cause unauthenticated connections
     unset REDIS_HOST 2>/dev/null || true
   fi
 fi
