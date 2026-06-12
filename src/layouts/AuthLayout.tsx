@@ -189,17 +189,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         {/* Logo */}
         <div className="p-5 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 flex-shrink-0">
-              <Zap size={18} className="text-white" />
-            </div>
-            {!collapsed && (
-              <div>
-                <h1 className="text-lg font-bold text-white tracking-tight">BizzAuto</h1>
-                <p className="text-[10px] text-blue-300/70 font-medium uppercase tracking-wider">
-                  Marketing Platform
-                </p>
-              </div>
-            )}
+            <img src="/logo.svg" alt="BizzAuto Ai Logo" className="h-10 w-auto flex-shrink-0" />
           </div>
         </div>
 

@@ -2286,6 +2286,49 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [evolutionQR, setEvolutionQR] = useState('');
   const [apiError, setApiError] = useState<string | null>(null);
 
+  // Handle OAuth redirect params (success/error from Meta callback)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get('success');
+    const error = params.get('error');
+
+    if (success === 'connected') {
+      setConnectionStatus('connected');
+      setCurrentView('chats');
+      // Clean URL
+      window.history.replaceState({}, '', '/whatsapp');
+    } else if (error) {
+      const errorMessages: Record<string, string> = {
+        auth_denied: 'Authorization denied by user',
+        no_code: 'No authorization code received',
+        state_expired: 'Session expired, please try again',
+        invalid_state: 'Invalid session state',
+        server_config_missing: 'Server configuration missing (META_APP_ID/SECRET)',
+        callback_failed: 'Connection failed, please try again',
+      };
+      setApiError(errorMessages[error] || `Connection failed: ${error}`);
+      window.history.replaceState({}, '', '/whatsapp');
+    }
+  }, []);
+
+  // Check WhatsApp status on mount
+  useEffect(() => {
+    let mounted = true;
+    const checkStatus = async () => {
+      try {
+        const status = await whatsappAPI.getStatus();
+        if (mounted && status?.data?.data?.connected) {
+          setConnectionStatus('connected');
+          setConnectedPhone(status.data.data.phoneNumber || '');
+        }
+      } catch {
+        // Not connected or error
+      }
+    };
+    checkStatus();
+    return () => { mounted = false; };
+  }, []);
+
   // Fetch Evolution config on mount
   useEffect(() => {
     let mounted = true;
@@ -2446,19 +2489,25 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     }
   };
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     if (connectionMode === 'evolution') {
       handleEvolutionConnect();
       return;
     }
-    // Meta QR mode (simulate)
-    setConnectionStatus('scanning');
-    setTimeout(() => setConnectionStatus('connecting'), 2000);
-    setTimeout(() => {
-      setConnectionStatus('connected');
-      setConnectedPhone('+91 8983027975');
-      setCurrentView('chats');
-    }, 4000);
+    // Meta OAuth flow - call backend to get signup URL
+    try {
+      const response = await whatsappAPI.connect();
+      const signupUrl = response.data?.signupUrl || response.data?.data?.signupUrl;
+      if (signupUrl) {
+        // Open Meta OAuth in same window
+        window.location.href = signupUrl;
+      } else {
+        setApiError('Failed to get signup URL. Check META_APP_ID in .env');
+      }
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.error || err?.message || 'Failed to initiate connection';
+      setApiError(errorMsg);
+    }
   };
 
   const handleDisconnect = async () => {

@@ -38,7 +38,10 @@ export async function initRedis(): Promise<RedisClientType | null> {
     });
 
     redisClient.on('error', (err: any) => {
-      if (err.message?.includes('NOAUTH')) return;
+      if (err.message?.includes('NOAUTH')) {
+        console.error('[Redis Service] AUTHENTICATION REQUIRED: Set REDIS_PASSWORD in .env or use redis://:password@host:port format in REDIS_URL');
+        return;
+      }
       console.error(`[Redis Service] Error: ${err.message}`);
       isConnected = false;
     });

@@ -99,7 +99,7 @@ const BulkImportPage: React.FC = () => {
                 <p className="text-sm text-blue-700">Use our template for correct column format</p>
               </div>
             </div>
-            <button onClick={() => { const csv = 'name*,phone*,email,tags,company,source,dealValue,customFields\nRahul Sharma,+919876543210,rahul@example.com,VIP,My Business,Website,50000,{"industry":"IT"}\n'; const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'import_template.csv'; a.click(); URL.revokeObjectURL(url); }} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"><Download size={14} />Download</button>
+            <button onClick={() => { const csv = 'name*,phone*,email,tags,company,source,dealValue,customFields\nRahul Sharma,+917972888023,rahul@example.com,VIP,My Business,Website,50000,{"industry":"IT"}\n'; const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'import_template.csv'; a.click(); URL.revokeObjectURL(url); }} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"><Download size={14} />Download</button>
           </div>
 
           {/* Format Guide */}

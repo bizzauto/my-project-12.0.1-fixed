@@ -353,7 +353,7 @@ export default function LeadGenerationPage(){
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label><input required type="text" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className={inp} placeholder="Enter name"/></div>
-            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone *</label><input required type="tel" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} className={inp} placeholder="+91 9876543210"/></div>
+            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone *</label><input required type="tel" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} className={inp} placeholder="+91 7972888023"/></div>
             <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label><input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} className={inp} placeholder="email@example.com"/></div>
             <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label><input type="text" value={form.company} onChange={e=>setForm({...form,company:e.target.value})} className={inp} placeholder="Company name"/></div>
             <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label><input type="text" value={form.location} onChange={e=>setForm({...form,location:e.target.value})} className={inp} placeholder="City"/></div>
@@ -376,7 +376,7 @@ export default function LeadGenerationPage(){
           <textarea
             id="bulkLeads"
             rows={10}
-            placeholder={`Rahul Sharma, 9876543210, rahul@gmail.com, indiamart, Hair Oil, Mumbai\nPriya Patel, 9876543211, priya@gmail.com, facebook_ads, Shampoo, Delhi\nAmit Kumar, 9876543212, , justdial, Face Cream, Bangalore`}
+            placeholder={`Rahul Sharma, 7972888023, rahul@gmail.com, indiamart, Hair Oil, Mumbai\nPriya Patel, 9876543211, priya@gmail.com, facebook_ads, Shampoo, Delhi\nAmit Kumar, 9876543212, , justdial, Face Cream, Bangalore`}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
           />
           <div className="flex justify-end gap-3">

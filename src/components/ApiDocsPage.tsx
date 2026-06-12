@@ -242,7 +242,7 @@ const ApiDocsPage: React.FC = () => {
   "data": {
     "id": "cuid...",
     "name": "John Doe",
-    "phone": "+919876543210"
+    "phone": "+917972888023"
   },
   "timestamp": "2026-06-06T10:00:00Z"
 }`}</pre>

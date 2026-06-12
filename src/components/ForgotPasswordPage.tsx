@@ -90,11 +90,8 @@ const ForgotPasswordPage: React.FC<{ onNavigate?: (page: string) => void }> = ({
             <span className="text-sm">Back to login</span>
           </Link>
 
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <Zap className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-white">BizzAuto</span>
+          <div className="mb-6">
+            <img src="/logo.svg" alt="BizzAuto Ai Logo" className="h-14 w-auto" />
           </div>
 
           <h2 className="text-3xl xl:text-4xl font-bold text-white mb-3">

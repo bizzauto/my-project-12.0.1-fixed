@@ -46,9 +46,7 @@ const RegisterPage: React.FC = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 bg-white dark:bg-gray-900">
         <div className="w-full max-w-md">
           <div className="mb-4 sm:mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              BizzAuto Solutions
-            </h1>
+            <img src="/logo.svg" alt="BizzAuto Ai Logo" className="h-12 w-auto" />
           </div>
 
           <div className="flex items-center gap-2 mb-6 sm:mb-8">

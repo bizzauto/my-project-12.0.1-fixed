@@ -138,7 +138,7 @@ async function seed() {
   // 4. CONTACTS (15 realistic Indian business contacts)
   // ===================================================================
   const contactsData = [
-    { name: 'Rahul Sharma', phone: '+91 9876543210', email: 'rahul.sharma@techsolutions.com', company: 'Tech Solutions Pvt Ltd', designation: 'CEO', stage: 'QUALIFIED', dealValue: 85000, source: 'Website', city: 'Mumbai', tags: ['Hot Lead', 'VIP'] },
+    { name: 'Rahul Sharma', phone: '+91 7972888023', email: 'rahul.sharma@techsolutions.com', company: 'Tech Solutions Pvt Ltd', designation: 'CEO', stage: 'QUALIFIED', dealValue: 85000, source: 'Website', city: 'Mumbai', tags: ['Hot Lead', 'VIP'] },
     { name: 'Priya Patel', phone: '+91 8765432109', email: 'priya.patel@digitalmedia.in', company: 'Digital Media Co', designation: 'Marketing Head', stage: 'NEW', dealValue: 45000, source: 'Referral', city: 'Pune', tags: ['New'] },
     { name: 'Amit Verma', phone: '+91 7654321098', email: 'amit.verma@buildcorp.com', company: 'BuildCorp Industries', designation: 'Director', stage: 'PROPOSAL', dealValue: 120000, source: 'LinkedIn', city: 'Delhi', tags: ['Follow Up'] },
     { name: 'Sneha Joshi', phone: '+91 6543210987', email: 'sneha@startupideas.in', company: 'StartupIdeas.in', designation: 'Founder', stage: 'NEGOTIATION', dealValue: 95000, source: 'WhatsApp', city: 'Bangalore', tags: ['Hot Lead'] },

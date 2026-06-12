@@ -57,10 +57,7 @@ const PublicNavbar: React.FC<PublicNavbarProps> = ({ isDark: forcedDark, onToggl
     }`}>
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-lg flex items-center justify-center">
-            <Zap size={18} className="text-white" />
-          </div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">BizzAuto</h1>
+          <img src="/logo.svg" alt="BizzAuto Ai Logo" className="h-10 w-auto" />
         </Link>
 
         <div className="hidden md:flex items-center gap-1">

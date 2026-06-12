@@ -454,7 +454,7 @@ const UnofficialWhatsAppSettings: React.FC = () => {
         <div className="grid sm:grid-cols-3 gap-3">
           <div className="sm:col-span-1">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5 block">Phone (E.164 with country code)</label>
-            <input type="tel" value={testNumber} onChange={(e) => setTestNumber(e.target.value)} placeholder="+919876543210" className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg font-mono" />
+            <input type="tel" value={testNumber} onChange={(e) => setTestNumber(e.target.value)} placeholder="+917972888023" className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg font-mono" />
           </div>
           <div className="sm:col-span-2">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5 block">Message</label>

@@ -41,7 +41,10 @@ function connectToRedis(url: string) {
   });
   
   client.on('error', (err: any) => {
-    if (err.message?.includes('NOAUTH')) return;
+    if (err.message?.includes('NOAUTH')) {
+      console.error('[Redis] AUTHENTICATION REQUIRED: Set REDIS_PASSWORD in .env or use redis://:password@host:port format in REDIS_URL');
+      return;
+    }
     console.error(`[Redis] Connection error: ${err.message}`);
   });
   

@@ -607,15 +607,39 @@ router.post('/connect', authenticate, requireBusinessOwner, async (req: AuthRequ
       });
     }
 
-    // Generate embedded signup URL
-    // This would use Meta's Embedded Signup flow
-    const signupUrl = `https://developers.facebook.com/dialog/whatsapp_business_api_embedded_signup?app_id=${process.env.META_APP_ID}&redirect_uri=${process.env.WHATSAPP_REDIRECT_URL}`;
+    const appId = process.env.META_APP_ID;
+    const redirectUri = process.env.WHATSAPP_REDIRECT_URL;
+
+    if (!appId || appId === 'your_meta_app_id') {
+      return res.status(400).json({
+        success: false,
+        error: 'META_APP_ID not configured in .env file',
+      });
+    }
+
+    // Generate Meta Embedded Signup URL
+    // Step 1: Request permissions needed
+    const scopes = [
+      'whatsapp_business_management',
+      'whatsapp_business_messaging',
+      'pages_show_list',
+      'pages_read_engagement',
+    ].join(',');
+
+    // State token for CSRF protection (businessId + timestamp)
+    const state = Buffer.from(JSON.stringify({
+      businessId: req.user.businessId,
+      ts: Date.now(),
+    })).toString('base64');
+
+    const signupUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}&response_type=code&state=${state}`;
 
     res.json({
       success: true,
       data: {
         signupUrl,
-        message: 'Complete the signup flow to connect your WhatsApp Business number',
+        state,
+        message: 'Redirect user to this URL to complete WhatsApp connection',
       },
     });
   } catch (error: any) {
@@ -623,6 +647,211 @@ router.post('/connect', authenticate, requireBusinessOwner, async (req: AuthRequ
     res.status(500).json({
       success: false,
       error: 'Failed to initiate WhatsApp connection',
+      details: error.message,
+    });
+  }
+});
+
+// OAuth Callback - Meta redirects here after user authorizes
+router.get('/callback', async (req: Request, res: Response) => {
+  try {
+    const { code, state, error: fbError } = req.query;
+
+    if (fbError) {
+      console.error('[WhatsApp Callback] Facebook error:', fbError);
+      return res.redirect(`${process.env.FRONTEND_URL}/whatsapp?error=auth_denied`);
+    }
+
+    if (!code) {
+      return res.redirect(`${process.env.FRONTEND_URL}/whatsapp?error=no_code`);
+    }
+
+    // Decode state to get businessId
+    let businessId: string;
+    try {
+      const stateData = JSON.parse(Buffer.from(state as string, 'base64').toString());
+      businessId = stateData.businessId;
+
+      // Validate state is not too old (5 min)
+      if (Date.now() - stateData.ts > 5 * 60 * 1000) {
+        return res.redirect(`${process.env.FRONTEND_URL}/whatsapp?error=state_expired`);
+      }
+    } catch {
+      return res.redirect(`${process.env.FRONTEND_URL}/whatsapp?error=invalid_state`);
+    }
+
+    const appId = process.env.META_APP_ID;
+    const appSecret = process.env.META_APP_SECRET;
+    const redirectUri = process.env.WHATSAPP_REDIRECT_URL;
+
+    if (!appId || !appSecret) {
+      console.error('[WhatsApp Callback] META_APP_ID or META_APP_SECRET not configured');
+      return res.redirect(`${process.env.FRONTEND_URL}/whatsapp?error=server_config_missing`);
+    }
+
+    // Step 1: Exchange code for short-lived access token
+    console.log('[WhatsApp Callback] Exchanging code for access token...');
+    const tokenResponse = await axios.get('https://graph.facebook.com/v18.0/oauth/access_token', {
+      params: {
+        client_id: appId,
+        client_secret: appSecret,
+        redirect_uri: redirectUri,
+        code: code as string,
+      },
+    });
+
+    const { access_token: shortToken } = tokenResponse.data;
+    if (!shortToken) {
+      console.error('[WhatsApp Callback] Failed to get access token');
+      return res.redirect(`${process.env.FRONTEND_URL}/whatsapp?error=token_exchange_failed`);
+    }
+
+    // Step 2: Exchange short-lived token for long-lived token (60 days)
+    console.log('[WhatsApp Callback] Exchanging for long-lived token...');
+    const longTokenResponse = await axios.get('https://graph.facebook.com/v18.0/oauth/access_token', {
+      params: {
+        grant_type: 'fb_exchange_token',
+        client_id: appId,
+        client_secret: appSecret,
+        fetched_value: shortToken,
+      },
+    });
+
+    const longLivedToken = longTokenResponse.data.access_token || shortToken;
+
+    // Step 3: Get WhatsApp Business Account (WABA) ID and Phone Number ID
+    console.log('[WhatsApp Callback] Fetching WABA and phone number...');
+    const wabaResponse = await axios.get('https://graph.facebook.com/v18.0/debug_token', {
+      params: {
+        input_token: longLivedToken,
+        access_token: `${appId}|${appSecret}`,
+      },
+    });
+
+    // Extract WABA ID from token scopes
+    const granularScopes = wabaResponse.data.data?.scopes || [];
+    let wabaId = '';
+    let phoneNumberId = '';
+
+    // Try to find WABA from granted scopes
+    for (const scope of granularScopes) {
+      if (scope.scope === 'whatsapp_business_management') {
+        // The target IDs contain the WABA ID
+        wabaId = scope.target_ids?.[0] || '';
+      }
+    }
+
+    // Step 4: If WABA ID found, get phone number ID
+    if (wabaId) {
+      try {
+        const phoneResponse = await axios.get(`https://graph.facebook.com/v18.0/${wabaId}/phone_numbers`, {
+          params: {
+            access_token: longLivedToken,
+            fields: 'id,display_phone_number,verified_name,quality_rating',
+          },
+        });
+
+        const phoneNumbers = phoneResponse.data?.data || [];
+        if (phoneNumbers.length > 0) {
+          phoneNumberId = phoneNumbers[0].id;
+          console.log(`[WhatsApp Callback] Found phone number: ${phoneNumbers[0].display_phone_number} (${phoneNumberId})`);
+        }
+      } catch (phoneErr: any) {
+        console.warn('[WhatsApp Callback] Could not fetch phone numbers:', phoneErr.message);
+      }
+    }
+
+    // Step 5: Generate webhook secret
+    const crypto = await import('crypto');
+    const webhookSecret = crypto.randomBytes(24).toString('hex');
+
+    // Step 6: Save to database
+    console.log('[WhatsApp Callback] Saving credentials to database...');
+    await prisma.business.update({
+      where: { id: businessId },
+      data: {
+        wabaId: wabaId || null,
+        waPhoneNumberId: phoneNumberId || null,
+        waAccessToken: encrypt(longLivedToken),
+        waWebhookSecret: webhookSecret,
+      },
+    });
+
+    console.log(`[WhatsApp Callback] WhatsApp connected for business ${businessId}`);
+    console.log(`[WhatsApp Callback] WABA ID: ${wabaId}`);
+    console.log(`[WhatsApp Callback] Phone Number ID: ${phoneNumberId}`);
+
+    // Redirect back to frontend with success
+    res.redirect(`${process.env.FRONTEND_URL}/whatsapp?success=connected`);
+  } catch (error: any) {
+    console.error('[WhatsApp Callback] Error:', error.response?.data || error.message);
+    res.redirect(`${process.env.FRONTEND_URL}/whatsapp?error=callback_failed`);
+  }
+});
+
+// Manual connect - Enter credentials directly (for testing or if Embedded Signup fails)
+router.post('/connect-manual', authenticate, requireBusinessOwner, async (req: AuthRequest, res: Response) => {
+  try {
+    const { wabaId, phoneNumberId, accessToken, webhookSecret } = req.body;
+
+    if (!phoneNumberId || !accessToken) {
+      return res.status(400).json({
+        success: false,
+        error: 'phoneNumberId and accessToken are required',
+      });
+    }
+
+    // Validate the access token by making a test API call
+    let phoneNumber = '';
+    try {
+      const testResponse = await axios.get(
+        `https://graph.facebook.com/v18.0/${phoneNumberId}`,
+        {
+          params: {
+            access_token: accessToken,
+            fields: 'display_phone_number,verified_name',
+          },
+        }
+      );
+      phoneNumber = testResponse.data?.display_phone_number || '';
+    } catch (validationErr: any) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid access token or phone number ID',
+        details: validationErr.response?.data?.error?.message || validationErr.message,
+      });
+    }
+
+    const crypto = await import('crypto');
+    const finalWebhookSecret = webhookSecret || crypto.randomBytes(24).toString('hex');
+
+    await prisma.business.update({
+      where: { id: req.user.businessId },
+      data: {
+        wabaId: wabaId || null,
+        waPhoneNumberId: phoneNumberId,
+        waAccessToken: encrypt(accessToken),
+        waWebhookSecret: finalWebhookSecret,
+        waPhoneNumber: phoneNumber,
+      },
+    });
+
+    console.log(`[WhatsApp] Manual connect successful for business ${req.user.businessId}`);
+
+    res.json({
+      success: true,
+      data: {
+        connected: true,
+        phoneNumber,
+        phoneNumberId,
+        message: 'WhatsApp connected successfully',
+      },
+    });
+  } catch (error: any) {
+    console.error('Manual connect error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to connect WhatsApp',
       details: error.message,
     });
   }

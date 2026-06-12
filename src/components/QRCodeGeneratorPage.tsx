@@ -141,7 +141,7 @@ export default function QRCodeGeneratorPage() {
                     value={config.phone || ''}
                     onChange={(e) => setConfig({ ...config, phone: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500"
-                    placeholder="+919876543210"
+                    placeholder="+917972888023"
                   />
                 </div>
                 <div>
@@ -165,7 +165,7 @@ export default function QRCodeGeneratorPage() {
                   value={config.phone || ''}
                   onChange={(e) => setConfig({ ...config, phone: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500"
-                  placeholder="+919876543210"
+                  placeholder="+917972888023"
                 />
               </div>
             )}

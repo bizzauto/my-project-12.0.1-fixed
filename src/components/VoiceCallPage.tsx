@@ -556,7 +556,7 @@ const JimiCallAssistant: React.FC<JimiCallAssistantProps> = ({ onCallRequest, co
   const [isListening, setIsListening] = useState(false);
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState<{ text: string; isUser: boolean }[]>([
-    { text: 'Namaste! Main Jimi hun, aapki voice call assistant! 🎧\n\nBolo kya karna hai:\n• "Call karo Rahul ko"\n• "Contact list dikhao"\n• "Save karo Amit 9876543210"', isUser: false }
+    { text: 'Namaste! Main Jimi hun, aapki voice call assistant! 🎧\n\nBolo kya karna hai:\n• "Call karo Rahul ko"\n• "Contact list dikhao"\n• "Save karo Amit 7972888023"', isUser: false }
   ]);
   const recognitionRef = useRef<any>(null);
 
@@ -620,7 +620,7 @@ const JimiCallAssistant: React.FC<JimiCallAssistantProps> = ({ onCallRequest, co
         const number = match[2];
         addMessage(`✅ Save ho gaya!\n${name}: ${number}\nAb "Call karo ${name} ko" bolo!`, false);
       } else {
-        addMessage('📝 Number save karne ke liye:\n"Save karo Rahul 9876543210"', false);
+        addMessage('📝 Number save karne ke liye:\n"Save karo Rahul 7972888023"', false);
       }
     }
     // Contact list
@@ -634,7 +634,7 @@ const JimiCallAssistant: React.FC<JimiCallAssistantProps> = ({ onCallRequest, co
     }
     // Help
     else if (lower.includes('help')) {
-      addMessage('🎧 Jimi Call Assistant Commands:\n\n• "Call karo Rahul ko" - Contact ko call karo\n• "Save karo Amit 9876543210" - Number save karo\n• "Contact list dikhao" - Contacts dekho\n• "Call history dikhao" - Recent calls', false);
+      addMessage('🎧 Jimi Call Assistant Commands:\n\n• "Call karo Rahul ko" - Contact ko call karo\n• "Save karo Amit 7972888023" - Number save karo\n• "Contact list dikhao" - Contacts dekho\n• "Call history dikhao" - Recent calls', false);
     }
     // Unknown
     else {

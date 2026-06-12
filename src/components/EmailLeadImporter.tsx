@@ -163,7 +163,7 @@ const EmailLeadImporter: React.FC = () => {
           <textarea
             value={pasteContent}
             onChange={(e) => setPasteContent(e.target.value)}
-            placeholder={`Paste email content here...\n\nExample:\nQuery from Rahul Sharma\nPhone: 9876543210\nEmail: rahul@example.com\nRequirement for Hair Oil\nCity: Mumbai`}
+            placeholder={`Paste email content here...\n\nExample:\nQuery from Rahul Sharma\nPhone: 7972888023\nEmail: rahul@example.com\nRequirement for Hair Oil\nCity: Mumbai`}
             rows={10}
             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
           />
@@ -206,7 +206,7 @@ const EmailLeadImporter: React.FC = () => {
                     type="tel"
                     value={lead.phone}
                     onChange={(e) => updateLead(index, 'phone', e.target.value)}
-                    placeholder="9876543210"
+                    placeholder="7972888023"
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm"
                   />
                 </div>
@@ -272,7 +272,7 @@ const EmailLeadImporter: React.FC = () => {
           <textarea
             value={pasteContent}
             onChange={(e) => setPasteContent(e.target.value)}
-            placeholder={`[\n  {"name": "Rahul", "phone": "9876543210", "product": "Hair Oil", "city": "Mumbai"},\n  {"name": "Priya", "phone": "9876543211", "product": "Shampoo", "city": "Delhi"}\n]`}
+            placeholder={`[\n  {"name": "Rahul", "phone": "7972888023", "product": "Hair Oil", "city": "Mumbai"},\n  {"name": "Priya", "phone": "9876543211", "product": "Shampoo", "city": "Delhi"}\n]`}
             rows={8}
             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
           />

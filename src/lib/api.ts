@@ -175,7 +175,9 @@ export const whatsappAPI = {
   getTemplates: () => apiClient.get('/whatsapp/templates'),
   createTemplate: (data: any) => apiClient.post('/whatsapp/templates', data),
   deleteTemplate: (id: string) => apiClient.delete(`/whatsapp/templates/${id}`),
-  connect: (data: { code: string }) => apiClient.post('/whatsapp/connect', data),
+  connect: () => apiClient.post('/whatsapp/connect'),
+  connectManual: (data: { wabaId?: string; phoneNumberId: string; accessToken: string; webhookSecret?: string }) =>
+    apiClient.post('/whatsapp/connect-manual', data),
   getAutoReplies: () => apiClient.get('/whatsapp/auto-replies'),
   createAutoReply: (data: any) => apiClient.post('/whatsapp/auto-replies', data),
   updateAutoReply: (id: string, data: any) => apiClient.put(`/whatsapp/auto-replies/${id}`, data),

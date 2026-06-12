@@ -62,18 +62,16 @@ const LoginPage: React.FC = () => {
         <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-pink-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
 
         <div className="relative z-10 max-w-lg w-full">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <Zap className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-3xl font-bold text-white">BizzAuto</span>
+          <div className="mb-8">
+            <img src="/logo.svg" alt="BizzAuto Ai Logo" className="h-16 w-auto" />
+            <p className="text-blue-100 text-sm mt-2">Trusted by 200+ businesses</p>
           </div>
 
           <h2 className="text-3xl xl:text-4xl font-bold text-white mb-3">
             {t('login.heroTitle', 'Automate Your Business Growth')}
           </h2>
           <p className="text-base xl:text-lg text-blue-100 mb-8">
-            Join 10,000+ businesses already growing with WhatsApp & AI automation.
+            Join 200+ businesses already growing with WhatsApp & AI automation.
           </p>
 
           {/* Growth Visualization Card */}

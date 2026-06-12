@@ -119,7 +119,7 @@ const SNAPSHOT_VERSION = '1.0.0';
 
 const DEMO_DATA: Record<SnapshotCategory, SnapshotItem[]> = {
   contacts: [
-    { id: '1', name: 'Rahul Sharma', email: 'rahul@example.com', phone: '+919876543210', company: 'TechCorp' },
+    { id: '1', name: 'Rahul Sharma', email: 'rahul@example.com', phone: '+917972888023', company: 'TechCorp' },
     { id: '2', name: 'Priya Patel', email: 'priya@example.com', phone: '+919876543211', company: 'DesignHub' },
     { id: '3', name: 'Amit Kumar', email: 'amit@example.com', phone: '+919876543212', company: 'CloudBase' },
     { id: '4', name: 'Sneha Gupta', email: 'sneha@example.com', phone: '+919876543213', company: 'InnoLabs' },
