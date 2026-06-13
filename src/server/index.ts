@@ -124,6 +124,7 @@ import { shutdownWebhookWorker } from './services/webhook-retry.service.js';
 import { startAuditPruneCron, stopAuditPruneCron } from './services/audit-prune.service.js';
 import adminInfrastructureRoutes from './routes/admin-infrastructure.js';
 import admissionRoutes from './routes/admission.js';
+import caCopilotRoutes from './routes/ca-copilot.js';
 
 dotenv.config();
 
@@ -395,6 +396,7 @@ app.use('/api/crm-invoices', crmInvoicesRoutes);
 app.use('/api/deals', dealsRoutes);
   app.use('/api/pipelines', pipelinesRoutes);
   app.use('/api/admission', admissionRoutes);
+app.use('/api/ca-copilot', caCopilotRoutes);
 app.use('/api/store-features', storeFeaturesRoutes);
 app.use('/api/store-advanced', storeAdvancedRoutes);
 app.use('/api/store-customize', storeCustomizeRoutes);

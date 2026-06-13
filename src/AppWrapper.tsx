@@ -49,7 +49,7 @@ const AI_ROUTES = new Set([
   '/customer-journey', '/bulk-messaging', '/appointment-booking', '/inventory',
   '/sso-config', '/custom-roles', '/sla-management', '/data-backup',
   '/landing-page-builder', '/ab-testing', '/google-ads', '/facebook-leads',
-  '/ai-sales-assistant', '/order-history',
+  '/ai-sales-assistant', '/order-history', '/ca-copilot',
 ]);
 
 const ModeAwareAuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -144,6 +144,7 @@ const GoogleAdsPage = lazy(() => import('./components/GoogleAdsPage'));
 const FacebookLeadAdsPage = lazy(() => import('./components/FacebookLeadAdsPage'));
 const AISalesAssistantPage = lazy(() => import('./components/AISalesAssistantPage'));
 const OrderHistoryPage = lazy(() => import('./components/OrderHistoryPage'));
+const CACopilotPage = lazy(() => import('./components/CACopilotPage'));
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -762,6 +763,7 @@ function AppRoutes() {
       <Route path="/facebook-leads" element={<ProtectedRoute><ModeAwareAuthLayout><FacebookLeadAdsPage /></ModeAwareAuthLayout></ProtectedRoute>} />
       <Route path="/ai-sales-assistant" element={<ProtectedRoute><ModeAwareAuthLayout><AISalesAssistantPage /></ModeAwareAuthLayout></ProtectedRoute>} />
       <Route path="/order-history" element={<ProtectedRoute><ModeAwareAuthLayout><OrderHistoryPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/ca-copilot" element={<ProtectedRoute><ModeAwareAuthLayout><CACopilotPage /></ModeAwareAuthLayout></ProtectedRoute>} />
 
       {/* Redirects */}
       <Route path="/404" element={<NotFoundPage />} />
