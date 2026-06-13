@@ -91,7 +91,7 @@ const ForgotPasswordPage: React.FC<{ onNavigate?: (page: string) => void }> = ({
           </Link>
 
           <div className="mb-6">
-            <img src="/logo.svg" alt="BizzAuto Ai Logo" className="h-14 w-auto" />
+            <img src="/logo.svg" alt="BizzAuto Ai Logo" className="h-18 w-auto" />
           </div>
 
           <h2 className="text-3xl xl:text-4xl font-bold text-white mb-3">

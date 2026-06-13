@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <img src="/logo.svg" alt="BizzAuto Ai Logo" className="h-12 w-auto mb-4" />
+            <img src="/logo.svg" alt="BizzAuto Ai Logo" className="h-16 w-auto mb-4" />
             <p className="text-gray-400 mb-4 max-w-xs">
               India's most powerful WhatsApp marketing & business automation platform. Built for small businesses & agencies.
             </p>
