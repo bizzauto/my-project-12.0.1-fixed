@@ -190,7 +190,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         {/* Logo */}
         <div className="p-5 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <img src="/logo.svg" alt="BizzAuto Ai Logo" className="h-14 w-auto flex-shrink-0" />
+            <img src="/logo.svg" alt="BizzAuto Ai Logo" className="h-20 w-auto flex-shrink-0" />
           </div>
         </div>
 
