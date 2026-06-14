@@ -16,7 +16,7 @@ export const securityHeaders = helmet({
       fontSrc: ["'self'", "https:", "data:"],
       connectSrc: ["'self'", "https:", "wss:"],
       mediaSrc: ["'self'", "https:", "blob:"],
-      frameSrc: ["'self'", "https://accounts.google.com", "https://*.google.com", "https://*.googleapis.com"],
+      frameSrc: ["'self'", "https://accounts.google.com", "https://*.google.com", "https://*.googleapis.com", "https://checkout.razorpay.com", "https://*.razorpay.com"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: []
     }
