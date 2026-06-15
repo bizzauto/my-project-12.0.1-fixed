@@ -46,6 +46,13 @@ export const securityHeaders = helmet({
   // Referrer Policy
   referrerPolicy: {
     policy: 'strict-origin-when-cross-origin'
+  },
+  
+  // Cross-Origin-Opener-Policy: Required for Google Identity Services popup
+  // Default 'same-origin' blocks the GIS popup at accounts.google.com/gsi/transform
+  // from sending postMessage back to the parent window, causing white screen.
+  crossOriginOpenerPolicy: {
+    policy: 'same-origin-allow-popups'
   }
 });
 
