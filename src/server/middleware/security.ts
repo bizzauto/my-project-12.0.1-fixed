@@ -7,16 +7,21 @@ import helmet from 'helmet';
  */
 export const securityHeaders = helmet({
   // Content Security Policy - Prevents XSS
+  // NOTE: This is the SOLE helmet/CSP configuration. The duplicate in server/index.ts was removed.
+  // Google OAuth (GIS), Razorpay, Google Fonts, and React/Vite all need these directives.
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https:"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com", "https://cdn.razorpay.com", "https://fonts.googleapis.com", "https://accounts.google.com", "https://apis.google.com"],
+      scriptSrcAttr: ["'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:", "blob:"],
-      fontSrc: ["'self'", "https:", "data:"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       connectSrc: ["'self'", "https:", "wss:"],
       mediaSrc: ["'self'", "https:", "blob:"],
-      frameSrc: ["'self'", "https://accounts.google.com", "https://*.google.com", "https://*.googleapis.com", "https://checkout.razorpay.com", "https://*.razorpay.com"],
+      frameSrc: ["'self'", "https://accounts.google.com", "https://*.google.com", "https://*.googleapis.com", "https://checkout.razorpay.com", "https://api.razorpay.com", "https://*.razorpay.com"],
+      workerSrc: ["'self'", "blob:"],
+      manifestSrc: ["'self'"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: []
     }

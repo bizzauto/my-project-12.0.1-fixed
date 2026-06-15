@@ -176,24 +176,6 @@ if (NODE_ENV !== 'production') {
   }));
 }
 
-// Middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com", "https://fonts.googleapis.com", "https://cdn.razorpay.com", "https://accounts.google.com", "https://apis.google.com"],
-      scriptSrcAttr: ["'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-      imgSrc: ["'self'", "data:", "https:", "blob:"],
-      connectSrc: ["'self'", "https:", "wss:"],
-      frameSrc: ["'self'", "https://checkout.razorpay.com", "https://api.razorpay.com", "https://accounts.google.com"],
-      workerSrc: ["'self'", "blob:"],
-      manifestSrc: ["'self'"],
-    },
-  },
-  crossOriginEmbedderPolicy: false,
-}));
 // Trust proxy — required when behind a reverse proxy (Nginx, Coolify, Cloudflare)
 // so that rate-limiter and req.ip use the real client IP from X-Forwarded-For
 app.set('trust proxy', 1);
