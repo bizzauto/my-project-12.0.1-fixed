@@ -864,6 +864,7 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
           phone: user.phone,
           role: user.role,
           businessId: user.businessId,
+          image: user.image,
         },
         business: {
           id: user.business.id,

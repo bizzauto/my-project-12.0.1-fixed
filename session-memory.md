@@ -54,8 +54,8 @@
 | Detail | Value |
 |--------|-------|
 | **VPS IP** | 87.76.169.6 |
-| **Container** | `wxxl6hhh02j9yf7m3u8452qo-172327323448` |
-| **SSH Key** | `/tmp/codebuff_vps_key` |
+| **Container** | `wxxl6hhh02j9yf7m3u8452qo-025442012803` |
+| **SSH Key** | `bizzauto-new-key` (in project root) |
 | **Domain** | https://bizzautoai.com |
 | **Login Email** | `bizzautoai.solution@gmail.com` |
 | **Login Password** | `Admin@123456` |

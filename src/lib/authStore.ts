@@ -9,6 +9,7 @@ interface User {
   role: string;
   businessId: string;
   avatar?: string;
+  image?: string;
   lastLogin?: string;
 }
 
@@ -60,6 +61,8 @@ interface AuthState {
   updateProfile: (data: { name?: string; phone?: string }) => Promise<void>;
   setOnboardingCompleted: (val: boolean) => void;
   setAdmissionCompleted: (val: boolean) => void;
+  setUser: (user: User) => void;
+  setTokens: (token: string, refreshToken: string) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -132,6 +135,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       const onboardingCompleted = localStorage.getItem('onboardingCompleted') === 'true';
       const admissionCompleted = localStorage.getItem('admissionCompleted') === 'true';
       
+      // Map image to avatar for backward compatibility
+      if (user?.image && !user.avatar) {
+        user.avatar = user.image;
+      }
+      
       // Sync admission status from business data if available
       if (business?.admissionCompleted) {
         localStorage.setItem('admissionCompleted', 'true');
@@ -160,7 +168,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { user, business, token, refreshToken } = res.data.data;
       localStorage.setItem('token', token);
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      set({ user, business, token, isAuthenticated: true, isLoading: false });
+      const onboardingCompleted = localStorage.getItem('onboardingCompleted') === 'true';
+      const admissionCompleted = localStorage.getItem('admissionCompleted') === 'true';
+      set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted, admissionCompleted });
     } catch (error: any) {
       set({ isLoading: false });
       const message = error.response?.data?.error || error.response?.data?.message || 'Invalid email or password';
@@ -205,6 +215,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { user, business, token, refreshToken } = res.data.data;
       localStorage.setItem('token', token);
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('onboardingCompleted', 'true');
       set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted: true });
     } catch (error: any) {
       set({ isLoading: false });
@@ -287,5 +298,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAdmissionCompleted: (val) => {
     localStorage.setItem('admissionCompleted', val ? 'true' : 'false');
     set({ admissionCompleted: val });
+  },
+
+  setUser: (user) => {
+    set({ user, isAuthenticated: true });
+  },
+
+  setTokens: (token, refreshToken) => {
+    localStorage.setItem('token', token);
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+    set({ token });
   },
 }));

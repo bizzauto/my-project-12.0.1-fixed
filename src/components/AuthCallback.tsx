@@ -35,6 +35,12 @@ export default function AuthCallback() {
         } as any);
         store.setTokens(token, refreshToken || '');
 
+        // Sync onboarding/admission flags from localStorage
+        const onboardingCompleted = localStorage.getItem('onboardingCompleted') === 'true';
+        const admissionCompleted = localStorage.getItem('admissionCompleted') === 'true';
+        if (onboardingCompleted) store.setOnboardingCompleted(true);
+        if (admissionCompleted) store.setAdmissionCompleted(true);
+
         const redirectPath = role === 'SUPER_ADMIN' ? '/admin' : '/dashboard';
         navigate(redirectPath, { replace: true });
       } catch (err) {

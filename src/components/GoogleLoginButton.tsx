@@ -59,11 +59,16 @@ const GoogleLoginButton: React.FC<Props> = ({
       localStorage.setItem('user', JSON.stringify(user));
       if (business) localStorage.setItem('business', JSON.stringify(business));
 
+      // Mark onboarding as completed for new users
+      localStorage.setItem('onboardingCompleted', 'true');
+      
       // Notify parent component
       if (onSuccess) {
         onSuccess(data.data);
       } else {
-        // Default: reload to trigger auth state update
+        // Default: go to dashboard - ProtectedRoute handles redirect:
+        // New users (admissionCompleted=false) → /resorpay
+        // Returning users (admissionCompleted=true) → dashboard
         window.location.href = '/dashboard';
       }
     } catch (err: any) {
@@ -98,6 +103,7 @@ const GoogleLoginButton: React.FC<Props> = ({
         callback: handleCredentialResponse,
         auto_select: false,
         cancel_on_tap_outside: true,
+        prompt: 'select_account',  // Always show account picker, not auto-select
       });
 
       // Render the Google button inside our container

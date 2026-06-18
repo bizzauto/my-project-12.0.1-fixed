@@ -62,7 +62,9 @@ router.post('/connect', authenticate, async (req: any, res: any) => {
     const businessId = req.user?.businessId;
     if (!businessId) return res.status(400).json({ success: false, error: 'Business ID required' });
 
-    const result = await EvolutionApiService.connectInstance(businessId);
+    // Accept instanceName from frontend if provided (e.g., auto-generated)
+    const instanceName = req.body?.instanceName;
+    const result = await EvolutionApiService.connectInstance(businessId, instanceName);
     res.json({ success: true, data: result });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });

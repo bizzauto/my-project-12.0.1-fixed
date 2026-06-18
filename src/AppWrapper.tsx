@@ -166,11 +166,13 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   // Check if admission form is completed (skip for admission-related pages)
+  // NOTE: Redirect to /resorpay (plan selection + payment) first, not /admission-form
+  // ResorPayBoard redirects to /admission-form after successful payment
   if (!admissionCompleted && 
       !location.pathname.startsWith('/admission-form') && 
       !location.pathname.startsWith('/resorpay') &&
       !location.pathname.startsWith('/onboarding')) {
-    return <Navigate to="/admission-form" replace />;
+    return <Navigate to="/resorpay" replace />;
   }
 
   return <ErrorBoundary pageName={location.pathname}>{children}</ErrorBoundary>;
