@@ -126,6 +126,8 @@ import adminInfrastructureRoutes from './routes/admin-infrastructure.js';
 import admissionRoutes from './routes/admission.js';
 import caCopilotRoutes from './routes/ca-copilot.js';
 import caFileCompareRoutes from './routes/ca-file-compare.js';
+import leadFinderRoutes from './routes/lead-finder.js';
+import aiOutreachRoutes from './routes/ai-outreach.js';
 
 dotenv.config();
 
@@ -381,6 +383,8 @@ app.use('/api/deals', dealsRoutes);
   app.use('/api/admission', admissionRoutes);
 app.use('/api/ca-copilot', caCopilotRoutes);
 app.use('/api/ca-copilot', caFileCompareRoutes);
+app.use('/api/lead-finder', leadFinderRoutes);
+app.use('/api/outreach', aiOutreachRoutes);
 app.use('/api/store-features', storeFeaturesRoutes);
 app.use('/api/store-advanced', storeAdvancedRoutes);
 app.use('/api/store-customize', storeCustomizeRoutes);

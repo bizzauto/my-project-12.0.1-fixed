@@ -711,4 +711,36 @@ export const crmInvoicesAPI = {
   delete: (id: string) => apiClient.delete(`/crm-invoices/${id}`),
 };
 
+// ==================== LEAD FINDER ====================
+export const leadFinderAPI = {
+  search: (data: { category: string; city: string; radius?: number }) =>
+    apiClient.post('/lead-finder/search', data),
+  analyze: (places: any[]) => apiClient.post('/lead-finder/analyze', { places }),
+  import: (data: { places: any[]; searchId: string }) => apiClient.post('/lead-finder/import', data),
+  history: (params?: { limit?: number }) => apiClient.get('/lead-finder/history', { params }),
+  score: (contactId: string) => apiClient.post(`/lead-finder/score/${contactId}`),
+  bulkScore: (contactIds?: string[]) => apiClient.post('/lead-finder/bulk-score', { contactIds }),
+  leads: (params?: { category?: string; source?: string; page?: number; limit?: number }) =>
+    apiClient.get('/lead-finder/leads', { params }),
+};
+
+// ==================== OUTREACH ====================
+export const outreachAPI = {
+  generate: (data: { contactId: string; template?: string }) => apiClient.post('/outreach/generate', data),
+  preview: (data: { contactIds: string[]; template?: string }) => apiClient.post('/outreach/preview', data),
+  send: (data: { campaignId: string; contactId: string; messageType?: string }) => apiClient.post('/outreach/send', data),
+  bulk: (data: { campaignId: string; messageType?: string; delayMs?: number }) => apiClient.post('/outreach/bulk', data),
+  listCampaigns: () => apiClient.get('/outreach/campaigns'),
+  getCampaign: (id: string) => apiClient.get(`/outreach/campaigns/${id}`),
+  createCampaign: (data: { name: string; template: string; contactIds: string[] }) =>
+    apiClient.post('/outreach/campaigns', data),
+  activateCampaign: (id: string) => apiClient.post(`/outreach/campaigns/${id}/activate`),
+  pauseCampaign: (id: string) => apiClient.post(`/outreach/campaigns/${id}/pause`),
+  scheduleFollowUps: (data: { campaignId: string; rules?: any }) =>
+    apiClient.post('/outreach/followup/schedule', data),
+  processFollowUps: () => apiClient.post('/outreach/followup/process'),
+  handleReply: (data: { contactId: string; campaignId: string; replyContent?: string }) =>
+    apiClient.post('/outreach/reply', data),
+};
+
 export default apiClient;

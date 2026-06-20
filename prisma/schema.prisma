@@ -233,9 +233,12 @@ model Business {
   analyticsIntegration   AnalyticsIntegration?
   discountRules          DiscountRule[]
   orderNotifications     OrderNotification[]
-  goals                  Goal[]
+   goals                  Goal[]
+   leadFinderSearches     LeadFinderSearch[]
+   outreachCampaigns      OutreachCampaign[]
+   outreachLogs           OutreachLog[]
 
-  createdAt DateTime @default(now())
+   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([plan])
@@ -344,6 +347,11 @@ model Contact {
   stage      String? // pipeline stage
   assignedTo String?
 
+  // Lead Finder
+  leadFinderScore  Int?    // 0-100 digital presence gap score
+  leadFinderSource String? // google_maps, justdial, etc.
+  leadFinderData   Json?   // Raw Google Places data
+
   // Relations
   activities           Activity[]
   appointments         Appointment[]
@@ -370,6 +378,7 @@ model Contact {
   returnRequests       ReturnRequest[]
   segmentMembers       SegmentMember[]
   pushSubscriptions    PushSubscription[]
+  outreachLogs         OutreachLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -3148,5 +3157,69 @@ model PlatformReferralPayout {
   createdAt     DateTime @default(now())
 
   @@index([referralId])
+  @@index([status])
+}
+
+// ==================== LEAD FINDER ====================
+
+model LeadFinderSearch {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id])
+  query         String
+  category      String
+  city          String
+  radius        Int      @default(10)
+  resultsCount  Int      @default(0)
+  importedCount Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([businessId])
+}
+
+model OutreachCampaign {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id])
+  name          String
+  status        String   @default("draft") // draft, active, paused, completed
+  totalLeads    Int      @default(0)
+  sent          Int      @default(0)
+  delivered     Int      @default(0)
+  replied       Int      @default(0)
+  clicked       Int      @default(0)
+  template      String
+  followUpRules Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  outreachLogs  OutreachLog[]
+
+  @@index([businessId])
+  @@index([status])
+}
+
+model OutreachLog {
+  id            String   @id @default(cuid())
+  campaignId    String
+  campaign      OutreachCampaign @relation(fields: [campaignId], references: [id])
+  contactId     String
+  contact       Contact          @relation(fields: [contactId], references: [id])
+  businessId    String
+  business      Business         @relation(fields: [businessId], references: [id])
+  messageType   String   @default("initial") // initial, followup_1, followup_2, followup_3
+  message       String
+  status        String   @default("pending") // pending, sent, delivered, read, replied, failed
+  whatsappMsgId String?
+  sentAt        DateTime?
+  deliveredAt   DateTime?
+  readAt        DateTime?
+  repliedAt     DateTime?
+  replyContent  String?
+  createdAt     DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([contactId])
+  @@index([businessId])
   @@index([status])
 }
