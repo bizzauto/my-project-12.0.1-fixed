@@ -551,14 +551,14 @@ export default function SettingsPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            { name: 'WhatsApp Business', icon: '💬', color: 'green', connected: !!business?.waAccessToken, desc: 'Send messages, auto-replies, campaigns' },
-            { name: 'Facebook', icon: '📘', color: 'blue', connected: !!business?.fbAccessToken, desc: 'Post to pages, lead ads' },
-            { name: 'Instagram', icon: '📷', color: 'pink', connected: !!business?.igAccessToken, desc: 'Post, stories, reels' },
-            { name: 'LinkedIn', icon: '💼', color: 'blue', connected: !!business?.linkedinAccessToken, desc: 'Professional posts' },
-            { name: 'Twitter/X', icon: '🐦', color: 'sky', connected: !!business?.twitterAccessToken, desc: 'Tweets and threads' },
-            { name: 'Google Business', icon: '🏢', color: 'red', connected: !!business?.gbpAccessToken, desc: 'Reviews, posts, insights' },
-            { name: 'YouTube', icon: '📺', color: 'red', connected: !!business?.youtubeAccessToken, desc: 'Channel management, videos' },
-            { name: 'Apple Sign-In', icon: '🍎', color: 'gray', connected: !!user?.appleId, desc: 'Sign in with Apple' },
+            { name: 'WhatsApp Business', icon: '💬', color: 'green', connected: !!(business as any)?.waAccessToken, desc: 'Send messages, auto-replies, campaigns' },
+            { name: 'Facebook', icon: '📘', color: 'blue', connected: !!(business as any)?.fbAccessToken, desc: 'Post to pages, lead ads' },
+            { name: 'Instagram', icon: '📷', color: 'pink', connected: !!(business as any)?.igAccessToken, desc: 'Post, stories, reels' },
+            { name: 'LinkedIn', icon: '💼', color: 'blue', connected: !!(business as any)?.linkedinAccessToken, desc: 'Professional posts' },
+            { name: 'Twitter/X', icon: '🐦', color: 'sky', connected: !!(business as any)?.twitterAccessToken, desc: 'Tweets and threads' },
+            { name: 'Google Business', icon: '🏢', color: 'red', connected: !!(business as any)?.gbpAccessToken, desc: 'Reviews, posts, insights' },
+            { name: 'YouTube', icon: '📺', color: 'red', connected: !!(business as any)?.youtubeAccessToken, desc: 'Channel management, videos' },
+            { name: 'Apple Sign-In', icon: '🍎', color: 'gray', connected: !!(user as any)?.appleId, desc: 'Sign in with Apple' },
           ].map((social) => (
             <div key={social.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
               <div className="flex items-center gap-3">
@@ -592,7 +592,7 @@ export default function SettingsPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {user?.googleId ? (
+              {(user as any)?.googleId ? (
                 <>
                   <span className="flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-medium">
                     <span className="w-2 h-2 bg-green-500 rounded-full"></span> Connected

@@ -3150,3 +3150,40 @@ model PlatformReferralPayout {
   @@index([referralId])
   @@index([status])
 }
+
+// ==================== WHITE LABEL ====================
+
+model wl_clients {
+  id        String   @id @default(cuid())
+  resellerId String
+  name      String
+  email     String
+  phone     String?
+  product   String
+  status    String
+  plan      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([resellerId])
+}
+
+model wl_resellers {
+  id           String   @id @default(cuid())
+  name         String
+  email        String
+  password     String
+  company      String
+  phone        String?
+  plan         String
+  domain       String?
+  logo         String?
+  primaryColor String
+  isActive     Boolean  @default(true)
+  revenue      Float    @default(0)
+  joinedAt     DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([email])
+}

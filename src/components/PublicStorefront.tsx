@@ -421,7 +421,7 @@ const PublicStorefront: React.FC = () => {
               {selectedProduct.images && selectedProduct.images.length > 0 ? (
                 <>
                   <img src={selectedProduct.images[selectedImageIdx] || selectedProduct.mainImage} alt={selectedProduct.name}
-                    className="w-full h-full object-cover rounded-t-2xl cursor-zoom-in" onClick={() => setZoomImage(selectedProduct.images[selectedImageIdx] || selectedProduct.mainImage)} />
+                    className="w-full h-full object-cover rounded-t-2xl cursor-zoom-in" onClick={() => setZoomImage(selectedProduct.images[selectedImageIdx] || (selectedProduct.mainImage ?? null))} />
                   {selectedProduct.images.length > 1 && (
                     <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 px-4">
                       {selectedProduct.images.slice(0, 6).map((img, i) => (

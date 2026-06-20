@@ -211,8 +211,14 @@ export default function ReviewRequests() {
   const [campaigns, setCampaigns] = useState<ReviewCampaign[]>([]);
   const [campaignModal, setCampaignModal] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<ReviewCampaign | null>(null);
-  const [campaignForm, setCampaignForm] = useState({
-    name: '', triggerType: 'manual' as const, channel: 'whatsapp' as const, messageTemplate: '', reviewUrl: ''
+  const [campaignForm, setCampaignForm] = useState<{
+    name: string;
+    triggerType: 'appointment_completed' | 'order_delivered' | 'manual';
+    channel: 'whatsapp' | 'email' | 'sms';
+    messageTemplate: string;
+    reviewUrl: string;
+  }>({
+    name: '', triggerType: 'manual', channel: 'whatsapp', messageTemplate: '', reviewUrl: ''
   });
   const [campaignSaving, setCampaignSaving] = useState(false);
 

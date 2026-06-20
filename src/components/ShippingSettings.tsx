@@ -70,7 +70,7 @@ const ShippingSettings: React.FC = () => {
       minOrderAmount: rule.minOrderAmount,
       maxOrderAmount: rule.maxOrderAmount,
       shippingFee: rule.shippingFee,
-      freeAboveAmount: rule.freeAboveAmount,
+      freeAbove: rule.freeAbove,
       pincodePrefixes: [...rule.pincodePrefixes],
       states: [...rule.states],
       isActive: rule.isActive,
@@ -159,7 +159,7 @@ const ShippingSettings: React.FC = () => {
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
                   <span className="flex items-center gap-1"><DollarSign size={12} />Fee: ₹{rule.shippingFee}</span>
-                  {rule.freeAboveAmount && <span className="flex items-center gap-1"><Package size={12} />Free above ₹{rule.freeAboveAmount}</span>}
+                  {rule.freeAbove && <span className="flex items-center gap-1"><Package size={12} />Free above ₹{rule.freeAbove}</span>}
                   {rule.minOrderAmount > 0 && <span>Min: ₹{rule.minOrderAmount}</span>}
                   {rule.maxOrderAmount && <span>Max: ₹{rule.maxOrderAmount}</span>}
                   {rule.pincodePrefixes.length > 0 && (
@@ -242,8 +242,8 @@ const ShippingSettings: React.FC = () => {
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Free Above (₹)</label>
                   <input
                     type="number"
-                    value={form.freeAboveAmount ?? ''}
-                    onChange={(e) => setForm({ ...form, freeAboveAmount: e.target.value ? Number(e.target.value) : null })}
+                    value={form.freeAbove ?? ''}
+                    onChange={(e) => setForm({ ...form, freeAbove: e.target.value ? Number(e.target.value) : null })}
                     placeholder="Never free"
                     className={inputClass}
                   />

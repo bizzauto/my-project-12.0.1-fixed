@@ -180,7 +180,7 @@ export default function ReferralsPage() {
             <span className="text-sm text-gray-500">Pending Payout</span>
           </div>
           <p className="text-3xl font-bold text-purple-600">₹{(data?.pendingPayout || 0).toLocaleString()}</p>
-          {data?.pendingPayout >= 100 && (
+          {(data?.pendingPayout ?? 0) >= 100 && (
             <button
               onClick={requestPayout}
               disabled={requestingPayout}

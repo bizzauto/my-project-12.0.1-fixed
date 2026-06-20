@@ -435,7 +435,6 @@ router.post('/simple-sync', authenticate, async (req: any, res: Response) => {
     const password = decrypt(config.password);
 
     console.log(`[SimpleSync] Config found: email=${config.email}, host=${config.imapHost}, port=${config.imapPort}`);
-    console.log(`[SimpleSync] Password length: ${password.length} chars`);
     console.log(`[SimpleSync] Starting sync for ${config.email}`);
 
     const result = await GmailIMAPService.fetchAndCreateLeads(

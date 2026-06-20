@@ -957,7 +957,7 @@ const ChatView: React.FC<{
                           </button>
                           <button onClick={() => {
                             const emoji = '👍';
-                            setNewMessage((prev) => prev + emoji);
+                            setMessage((prev: string) => prev + emoji);
                           }} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 dark:text-gray-400" title="React">
                             <Smile size={14} />
                           </button>
