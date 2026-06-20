@@ -97,7 +97,7 @@ router.post('/bulk', authenticate, async (req: any, res: Response) => {
     const businessId = req.user?.businessId;
     if (!businessId) return res.status(400).json({ success: false, error: 'Business ID required' });
 
-    const { campaignId, messageType = 'initial', delayMs = 2000 } = req.body;
+    const { campaignId, messageType = 'initial', delayMs = 3000, maxMessages = 30 } = req.body;
     if (!campaignId) {
       return res.status(400).json({ success: false, error: 'campaignId is required' });
     }
@@ -109,6 +109,7 @@ router.post('/bulk', authenticate, async (req: any, res: Response) => {
         campaignId,
         messageType,
         delayMs,
+        maxMessages,
       }, {
         priority: 1,
         delay: 0,
@@ -122,6 +123,7 @@ router.post('/bulk', authenticate, async (req: any, res: Response) => {
         campaignId,
         messageType,
         delayMs,
+        maxMessages,
       });
 
       res.json({ success: true, data: result });

@@ -66,12 +66,12 @@ const outreachWorker = redisConnection ? new Worker(
     }
 
     if (type === 'send-bulk') {
-      const { businessId, campaignId, messageType, delayMs = 2000 } = job.data;
+      const { businessId, campaignId, messageType, delayMs = 3000, maxMessages = 30 } = job.data;
 
       const pendingLogs = await prisma.outreachLog.findMany({
         where: { campaignId, messageType: messageType || 'initial', status: 'pending' },
         include: { contact: true },
-        take: 30,
+        take: Math.min(maxMessages, 50),
       });
 
       let sent = 0;
@@ -95,7 +95,12 @@ const outreachWorker = redisConnection ? new Worker(
           });
 
           sent++;
-          await new Promise((r) => setTimeout(r, delayMs));
+
+          // Random delay 2-4 seconds to avoid WhatsApp spam detection
+          const minDelay = 2000;
+          const maxDelay = 4000;
+          const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
+          await new Promise((r) => setTimeout(r, randomDelay));
         } catch {
           errors++;
           await prisma.outreachLog.update({

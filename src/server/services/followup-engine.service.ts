@@ -139,8 +139,9 @@ export class FollowUpEngineService {
 
         sent++;
 
-        // Rate limit: 2 second delay
-        await new Promise((r) => setTimeout(r, 2000));
+        // Random delay 2-4 seconds to avoid spam detection
+        const randomDelay = Math.floor(Math.random() * 2000) + 2000; // 2000-4000ms
+        await new Promise((r) => setTimeout(r, randomDelay));
       } catch {
         errors++;
         await prisma.outreachLog.update({

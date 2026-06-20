@@ -39,6 +39,7 @@ export default function OutreachCampaignPage() {
   const [newName, setNewName] = useState('');
   const [newTemplate, setNewTemplate] = useState('');
   const [newContactIds, setNewContactIds] = useState('');
+  const [newMaxMessages, setNewMaxMessages] = useState(30);
   const [creating, setCreating] = useState(false);
 
   const loadCampaigns = async () => {
@@ -116,8 +117,8 @@ export default function OutreachCampaignPage() {
 
   const handleBulkSend = async (campaignId: string) => {
     try {
-      await outreachAPI.bulk({ campaignId });
-      setMessage({ type: 'success', text: 'Bulk send queued' });
+      await outreachAPI.bulk({ campaignId, maxMessages: newMaxMessages });
+      setMessage({ type: 'success', text: `Bulk send queued (max ${newMaxMessages} per batch)` });
     } catch (err: any) {
       setMessage({ type: 'error', text: err.response?.data?.error || 'Failed' });
     }
@@ -214,6 +215,20 @@ export default function OutreachCampaignPage() {
                   placeholder="Hi {name}, I noticed {business} doesn't have a website yet. We can help you get online..."
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Messages Per Batch</label>
+                <select
+                  value={newMaxMessages}
+                  onChange={(e) => setNewMaxMessages(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={10}>10 messages (Safest)</option>
+                  <option value={20}>20 messages (Safe)</option>
+                  <option value={30}>30 messages (Recommended)</option>
+                  <option value={50}>50 messages (Max)</option>
+                </select>
+                <p className="text-xs text-gray-400 mt-1">Each batch has random 2-4s delays between messages</p>
               </div>
             </div>
             <div className="flex gap-2 mt-4">
@@ -339,6 +354,16 @@ export default function OutreachCampaignPage() {
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                   <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Message Template</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{selectedCampaign.template}</p>
+                </div>
+
+                {/* Anti-Ban Info */}
+                <div className="mt-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-green-700 dark:text-green-300 mb-2">Anti-Ban Protection Active</h4>
+                  <ul className="text-xs text-green-600 dark:text-green-400 space-y-1">
+                    <li>Each message is AI-generated with unique wording, greeting, and sentence structure</li>
+                    <li>Random 2-4 second delay between every message</li>
+                    <li>Variation seeds ensure no two messages look identical to WhatsApp</li>
+                  </ul>
                 </div>
               </div>
             ) : (
