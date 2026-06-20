@@ -177,12 +177,13 @@ export class EvolutionApiService {
   /**
    * Connect to Evolution API and get QR code.
    * 
-   * Strategy:
+   * Strategy (Evolution API v2 compatible):
    * 1. Delete any existing instance (cleanup, suppress errors)
-   * 2. Wait 2 seconds for cleanup to propagate
+   * 2. Wait 3 seconds for cleanup to propagate
    * 3. Create a fresh instance via POST /instance/create
-   * 4. Get QR code via GET /instance/connect/:name (with 1 retry on failure)
-   * 5. If connect returns { count: 0 }, try /instance/qrcode/:name as fallback
+   * 4. Wait 2 seconds for instance to initialize
+   * 5. Get QR code via GET /instance/connect/:name (with retries)
+   * 6. If connect returns no QR, try /instance/qrcode/:name as fallback
    * 
    * Accepts optional instanceName from frontend; falls back to configured name.
    */
@@ -194,6 +195,8 @@ export class EvolutionApiService {
     const config = await this.getConfig(businessId);
     const resolvedInstanceName = instanceName || config.instanceName;
 
+    console.log(`[Evolution] === Starting connect for: ${resolvedInstanceName} ===`);
+
     // Step 1: Delete any existing instance (cleanup, suppress errors)
     try {
       await axios.delete(
@@ -202,66 +205,109 @@ export class EvolutionApiService {
       );
       console.log(`[Evolution] Deleted existing instance: ${resolvedInstanceName}`);
     } catch (e: any) {
-      console.warn(`[Evolution] Delete instance ${resolvedInstanceName} failed (may not exist):`, e?.response?.data || e.message);
+      console.log(`[Evolution] Delete ${resolvedInstanceName} (may not exist): ${e?.response?.status || e.message}`);
     }
 
-    // Wait 2 seconds for cleanup
+    // Also clean up any OTHER stale instances for this business
+    try {
+      const allInstances = await axios.get(
+        `${config.baseUrl}/instance/fetchInstances`,
+        { headers: { apikey: config.apiKey }, timeout: 10000 }
+      );
+      const staleInstances = (allInstances.data || []).filter((inst: any) => 
+        inst.name !== resolvedInstanceName && 
+        inst.connectionStatus !== 'open' &&
+        inst._count?.Message === 0
+      );
+      for (const stale of staleInstances.slice(0, 5)) {
+        try {
+          await axios.delete(
+            `${config.baseUrl}/instance/delete/${stale.name}`,
+            { headers: { apikey: config.apiKey }, timeout: 5000 }
+          );
+          console.log(`[Evolution] Cleaned stale instance: ${stale.name}`);
+        } catch {}
+      }
+    } catch {}
+
+    // Step 2: Wait 3 seconds for cleanup to propagate
+    console.log('[Evolution] Waiting 3s for cleanup...');
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Step 3: Create fresh instance
+    console.log(`[Evolution] Creating instance: ${resolvedInstanceName}`);
+    let createResult: any;
+    try {
+      createResult = await axios.post(
+        `${config.baseUrl}/instance/create`,
+        {
+          instanceName: resolvedInstanceName,
+          qrcode: true,
+          integration: 'WHATSAPP-BAILEYS',
+          number: '', rejectCall: false, groupsIgnore: true,
+          alwaysOnline: true, readMessages: true, readStatus: true,
+          syncFullHistory: false,
+        },
+        {
+          headers: { 'Content-Type': 'application/json', apikey: config.apiKey },
+          timeout: 30000,
+        }
+      );
+      console.log('[Evolution] Instance created successfully');
+    } catch (createErr: any) {
+      // If instance already exists, that's fine — continue to connect
+      const status = createErr?.response?.status;
+      if (status === 403 || status === 409) {
+        console.log('[Evolution] Instance already exists, proceeding to connect...');
+      } else {
+        throw new Error(`Failed to create instance: ${createErr?.response?.data?.message || createErr.message}`);
+      }
+    }
+
+    // Step 4: Wait 2 seconds for instance to initialize
+    console.log('[Evolution] Waiting 2s for instance initialization...');
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Step 2: Create fresh instance
-    console.log(`[Evolution] Creating instance: ${resolvedInstanceName}`);
-    await axios.post(
-      `${config.baseUrl}/instance/create`,
-      {
-        instanceName: resolvedInstanceName,
-        qrcode: true,
-        integration: 'WHATSAPP-BAILEYS',
-        number: '', rejectCall: false, groupsIgnore: true,
-        alwaysOnline: true, readMessages: true, readStatus: true,
-        syncFullHistory: false,
-      },
-      {
-        headers: { 'Content-Type': 'application/json', apikey: config.apiKey },
-        timeout: 30000,
-      }
-    );
-
-    // Step 3: Get QR code via connect endpoint (with 1 retry)
+    // Step 5: Get QR code via connect endpoint (with 2 retries)
     console.log(`[Evolution] Connecting instance: ${resolvedInstanceName}`);
-    let connectResponse: any;
-    let connectError: any;
-    try {
-      connectResponse = await axios.get(
-        `${config.baseUrl}/instance/connect/${resolvedInstanceName}`,
-        { headers: { apikey: config.apiKey }, timeout: 30000 }
-      );
-    } catch (firstErr: any) {
-      connectError = firstErr;
-      console.error('[Evolution] Connect failed, retrying once after 3s:', firstErr?.response?.data || firstErr.message);
-      await new Promise(resolve => setTimeout(resolve, 3000));
+    let connectResponse: any = null;
+    let lastError: any = null;
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         connectResponse = await axios.get(
           `${config.baseUrl}/instance/connect/${resolvedInstanceName}`,
           { headers: { apikey: config.apiKey }, timeout: 30000 }
         );
-        connectError = null; // Retry succeeded
-      } catch (secondErr: any) {
-        throw new Error(
-          'Failed to connect to Evolution API after retry: ' +
-          (secondErr?.response?.data?.message || secondErr.message)
-        );
+        console.log(`[Evolution] Connect attempt ${attempt} succeeded`);
+        break;
+      } catch (err: any) {
+        lastError = err;
+        console.error(`[Evolution] Connect attempt ${attempt} failed:`, err?.response?.data || err.message);
+        if (attempt < 3) {
+          const waitTime = attempt * 2000;
+          console.log(`[Evolution] Retrying in ${waitTime}ms...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
       }
     }
 
-    const data = connectResponse?.data;
+    if (!connectResponse) {
+      throw new Error(
+        `Failed to connect after 3 attempts: ${lastError?.response?.data?.message || lastError?.message || 'Unknown error'}`
+      );
+    }
 
-    // Step 4: Extract QR code from connect response
+    const data = connectResponse?.data;
+    console.log('[Evolution] Connect response:', JSON.stringify({ hasBase64: !!data?.base64, hasCode: !!data?.code, count: data?.count }).substring(0, 200));
+
+    // Step 6: Extract QR code from connect response
     const qrCodeRaw = this.extractQR(data);
 
     if (!qrCodeRaw) {
       // If connect returned { count: 0 }, try /instance/qrcode/:name as fallback
       if (data?.count === 0 || data?.count === undefined) {
-        console.log('[Evolution] Connect returned count=0, trying qrcode endpoint...');
+        console.log('[Evolution] No QR from connect, trying qrcode fallback endpoint...');
         try {
           const qrResponse = await axios.get(
             `${config.baseUrl}/instance/qrcode/${resolvedInstanceName}`,
@@ -269,41 +315,60 @@ export class EvolutionApiService {
           );
           const fallbackQR = this.extractQR(qrResponse.data);
           if (fallbackQR) {
-            await prisma.integration.upsert({
-              where: { id: `evo_${businessId}` },
-              create: {
-                id: `evo_${businessId}`, businessId,
-                type: 'evolution_api', name: 'Evolution API',
-                config: {
-                  baseUrl: config.baseUrl, apiKey: config.apiKey,
-                  instanceName: resolvedInstanceName,
-                  instanceId: qrResponse.data?.instance?.id || '',
-                  status: 'scanning',
-                },
-                isActive: true,
-              },
-              update: {
-                config: {
-                  baseUrl: config.baseUrl, apiKey: config.apiKey,
-                  instanceName: resolvedInstanceName,
-                  instanceId: qrResponse.data?.instance?.id || '',
-                  status: 'scanning',
-                },
-                isActive: true,
-              },
-            });
+            console.log('[Evolution] QR fallback succeeded');
+            await this.saveIntegrationConfig(businessId, config, resolvedInstanceName, qrResponse.data?.instance?.id || '');
             const isBase64Image = fallbackQR.startsWith('data:') || fallbackQR.startsWith('iVBOR');
             return { qrCode: fallbackQR, qrCodeBase64: isBase64Image ? fallbackQR : undefined, status: 'scanning' };
           }
         } catch (qrErr: any) {
-          console.error('[Evolution] QR code fallback also failed:', qrErr?.response?.data || qrErr.message);
+          console.error('[Evolution] QR fallback also failed:', qrErr?.response?.data || qrErr.message);
         }
       }
-      throw new Error('No QR code returned from Evolution API connection');
+
+      // Last resort: try waiting a bit and connecting again (QR may need time to generate)
+      console.log('[Evolution] Final attempt: waiting 3s then retrying connect...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      try {
+        const finalRes = await axios.get(
+          `${config.baseUrl}/instance/connect/${resolvedInstanceName}`,
+          { headers: { apikey: config.apiKey }, timeout: 30000 }
+        );
+        const finalQR = this.extractQR(finalRes.data);
+        if (finalQR) {
+          console.log('[Evolution] Final attempt succeeded!');
+          await this.saveIntegrationConfig(businessId, config, resolvedInstanceName, finalRes.data?.instance?.id || '');
+          const isBase64Image = finalQR.startsWith('data:') || finalQR.startsWith('iVBOR');
+          return { qrCode: finalQR, qrCodeBase64: isBase64Image ? finalQR : undefined, status: 'scanning' };
+        }
+      } catch (finalErr: any) {
+        console.error('[Evolution] Final attempt failed:', finalErr?.response?.data || finalErr.message);
+      }
+
+      throw new Error('No QR code returned from Evolution API. The instance may be stuck. Try refreshing after a few seconds.');
     }
 
-    // Step 5: Save integration config to DB
-    const instanceId = data?.instance?.id || '';
+    // Step 7: Save integration config to DB
+    const instanceId = data?.instance?.id || createResult?.data?.instance?.id || '';
+    await this.saveIntegrationConfig(businessId, config, resolvedInstanceName, instanceId);
+
+    const isBase64Image = qrCodeRaw.startsWith('data:') || qrCodeRaw.startsWith('iVBOR');
+    console.log(`[Evolution] === Connect complete for: ${resolvedInstanceName} ===`);
+    return {
+      qrCode: qrCodeRaw,
+      qrCodeBase64: isBase64Image ? qrCodeRaw : undefined,
+      status: 'scanning',
+    };
+  }
+
+  /**
+   * Save Evolution API integration config to DB
+   */
+  private static async saveIntegrationConfig(
+    businessId: string,
+    config: { baseUrl: string; apiKey: string; instanceName: string },
+    resolvedInstanceName: string,
+    instanceId: string
+  ): Promise<void> {
     await prisma.integration.upsert({
       where: { id: `evo_${businessId}` },
       create: {
@@ -325,13 +390,6 @@ export class EvolutionApiService {
         isActive: true,
       },
     });
-
-    const isBase64Image = qrCodeRaw.startsWith('data:') || qrCodeRaw.startsWith('iVBOR');
-    return {
-      qrCode: qrCodeRaw,
-      qrCodeBase64: isBase64Image ? qrCodeRaw : undefined,
-      status: 'scanning',
-    };
   }
 
   /**
