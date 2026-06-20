@@ -25,12 +25,12 @@ router.post('/config', authenticate, async (req: any, res: any) => {
     const businessId = req.user?.businessId;
     if (!businessId) return res.status(400).json({ success: false, error: 'Business ID required' });
 
-    const { baseUrl, apiKey, instanceName } = req.body;
+    const { baseUrl, apiKey, instanceName, phone } = req.body;
     if (!baseUrl || !apiKey) {
       return res.status(400).json({ success: false, error: 'baseUrl and apiKey are required' });
     }
 
-    await EvolutionApiService.saveConfig(businessId, { baseUrl, apiKey, instanceName });
+    await EvolutionApiService.saveConfig(businessId, { baseUrl, apiKey, instanceName, phone });
     res.json({ success: true, message: 'Evolution API config saved' });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
@@ -45,10 +45,10 @@ router.post('/instance', authenticate, async (req: any, res: any) => {
     const businessId = req.user?.businessId;
     if (!businessId) return res.status(400).json({ success: false, error: 'Business ID required' });
 
-    const { baseUrl, apiKey, instanceName, webhookUrl } = req.body;
+    const { baseUrl, apiKey, instanceName, webhookUrl, phone } = req.body;
     // baseUrl/apiKey are optional - service falls back to DB config / env vars
     const result = await EvolutionApiService.createInstance(businessId, {
-      baseUrl, apiKey, instanceName, webhookUrl,
+      baseUrl, apiKey, instanceName, webhookUrl, phone,
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
@@ -62,9 +62,10 @@ router.post('/connect', authenticate, async (req: any, res: any) => {
     const businessId = req.user?.businessId;
     if (!businessId) return res.status(400).json({ success: false, error: 'Business ID required' });
 
-    // Accept instanceName from frontend if provided (e.g., auto-generated)
+    // Accept instanceName and phone from frontend if provided
     const instanceName = req.body?.instanceName;
-    const result = await EvolutionApiService.connectInstance(businessId, instanceName);
+    const phone = req.body?.phone;
+    const result = await EvolutionApiService.connectInstance(businessId, instanceName, phone);
     res.json({ success: true, data: result });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
