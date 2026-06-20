@@ -3,6 +3,7 @@ import { prisma } from '../index.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 import { LeadFinderService } from '../services/lead-finder.service.js';
 import { AiLeadScoringService } from '../services/ai-lead-scoring.service.js';
+import { GoogleSheetsService } from '../services/google-sheets.service.js';
 
 const router = Router();
 
@@ -195,6 +196,35 @@ router.get('/leads', authenticate, async (req: any, res: Response) => {
         limit: parseInt(limit as string),
         pages: Math.ceil(total / parseInt(limit as string)),
       },
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ==================== GOOGLE SHEETS EXPORT ====================
+
+/**
+ * POST /api/lead-finder/export-sheets
+ * Export lead finder leads to Google Sheets
+ */
+router.post('/export-sheets', authenticate, async (req: any, res: Response) => {
+  try {
+    const businessId = req.user?.businessId;
+    if (!businessId) return res.status(400).json({ success: false, error: 'Business ID required' });
+
+    const { spreadsheetId, sheetName, category } = req.body;
+
+    const result = await GoogleSheetsService.exportLeadFinderLeads(businessId, {
+      spreadsheetId,
+      sheetName,
+      category,
+    });
+
+    res.json({
+      success: true,
+      message: `Exported ${result.exported} leads to Google Sheets`,
+      data: result,
     });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });

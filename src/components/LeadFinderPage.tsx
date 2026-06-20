@@ -61,6 +61,7 @@ export default function LeadFinderPage() {
   const [activeTab, setActiveTab] = useState<'search' | 'leads'>('search');
   const [leads, setLeads] = useState<any[]>([]);
   const [leadsLoading, setLeadsLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const handleSearch = async () => {
     if (!category || !city) {
@@ -133,6 +134,33 @@ export default function LeadFinderPage() {
       // ignore
     } finally {
       setLeadsLoading(false);
+    }
+  };
+
+  const handleExportToSheets = async () => {
+    setExporting(true);
+    try {
+      const res = await fetch('/api/lead-finder/export-sheets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: `Exported ${data.data.exported} leads to Google Sheets` });
+        if (data.data.spreadsheetUrl) {
+          window.open(data.data.spreadsheetUrl, '_blank');
+        }
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Export failed' });
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Export failed' });
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -356,7 +384,19 @@ export default function LeadFinderPage() {
                 <p>No leads imported yet. Use the Search tab to find businesses.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <>
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{leads.length} Leads</h3>
+                  <button
+                    onClick={handleExportToSheets}
+                    disabled={exporting}
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    {exporting ? 'Exporting...' : 'Export to Google Sheets'}
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
@@ -384,6 +424,7 @@ export default function LeadFinderPage() {
                   </tbody>
                 </table>
               </div>
+              </>
             )}
           </div>
         )}

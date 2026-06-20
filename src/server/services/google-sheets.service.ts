@@ -374,6 +374,110 @@ export class GoogleSheetsService {
 
     return { spreadsheetId };
   }
+
+  /**
+   * Export lead finder leads to Google Sheets
+   */
+  static async exportLeadFinderLeads(
+    businessId: string,
+    options: {
+      spreadsheetId?: string;
+      sheetName?: string;
+      category?: string;
+    } = {}
+  ): Promise<{ exported: number; spreadsheetUrl: string }> {
+    const { oauth2Client, spreadsheetId: configSpreadsheetId } =
+      await this.getGoogleClient(businessId);
+
+    const spreadsheetId = options.spreadsheetId || configSpreadsheetId;
+    if (!spreadsheetId) {
+      throw new Error('Spreadsheet ID not configured. Please set up Google Sheets integration first.');
+    }
+
+    const sheetName = options.sheetName || 'Lead Finder Leads';
+
+    // Fetch lead finder contacts with scores
+    const where: any = { businessId, source: 'lead_finder' };
+    if (options.category) {
+      where.leadScores = { some: { category: options.category } };
+    }
+
+    const contacts = await prisma.contact.findMany({
+      where,
+      include: { leadScores: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Prepare headers
+    const headers = [
+      'Name',
+      'Phone',
+      'Email',
+      'Company',
+      'City',
+      'Source',
+      'Score',
+      'Category',
+      'Digital Gaps',
+      'Website',
+      'Rating',
+      'Reviews',
+      'Tags',
+      'Created At',
+    ];
+
+    const rows = contacts.map((c) => {
+      const data = (c.leadFinderData as any) || {};
+      const metadata = (c.metadata as any) || {};
+      const score = c.leadScores?.[0];
+      const reasons = (score?.reasons as any)?.reasons || [];
+
+      return [
+        c.name || '',
+        c.phone || '',
+        c.email || '',
+        c.company || '',
+        c.city || '',
+        c.leadFinderSource || c.source || '',
+        score?.score?.toString() || '0',
+        score?.category || 'cold',
+        reasons.join(', '),
+        data.website || metadata.website || 'No',
+        data.rating?.toString() || metadata.rating?.toString() || '',
+        data.totalReviews?.toString() || metadata.reviews?.toString() || '',
+        (c.tags || []).join(', '),
+        c.createdAt.toISOString(),
+      ];
+    });
+
+    const values = [headers, ...rows];
+
+    // Update sheet
+    const sheets = google.sheets({ version: 'v4', auth: oauth2Client });
+
+    // Try to update, if sheet doesn't exist, append
+    try {
+      await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range: `${sheetName}!A:N`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values },
+      });
+    } catch {
+      // Sheet might not exist, append to create it
+      await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: `${sheetName}!A:N`,
+        valueInputOption: 'USER_ENTERED',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: { values },
+      });
+    }
+
+    const spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}`;
+
+    return { exported: contacts.length, spreadsheetUrl };
+  }
 }
 
 export default GoogleSheetsService;
