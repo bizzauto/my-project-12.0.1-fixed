@@ -7,7 +7,8 @@ import {
   Zap, UserPlus, MapPin, Bot, PhoneCall, Send,
   ShoppingCart, FileText, Clock, MoreVertical, Share2, Moon, Sun, Menu, X, Mail,
   Workflow, Link, GraduationCap, MessageCircle, FormInput, PenTool,
-  CreditCard, Building2, PhoneOff, Camera, Upload, Store, Calculator
+  CreditCard, Building2, PhoneOff, Camera, Upload, Store, Calculator,
+  Globe, QrCode
 } from 'lucide-react';
 import { useAuthStore } from '../lib/authStore';
 import { useThemeStore } from '../lib/themeStore';
@@ -51,6 +52,14 @@ const menuItems: MenuItem[] = [
 
 const menuSections: { label: string; items: MenuItem[] }[] = [
   {
+    label: 'Products',
+    items: [
+      { id: '/google-reviews-qr', label: 'Reviews QR', icon: <QrCode size={20} /> },
+      { id: '/vcard-maker', label: 'V-Card Maker', icon: <CreditCard size={20} /> },
+      { id: '/website-builder-product', label: 'Website Builder', icon: <Globe size={20} /> },
+    ],
+  },
+  {
     label: 'Automation & AI',
     items: [
       { id: '/workflows', label: 'Workflows', icon: <Workflow size={20} /> },
@@ -80,6 +89,7 @@ const settingsMenuItems: MenuItem[] = [
   { id: '/custom-fields', label: 'Custom Fields', icon: <FormInput size={20} /> },
   { id: '/client-portal', label: 'Client Portal', icon: <Building2 size={20} /> },
   { id: '/agency', label: 'Agency', icon: <Users size={20} /> },
+  { id: '/reseller-hub', label: 'Reseller Hub', icon: <Store size={20} /> },
   { id: '/missed-call-settings', label: 'Missed Call', icon: <PhoneOff size={20} /> },
   { id: '/dograh-settings', label: 'Voice AI', icon: <Bot size={20} /> },
   { id: '/snapshots', label: 'Snapshots', icon: <Camera size={20} /> },

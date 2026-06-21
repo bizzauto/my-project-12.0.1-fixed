@@ -128,6 +128,7 @@ import caCopilotRoutes from './routes/ca-copilot.js';
 import caFileCompareRoutes from './routes/ca-file-compare.js';
 import leadFinderRoutes from './routes/lead-finder.js';
 import aiOutreachRoutes from './routes/ai-outreach.js';
+import whiteLabelRoutes from './routes/white-label.js';
 
 dotenv.config();
 
@@ -385,6 +386,7 @@ app.use('/api/ca-copilot', caCopilotRoutes);
 app.use('/api/ca-copilot', caFileCompareRoutes);
 app.use('/api/lead-finder', leadFinderRoutes);
 app.use('/api/outreach', aiOutreachRoutes);
+app.use('/api/wl', whiteLabelRoutes);
 app.use('/api/store-features', storeFeaturesRoutes);
 app.use('/api/store-advanced', storeAdvancedRoutes);
 app.use('/api/store-customize', storeCustomizeRoutes);
