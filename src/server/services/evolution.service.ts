@@ -57,6 +57,7 @@ export class EvolutionApiService {
     apiKey?: string;
     instanceName?: string;
     webhookUrl?: string;
+    phone?: string;
   }): Promise<any> {
     if (!options.baseUrl || !options.apiKey) {
       const internalConfig = await this.getConfig(businessId);
@@ -65,6 +66,7 @@ export class EvolutionApiService {
       options.instanceName = options.instanceName || internalConfig.instanceName;
     }
     const instanceName = options.instanceName || `biz_${businessId.slice(-8)}`;
+    const phone = options.phone || '919999999999';
 
     try {
       const response = await axios.post(
@@ -73,7 +75,7 @@ export class EvolutionApiService {
           instanceName,
           qrcode: true,
           integration: 'WHATSAPP-BAILEYS',
-          number: '',
+          number: phone,
           rejectCall: false,
           groupsIgnore: true,
           alwaysOnline: true,
@@ -187,13 +189,30 @@ export class EvolutionApiService {
    * 
    * Accepts optional instanceName from frontend; falls back to configured name.
    */
-  static async connectInstance(businessId: string, instanceName?: string): Promise<{
+  static async connectInstance(businessId: string, instanceName?: string, phone?: string): Promise<{
     qrCode: string;
     qrCodeBase64?: string;
     status: string;
   }> {
     const config = await this.getConfig(businessId);
     const resolvedInstanceName = instanceName || config.instanceName;
+
+    // Resolve phone number: explicit param > existing Integration config > default placeholder
+    let resolvedPhone = phone || '';
+    if (!resolvedPhone) {
+      try {
+        const existingIntegration = await prisma.integration.findFirst({
+          where: { businessId, type: 'evolution_api' },
+        });
+        if (existingIntegration) {
+          const existingConfig = existingIntegration.config as any;
+          resolvedPhone = existingConfig.phone || '';
+        }
+      } catch {}
+    }
+    if (!resolvedPhone) {
+      resolvedPhone = '919999999999'; // placeholder — user should update in settings
+    }
 
     console.log(`[Evolution] === Starting connect for: ${resolvedInstanceName} ===`);
 
@@ -244,7 +263,8 @@ export class EvolutionApiService {
           instanceName: resolvedInstanceName,
           qrcode: true,
           integration: 'WHATSAPP-BAILEYS',
-          number: '', rejectCall: false, groupsIgnore: true,
+          number: resolvedPhone,
+          rejectCall: false, groupsIgnore: true,
           alwaysOnline: true, readMessages: true, readStatus: true,
           syncFullHistory: false,
         },
@@ -349,7 +369,7 @@ export class EvolutionApiService {
 
     // Step 7: Save integration config to DB
     const instanceId = data?.instance?.id || createResult?.data?.instance?.id || '';
-    await this.saveIntegrationConfig(businessId, config, resolvedInstanceName, instanceId);
+    await this.saveIntegrationConfig(businessId, config, resolvedInstanceName, instanceId, resolvedPhone);
 
     const isBase64Image = qrCodeRaw.startsWith('data:') || qrCodeRaw.startsWith('iVBOR');
     console.log(`[Evolution] === Connect complete for: ${resolvedInstanceName} ===`);
@@ -367,7 +387,8 @@ export class EvolutionApiService {
     businessId: string,
     config: { baseUrl: string; apiKey: string; instanceName: string },
     resolvedInstanceName: string,
-    instanceId: string
+    instanceId: string,
+    phone?: string
   ): Promise<void> {
     await prisma.integration.upsert({
       where: { id: `evo_${businessId}` },
@@ -377,6 +398,7 @@ export class EvolutionApiService {
         config: {
           baseUrl: config.baseUrl, apiKey: config.apiKey,
           instanceName: resolvedInstanceName, instanceId,
+          phone: phone || '',
           status: 'scanning',
         },
         isActive: true,
@@ -385,6 +407,7 @@ export class EvolutionApiService {
         config: {
           baseUrl: config.baseUrl, apiKey: config.apiKey,
           instanceName: resolvedInstanceName, instanceId,
+          phone: phone || '',
           status: 'scanning',
         },
         isActive: true,
@@ -404,42 +427,60 @@ export class EvolutionApiService {
     try {
       const config = await this.getConfig(businessId);
 
-      const response = await axios.get(
-        `${config.baseUrl}/instance/connectionState/${config.instanceName}`,
-        { headers: { apikey: config.apiKey } }
-      );
+      // Try to check actual connection state from Evolution API
+      try {
+        const response = await axios.get(
+          `${config.baseUrl}/instance/connectionState/${config.instanceName}`,
+          { headers: { apikey: config.apiKey }, timeout: 10000 }
+        );
 
-      const state = response.data?.instance?.state || 'close';
+        const state = response.data?.instance?.state || 'close';
 
-      if (state === 'open') {
-        let phone = '';
-        let profileName = '';
-        let profilePicUrl = '';
+        if (state === 'open') {
+          let phone = '';
+          let profileName = '';
+          let profilePicUrl = '';
 
-        try {
-          const fetchRes = await axios.get(
-            `${config.baseUrl}/instance/fetchInstances?instanceName=${config.instanceName}`,
-            { headers: { apikey: config.apiKey } }
-          );
-          const instanceData = Array.isArray(fetchRes.data) ? fetchRes.data[0] : fetchRes.data;
-          phone = instanceData?.instance?.phone || instanceData?.phone || '';
-          profileName = instanceData?.instance?.profileName || instanceData?.profileName || profileName;
-        } catch {}
+          try {
+            const fetchRes = await axios.get(
+              `${config.baseUrl}/instance/fetchInstances?instanceName=${config.instanceName}`,
+              { headers: { apikey: config.apiKey }, timeout: 10000 }
+            );
+            const instanceData = Array.isArray(fetchRes.data) ? fetchRes.data[0] : fetchRes.data;
+            phone = instanceData?.instance?.phone || instanceData?.phone || '';
+            profileName = instanceData?.instance?.profileName || instanceData?.profileName || profileName;
+          } catch {}
 
-        try {
-          const profileRes = await axios.post(
-            `${config.baseUrl}/chat/fetchProfilePictureUrl/${config.instanceName}`,
-            { number: '' },
-            { headers: { apikey: config.apiKey } }
-          );
-          profilePicUrl = profileRes.data?.profilePictureUrl || '';
-        } catch {}
+          try {
+            const profileRes = await axios.post(
+              `${config.baseUrl}/chat/fetchProfilePictureUrl/${config.instanceName}`,
+              { number: '' },
+              { headers: { apikey: config.apiKey }, timeout: 10000 }
+            );
+            profilePicUrl = profileRes.data?.profilePictureUrl || '';
+          } catch {}
 
-        await this.updateStatus(businessId, 'connected');
-        return { status: 'connected', phone, profileName, profilePicUrl };
-      } else if (state === 'connecting' || state === 'pairing' || state === 'syncing') {
-        return { status: 'scanning' };
-      } else {
+          await this.updateStatus(businessId, 'connected');
+          return { status: 'connected', phone, profileName, profilePicUrl };
+        } else if (state === 'connecting' || state === 'pairing' || state === 'syncing') {
+          return { status: 'scanning' };
+        } else {
+          return { status: 'disconnected' };
+        }
+      } catch (apiError: any) {
+        // Evolution API unreachable or instance not found — fall back to DB cached status
+        console.log(`[Evolution] Status check failed for ${config.instanceName}: ${apiError?.response?.status || apiError.message}`);
+
+        // Read cached status from Integration config
+        const integration = await prisma.integration.findFirst({
+          where: { businessId, type: 'evolution_api' },
+        });
+        if (integration) {
+          const cachedConfig = integration.config as any;
+          const cachedStatus = cachedConfig?.status || 'disconnected';
+          return { status: cachedStatus as any };
+        }
+
         return { status: 'disconnected' };
       }
     } catch {
@@ -716,26 +757,26 @@ export class EvolutionApiService {
     }
   }
 
-  static async saveConfig(businessId: string, config: { baseUrl: string; apiKey: string; instanceName?: string }): Promise<void> {
+  static async saveConfig(businessId: string, config: { baseUrl: string; apiKey: string; instanceName?: string; phone?: string }): Promise<void> {
     await prisma.integration.upsert({
       where: { id: `evo_${businessId}` },
-      create: { id: `evo_${businessId}`, businessId, type: 'evolution_api', name: 'Evolution API', config: { ...config, instanceName: config.instanceName || `biz_${businessId.slice(-8)}`, status: 'disconnected' }, isActive: true },
-      update: { config: { ...config, instanceName: config.instanceName || `biz_${businessId.slice(-8)}`, status: 'disconnected' }, isActive: true },
+      create: { id: `evo_${businessId}`, businessId, type: 'evolution_api', name: 'Evolution API', config: { ...config, instanceName: config.instanceName || `biz_${businessId.slice(-8)}`, phone: config.phone || '', status: 'disconnected' }, isActive: true },
+      update: { config: { ...config, instanceName: config.instanceName || `biz_${businessId.slice(-8)}`, phone: config.phone || '', status: 'disconnected' }, isActive: true },
     });
   }
 
-  static async getPublicConfig(businessId: string): Promise<{ configured: boolean; status: string; instanceName: string; baseUrl: string; apiKey: string }> {
+  static async getPublicConfig(businessId: string): Promise<{ configured: boolean; status: string; instanceName: string; baseUrl: string; apiKey: string; phone: string }> {
     const integration = await prisma.integration.findFirst({ where: { businessId, type: 'evolution_api' } });
     if (integration) {
       const config = integration.config as any;
-      return { configured: true, status: config.status || 'disconnected', instanceName: config.instanceName || '', baseUrl: config.baseUrl || '', apiKey: config.apiKey || '' };
+      return { configured: true, status: config.status || 'disconnected', instanceName: config.instanceName || '', baseUrl: config.baseUrl || '', apiKey: config.apiKey || '', phone: config.phone || '' };
     }
     const envBaseUrl = process.env.EVOLUTION_API_URL;
     const envApiKey = process.env.EVOLUTION_API_KEY;
     if (envBaseUrl && envApiKey) {
-      return { configured: true, status: 'disconnected', instanceName: process.env.EVOLUTION_INSTANCE_NAME || `biz_${businessId.slice(-8)}`, baseUrl: envBaseUrl, apiKey: envApiKey };
+      return { configured: true, status: 'disconnected', instanceName: process.env.EVOLUTION_INSTANCE_NAME || `biz_${businessId.slice(-8)}`, baseUrl: envBaseUrl, apiKey: envApiKey, phone: '' };
     }
-    return { configured: false, status: 'disconnected', instanceName: '', baseUrl: '', apiKey: '' };
+    return { configured: false, status: 'disconnected', instanceName: '', baseUrl: '', apiKey: '', phone: '' };
   }
 }
 

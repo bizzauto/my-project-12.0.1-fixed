@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Check, CreditCard, Shield, Zap, Star, ArrowRight,
-  ArrowLeft, Building2, Users, MessageSquare, Globe,
-  TrendingUp, Headphones, Lock, AlertCircle, Loader2
+  Building2, Users, MessageSquare, Globe,
+  TrendingUp, Headphones, Lock, AlertCircle, Loader2, Sparkles
 } from 'lucide-react';
 import { useAuthStore } from '../lib/authStore';
 import { subscriptionsAPI } from '../lib/api';
@@ -18,13 +18,14 @@ interface Plan {
   icon: React.ReactNode;
   popular?: boolean;
   color: string;
+  badge?: string;
 }
 
 const plans: Plan[] = [
   {
     id: 'FREE',
     name: 'Free Trial',
-    description: 'Perfect for trying out BizzAuto',
+    description: 'Try BizzAuto free for 7 days',
     price: { month: 0, year: 0 },
     features: [
       '100 Contacts',
@@ -34,13 +35,14 @@ const plans: Plan[] = [
       'Basic CRM',
       '7-day trial',
     ],
-    icon: <Zap size={24} />,
-    color: 'from-gray-500 to-gray-600',
+    icon: <Zap size={22} />,
+    color: 'from-slate-500 to-slate-600',
+    badge: 'Trial',
   },
   {
     id: 'STARTER',
     name: 'Starter',
-    description: 'For small businesses getting started',
+    description: 'For small businesses',
     price: { month: 999, year: 9990 },
     features: [
       '1,000 Contacts',
@@ -51,7 +53,7 @@ const plans: Plan[] = [
       'Email Support',
       'Basic Automation',
     ],
-    icon: <Building2 size={24} />,
+    icon: <Building2 size={22} />,
     color: 'from-blue-500 to-blue-600',
   },
   {
@@ -69,9 +71,10 @@ const plans: Plan[] = [
       'Automation Workflows',
       'Social Media Integration',
     ],
-    icon: <TrendingUp size={24} />,
+    icon: <TrendingUp size={22} />,
     popular: true,
-    color: 'from-purple-500 to-pink-500',
+    color: 'from-indigo-500 to-purple-600',
+    badge: 'Most Popular',
   },
   {
     id: 'PRO',
@@ -89,7 +92,7 @@ const plans: Plan[] = [
       'API Access',
       'Advanced Reports',
     ],
-    icon: <Star size={24} />,
+    icon: <Star size={22} />,
     color: 'from-orange-500 to-red-500',
   },
   {
@@ -108,8 +111,8 @@ const plans: Plan[] = [
       'SLA Guarantee',
       'Dedicated Account Manager',
     ],
-    icon: <Globe size={24} />,
-    color: 'from-green-500 to-emerald-500',
+    icon: <Globe size={22} />,
+    color: 'from-emerald-500 to-green-600',
   },
 ];
 
@@ -124,7 +127,6 @@ const ResorPayBoard: React.FC = () => {
 
   const handleSelectPlan = async (planId: string) => {
     if (planId === 'FREE') {
-      // Skip to admission form with free plan
       navigate('/admission-form', { replace: true });
       return;
     }
@@ -134,7 +136,6 @@ const ResorPayBoard: React.FC = () => {
     setError('');
 
     try {
-      // Create Razorpay order
       const response = await subscriptionsAPI.createCheckout({
         plan: planId,
         period: billingPeriod,
@@ -142,7 +143,6 @@ const ResorPayBoard: React.FC = () => {
 
       const { orderId, amount, currency, key } = response.data.data;
 
-      // Load Razorpay script if not loaded
       if (!(window as any).Razorpay) {
         await new Promise<void>((resolve, reject) => {
           const script = document.createElement('script');
@@ -164,7 +164,6 @@ const ResorPayBoard: React.FC = () => {
         order_id: orderId,
         handler: async (response: any) => {
           try {
-            // Verify payment on backend
             const verifyResponse = await subscriptionsAPI.verify({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -175,7 +174,6 @@ const ResorPayBoard: React.FC = () => {
 
             if (verifyResponse.data.success) {
               toast.success('Payment successful! Subscription activated.');
-              // Redirect to admission form after successful payment
               setTimeout(() => {
                 navigate('/admission-form', { replace: true });
               }, 1500);
@@ -234,9 +232,9 @@ const ResorPayBoard: React.FC = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                ResorPay
+                BizzAuto
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Secure Payment Gateway</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Choose Your Plan</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
@@ -249,12 +247,16 @@ const ResorPayBoard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Welcome Section */}
         <div className="text-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <Sparkles size={16} />
+            Welcome to BizzAuto
+          </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
-            Welcome, {user?.name || 'User'}! 👋
+            Choose the perfect plan for
           </h2>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Choose the perfect plan for <span className="font-semibold text-indigo-600">{business?.name || 'Your Business'}</span>.
-            All plans include a 7-day free trial.
+            <span className="font-semibold text-indigo-600">{business?.name || 'Your Business'}</span>
+            {' '}— All plans include a 7-day free trial
           </p>
         </div>
 
@@ -313,10 +315,10 @@ const ResorPayBoard: React.FC = () => {
                     : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'
                 }`}
               >
-                {plan.popular && (
+                {plan.badge && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold px-4 py-1.5 rounded-full whitespace-nowrap">
-                      Most Popular
+                      {plan.badge}
                     </span>
                   </div>
                 )}

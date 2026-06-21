@@ -479,7 +479,7 @@ const AppointmentsPage: React.FC = () => {
                           <p className="font-medium text-gray-900 dark:text-white text-sm">{appt.title}</p>
                           <span className="text-xs text-gray-500">{appt.time}</span>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{appt.contact}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{(appt as any).contact}</p>
                       </div>
                     ))}
                     {hourAppts.length === 0 && <div className="h-8" />}

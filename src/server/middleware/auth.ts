@@ -82,7 +82,7 @@ export const authenticate = async (
       });
     }
 
-    // Reuse existing CSRF token if still valid, else generate new one
+    // Only generate CSRF token if not exists or expired (max once per session)
     let csrfToken = await CSRFService.getToken(user.id);
     if (!csrfToken) {
       csrfToken = await CSRFService.generateToken(user.id);

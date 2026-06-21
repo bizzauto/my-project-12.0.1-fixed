@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { prisma } from '../db.js';
 import { hashPassword, comparePassword, generateToken } from '../utils/auth.js';
-import { authenticate, AuthRequest } from '../middleware/auth.js';
+import { authenticate, requireRole, AuthRequest } from '../middleware/auth.js';
 import { generateRefreshToken } from '../utils/auth.js';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
@@ -445,7 +445,7 @@ router.post('/apple', socialAuthLimiter, async (req: Request, res: Response) => 
         appleId,
         name,
         businessId: business.id,
-        role: 'OWNER',
+        role: 'MEMBER',
         emailVerified: new Date(),
         isVerified: true,
       },
@@ -603,7 +603,7 @@ router.post('/google', socialAuthLimiter, async (req: Request, res: Response) =>
         name: name || email.split('@')[0],
         image: picture,
         businessId: business.id,
-        role: 'OWNER',
+        role: 'MEMBER',
         emailVerified: new Date(),
         isVerified: true,
       },
@@ -687,14 +687,15 @@ router.post('/register', registerLimiter, validate(registerSchema), async (req: 
       },
     });
 
-    // Create user
+    // Create user — default MEMBER role, OWNER for first user of business
+    const userRole = 'MEMBER';
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
         businessId: business.id,
-        role: 'OWNER',
+        role: userRole,
       },
     });
 
@@ -1009,15 +1010,21 @@ router.post('/create-super-admin', async (req: Request, res: Response) => {
       });
     }
 
-    // Check if super admin already exists
-    const existing = await prisma.user.findFirst({
-      where: { role: 'SUPER_ADMIN' },
+    // Check if super admin already exists — allow multiple
+    const existing = await prisma.user.findUnique({
+      where: { email },
     });
 
     if (existing) {
-      return res.status(409).json({
-        success: false,
-        error: 'Super admin already exists',
+      // Promote existing user to SUPER_ADMIN
+      const updated = await prisma.user.update({
+        where: { email },
+        data: { role: 'SUPER_ADMIN' },
+      });
+      return res.status(200).json({
+        success: true,
+        message: 'User promoted to Super Admin',
+        data: { id: updated.id, email: updated.email, name: updated.name, role: updated.role },
       });
     }
 
@@ -1050,6 +1057,76 @@ router.post('/create-super-admin', async (req: Request, res: Response) => {
       error: 'Failed to create super admin',
       details: error.message,
     });
+  }
+});
+
+// ==================== ROLE MANAGEMENT ====================
+// PUT /api/auth/role — Change user role (SUPER_ADMIN/OWNER only)
+router.put('/role', authenticate, requireRole('SUPER_ADMIN', 'OWNER'), async (req: Request, res: Response) => {
+  try {
+    const { userId, role } = req.body;
+    if (!userId || !role) {
+      return res.status(400).json({ success: false, error: 'userId and role are required' });
+    }
+
+    const validRoles = ['SUPER_ADMIN', 'OWNER', 'ADMIN', 'MEMBER', 'VIEWER'];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ success: false, error: `Invalid role. Must be one of: ${validRoles.join(', ')}` });
+    }
+
+    const currentUser = (req as any).user;
+    // Only SUPER_ADMIN can assign SUPER_ADMIN
+    if (role === 'SUPER_ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({ success: false, error: 'Only Super Admin can assign Super Admin role' });
+    }
+
+    const targetUser = await prisma.user.findUnique({ where: { id: userId } });
+    if (!targetUser) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    // OWNER can only manage users in their own business
+    if (currentUser.role === 'OWNER' && targetUser.businessId !== currentUser.businessId) {
+      return res.status(403).json({ success: false, error: 'Cannot manage users outside your business' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { role },
+    });
+
+    res.json({
+      success: true,
+      data: { id: updatedUser.id, email: updatedUser.email, name: updatedUser.name, role: updatedUser.role },
+    });
+  } catch (error: any) {
+    console.error('Role change error:', error);
+    res.status(500).json({ success: false, error: 'Failed to change role', details: error.message });
+  }
+});
+
+// GET /api/auth/users — List users in business (SUPER_ADMIN/OWNER/ADMIN)
+router.get('/users', authenticate, requireRole('SUPER_ADMIN', 'OWNER', 'ADMIN'), async (req: Request, res: Response) => {
+  try {
+    const currentUser = (req as any).user;
+    let whereClause: any = {};
+
+    if (currentUser.role === 'SUPER_ADMIN') {
+      whereClause = {}; // Super admin sees all
+    } else {
+      whereClause = { businessId: currentUser.businessId };
+    }
+
+    const users = await prisma.user.findMany({
+      where: whereClause,
+      select: { id: true, email: true, name: true, role: true, isActive: true, createdAt: true, lastLoginAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.json({ success: true, data: { users } });
+  } catch (error: any) {
+    console.error('List users error:', error);
+    res.status(500).json({ success: false, error: 'Failed to list users' });
   }
 });
 

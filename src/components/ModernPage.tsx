@@ -37,6 +37,7 @@ const ROUTE_META: Record<string, { title: string; subtitle: string; badge: strin
   '/custom-fields': { title: 'Custom Fields', subtitle: 'Customize your CRM data model', badge: 'SETTINGS', icon: <Settings size={20} /> },
   '/client-portal': { title: 'Client Portal', subtitle: 'Branded portal for your customers', badge: 'PORTAL', icon: <Users size={20} /> },
   '/agency': { title: 'Agency Dashboard', subtitle: 'Manage multiple sub-accounts', badge: 'AGENCY', icon: <Briefcase size={20} /> },
+  '/admin/users': { title: 'User Management', subtitle: 'Manage roles and permissions', badge: 'USERS', icon: <Users size={20} /> },
   '/missed-call-settings': { title: 'Missed Call', subtitle: 'Auto-respond to missed calls', badge: 'CALLBACK', icon: <Phone size={20} /> },
   '/dograh-settings': { title: 'Dograh Integration', subtitle: 'AI calling and voice automation', badge: 'VOICE', icon: <Phone size={20} /> },
   '/snapshots': { title: 'Snapshots', subtitle: 'Version control for your account', badge: 'BACKUP', icon: <Shield size={20} /> },

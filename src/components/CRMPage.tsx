@@ -1350,6 +1350,7 @@ export default function CRMPage() {
 
 const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = ({ contact, onClose }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'notes' | 'tasks' | 'activities' | 'deals'>('overview');
+  const { info } = useToast();
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
@@ -1477,7 +1478,7 @@ const ContactDetailModal: React.FC<{ contact: Contact; onClose: () => void }> = 
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={() => setToast({ message: 'Edit task feature coming soon', type: 'info' })} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"><Edit3 size={14} className="text-gray-400" /></button>
+                    <button onClick={() => info('Edit task feature coming soon')} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"><Edit3 size={14} className="text-gray-400" /></button>
                   </div>
                 </div>
               )) : (

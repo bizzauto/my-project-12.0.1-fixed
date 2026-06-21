@@ -21,10 +21,13 @@ export default function SmartReplyPage() {
   const [replies, setReplies] = useState<SmartReply[]>([]);
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const generateReplies = async () => {
     if (!message.trim()) return;
     setLoading(true);
+    setError(null);
+    setReplies([]);
     try {
       const res = await fetch('/api/ai/smart-replies', {
         method: 'POST',
@@ -38,19 +41,10 @@ export default function SmartReplyPage() {
       if (data.success && data.data?.replies) {
         setReplies(data.data.replies);
       } else {
-        // Demo replies
-        setReplies([
-          { id: '1', text: `Thank you for reaching out! I'd be happy to help you with that. Let me check the details and get back to you shortly.`, tone: 'professional', confidence: 95 },
-          { id: '2', text: `Hey! Got your message. I'll look into this right away and update you soon! 👍`, tone: 'friendly', confidence: 88 },
-          { id: '3', text: `Dear Customer, thank you for your inquiry. We have received your request and our team is working on it. We will respond within 24 hours.`, tone: 'formal', confidence: 82 },
-          { id: '4', text: `Sure thing! Let me get that sorted for you. Give me a few minutes!`, tone: 'casual', confidence: 75 },
-        ]);
+        setError('Unable to generate replies. Please check your AI configuration and try again.');
       }
     } catch {
-      setReplies([
-        { id: '1', text: `Thank you for your message! I'll get back to you shortly with the details.`, tone: 'professional', confidence: 90 },
-        { id: '2', text: `Got it! Let me check and update you soon.`, tone: 'friendly', confidence: 85 },
-      ]);
+      setError('Unable to generate replies. Please check your AI configuration and try again.');
     } finally {
       setLoading(false);
     }
@@ -110,6 +104,19 @@ export default function SmartReplyPage() {
           {loading ? 'Generating...' : 'Generate Smart Replies'}
         </button>
       </div>
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <p className="text-red-700 mb-3">{error}</p>
+          <button
+            onClick={generateReplies}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Replies */}
       {replies.length > 0 && (

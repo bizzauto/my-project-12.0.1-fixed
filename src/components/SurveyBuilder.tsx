@@ -185,11 +185,46 @@ export default function SurveyBuilder() {
   const [typeFilter, setTypeFilter] = useState<SurveyType | ''>('');
   const [loading, setLoading] = useState(true);
   const [dragType, setDragType] = useState<QuestionType | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => { setSurveys(generateMockData()); setLoading(false); }, 400);
-    return () => clearTimeout(t);
+    loadSurveys();
   }, []);
+
+  const loadSurveys = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/surveys');
+      const data = await res.json();
+      if (data.success) {
+        setSurveys(data.data.surveys.map((s: any) => ({
+          ...s,
+          type: (s.questions?.[0]?.type ? 'form' : 'survey') as SurveyType,
+          questions: (s.questions || []).map((q: any) => ({
+            ...q,
+            validation: q.validation || { minLength: 0, maxLength: 0, pattern: '', customMessage: '' },
+            conditionalLogic: q.conditionalLogic || { enabled: false, questionId: '', operator: 'equals', value: '' },
+          })),
+        })));
+      }
+    } catch { /* ignore */ }
+    finally { setLoading(false); }
+  };
+
+  const loadResponses = async (surveyId: string) => {
+    try {
+      const res = await fetch(`/api/surveys/${surveyId}/results`);
+      const data = await res.json();
+      if (data.success) {
+        setResponses((data.data.submissions || []).map((s: any) => ({
+          id: s.id,
+          submittedAt: s.createdAt,
+          status: s.completed ? 'complete' : 'partial',
+          answers: s.answers || {},
+        })));
+      }
+    } catch { /* ignore */ }
+  };
 
   const filtered = surveys.filter(s => {
     if (typeFilter && s.type !== typeFilter) return false;
@@ -207,7 +242,7 @@ export default function SurveyBuilder() {
 
   const openResponses = (survey: Survey) => {
     setActiveSurvey(survey);
-    setResponses(generateMockResponses(survey.id));
+    loadResponses(survey.id);
     setView('responses');
   };
 
@@ -263,10 +298,57 @@ export default function SurveyBuilder() {
     a.click();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!activeSurvey) return;
-    setSurveys(prev => prev.map(s => s.id === activeSurvey.id ? activeSurvey : s));
-    alert('Survey saved successfully!');
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/surveys/${activeSurvey.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: activeSurvey.name,
+          description: activeSurvey.settings?.thankYouMessage || '',
+          questions: activeSurvey.questions.map(q => ({ id: q.id, type: q.type, label: q.label, placeholder: q.placeholder, required: q.required, options: q.options })),
+          status: activeSurvey.status,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSurveys(prev => prev.map(s => s.id === activeSurvey.id ? activeSurvey : s));
+        alert('Survey saved successfully!');
+      } else { alert(data.error || 'Failed to save'); }
+    } catch { alert('Failed to save survey'); }
+    finally { setSaving(false); }
+  };
+
+  const handleCreateSurvey = async (name: string, type: SurveyType) => {
+    try {
+      setSaving(true);
+      const res = await fetch('/api/surveys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, questions: [createDefaultQuestion('text')], description: '' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const newSurvey: Survey = { ...data.data.survey, type, questions: (data.data.survey.questions || []).map((q: any) => ({ ...q, validation: q.validation || { minLength: 0, maxLength: 0, pattern: '', customMessage: '' }, conditionalLogic: q.conditionalLogic || { enabled: false, questionId: '', operator: 'equals', value: '' } })), settings: { thankYouMessage: 'Thank you!', redirectUrl: '', notificationEmail: '', allowMultipleSubmissions: true } };
+        setSurveys(prev => [newSurvey, ...prev]);
+        setActiveSurvey(newSurvey);
+        setView('editor');
+      } else { alert(data.error || 'Failed to create'); }
+    } catch { alert('Failed to create survey'); }
+    finally { setSaving(false); }
+  };
+
+  const handleDeleteSurvey = async (id: string) => {
+    if (!confirm('Delete this survey?')) return;
+    try {
+      const res = await fetch(`/api/surveys/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setSurveys(prev => prev.filter(s => s.id !== id));
+      } else { alert(data.error); }
+    } catch { alert('Failed to delete'); }
   };
 
   const statusColor = (s: string) => {
@@ -528,7 +610,7 @@ export default function SurveyBuilder() {
           <p className="text-sm text-slate-500 mt-1">Create and manage your surveys, forms, and polls</p>
         </div>
         <button
-          onClick={() => { setActiveSurvey(createDefaultSurvey()); setView('editor'); }}
+          onClick={() => { const name = prompt('Survey name:'); if (name) handleCreateSurvey(name, 'form'); }}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
         >
           <Plus size={16} /> Create Survey
@@ -607,7 +689,7 @@ export default function SurveyBuilder() {
                         <button onClick={() => { navigator.clipboard.writeText(`https://forms.example.com/${survey.id}`); }} className="p-1.5 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded transition-colors" title="Copy Link">
                           <Copy size={15} />
                         </button>
-                        <button onClick={() => { if (confirm('Delete this survey?')) setSurveys(prev => prev.filter(s => s.id !== survey.id)); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
+                        <button onClick={() => handleDeleteSurvey(survey.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
                           <Trash2 size={15} />
                         </button>
                       </div>

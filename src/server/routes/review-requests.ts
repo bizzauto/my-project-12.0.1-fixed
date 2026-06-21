@@ -204,17 +204,25 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
           data: { status: 'sent', sentAt: new Date() },
         });
       } else if (channel === 'sms') {
-        // SMS sending placeholder — integrate with Twilio/VoIP provider
-        await prisma.reviewRequest.update({
-          where: { id: request.id },
-          data: { status: 'sent', sentAt: new Date() },
-        });
+        const twilioSid = process.env.TWILIO_SID;
+        const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+        const smsApiKey = process.env.SMS_API_KEY;
+
+        if (twilioSid && twilioAuthToken) {
+          // TODO: Integrate with Twilio SMS API
+          throw new Error('SMS via Twilio not yet implemented');
+        } else if (smsApiKey) {
+          // TODO: Integrate with configured SMS provider
+          throw new Error('SMS provider not yet implemented');
+        } else {
+          throw new Error('SMS provider not configured. Configure TWILIO_SID and TWILIO_AUTH_TOKEN in .env');
+        }
       }
     } catch (sendError: any) {
       console.error('Failed to send review request:', sendError);
       await prisma.reviewRequest.update({
         where: { id: request.id },
-        data: { status: 'failed' },
+        data: { status: 'failed', errorMessage: sendError.message },
       });
     }
 
@@ -305,11 +313,19 @@ router.post('/bulk', authenticate, async (req: AuthRequest, res: Response) => {
           });
           sent++;
         } else if (channel === 'sms') {
-          await prisma.reviewRequest.update({
-            where: { id: request.id },
-            data: { status: 'sent', sentAt: new Date() },
-          });
-          sent++;
+          const twilioSid = process.env.TWILIO_SID;
+          const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+          const smsApiKey = process.env.SMS_API_KEY;
+
+          if (twilioSid && twilioAuthToken) {
+            // TODO: Integrate with Twilio SMS API
+            throw new Error('SMS via Twilio not yet implemented');
+          } else if (smsApiKey) {
+            // TODO: Integrate with configured SMS provider
+            throw new Error('SMS provider not yet implemented');
+          } else {
+            throw new Error('SMS provider not configured. Configure TWILIO_SID and TWILIO_AUTH_TOKEN in .env');
+          }
         } else {
           await prisma.reviewRequest.update({
             where: { id: request.id },
@@ -317,10 +333,10 @@ router.post('/bulk', authenticate, async (req: AuthRequest, res: Response) => {
           });
           failed++;
         }
-      } catch {
+      } catch (sendErr: any) {
         await prisma.reviewRequest.update({
           where: { id: request.id },
-          data: { status: 'failed' },
+          data: { status: 'failed', errorMessage: sendErr.message || 'Send failed' },
         });
         failed++;
       }
@@ -640,10 +656,19 @@ router.post('/campaigns/:id/trigger', authenticate, async (req: AuthRequest, res
           data: { status: 'sent', sentAt: new Date() },
         });
       } else if (campaign.channel === 'sms') {
-        await prisma.reviewRequest.update({
-          where: { id: request.id },
-          data: { status: 'sent', sentAt: new Date() },
-        });
+        const twilioSid = process.env.TWILIO_SID;
+        const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+        const smsApiKey = process.env.SMS_API_KEY;
+
+        if (twilioSid && twilioAuthToken) {
+          // TODO: Integrate with Twilio SMS API
+          throw new Error('SMS via Twilio not yet implemented');
+        } else if (smsApiKey) {
+          // TODO: Integrate with configured SMS provider
+          throw new Error('SMS provider not yet implemented');
+        } else {
+          throw new Error('SMS provider not configured. Configure TWILIO_SID and TWILIO_AUTH_TOKEN in .env');
+        }
       }
 
       await prisma.reviewRequestCampaign.update({
@@ -654,7 +679,7 @@ router.post('/campaigns/:id/trigger', authenticate, async (req: AuthRequest, res
       console.error('Failed to send triggered review request:', sendError);
       await prisma.reviewRequest.update({
         where: { id: request.id },
-        data: { status: 'failed' },
+        data: { status: 'failed', errorMessage: sendError.message },
       });
     }
 

@@ -90,7 +90,7 @@ export const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
 
   return (
     <div className={`grid ${gapMap[gap]} ${className}`} style={style}>
-      <ResponsiveGridStyle cols={cols} />
+      <ResponsiveGridStyle cols={{ mobile: cols.mobile ?? 1, tablet: cols.tablet ?? 2, desktop: cols.desktop ?? 3, wide: cols.wide ?? 4 }} />
       {children}
     </div>
   );

@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { useToast } from '../components/Toast';
-import { Calendar, Clock, User, Phone, Mail, Copy, Code, CheckCircle2, Settings, Globe } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Calendar, Clock, User, Phone, Mail, Copy, Code, CheckCircle2, Settings, Globe, Loader2 } from 'lucide-react';
 
 interface AppointmentType {
   id: string;
@@ -10,22 +9,59 @@ interface AppointmentType {
   active: boolean;
 }
 
+interface Appointment {
+  id: string;
+  title: string;
+  startTime: string;
+  status: string;
+  contact: { name: string; phone: string };
+}
+
 export default function AppointmentBookingPage() {
-  const toast = useToast();
-  const [types, setTypes] = useState<AppointmentType[]>([
+  const [types] = useState<AppointmentType[]>([
     { id: '1', name: 'Consultation', duration: 30, price: 0, active: true },
     { id: '2', name: 'Service Appointment', duration: 60, price: 500, active: true },
   ]);
   const [showEmbed, setShowEmbed] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
 
   const embedCode = `<iframe src="${window.location.origin}/booking-widget" width="100%" height="600" frameborder="0"></iframe>`;
+
+  const fetchUpcomingAppointments = useCallback(async () => {
+    try {
+      setLoadingAppointments(true);
+      const today = new Date().toISOString().split('T')[0];
+      const res = await fetch(`/api/appointments?status=confirmed&date=${today}&limit=10`, { credentials: 'include' });
+      const data = await res.json();
+      if (data.success) {
+        setAppointments(data.data.appointments || []);
+      }
+    } catch { /* silently fail */ }
+    finally { setLoadingAppointments(false); }
+  }, []);
+
+  useEffect(() => { fetchUpcomingAppointments(); }, [fetchUpcomingAppointments]);
 
   const copyEmbed = () => {
     navigator.clipboard.writeText(embedCode);
     setCopied(true);
-    toast.success('Embed code copied!');
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const formatTime = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  };
+
+  const getDateLabel = (isoString: string) => {
+    const date = new Date(isoString);
+    const today = new Date();
+    const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
   };
 
   return (
@@ -37,15 +73,11 @@ export default function AppointmentBookingPage() {
           </h1>
           <p className="text-gray-600 mt-1">Embeddable booking widget for your website</p>
         </div>
-        <button
-          onClick={() => setShowEmbed(!showEmbed)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg"
-        >
+        <button onClick={() => setShowEmbed(!showEmbed)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg">
           <Code size={18} /> Get Embed Code
         </button>
       </div>
 
-      {/* Embed Code */}
       {showEmbed && (
         <div className="bg-gray-900 rounded-xl p-4 mb-6 flex items-center justify-between">
           <code className="text-green-400 text-sm overflow-x-auto flex-1">{embedCode}</code>
@@ -123,26 +155,35 @@ export default function AppointmentBookingPage() {
           </div>
         </div>
 
-        {/* Upcoming */}
+        {/* Upcoming Appointments */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h3 className="font-semibold text-gray-900 mb-4">Upcoming Appointments</h3>
-          <div className="space-y-3">
-            {[
-              { name: 'Priya Sharma', service: 'Consultation', time: 'Today, 2:00 PM', phone: '+91 98765 43210' },
-              { name: 'Raj Patel', service: 'Service Appointment', time: 'Today, 4:30 PM', phone: '+91 87654 32109' },
-              { name: 'Anita Desai', service: 'Consultation', time: 'Tomorrow, 10:00 AM', phone: '+91 76543 21098' },
-            ].map((apt, i) => (
-              <div key={i} className="flex items-center gap-3 bg-blue-50 rounded-lg p-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-medium text-sm">
-                  {apt.name.split(' ').map(n => n[0]).join('')}
+          <h3 className="font-semibold text-gray-900 mb-4 flex items-center justify-between">
+            Upcoming Appointments
+            <button onClick={fetchUpcomingAppointments} className="text-xs text-blue-600 hover:underline">Refresh</button>
+          </h3>
+          {loadingAppointments ? (
+            <div className="flex items-center justify-center py-8"><Loader2 className="animate-spin text-blue-600" size={24} /></div>
+          ) : appointments.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">
+              <Calendar size={32} className="mx-auto mb-2 opacity-30" />
+              <p className="text-sm">No upcoming appointments</p>
+              <p className="text-xs mt-1">Appointments will appear here</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {appointments.slice(0, 5).map((apt) => (
+                <div key={apt.id} className="flex items-center gap-3 bg-blue-50 rounded-lg p-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-medium text-sm">
+                    {apt.contact?.name?.split(' ').map((n: string) => n[0]).join('') || '?'}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">{apt.contact?.name || apt.title}</div>
+                    <div className="text-xs text-gray-500">{apt.title} • {getDateLabel(apt.startTime)}, {formatTime(apt.startTime)}</div>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <div className="text-sm font-medium">{apt.name}</div>
-                  <div className="text-xs text-gray-500">{apt.service} • {apt.time}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -17,6 +17,9 @@ export default function SettingsPage() {
   const [disablePassword, setDisablePassword] = useState('');
   const [showDisableConfirm, setShowDisableConfirm] = useState(false);
   const [connectingGoogle, setConnectingGoogle] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: business?.name || '',
@@ -85,6 +88,35 @@ export default function SettingsPage() {
       toast.error('Failed to disable 2FA');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    if (passwordForm.newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      const result = await authAPI.changePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      if (result.data?.success) {
+        toast.success('Password changed successfully');
+        setShowPasswordModal(false);
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        toast.error(result.data?.error || 'Failed to change password');
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || error?.message || 'Failed to change password');
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -459,7 +491,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <button
-                  onClick={() => toast.info('Password change coming soon')}
+                  onClick={() => setShowPasswordModal(true)}
                   className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
                 >
                   Change Password
@@ -521,6 +553,68 @@ export default function SettingsPage() {
           </div>
         )}
 
+        {showPasswordModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-5 md:p-6">
+              <div className="flex items-center gap-3 text-blue-600 mb-4">
+                <Lock className="w-8 h-8" />
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Change Password</h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                    placeholder="Enter current password"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                    placeholder="Enter new password (min 8 characters)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                  }}
+                  className="flex-1 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleChangePassword}
+                  disabled={!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword || passwordLoading}
+                  className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {passwordLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {passwordLoading ? 'Changing...' : 'Change Password'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Save Button */}
         <div className="flex justify-end gap-4">
           <button
@@ -551,14 +645,14 @@ export default function SettingsPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            { name: 'WhatsApp Business', icon: '💬', color: 'green', connected: !!business?.waAccessToken, desc: 'Send messages, auto-replies, campaigns' },
-            { name: 'Facebook', icon: '📘', color: 'blue', connected: !!business?.fbAccessToken, desc: 'Post to pages, lead ads' },
-            { name: 'Instagram', icon: '📷', color: 'pink', connected: !!business?.igAccessToken, desc: 'Post, stories, reels' },
-            { name: 'LinkedIn', icon: '💼', color: 'blue', connected: !!business?.linkedinAccessToken, desc: 'Professional posts' },
-            { name: 'Twitter/X', icon: '🐦', color: 'sky', connected: !!business?.twitterAccessToken, desc: 'Tweets and threads' },
-            { name: 'Google Business', icon: '🏢', color: 'red', connected: !!business?.gbpAccessToken, desc: 'Reviews, posts, insights' },
-            { name: 'YouTube', icon: '📺', color: 'red', connected: !!business?.youtubeAccessToken, desc: 'Channel management, videos' },
-            { name: 'Apple Sign-In', icon: '🍎', color: 'gray', connected: !!user?.appleId, desc: 'Sign in with Apple' },
+            { name: 'WhatsApp Business', icon: '💬', color: 'green', connected: !!(business as any)?.waAccessToken, desc: 'Send messages, auto-replies, campaigns' },
+            { name: 'Facebook', icon: '📘', color: 'blue', connected: !!(business as any)?.fbAccessToken, desc: 'Post to pages, lead ads' },
+            { name: 'Instagram', icon: '📷', color: 'pink', connected: !!(business as any)?.igAccessToken, desc: 'Post, stories, reels' },
+            { name: 'LinkedIn', icon: '💼', color: 'blue', connected: !!(business as any)?.linkedinAccessToken, desc: 'Professional posts' },
+            { name: 'Twitter/X', icon: '🐦', color: 'sky', connected: !!(business as any)?.twitterAccessToken, desc: 'Tweets and threads' },
+            { name: 'Google Business', icon: '🏢', color: 'red', connected: !!(business as any)?.gbpAccessToken, desc: 'Reviews, posts, insights' },
+            { name: 'YouTube', icon: '📺', color: 'red', connected: !!(business as any)?.youtubeAccessToken, desc: 'Channel management, videos' },
+            { name: 'Apple Sign-In', icon: '🍎', color: 'gray', connected: !!(user as any)?.appleId, desc: 'Sign in with Apple' },
           ].map((social) => (
             <div key={social.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
               <div className="flex items-center gap-3">
@@ -592,7 +686,7 @@ export default function SettingsPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {user?.googleId ? (
+              {(user as any)?.googleId ? (
                 <>
                   <span className="flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-medium">
                     <span className="w-2 h-2 bg-green-500 rounded-full"></span> Connected

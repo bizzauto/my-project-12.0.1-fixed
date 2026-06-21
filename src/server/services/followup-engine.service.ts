@@ -1,6 +1,20 @@
 import { prisma } from '../db.js';
 import { AIService } from './ai.service.js';
 import { WhatsAppService } from './whatsapp.service.js';
+import { EvolutionApiService } from './evolution.service.js';
+
+/**
+ * Smart send: detects which WhatsApp channel is configured and routes accordingly.
+ */
+async function smartSendText(businessId: string, to: string, message: string): Promise<any> {
+  const evoIntegration = await prisma.integration.findFirst({
+    where: { businessId, type: 'evolution_api', isActive: true },
+  });
+  if (evoIntegration) {
+    return await EvolutionApiService.sendText(businessId, to, message);
+  }
+  return await WhatsAppService.sendTextMessage(businessId, to, message);
+}
 
 interface FollowUpRule {
   delayHours: number;
@@ -117,10 +131,8 @@ export class FollowUpEngineService {
         if (!log.contact?.phone) { errors++; continue; }
         if (log.campaign?.status !== 'active') { errors++; continue; }
 
-        // Send via WhatsApp
-        const result = await WhatsAppService.sendTextMessage(businessId, log.contact.phone, log.message, {
-          messageId: log.contactId,
-        });
+        // Send via WhatsApp (auto-detects Evolution vs Meta)
+        const result = await smartSendText(businessId, log.contact.phone, log.message);
 
         await prisma.outreachLog.update({
           where: { id: log.id },
@@ -139,8 +151,9 @@ export class FollowUpEngineService {
 
         sent++;
 
-        // Rate limit: 2 second delay
-        await new Promise((r) => setTimeout(r, 2000));
+        // Random delay 2-4 seconds to avoid spam detection
+        const randomDelay = Math.floor(Math.random() * 2000) + 2000; // 2000-4000ms
+        await new Promise((r) => setTimeout(r, randomDelay));
       } catch {
         errors++;
         await prisma.outreachLog.update({

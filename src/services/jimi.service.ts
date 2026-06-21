@@ -56,6 +56,7 @@ interface CommandResult {
   action: string;
   params?: any;
   response: string;
+  requiresConfirmation?: boolean;
 }
 
 type JimiCallback = (text: string, isUser: boolean) => void;

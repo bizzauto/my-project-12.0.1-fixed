@@ -45,11 +45,13 @@ const AI_ROUTES = new Set([
   '/documents', '/profile', '/settings', '/billing', '/team', '/api-keys',
   '/audit-log', '/store-share', '/support-tickets', '/notification-preferences',
   '/webhooks', '/referrals', '/revenue', '/qr-generator', '/audit-export',
-  '/smart-reply', '/content-scheduler', '/voice-to-text', '/campaign-roi',
-  '/customer-journey', '/bulk-messaging', '/appointment-booking', '/inventory',
-  '/sso-config', '/custom-roles', '/sla-management', '/data-backup',
-  '/landing-page-builder', '/ab-testing', '/google-ads', '/facebook-leads',
-  '/ai-sales-assistant', '/order-history', '/ca-copilot',
+    '/smart-reply', '/content-scheduler', '/voice-to-text', '/campaign-roi',
+    '/customer-journey', '/bulk-messaging', '/appointment-booking', '/inventory',
+    '/sso-config', '/custom-roles', '/sla-management', '/data-backup',
+    '/landing-page-builder', '/ab-testing', '/google-ads', '/facebook-leads',
+    '/ai-sales-assistant', '/order-history', '/ca-copilot',
+    '/google-reviews-qr', '/vcard-maker', '/website-builder-product',
+    '/reseller-hub',
 ]);
 
 const ModeAwareAuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -99,6 +101,7 @@ const TeamManagement = lazy(() => import('./components/TeamManagement'));
 const UserProfile = lazy(() => import('./components/UserProfile'));
 const SettingsPage = lazy(() => import('./components/SettingsPage'));
 const SuperAdminDashboard = lazy(() => import('./components/SuperAdminDashboard'));
+const UserManagementPage = lazy(() => import('./components/UserManagementPage'));
 const OnboardingWizard = lazy(() => import('./components/OnboardingWizard'));
 const ResorPayBoard = lazy(() => import('./components/ResorPayBoard'));
 const AdmissionForm = lazy(() => import('./components/AdmissionForm'));
@@ -147,6 +150,11 @@ const FacebookLeadAdsPage = lazy(() => import('./components/FacebookLeadAdsPage'
 const AISalesAssistantPage = lazy(() => import('./components/AISalesAssistantPage'));
 const OrderHistoryPage = lazy(() => import('./components/OrderHistoryPage'));
 const CACopilotPage = lazy(() => import('./components/CACopilotPage'));
+const GoogleReviewsQRPage = lazy(() => import('./components/GoogleReviewsQRPage'));
+const VCardMakerPage = lazy(() => import('./components/VCardMakerPage'));
+const WebsiteBuilderProductPage = lazy(() => import('./components/WebsiteBuilderProductPage'));
+const ResellerDashboardPage = lazy(() => import('./components/ResellerDashboardPage'));
+const ResellerAuthPage = lazy(() => import('./components/ResellerAuthPage'));
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -266,6 +274,14 @@ function AppRoutes() {
         element={
           <SuperAdminRoute>
             <SuperAdminDashboard />
+          </SuperAdminRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <SuperAdminRoute>
+            <UserManagementPage />
           </SuperAdminRoute>
         }
       />
@@ -788,6 +804,16 @@ function AppRoutes() {
       <Route path="/ai-sales-assistant" element={<ProtectedRoute><ModeAwareAuthLayout><AISalesAssistantPage /></ModeAwareAuthLayout></ProtectedRoute>} />
       <Route path="/order-history" element={<ProtectedRoute><ModeAwareAuthLayout><OrderHistoryPage /></ModeAwareAuthLayout></ProtectedRoute>} />
       <Route path="/ca-copilot" element={<ProtectedRoute><ModeAwareAuthLayout><CACopilotPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+
+      {/* Product Features */}
+      <Route path="/google-reviews-qr" element={<ProtectedRoute><ModeAwareAuthLayout><GoogleReviewsQRPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/vcard-maker" element={<ProtectedRoute><ModeAwareAuthLayout><VCardMakerPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/website-builder-product" element={<ProtectedRoute><ModeAwareAuthLayout><WebsiteBuilderProductPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+
+      {/* Reseller Hub */}
+      <Route path="/reseller-hub" element={<ProtectedRoute><ModeAwareAuthLayout><ResellerDashboardPage /></ModeAwareAuthLayout></ProtectedRoute>} />
+      <Route path="/reseller-login" element={<ResellerAuthPage />} />
+      <Route path="/reseller-register" element={<ResellerAuthPage />} />
 
       {/* Redirects */}
       <Route path="/404" element={<NotFoundPage />} />

@@ -1788,7 +1788,7 @@ const SocialMediaPage: React.FC = () => {
                     {media.media_type === 'VIDEO' ? (
                       <div className="w-full h-full relative">
                         <img
-                          src={media.thumbnail_url || media.media_url}
+                          src={(media as any).thumbnail_url || media.media_url}
                           alt={media.caption || 'Instagram post'}
                           className="w-full h-full object-cover"
                         />

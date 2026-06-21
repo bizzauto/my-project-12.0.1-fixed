@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Star, Globe, Phone, Download, Filter, BarChart3, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, MapPin, Star, Globe, Phone, Download, Filter, BarChart3, Loader2, CheckCircle2, XCircle, Info, Sparkles } from 'lucide-react';
 import { leadFinderAPI } from '../lib/api';
 import { useAuthStore } from '../lib/authStore';
 import LeadScoreBadge from './LeadScoreBadge';
@@ -45,11 +45,13 @@ const BUSINESS_CATEGORIES = [
   { value: 'contractor', label: 'Contractor' },
   { value: 'hotel', label: 'Hotel' },
   { value: 'cafe', label: 'Cafe' },
+  { value: 'custom', label: 'Custom (Enter your own)' },
 ];
 
 export default function LeadFinderPage() {
   const { business } = useAuthStore();
   const [category, setCategory] = useState('');
+  const [customCategory, setCustomCategory] = useState('');
   const [city, setCity] = useState('');
   const [radius, setRadius] = useState(10);
   const [results, setResults] = useState<GooglePlace[]>([]);
@@ -62,10 +64,19 @@ export default function LeadFinderPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [leadsLoading, setLeadsLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(() => {
+    return localStorage.getItem('leadFinderBannerDismissed') === 'true';
+  });
+
+  const handleDismissBanner = () => {
+    setBannerDismissed(true);
+    localStorage.setItem('leadFinderBannerDismissed', 'true');
+  };
 
   const handleSearch = async () => {
-    if (!category || !city) {
-      setMessage({ type: 'error', text: 'Please select category and enter city' });
+    const searchCategory = category === 'custom' ? customCategory.trim() : category;
+    if (!searchCategory || !city) {
+      setMessage({ type: 'error', text: 'Please select/enter a category and enter city' });
       return;
     }
 
@@ -75,7 +86,7 @@ export default function LeadFinderPage() {
     setSelected(new Set());
 
     try {
-      const res = await leadFinderAPI.search({ category, city, radius });
+      const res = await leadFinderAPI.search({ category: searchCategory, city, radius });
       if (res.data?.success) {
         setResults(res.data.data.results || []);
         setSearchId(res.data.data.searchId || '');
@@ -223,7 +234,7 @@ export default function LeadFinderPage() {
           <>
             {/* Search Form */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Category</label>
                   <select
@@ -237,6 +248,18 @@ export default function LeadFinderPage() {
                     ))}
                   </select>
                 </div>
+                {category === 'custom' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Custom Category</label>
+                    <input
+                      type="text"
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                      placeholder="e.g. LED Light Manufacturer, Bakery..."
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">City</label>
                   <input
@@ -259,14 +282,20 @@ export default function LeadFinderPage() {
                   />
                 </div>
                 <div className="flex items-end">
-                  <button
-                    onClick={handleSearch}
-                    disabled={loading || !category || !city}
-                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                    {loading ? 'Searching...' : 'Find Leads'}
-                  </button>
+                  <div className="w-full">
+                    <button
+                      onClick={handleSearch}
+                      disabled={loading || !category || (category === 'custom' && !customCategory.trim()) || !city}
+                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                      {loading ? 'Searching...' : 'Find Leads'}
+                    </button>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                      <Info className="w-3 h-3" />
+                      Uses AI to find relevant businesses matching your criteria
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -274,6 +303,17 @@ export default function LeadFinderPage() {
             {/* Results */}
             {results.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                {!bannerDismissed && (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 px-4 py-3 flex items-center gap-3">
+                    <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                    <p className="text-sm text-amber-800 dark:text-amber-300 flex-1">
+                      <span className="font-semibold">AI-Generated Leads:</span> These businesses are AI-suggested based on your search criteria. Verify contact details before outreach.
+                    </p>
+                    <button onClick={handleDismissBanner} className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 flex-shrink-0">
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <h3 className="font-semibold text-gray-900 dark:text-white">{results.length} Results</h3>
@@ -325,7 +365,13 @@ export default function LeadFinderPage() {
                             />
                           </td>
                           <td className="px-4 py-3">
-                            <div className="font-medium text-gray-900 dark:text-white">{place.name}</div>
+                            <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                              {place.name}
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
+                                <Sparkles className="w-3 h-3" />
+                                AI Suggested
+                              </span>
+                            </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">{place.types?.slice(0, 2).join(', ')}</div>
                           </td>
                           <td className="px-4 py-3 text-gray-700 dark:text-gray-300">

@@ -86,7 +86,7 @@ const WalletWidget: React.FC<WalletWidgetProps> = ({ onAddFunds, onViewHistory }
         </div>
         <div className="flex justify-between text-xs sm:text-sm">
           <span className="text-gray-500 dark:text-gray-400">Platform Fee (10%)</span>
-          <span className="font-medium text-orange-600 dark:text-orange-400">₹{(wallet?.totalMarginPaid || 0).toFixed(2)}</span>
+          <span className="font-medium text-orange-600 dark:text-orange-400">₹{((wallet as any)?.totalMarginPaid || 0).toFixed(2)}</span>
         </div>
       </div>
 

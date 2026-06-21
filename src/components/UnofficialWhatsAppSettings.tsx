@@ -49,7 +49,7 @@ const PROVIDER_OPTIONS: Array<{ value: GatewayProvider; label: string; descripti
 ];
 
 const UnofficialWhatsAppSettings: React.FC = () => {
-  const { showToast } = useToast();
+  const { toast: showToast } = useToast();
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

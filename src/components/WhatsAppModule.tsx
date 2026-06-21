@@ -80,6 +80,7 @@ interface EvolutionConfig {
   baseUrl: string;
   apiKey: string;
   instanceName: string;
+  phone: string;
   configured: boolean;
 }
 
@@ -150,7 +151,7 @@ const evolutionAPI = {
   getConfig: () => apiClient.get('/evolution/config'),
   saveConfig: (data: any) => apiClient.post('/evolution/config', data),
   createInstance: (data: any) => apiClient.post('/evolution/instance', data),
-  connectInstance: (instanceName: string) => apiClient.post('/evolution/connect', { instanceName }),
+  connectInstance: (instanceName: string, phone?: string) => apiClient.post('/evolution/connect', { instanceName, phone }),
   getStatus: (instanceName: string) => apiClient.get(`/evolution/status?instanceName=${instanceName}`),
   disconnectInstance: (instanceName: string) => apiClient.post('/evolution/disconnect', { instanceName }),
   getChats: (instanceName: string) => apiClient.get(`/evolution/chats?instanceName=${instanceName}`),
@@ -203,7 +204,7 @@ const QRConnectView: React.FC<{
   onEvolutionConfigChange?: (config: EvolutionConfig) => void;
   onEvolutionConnect?: () => void;
   apiError?: string | null;
-}> = ({ connectionStatus, connectedPhone, onConnect, onDisconnect, onRefreshQR, qrValue, connectionMode = 'qr', onModeChange = () => { }, evolutionConfig = { baseUrl: '', apiKey: '', instanceName: '', configured: false }, onEvolutionConfigChange = () => { }, onEvolutionConnect = () => { }, apiError = null }) => {
+}> = ({ connectionStatus, connectedPhone, onConnect, onDisconnect, onRefreshQR, qrValue, connectionMode = 'qr', onModeChange = () => { }, evolutionConfig = { baseUrl: '', apiKey: '', instanceName: '', phone: '', configured: false }, onEvolutionConfigChange = () => { }, onEvolutionConnect = () => { }, apiError = null }) => {
   const [step, setStep] = useState(0);
   const [showEvolutionForm, setShowEvolutionForm] = useState(false);
 
@@ -539,6 +540,17 @@ const QRConnectView: React.FC<{
                       className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 text-sm"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">WhatsApp Number <span className="text-gray-400">(with country code)</span></label>
+                    <input
+                      type="tel"
+                      value={evolutionConfig.phone || ''}
+                      onChange={e => onEvolutionConfigChange({ ...evolutionConfig, phone: e.target.value })}
+                      placeholder="919999999999"
+                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 text-sm"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Required. Your WhatsApp number with country code (e.g., 919999999999)</p>
+                  </div>
                   <button
                     onClick={() => { onEvolutionConfigChange({ ...evolutionConfig, configured: true }); setShowEvolutionForm(false); }}
                     className="w-full px-4 sm:px-5 md:px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-semibold"
@@ -651,14 +663,7 @@ const ChatView: React.FC<{
       setTimeout(() => setMessages(prev => prev.map(m => m.id === newMsg.id ? { ...m, status: 'sent' } : m)), 500);
     }
 
-    if (!isConnected || !evolutionInstanceName) {
-      setTimeout(() => setMessages(prev => prev.map(m => m.id === newMsg.id ? { ...m, status: 'delivered' } : m)), 1500);
-    }
 
-    // Auto-reply only when connected via Evolution API
-    if (isConnected && evolutionInstanceName) {
-      // Real messages will come via webhook, no simulation needed
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -699,13 +704,11 @@ const ChatView: React.FC<{
       timestamp: new Date().toISOString(),
       time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
       direction: 'outbound',
-      status: 'sending',
+      status: 'sent',
       type: 'template',
     };
     setMessages(prev => [...prev, newMsg]);
     setShowTemplatePanel(false);
-    setTimeout(() => setMessages(prev => prev.map(m => m.id === newMsg.id ? { ...m, status: 'sent' } : m)), 500);
-    setTimeout(() => setMessages(prev => prev.map(m => m.id === newMsg.id ? { ...m, status: 'delivered' } : m)), 1500);
   };
 
   return (
@@ -940,6 +943,9 @@ const ChatView: React.FC<{
                           <span className="text-[10px] text-gray-500 dark:text-gray-400">{msg.time}</span>
                           {msg.direction === 'outbound' && <MessageStatus status={msg.status} />}
                         </div>
+                        {msg.direction === 'outbound' && (
+                          <p className="text-[9px] text-gray-400 dark:text-gray-500 text-right mt-0.5">Delivery status updates via webhook</p>
+                        )}
 
                         {/* Hover actions */}
                         <div className="absolute -top-2 right-2 hidden group-hover:flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg shadow-md p-1">
@@ -957,7 +963,7 @@ const ChatView: React.FC<{
                           </button>
                           <button onClick={() => {
                             const emoji = '👍';
-                            setNewMessage((prev) => prev + emoji);
+                            setMessage((prev: string) => prev + emoji);
                           }} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 dark:text-gray-400" title="React">
                             <Smile size={14} />
                           </button>
@@ -2278,6 +2284,7 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     baseUrl: '',
     apiKey: '',
     instanceName: '',
+    phone: '',
     configured: false,
   });
   const [evolutionInstanceName, setEvolutionInstanceName] = useState('');
@@ -2344,6 +2351,7 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             baseUrl: config.baseUrl || '',
             apiKey: config.apiKey || '',
             instanceName: config.instanceName || '',
+            phone: config.phone || '',
             configured: !!config.baseUrl,
           });
           if (config.instanceName) {
@@ -2445,13 +2453,14 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           instanceName,
           baseUrl: evolutionConfig.baseUrl,
           apiKey: evolutionConfig.apiKey,
+          phone: evolutionConfig.phone,
         });
       } catch {
         // Instance may already exist, continue
       }
 
       // Connect and get QR
-      const connectRes = await evolutionAPI.connectInstance(instanceName);
+      const connectRes = await evolutionAPI.connectInstance(instanceName, evolutionConfig.phone);
       // Server wraps response: { success: true, data: { qrCode, qrCodeBase64, status } }
       const responseData = connectRes?.data?.data || connectRes?.data;
       const qrCode = responseData?.qrCodeBase64 || responseData?.qrCode || '';
@@ -2480,6 +2489,7 @@ const WhatsAppModule: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         baseUrl: config.baseUrl,
         apiKey: config.apiKey,
         instanceName: config.instanceName,
+        phone: config.phone,
       });
     } catch (err: any) {
       const errorMsg = err?.response?.data?.error || err?.message || 'Failed to save Evolution API configuration';

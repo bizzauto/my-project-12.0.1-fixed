@@ -109,6 +109,7 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { user, isDemoMode } = useAuthStore();
   const userName = user?.name || 'Admin';
+  const setActiveModule = (m: string) => { navigate('/' + m); };
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -495,7 +496,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <button
-            onClick={() => setActiveModule?.('whatsapp')}
+            onClick={() => setActiveModule('whatsapp')}
             className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 bg-white/80 dark:bg-gray-800/80 text-emerald-700 dark:text-emerald-300 text-xs font-medium rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors border border-emerald-200 dark:border-emerald-700"
           >
             <Sparkles size={14} />
