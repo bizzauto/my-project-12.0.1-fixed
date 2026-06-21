@@ -3188,3 +3188,93 @@ model wl_resellers {
 
   @@index([email])
 }
+
+// ==================== V-CARD MAKER ====================
+
+model VCards {
+  id          String   @id @default(cuid())
+  businessId  String
+  name        String
+  title       String?
+  company     String?
+  phone       String?
+  email       String?
+  website     String?
+  address     String?
+  template    String   @default("professional")
+  color       String   @default("#2563eb")
+  views       Int      @default(0)
+  shares      Int      @default(0)
+  status      String   @default("active")
+  socialLinks Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+// ==================== WEBSITE BUILDER ====================
+
+model Websites {
+  id           String   @id @default(cuid())
+  businessId   String
+  name         String
+  slug         String
+  template     String   @default("business")
+  blocks       Json?
+  status       String   @default("draft")
+  views        Int      @default(0)
+  leads        Int      @default(0)
+  customDomain String?
+  publishedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([businessId])
+  @@unique([businessId, slug])
+}
+
+// ==================== SURVEY BUILDER ====================
+
+model Surveys {
+  id             String   @id @default(cuid())
+  businessId     String
+  name           String
+  description    String?
+  questions      Json
+  status         String   @default("draft")
+  submissionCount Int     @default(0)
+  completionRate Float    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+model SurveySubmissions {
+  id         String   @id @default(cuid())
+  surveyId   String
+  answers    Json
+  respondent String?
+  completed  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([surveyId])
+}
+
+// ==================== SSO CONFIG ====================
+
+model SSOConfig {
+  id          String   @id @default(cuid())
+  businessId  String
+  provider    String
+  clientId    String
+  clientSecret String
+  domain      String?
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([businessId])
+  @@unique([businessId, provider])
+}
