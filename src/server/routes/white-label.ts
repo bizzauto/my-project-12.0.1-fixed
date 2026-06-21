@@ -34,7 +34,7 @@ router.post('/auth/login', async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: 'Email and password required' });
     }
 
-    const reseller = await (prisma as any).wl_resellers.findUnique({ where: { email } });
+    const reseller = await (prisma as any).wl_resellers.findFirst({ where: { email } });
     if (!reseller) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
@@ -88,7 +88,7 @@ router.post('/auth/register', async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: 'Invalid email format' });
     }
 
-    const existing = await (prisma as any).wl_resellers.findUnique({ where: { email } });
+    const existing = await (prisma as any).wl_resellers.findFirst({ where: { email } });
     if (existing) {
       return res.status(409).json({ success: false, error: 'Email already registered' });
     }
