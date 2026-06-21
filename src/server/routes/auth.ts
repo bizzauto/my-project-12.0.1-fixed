@@ -263,7 +263,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
           image: picture || null,
           emailVerified: new Date(),
           password: await hashPassword(crypto.randomBytes(32).toString('hex')),
-          role: 'USER' as any,
+          role: 'OWNER',
         },
         include: { business: true },
       }) as any;
@@ -290,7 +290,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
       token,
       refreshToken,
       userId: user.id,
-      role: user.role || 'USER',
+      role: user.role || 'OWNER',
       name: user.name || '',
       email: user.email || '',
     });
@@ -445,7 +445,7 @@ router.post('/apple', socialAuthLimiter, async (req: Request, res: Response) => 
         appleId,
         name,
         businessId: business.id,
-        role: 'MEMBER',
+        role: 'OWNER',
         emailVerified: new Date(),
         isVerified: true,
       },
@@ -603,7 +603,7 @@ router.post('/google', socialAuthLimiter, async (req: Request, res: Response) =>
         name: name || email.split('@')[0],
         image: picture,
         businessId: business.id,
-        role: 'MEMBER',
+        role: 'OWNER',
         emailVerified: new Date(),
         isVerified: true,
       },
@@ -687,8 +687,8 @@ router.post('/register', registerLimiter, validate(registerSchema), async (req: 
       },
     });
 
-    // Create user — default MEMBER role, OWNER for first user of business
-    const userRole = 'MEMBER';
+    // First user of a business is always the OWNER
+    const userRole = 'OWNER';
     const user = await prisma.user.create({
       data: {
         email,
