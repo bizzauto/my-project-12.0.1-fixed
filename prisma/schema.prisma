@@ -15,7 +15,7 @@ model User {
   name                 String?
   password             String?
   phone                String?
-  role                 Role              @default(OWNER)
+  role                 Role              @default(MEMBER)
   businessId           String?
   emailVerified        DateTime?
   image                String?
@@ -2738,7 +2738,10 @@ enum Role {
 enum Plan {
   FREE
   BASIC
+  STARTER
+  GROWTH
   PROFESSIONAL
+  PRO
   ENTERPRISE
   AGENCY
 }
