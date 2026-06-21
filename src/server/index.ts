@@ -36,6 +36,7 @@ import userRoutes from './routes/user.js';
 import referralRoutes from './routes/referrals.js';
 import aiRoutes from './routes/ai.js';
 import analyticsRoutes from './routes/analytics.js';
+import admissionRoutes from './routes/admission.js';
 import appointmentsRoutes from './routes/appointments.js';
 import automationRoutes from './routes/automation.js';
 import businessRoutes from './routes/business.js';
