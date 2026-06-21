@@ -40,6 +40,7 @@ import admissionRoutes from './routes/admission.js';
 import appointmentsRoutes from './routes/appointments.js';
 import automationRoutes from './routes/automation.js';
 import businessRoutes from './routes/business.js';
+import caCopilotRoutes from './routes/ca-copilot.js';
 import campaignsRoutes from './routes/campaigns.js';
 import chatbotRoutes from './routes/chatbot.js';
 import contactsRoutes from './routes/contacts.js';
