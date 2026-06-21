@@ -2533,6 +2533,7 @@ model ReviewRequest {
   message       String
   reviewUrl     String // Google review link
   status        String    @default("pending") // pending, sent, opened, completed, failed
+  errorMessage  String?
   sentAt        DateTime?
   openedAt      DateTime?
   completedAt   DateTime?

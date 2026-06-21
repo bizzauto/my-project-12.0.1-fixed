@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '../components/Toast';
+import { useAuthStore } from '../lib/authStore';
 import { Shield, Plus, Edit, Trash2, Users, Check, X } from 'lucide-react';
 
 interface Permission {
@@ -35,17 +36,45 @@ const allPermissions: Permission[] = [
   { id: 'reports.export', name: 'Export Reports', category: 'Reports' },
 ];
 
-const defaultRoles: Role[] = [
+const systemRoles: Role[] = [
   { id: 'admin', name: 'Admin', color: 'bg-red-100 text-red-700', users: 2, permissions: allPermissions.map(p => p.id), isSystem: true },
-  { id: 'manager', name: 'Manager', color: 'bg-blue-100 text-blue-700', users: 5, permissions: ['contacts.view', 'contacts.create', 'campaigns.view', 'campaigns.create', 'campaigns.send', 'invoices.view', 'reports.view'], isSystem: false },
-  { id: 'sales', name: 'Sales Rep', color: 'bg-green-100 text-green-700', users: 8, permissions: ['contacts.view', 'contacts.create', 'campaigns.view', 'invoices.view', 'invoices.create'], isSystem: false },
+  { id: 'manager', name: 'Manager', color: 'bg-blue-100 text-blue-700', users: 5, permissions: ['contacts.view', 'contacts.create', 'campaigns.view', 'campaigns.create', 'campaigns.send', 'invoices.view', 'reports.view'], isSystem: true },
+  { id: 'member', name: 'Member', color: 'bg-green-100 text-green-700', users: 8, permissions: ['contacts.view', 'contacts.create', 'campaigns.view', 'invoices.view', 'invoices.create'], isSystem: true },
 ];
 
 export default function CustomRolesPage() {
   const toast = useToast();
-  const [roles, setRoles] = useState<Role[]>(defaultRoles);
+  const business = useAuthStore((s) => s.business);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [newRole, setNewRole] = useState({ name: '', color: 'bg-purple-100 text-purple-700', permissions: [] as string[] });
+
+  const storageKey = `bz-custom-roles-${business?.id || 'default'}`;
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const mergedSystem = systemRoles.map(sr => {
+          const custom = parsed.find((r: Role) => r.id === sr.id);
+          return custom ? { ...sr, ...custom, isSystem: true } : sr;
+        });
+        const customOnly = parsed.filter((r: Role) => !r.isSystem && !systemRoles.some(sr => sr.id === r.id));
+        setRoles([...mergedSystem, ...customOnly]);
+      } else {
+        setRoles([...systemRoles]);
+      }
+    } catch {
+      setRoles([...systemRoles]);
+    }
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (roles.length > 0) {
+      localStorage.setItem(storageKey, JSON.stringify(roles));
+    }
+  }, [roles, storageKey]);
 
   const categories = [...new Set(allPermissions.map(p => p.category))];
 
@@ -72,6 +101,25 @@ export default function CustomRolesPage() {
     toast.success('Role deleted');
   };
 
+  const startEdit = (role: Role) => {
+    setEditing(role.id);
+    setNewRole({ name: role.name, color: role.color, permissions: [...role.permissions] });
+  };
+
+  const saveEdit = () => {
+    if (!editing) return;
+    if (!newRole.name) { toast.error('Role name required'); return; }
+    setRoles(prev => prev.map(r => r.id === editing ? { ...r, name: newRole.name, color: newRole.color, permissions: newRole.permissions } : r));
+    setEditing(null);
+    setNewRole({ name: '', color: 'bg-purple-100 text-purple-700', permissions: [] });
+    toast.success('Role updated!');
+  };
+
+  const cancelEdit = () => {
+    setEditing(null);
+    setNewRole({ name: '', color: 'bg-purple-100 text-purple-700', permissions: [] });
+  };
+
   return (
     <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-6">
@@ -81,14 +129,21 @@ export default function CustomRolesPage() {
         <p className="text-gray-600 mt-1">Create custom roles with granular permission control</p>
       </div>
 
-      {/* Roles List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {roles.length === 0 && (
+          <div className="col-span-full text-center py-12 text-gray-400">
+            No custom roles yet
+          </div>
+        )}
         {roles.map((role) => (
           <div key={role.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
             <div className="flex items-center justify-between mb-3">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${role.color}`}>{role.name}</span>
               <div className="flex items-center gap-1">
                 <span className="text-xs text-gray-400 flex items-center gap-1"><Users size={12} /> {role.users}</span>
+                <button onClick={() => startEdit(role)} className="p-1 hover:bg-blue-50 rounded text-blue-400">
+                  <Edit size={14} />
+                </button>
                 {!role.isSystem && (
                   <button onClick={() => deleteRole(role.id)} className="p-1 hover:bg-red-50 rounded text-red-400">
                     <Trash2 size={14} />
@@ -104,9 +159,10 @@ export default function CustomRolesPage() {
         ))}
       </div>
 
-      {/* Create Role */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2"><Plus size={18} /> Create New Role</h3>
+        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          {editing ? <><Edit size={18} /> Edit Role</> : <><Plus size={18} /> Create New Role</>}
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Role Name</label>
@@ -124,7 +180,6 @@ export default function CustomRolesPage() {
           </div>
         </div>
 
-        {/* Permissions */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
           {categories.map(cat => (
@@ -147,10 +202,18 @@ export default function CustomRolesPage() {
           ))}
         </div>
 
-        <button onClick={saveRole}
-          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-          Create Role
-        </button>
+        <div className="flex gap-2">
+          <button onClick={editing ? saveEdit : saveRole}
+            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            {editing ? 'Save Changes' : 'Create Role'}
+          </button>
+          {editing && (
+            <button onClick={cancelEdit}
+              className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+              Cancel
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

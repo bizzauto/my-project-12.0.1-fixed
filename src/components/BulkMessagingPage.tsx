@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../lib/authStore';
 import { useToast } from '../components/Toast';
+import { campaignsAPI } from '../lib/api';
 import { Send, Users, FileText, Clock, CheckCircle2, AlertCircle, Upload, Filter, Loader2 } from 'lucide-react';
 
 interface BulkMessage {
@@ -21,10 +22,23 @@ export default function BulkMessagingPage() {
   const [content, setContent] = useState('');
   const [recipientFilter, setRecipientFilter] = useState('all');
   const [sending, setSending] = useState(false);
-  const [history] = useState<BulkMessage[]>([
-    { id: '1', content: 'Diwali Sale! Up to 50% off. Shop now!', channel: 'whatsapp', totalSent: 5420, delivered: 5200, failed: 220, scheduledAt: '2026-06-01', status: 'completed' },
-    { id: '2', content: 'Your order has been shipped! Track here: ...', channel: 'sms', totalSent: 1200, delivered: 1150, failed: 50, scheduledAt: '2026-06-03', status: 'completed' },
-  ]);
+  const [history, setHistory] = useState<BulkMessage[]>([]);
+
+  useEffect(() => {
+    campaignsAPI.list().then((res) => {
+      const items = (res.data?.data || res.data || []).map((c: any) => ({
+        id: c.id,
+        content: c.message || c.content || '',
+        channel: c.channel || 'whatsapp',
+        totalSent: c.totalSent || c.sent || 0,
+        delivered: c.delivered || 0,
+        failed: c.failed || 0,
+        scheduledAt: c.scheduledAt || c.createdAt || '',
+        status: c.status || 'pending',
+      }));
+      setHistory(items);
+    }).catch(() => {});
+  }, []);
 
   const templates = [
     { name: 'Welcome', text: 'Welcome to {business}! Thank you for joining us. Reply HELP for support.' },
@@ -47,6 +61,17 @@ export default function BulkMessagingPage() {
       if (data.success) {
         toast.success(`Bulk ${channel.toUpperCase()} sending initiated!`);
         setContent('');
+        const newItem: BulkMessage = {
+          id: data.data?.id || Date.now().toString(),
+          content,
+          channel,
+          totalSent: data.data?.totalSent || 0,
+          delivered: 0,
+          failed: 0,
+          scheduledAt: new Date().toISOString(),
+          status: 'sending',
+        };
+        setHistory((prev) => [newItem, ...prev]);
       } else {
         toast.error(data.error || 'Failed to send');
       }
@@ -153,6 +178,12 @@ export default function BulkMessagingPage() {
             <Clock size={18} /> Recent Campaigns
           </h3>
           <div className="space-y-3">
+            {history.length === 0 && (
+              <div className="text-center py-8 text-gray-400">
+                <Send size={32} className="mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No messages sent yet</p>
+              </div>
+            )}
             {history.map((msg) => (
               <div key={msg.id} className="bg-gray-50 rounded-lg p-3">
                 <div className="flex items-center justify-between mb-1">

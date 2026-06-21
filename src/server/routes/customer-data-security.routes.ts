@@ -237,12 +237,23 @@ router.get('/access-log/:contactId', authenticate, async (req: Request, res: Res
       return res.status(404).json({ success: false, error: 'Customer not found' });
     }
     
-    // Get audit logs (you might need to create an AuditLog model)
-    // For now, return mock data
-    const accessLog = [
-      { action: 'VIEW', timestamp: new Date(), user: 'System', details: 'Customer data accessed' },
-    ];
-    
+    const logs = await prisma.auditLog.findMany({
+      where: {
+        businessId,
+        entity: 'contact',
+        entityId: contactId,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+
+    const accessLog = logs.map((log) => ({
+      action: log.action.toUpperCase(),
+      timestamp: log.createdAt,
+      user: log.userEmail || log.userId || 'Unknown',
+      details: log.description || log.action,
+    }));
+
     res.json({ success: true, data: accessLog });
   } catch (error: any) {
     console.error('[CustomerSecurity] Access log failed:', error);

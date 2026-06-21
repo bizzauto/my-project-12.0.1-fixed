@@ -8,7 +8,7 @@ const router = Router();
 
 // Generate ticket number
 function generateTicketNumber(): string {
-  const num = Math.floor(Math.random() * 999999).toString().padStart(6, '0');
+  const num = Date.now().toString(36).toUpperCase().slice(-6);
   return `#TICKET-${num}`;
 }
 

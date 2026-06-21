@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, FileText, Image, CheckCircle, AlertCircle, Loader2, Building2, User, Phone, Mail, MapPin, Globe, CreditCard, ArrowRight, Sparkles } from 'lucide-react';
+import { aiAPI } from '../lib/api';
 
 interface BusinessData {
   businessName: string;
@@ -63,23 +64,43 @@ const AutoSetupWizard: React.FC<AutoSetupProps> = ({ onComplete }) => {
   };
 
   const parseDocument = async (data: string, type: 'pdf' | 'image'): Promise<BusinessData> => {
-    // Mock parsing - in production, send to backend API
-    // Backend will use AI to extract text from PDF/Image
-    
-    // Simulate delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Return mock parsed data (in production, this comes from AI)
-    return {
-      businessName: 'Demo Business',
-      businessType: 'Retail',
-      ownerName: 'Customer Name',
-      phone: '+91 7972888023',
-      email: 'demo@example.com',
-      address: '123 Main Street, City',
+    const empty: BusinessData = {
+      businessName: '',
+      businessType: '',
+      ownerName: '',
+      phone: '',
+      email: '',
+      address: '',
       website: '',
       gstNumber: '',
     };
+
+    try {
+      const res = await aiAPI.generate({
+        type: 'medium',
+        prompt: `Extract business information from this ${type} document. Return ONLY a JSON object with fields: businessName, businessType, ownerName, phone, email, address, website, gstNumber. Use empty string for any missing fields. Do not include any other text.`,
+        context: { document: data, fileType: type }
+      });
+
+      const text = res.data?.data?.text || '';
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return {
+          businessName: parsed.businessName || '',
+          businessType: parsed.businessType || '',
+          ownerName: parsed.ownerName || '',
+          phone: parsed.phone || '',
+          email: parsed.email || '',
+          address: parsed.address || '',
+          website: parsed.website || '',
+          gstNumber: parsed.gstNumber || '',
+        };
+      }
+      return empty;
+    } catch {
+      return empty;
+    }
   };
 
   const handleManualEntry = () => {

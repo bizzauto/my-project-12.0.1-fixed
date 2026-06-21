@@ -663,14 +663,7 @@ const ChatView: React.FC<{
       setTimeout(() => setMessages(prev => prev.map(m => m.id === newMsg.id ? { ...m, status: 'sent' } : m)), 500);
     }
 
-    if (!isConnected || !evolutionInstanceName) {
-      setTimeout(() => setMessages(prev => prev.map(m => m.id === newMsg.id ? { ...m, status: 'delivered' } : m)), 1500);
-    }
 
-    // Auto-reply only when connected via Evolution API
-    if (isConnected && evolutionInstanceName) {
-      // Real messages will come via webhook, no simulation needed
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -711,13 +704,11 @@ const ChatView: React.FC<{
       timestamp: new Date().toISOString(),
       time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
       direction: 'outbound',
-      status: 'sending',
+      status: 'sent',
       type: 'template',
     };
     setMessages(prev => [...prev, newMsg]);
     setShowTemplatePanel(false);
-    setTimeout(() => setMessages(prev => prev.map(m => m.id === newMsg.id ? { ...m, status: 'sent' } : m)), 500);
-    setTimeout(() => setMessages(prev => prev.map(m => m.id === newMsg.id ? { ...m, status: 'delivered' } : m)), 1500);
   };
 
   return (
@@ -952,6 +943,9 @@ const ChatView: React.FC<{
                           <span className="text-[10px] text-gray-500 dark:text-gray-400">{msg.time}</span>
                           {msg.direction === 'outbound' && <MessageStatus status={msg.status} />}
                         </div>
+                        {msg.direction === 'outbound' && (
+                          <p className="text-[9px] text-gray-400 dark:text-gray-500 text-right mt-0.5">Delivery status updates via webhook</p>
+                        )}
 
                         {/* Hover actions */}
                         <div className="absolute -top-2 right-2 hidden group-hover:flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg shadow-md p-1">
