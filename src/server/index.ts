@@ -132,6 +132,8 @@ import vcardRoutes from './routes/vcard.js';
 import websiteRoutes from './routes/websites.js';
 import surveyRoutes from './routes/surveys.js';
 import ssoRoutes from './routes/sso.js';
+import landingPagesRoutes from './routes/landing-pages.js';
+import customRolesRoutes from './routes/custom-roles.js';
 
 dotenv.config();
 
@@ -395,6 +397,8 @@ app.use('/api/vcard', vcardRoutes);
 app.use('/api/websites', websiteRoutes);
 app.use('/api/surveys', surveyRoutes);
 app.use('/api/sso', ssoRoutes);
+app.use('/api/landing-pages', landingPagesRoutes);
+app.use('/api/custom-roles', customRolesRoutes);
 app.use('/api/store-features', storeFeaturesRoutes);
 app.use('/api/store-advanced', storeAdvancedRoutes);
 app.use('/api/store-customize', storeCustomizeRoutes);

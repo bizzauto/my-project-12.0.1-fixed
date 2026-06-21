@@ -2727,6 +2727,45 @@ model SSOConfig {
   @@index([businessId])
 }
 
+// Landing Page Builder
+model LandingPage {
+  id          String   @id @default(cuid())
+  businessId  String
+  name        String
+  slug        String
+  blocks      String[] @default([]) // Array of block types
+  content     Json?    // Full content as JSON
+  html        String?  // Generated HTML
+  status      LandingPageStatus @default(DRAFT)
+  views       Int      @default(0)
+  conversions Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([businessId, slug])
+  @@index([businessId])
+}
+
+enum LandingPageStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// Custom Roles (business-level role definitions)
+model CustomRole {
+  id          String   @id @default(cuid())
+  businessId  String
+  name        String
+  color       String   @default("bg-purple-100 text-purple-700")
+  permissions String[] // Array of permission strings
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([businessId, name])
+  @@index([businessId])
+}
+
 enum Role {
   SUPER_ADMIN
   OWNER
