@@ -22,15 +22,12 @@ export default function ResellerAuthPage() {
 
     setLoading(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
-      if (!API_URL) { toast.error('API configuration missing'); setLoading(false); return; }
-
       const endpoint = mode === 'login' ? '/api/wl/auth/login' : '/api/wl/auth/register';
       const body = mode === 'login'
         ? { email: form.email, password: form.password }
         : { name: form.name, email: form.email, password: form.password, company: form.company, phone: form.phone };
 
-      const res = await fetch(`${API_URL}${endpoint}`, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

@@ -57,14 +57,13 @@ export default function ResellerDashboardPage() {
 
   const fetchResellerData = async () => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
       const token = localStorage.getItem('rp-token');
-      if (!token || !API_URL) { setLoading(false); return; }
+      if (!token) { setLoading(false); return; }
 
       const [resellerRes, clientsRes, brandingRes] = await Promise.all([
-        fetch(`${API_URL}/api/wl/auth/me`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_URL}/api/wl/clients`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_URL}/api/wl/branding`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/wl/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/wl/clients', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/wl/branding', { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       const resellerData = await resellerRes.json();
@@ -85,11 +84,10 @@ export default function ResellerDashboardPage() {
   const addClient = async () => {
     if (!newClient.name.trim() || !newClient.email.trim()) { toast.error('Name and email required'); return; }
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
       const token = localStorage.getItem('rp-token');
-      if (!API_URL || !token) { toast.error('Configuration error'); return; }
+      if (!token) { toast.error('Not authenticated'); return; }
 
-      const res = await fetch(`${API_URL}/api/wl/clients`, {
+      const res = await fetch('/api/wl/clients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(newClient),
@@ -111,11 +109,10 @@ export default function ResellerDashboardPage() {
 
   const removeClient = async (id: string) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
       const token = localStorage.getItem('rp-token');
-      if (!API_URL || !token) return;
+      if (!token) return;
 
-      await fetch(`${API_URL}/api/wl/clients/${id}`, {
+      await fetch(`/api/wl/clients/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -128,11 +125,10 @@ export default function ResellerDashboardPage() {
 
   const updateClientStatus = async (id: string, status: string) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
       const token = localStorage.getItem('rp-token');
-      if (!API_URL || !token) return;
+      if (!token) return;
 
-      await fetch(`${API_URL}/api/wl/clients/${id}/status`, {
+      await fetch(`/api/wl/clients/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status }),
@@ -146,11 +142,10 @@ export default function ResellerDashboardPage() {
 
   const saveBranding = async () => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
       const token = localStorage.getItem('rp-token');
-      if (!API_URL || !token) { toast.error('Configuration error'); return; }
+      if (!token) { toast.error('Not authenticated'); return; }
 
-      const res = await fetch(`${API_URL}/api/wl/branding`, {
+      const res = await fetch('/api/wl/branding', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(branding),
