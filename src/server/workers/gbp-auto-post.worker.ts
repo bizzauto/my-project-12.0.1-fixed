@@ -1,5 +1,5 @@
 import { Queue, Worker, Job } from 'bullmq';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { GBPAutoPostService } from '../services/gbp-auto-post.service.js';
 import { createRedisConnection } from '../utils/redis-connection.js';
 

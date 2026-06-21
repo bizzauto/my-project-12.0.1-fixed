@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { encrypt, decrypt } from '../utils/auth.js';
 
 /**

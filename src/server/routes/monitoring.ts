@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { getSlowQueryStats } from '../middleware/slow-query-logger.js';
 import { getRateLimitStats } from '../middleware/websocket-rate-limit.js';
 

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import axios, { AxiosInstance } from 'axios';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { decrypt, encrypt } from '../utils/auth.js';
 
 /**

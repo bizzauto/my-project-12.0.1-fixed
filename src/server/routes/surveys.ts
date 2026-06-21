@@ -1,5 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
+import { authenticate, AuthRequest } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
+import { createSurveySchema, updateSurveySchema } from '../validations/remaining-schemas.js';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
 

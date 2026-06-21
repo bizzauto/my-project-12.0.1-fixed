@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 
 /**
  * API Key Authentication Middleware

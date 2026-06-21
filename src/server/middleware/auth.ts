@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { CSRFService } from '../services/csrf.service.js';
 
 export interface AuthRequest extends Request {

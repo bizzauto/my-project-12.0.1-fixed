@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 
 /**
  * CSRF Token Service

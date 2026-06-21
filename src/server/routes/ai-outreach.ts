@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 import { AiOutreachService } from '../services/ai-outreach.service.js';
 import { FollowUpEngineService } from '../services/followup-engine.service.js';

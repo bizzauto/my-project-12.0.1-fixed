@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate } from '../middleware/auth.js';
 import { GoogleSheetsService } from '../services/google-sheets.service.js';
 import { EmailService } from '../services/email.service.js';

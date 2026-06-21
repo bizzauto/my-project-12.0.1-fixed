@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate } from '../middleware/auth.js';
 import { InstagramService } from '../services/instagram.service.js';
 import multer from 'multer';

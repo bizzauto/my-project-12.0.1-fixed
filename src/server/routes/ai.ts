@@ -1,4 +1,4 @@
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate } from '../middleware/auth.js';
 import axios from 'axios';
 import express, { Request, Response } from 'express';

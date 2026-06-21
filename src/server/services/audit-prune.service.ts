@@ -19,7 +19,7 @@
  *   stopAuditPruneCron();
  */
 
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 
 // ==================== CONFIG ====================
 

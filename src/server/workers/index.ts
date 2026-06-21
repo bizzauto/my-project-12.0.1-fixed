@@ -5,7 +5,7 @@ import { GoogleSheetsService } from '../services/google-sheets.service.js';
 import { LeadCaptureService } from '../services/lead-capture.service.js';
 import { GBPAutoPostService } from '../services/gbp-auto-post.service.js';
 import { webhookDeliveryQueue, shutdownWebhookWorker } from '../services/webhook-retry.service.js';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { createRedisConnection } from '../utils/redis-connection.js';
 
 // Redis connection

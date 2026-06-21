@@ -1,6 +1,6 @@
 
 import { Router, Request, Response } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate, AuthRequest, validateWebhook, generateWebhookSecret } from '../middleware/auth.js';
 import { LeadCaptureService } from '../services/lead-capture.service.js';
 import { WhatsAppService } from '../services/whatsapp.service.js';

@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 
 /**
  * Transactional Email Service

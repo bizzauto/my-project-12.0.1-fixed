@@ -3,7 +3,7 @@
  * Provides comprehensive health check for Docker, load balancers, and monitoring
  */
 
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 
 interface HealthCheckResult {
   status: 'healthy' | 'degraded' | 'unhealthy';

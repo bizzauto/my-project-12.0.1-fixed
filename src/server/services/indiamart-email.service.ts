@@ -1,5 +1,5 @@
 import { simpleParser, EmailAddress } from 'mailparser';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { LeadCaptureService } from './lead-capture.service.js';
 
 /**

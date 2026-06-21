@@ -1,4 +1,4 @@
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { LeadCaptureService } from './lead-capture.service.js';
 import { EmailLeadService } from './email-lead.service.js';
 import { simpleParser } from 'mailparser';

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import axios from 'axios';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { decrypt, encrypt } from '../utils/auth.js';
 
 const WHATSAPP_API_BASE = 'https://graph.facebook.com/v18.0';

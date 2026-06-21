@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate } from '../middleware/auth.js';
 import multer from 'multer';
 import path from 'path';

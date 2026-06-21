@@ -1,4 +1,4 @@
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { AIService } from './ai.service.js';
 import { WhatsAppService } from './whatsapp.service.js';
 import { EvolutionApiService } from './evolution.service.js';

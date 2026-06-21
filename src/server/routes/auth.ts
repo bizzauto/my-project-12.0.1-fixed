@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { hashPassword, comparePassword, generateToken } from '../utils/auth.js';
 import { authenticate, requireRole, AuthRequest } from '../middleware/auth.js';
 import { generateRefreshToken } from '../utils/auth.js';

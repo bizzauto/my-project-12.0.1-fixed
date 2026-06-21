@@ -19,7 +19,7 @@ import { Queue, Worker, Job } from 'bullmq';
 
 import axios from 'axios';
 import crypto from 'crypto';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 
 // ==================== TYPES ====================
 

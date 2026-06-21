@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate, requireBusinessOwner } from '../middleware/auth.js';
 import { getUsageStats, PLAN_LIMITS } from '../middleware/planLimits.js';
 import razorpayService from '../services/razorpay.service.js';

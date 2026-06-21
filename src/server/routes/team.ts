@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import crypto from 'crypto';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
 import { checkUserLimit } from '../middleware/planLimits.js';
 import { hashPassword } from '../utils/auth.js';

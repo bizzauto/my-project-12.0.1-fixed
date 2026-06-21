@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 
 // ==================== PLAN LIMITS MIDDLEWARE ====================
 // Enforces plan limits for contacts, messages, users

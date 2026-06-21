@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 import { GBPAutoPostService } from '../services/gbp-auto-post.service.js';
 import { encrypt, decrypt } from '../utils/auth.js';

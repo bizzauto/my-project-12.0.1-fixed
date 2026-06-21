@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import axios from 'axios';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 
 // AI Provider Configuration — lazy init to avoid crash when env vars are missing
 

@@ -1,5 +1,5 @@
 import { Queue, Worker, Job } from 'bullmq';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { WhatsAppService } from '../services/whatsapp.service.js';
 import { EvolutionApiService } from '../services/evolution.service.js';
 import { FollowUpEngineService } from '../services/followup-engine.service.js';

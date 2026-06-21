@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { WhatsAppService } from './whatsapp.service.js';
 import { EmailService } from './email.service.js';
 

@@ -1,4 +1,4 @@
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import axios from 'axios';
 import { decrypt } from '../utils/auth.js';
 import fs from 'fs';

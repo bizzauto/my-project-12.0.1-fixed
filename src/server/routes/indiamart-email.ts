@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate } from '../middleware/auth.js';
 import { IndiaMARTEmailService } from '../services/indiamart-email.service.js';
 import { EmailLeadService, Platform } from '../services/email-lead.service.js';

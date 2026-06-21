@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 import { cacheResponse } from '../middleware/cache.js';
 import { validate } from '../middleware/validate.js';

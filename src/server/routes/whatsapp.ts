@@ -1,6 +1,6 @@
 
 import { Router, Request, Response } from 'express';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { authenticate, requireBusinessOwner, AuthRequest } from '../middleware/auth.js';
 import { checkMessageLimit } from '../middleware/planLimits.js';
 import axios from 'axios';

@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authenticate, requireRole, AuthRequest } from '../middleware/auth.js';
 import { EmailService } from '../services/email.service.js';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import crypto from 'crypto';
 
 const router = Router();

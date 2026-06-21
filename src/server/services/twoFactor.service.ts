@@ -1,7 +1,7 @@
 import speakeasy from 'speakeasy';
 import crypto from 'crypto';
 import QRCode from 'qrcode';
-import { prisma } from '../index.js';
+import { prisma } from '../db.js';
 import { encrypt, decrypt } from '../utils/auth.js';
 
 /**
