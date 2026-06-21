@@ -89,6 +89,7 @@ const settingsMenuItems: MenuItem[] = [
   { id: '/custom-fields', label: 'Custom Fields', icon: <FormInput size={20} /> },
   { id: '/client-portal', label: 'Client Portal', icon: <Building2 size={20} /> },
   { id: '/agency', label: 'Agency', icon: <Users size={20} /> },
+  { id: '/admin/users', label: 'User Management', icon: <Users size={20} />, roles: ['SUPER_ADMIN', 'OWNER', 'ADMIN'] },
   { id: '/reseller-hub', label: 'Reseller Hub', icon: <Store size={20} /> },
   { id: '/missed-call-settings', label: 'Missed Call', icon: <PhoneOff size={20} /> },
   { id: '/dograh-settings', label: 'Voice AI', icon: <Bot size={20} /> },

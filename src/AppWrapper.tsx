@@ -101,6 +101,7 @@ const TeamManagement = lazy(() => import('./components/TeamManagement'));
 const UserProfile = lazy(() => import('./components/UserProfile'));
 const SettingsPage = lazy(() => import('./components/SettingsPage'));
 const SuperAdminDashboard = lazy(() => import('./components/SuperAdminDashboard'));
+const UserManagementPage = lazy(() => import('./components/UserManagementPage'));
 const OnboardingWizard = lazy(() => import('./components/OnboardingWizard'));
 const ResorPayBoard = lazy(() => import('./components/ResorPayBoard'));
 const AdmissionForm = lazy(() => import('./components/AdmissionForm'));
@@ -273,6 +274,14 @@ function AppRoutes() {
         element={
           <SuperAdminRoute>
             <SuperAdminDashboard />
+          </SuperAdminRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <SuperAdminRoute>
+            <UserManagementPage />
           </SuperAdminRoute>
         }
       />
