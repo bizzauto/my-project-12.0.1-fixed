@@ -142,6 +142,50 @@ router.get('/analytics', async (req: any, res: any) => {
   }
 });
 
+// ==================== GROWTH TREND ====================
+
+router.get('/growth', async (req: any, res: any) => {
+  try {
+    const months = 12;
+    const now = new Date();
+    const data: { month: string; businesses: number; users: number; revenue: number }[] = [];
+
+    for (let i = months - 1; i >= 0; i--) {
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+      const monthLabel = monthStart.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+      const [businesses, users, revenue] = await Promise.all([
+        prisma.business.count({
+          where: { createdAt: { gte: monthStart, lt: monthEnd } },
+        }),
+        prisma.user.count({
+          where: { createdAt: { gte: monthStart, lt: monthEnd } },
+        }),
+        prisma.subscription.aggregate({
+          _sum: { amount: true },
+          where: {
+            status: 'active',
+            createdAt: { gte: monthStart, lt: monthEnd },
+          },
+        }),
+      ]);
+
+      data.push({
+        month: monthLabel,
+        businesses,
+        users,
+        revenue: revenue._sum.amount || 0,
+      });
+    }
+
+    res.json({ success: true, data });
+  } catch (error: any) {
+    console.error('Super admin growth error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch growth data', details: error.message });
+  }
+});
+
 // ==================== BUSINESSES ====================
 
 // List all businesses
