@@ -91,24 +91,58 @@ router.get('/analytics', authenticate, requireRole('SUPER_ADMIN'), async (req: A
   }
 });
 
-// GET /api/admin/feature-flags — Feature flags (simple DB-backed)
+// In-memory feature flag overrides (persist in DB in production)
+const featureFlagOverrides: Map<string, boolean> = new Map();
+
+// GET /api/admin/feature-flags — Feature flags (env-based with overrides)
 router.get('/feature-flags', authenticate, requireRole('SUPER_ADMIN'), async (_req: AuthRequest, res: any) => {
   try {
-    // Feature flags are read from env variables for simplicity
-    const flags = {
-      aiCreativeStudio: process.env.FF_AI_CREATIVE !== 'false',
-      voiceCalls: process.env.FF_VOICE_CALLS !== 'false',
-      workflowBuilder: process.env.FF_WORKFLOWS !== 'false',
-      funnelBuilder: process.env.FF_FUNNELS !== 'false',
-      courseBuilder: process.env.FF_COURSES !== 'false',
-      liveChat: process.env.FF_LIVE_CHAT !== 'false',
-      cartRecovery: process.env.FF_CART_RECOVERY !== 'false',
-      referrals: process.env.FF_REFERRALS !== 'false',
-      loyaltyProgram: process.env.FF_LOYALTY !== 'false',
-      betaFeatures: process.env.FF_BETA === 'true',
+    const defaults: Record<string, boolean> = {
+      aiCreativeStudio: true,
+      voiceCalls: true,
+      workflowBuilder: true,
+      funnelBuilder: true,
+      courseBuilder: true,
+      liveChat: true,
+      cartRecovery: true,
+      referrals: true,
+      loyaltyProgram: true,
+      betaFeatures: false,
     };
 
+    const flags: Record<string, { enabled: boolean; source: string }> = {};
+    for (const [key, defaultValue] of Object.entries(defaults)) {
+      const envKey = `FF_${key.replace(/([A-Z])/g, '_$1').toUpperCase()}`;
+      if (featureFlagOverrides.has(key)) {
+        flags[key] = { enabled: featureFlagOverrides.get(key)!, source: 'override' };
+      } else if (process.env[envKey] !== undefined) {
+        flags[key] = { enabled: process.env[envKey] !== 'false', source: 'env' };
+      } else {
+        flags[key] = { enabled: defaultValue, source: 'default' };
+      }
+    }
+
     res.json({ success: true, data: flags });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// PUT /api/admin/feature-flags — Toggle feature flags
+router.put('/feature-flags', authenticate, requireRole('SUPER_ADMIN'), async (req: AuthRequest, res: any) => {
+  try {
+    const updates: Record<string, boolean> = req.body;
+    if (!updates || typeof updates !== 'object') {
+      return res.status(400).json({ success: false, error: 'Request body must be an object of flag key-value pairs' });
+    }
+
+    for (const [key, value] of Object.entries(updates)) {
+      if (typeof value === 'boolean') {
+        featureFlagOverrides.set(key, value);
+      }
+    }
+
+    res.json({ success: true, message: 'Feature flags updated', data: Object.fromEntries(featureFlagOverrides) });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }

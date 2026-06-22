@@ -891,6 +891,7 @@ export const adminInfrastructureAPI = {
 export const adminAnalyticsAPI = {
   getAnalytics: () => apiClient.get('/admin/analytics/analytics'),
   getFeatureFlags: () => apiClient.get('/admin/analytics/feature-flags'),
+  updateFeatureFlags: (flags: Record<string, boolean>) => apiClient.put('/admin/analytics/feature-flags', flags),
   getAuditLog: (params?: Record<string, any>) => apiClient.get('/admin/analytics/audit-log', { params }),
 };
 

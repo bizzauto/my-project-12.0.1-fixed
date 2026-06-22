@@ -4,7 +4,7 @@ import {
   ArrowUpRight, ArrowDownRight, Shield, DollarSign, RefreshCw,
   Image, Plus, Trash2, ExternalLink, Clock, Calendar, Server,
   FileText, CreditCard, ChevronLeft, ChevronRight, Search,
-  LayoutDashboard
+  LayoutDashboard, Flag
 } from 'lucide-react';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
@@ -16,6 +16,7 @@ import { superAdminAPI } from '../lib/api';
 import InfrastructureHealthTab from './InfrastructureHealthTab';
 import AuditLogTab from './AuditLogTab';
 import SubscriptionsTab from './SubscriptionsTab';
+import FeatureFlagsTab from './FeatureFlagsTab';
 
 // ============================================================
 // TYPES
@@ -77,6 +78,7 @@ const TABS = [
   { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
   { id: 'users', label: 'Users', icon: Users },
   { id: 'businesses', label: 'Businesses', icon: Building2 },
+  { id: 'feature-flags', label: 'Feature Flags', icon: Flag },
   { id: 'backgrounds', label: 'Backgrounds', icon: Image },
 ] as const;
 
@@ -706,6 +708,7 @@ const SuperAdminDashboard: React.FC = () => {
       {activeTab === 'subscriptions' && <SubscriptionsTab />}
       {activeTab === 'users' && <UsersSubTab />}
       {activeTab === 'businesses' && <BusinessesSubTab />}
+      {activeTab === 'feature-flags' && <FeatureFlagsTab />}
 
       {/* Backgrounds Tab */}
       {activeTab === 'backgrounds' && (
