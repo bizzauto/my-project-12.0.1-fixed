@@ -2,6 +2,7 @@ import axios from 'axios';
 import { prisma } from '../db.js';
 import { WhatsAppService } from './whatsapp.service.js';
 import { EmailService } from './email.service.js';
+import { handleLeadCapture as triggerLeadWorkflows } from './ai-auto-reply.service.js';
 
 /**
  * Lead Capture Service
@@ -93,6 +94,14 @@ export class LeadCaptureService {
       },
     });
 
+    // Trigger internal workflows (lead_created)
+    await triggerLeadWorkflows(businessId, contact.id, 'indiamart', {
+      ...leadData,
+      contact: { id: contact.id, name: leadData.name, phone: leadData.phone, email: leadData.email, company: leadData.company },
+      source: 'indiamart',
+      contactId: contact.id,
+    });
+
     // Trigger n8n workflows
     await this.triggerN8nWorkflow(businessId, { ...leadData, source: 'indiamart', contactId: contact.id });
 
@@ -154,6 +163,14 @@ export class LeadCaptureService {
         metadata: { source: 'justdial', ...leadData },
         createdBy: 'lead_capture_service',
       },
+    });
+
+    // Trigger internal workflows
+    await triggerLeadWorkflows(businessId, contact.id, 'justdial', {
+      ...leadData,
+      contact: { id: contact.id, name: leadData.name, phone: leadData.phone, email: leadData.email },
+      source: 'justdial',
+      contactId: contact.id,
     });
 
     return contact;
@@ -220,6 +237,14 @@ export class LeadCaptureService {
       },
     });
 
+    // Trigger internal workflows
+    await triggerLeadWorkflows(businessId, contact.id, 'facebook_ads', {
+      ...leadData,
+      contact: { id: contact.id, name: leadData.name, phone: leadData.phone, email: leadData.email },
+      source: 'facebook_ads',
+      contactId: contact.id,
+    });
+
     return contact;
   }
 
@@ -280,6 +305,14 @@ export class LeadCaptureService {
         metadata: { source: 'instagram_ads', ...leadData },
         createdBy: 'lead_capture_service',
       },
+    });
+
+    // Trigger internal workflows
+    await triggerLeadWorkflows(businessId, contact.id, 'instagram_ads', {
+      ...leadData,
+      contact: { id: contact.id, name: leadData.name, phone: leadData.phone, email: leadData.email },
+      source: 'instagram_ads',
+      contactId: contact.id,
     });
 
     return contact;

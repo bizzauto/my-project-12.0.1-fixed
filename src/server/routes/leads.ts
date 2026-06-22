@@ -5,6 +5,7 @@ import { authenticate, AuthRequest, validateWebhook, generateWebhookSecret } fro
 import { LeadCaptureService } from '../services/lead-capture.service.js';
 import { WhatsAppService } from '../services/whatsapp.service.js';
 import { EmailService } from '../services/email.service.js';
+import { handleLeadCapture as triggerLeadWorkflows } from '../services/ai-auto-reply.service.js';
 import rateLimit from 'express-rate-limit';
 
 const router = Router();
@@ -227,6 +228,13 @@ router.post('/manual', authenticate, leadCaptureLimiter, async (req: AuthRequest
             },
           },
         });
+        // Trigger internal workflows for manual lead
+        await triggerLeadWorkflows(businessId, contact.id, 'manual', {
+          ...leadData,
+          contact: { id: contact.id, name: leadData.name, phone: leadData.phone, email: leadData.email, company: leadData.company },
+          source: 'manual',
+          contactId: contact.id,
+        }).catch((e: any) => console.error('[Manual Lead] Workflow trigger failed:', e.message));
         break;
       default:
         return res.status(400).json({
@@ -708,6 +716,14 @@ router.post('/capture/:businessId', leadCaptureLimiter, async (req: Request, res
         createdBy: 'system',
       },
     });
+
+    // Trigger internal workflows for public lead capture
+    await triggerLeadWorkflows(businessId, contact.id, src || 'website', {
+      name, phone, email, company, product, requirement, city, supplier,
+      contact: { id: contact.id, name, phone, email, company },
+      source: src || 'website',
+      contactId: contact.id,
+    }).catch((e: any) => console.error('[Public Lead] Workflow trigger failed:', e.message));
 
     res.json({ success: true, message: 'Lead captured successfully', data: contact });
   } catch (error: any) {

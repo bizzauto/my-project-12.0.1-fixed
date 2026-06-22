@@ -680,4 +680,171 @@ router.get('/automations/templates', async (req: AuthRequest, res: Response) => 
   }
 });
 
+// ==================== DEPLOYABLE WORKFLOW TEMPLATES ====================
+
+interface DeployableTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  triggerType: string;
+  config: Record<string, any>;
+  nodes: any[];
+  edges: any[];
+}
+
+const DEPLOYABLE_TEMPLATES: DeployableTemplate[] = [
+  {
+    id: 'leadgen-whatsapp-reply',
+    name: 'Lead Gen → WhatsApp Auto Reply',
+    description: 'When a new lead is captured from any source, automatically send a personalized WhatsApp reply and add a "Auto-Replied" tag',
+    category: 'lead_generation',
+    triggerType: 'lead_created',
+    config: {
+      welcomeMessage: "Hi {{contact.name}}! 👋\n\nThank you for your interest! We've received your inquiry and our team will get back to you shortly.",
+      followUpDelay: 30,
+      addTag: 'Auto-Replied',
+    },
+    nodes: [
+      { id: 'trigger-1', type: 'workflowNode', position: { x: 250, y: 0 }, data: { label: 'Lead Created', nodeType: 'lead_created', category: 'trigger', config: { source: 'all' } } },
+      { id: 'action-send', type: 'workflowNode', position: { x: 250, y: 120 }, data: { label: 'Send WhatsApp Reply', nodeType: 'send_whatsapp', category: 'action', config: { templateId: 'welcome', message: "Hi {{contact.name}}! 👋\n\nThank you for your interest! We've received your inquiry and our team will get back to you shortly.\n\nBest regards,\n{{business.name}}" } } },
+      { id: 'action-tag', type: 'workflowNode', position: { x: 250, y: 260 }, data: { label: 'Add Auto-Replied Tag', nodeType: 'add_tag', category: 'action', config: { tagName: 'Auto-Replied' } } },
+      { id: 'action-wait', type: 'workflowNode', position: { x: 250, y: 400 }, data: { label: 'Wait 30 Minutes', nodeType: 'wait_delay', category: 'condition', config: { delayType: 'fixed', duration: 30, unit: 'minutes' } } },
+      { id: 'action-followup', type: 'workflowNode', position: { x: 250, y: 540 }, data: { label: 'Send Follow-up', nodeType: 'send_whatsapp', category: 'action', config: { templateId: 'follow_up', message: "Hi {{contact.name}}! Just following up on your recent inquiry. Do you have any questions? 😊" } } },
+    ],
+    edges: [
+      { id: 'e1-2', source: 'trigger-1', target: 'action-send', type: 'smoothstep', animated: true },
+      { id: 'e2-3', source: 'action-send', target: 'action-tag', type: 'smoothstep', animated: true },
+      { id: 'e3-4', source: 'action-tag', target: 'action-wait', type: 'smoothstep', animated: true },
+      { id: 'e4-5', source: 'action-wait', target: 'action-followup', type: 'smoothstep', animated: true },
+    ],
+  },
+  {
+    id: 'leadgen-ai-reply',
+    name: 'Lead Gen → AI Smart Reply',
+    description: 'When a lead is created, use AI to generate a personalized response based on their inquiry, then send via WhatsApp',
+    category: 'lead_generation',
+    triggerType: 'lead_created',
+    config: {
+      aiTone: 'professional',
+      aiSystemPrompt: 'You are a helpful sales representative. Reply to leads professionally and warmly. Keep responses under 300 characters for WhatsApp.',
+    },
+    nodes: [
+      { id: 'trigger-1', type: 'workflowNode', position: { x: 250, y: 0 }, data: { label: 'Lead Created', nodeType: 'lead_created', category: 'trigger', config: { source: 'all' } } },
+      { id: 'ai-gen', type: 'workflowNode', position: { x: 250, y: 140 }, data: { label: 'AI Generate Reply', nodeType: 'ai_reply', category: 'ai', config: { model: 'gpt-4o-mini', sendAsWhatsApp: true, maxTokens: 300 } } },
+      { id: 'action-score', type: 'workflowNode', position: { x: 250, y: 280 }, data: { label: 'AI Score Lead', nodeType: 'ai_score_lead', category: 'ai', config: { criteria: 'comprehensive', outputField: 'leadScore', updateContact: true } } },
+    ],
+    edges: [
+      { id: 'e1-2', source: 'trigger-1', target: 'ai-gen', type: 'smoothstep', animated: true },
+      { id: 'e2-3', source: 'ai-gen', target: 'action-score', type: 'smoothstep', animated: true },
+    ],
+  },
+  {
+    id: 'incoming-msg-autoreply',
+    name: 'Incoming Message → AI Auto Reply',
+    description: 'When a message is received on WhatsApp, use AI to generate a smart reply automatically',
+    category: 'support',
+    triggerType: 'message_received',
+    config: { businessHoursOnly: false, aiTone: 'friendly' },
+    nodes: [
+      { id: 'trigger-1', type: 'workflowNode', position: { x: 250, y: 0 }, data: { label: 'Message Received', nodeType: 'message_received', category: 'trigger', config: { channel: 'all' } } },
+      { id: 'condition-1', type: 'workflowNode', position: { x: 250, y: 140 }, data: { label: 'Has Phone?', nodeType: 'if_else', category: 'condition', config: { field: 'contact.phone', operator: 'is_not_empty' } } },
+      { id: 'action-reply', type: 'workflowNode', position: { x: 100, y: 300 }, data: { label: 'AI Reply via WhatsApp', nodeType: 'ai_reply', category: 'ai', config: { sendAsWhatsApp: true, promptTemplate: 'customer_support' } } },
+      { id: 'action-log', type: 'workflowNode', position: { x: 450, y: 300 }, data: { label: 'Log Activity', nodeType: 'add_activity', category: 'action', config: { activityType: 'note', title: 'Message without phone', content: 'Could not reply - no phone number' } } },
+    ],
+    edges: [
+      { id: 'e1-2', source: 'trigger-1', target: 'condition-1', type: 'smoothstep', animated: true },
+      { id: 'e2-true', source: 'condition-1', target: 'action-reply', sourceHandle: 'true', type: 'smoothstep', animated: true, label: 'True' },
+      { id: 'e2-false', source: 'condition-1', target: 'action-log', sourceHandle: 'false', type: 'smoothstep', animated: true, label: 'False' },
+    ],
+  },
+  {
+    id: 'leadgen-full-funnel',
+    name: 'Complete Lead Gen Funnel',
+    description: 'Full automation: Capture lead → WhatsApp reply → Add tag → Score lead → Notify team → Follow up after 24h',
+    category: 'lead_generation',
+    triggerType: 'lead_created',
+    config: {},
+    nodes: [
+      { id: 'trigger-1', type: 'workflowNode', position: { x: 250, y: 0 }, data: { label: 'Lead Created', nodeType: 'lead_created', category: 'trigger', config: { source: 'all' } } },
+      { id: 'action-welcome', type: 'workflowNode', position: { x: 250, y: 120 }, data: { label: 'Send Welcome WhatsApp', nodeType: 'send_whatsapp', category: 'action', config: { message: 'Hi {{contact.name}}! 🎉 Thanks for reaching out! Our team will contact you within 24 hours with the best solution for you.' } } },
+      { id: 'action-tag', type: 'workflowNode', position: { x: 250, y: 240 }, data: { label: 'Tag: New Lead', nodeType: 'add_tag', category: 'action', config: { tagName: 'New-Lead' } } },
+      { id: 'ai-score', type: 'workflowNode', position: { x: 250, y: 360 }, data: { label: 'AI Score Lead', nodeType: 'ai_score_lead', category: 'ai', config: { criteria: 'comprehensive', outputField: 'leadScore' } } },
+      { id: 'condition-hot', type: 'workflowNode', position: { x: 250, y: 480 }, data: { label: 'High Score? (>70)', nodeType: 'if_else', category: 'condition', config: { field: 'leadScore', operator: 'greater_than', value: '70' } } },
+      { id: 'action-notify', type: 'workflowNode', position: { x: 100, y: 620 }, data: { label: 'Notify Sales Team', nodeType: 'notify_team', category: 'action', config: { team: 'sales', message: '🔥 Hot lead alert! {{contact.name}} scored high. Follow up ASAP!' } } },
+      { id: 'action-wait', type: 'workflowNode', position: { x: 400, y: 620 }, data: { label: 'Wait 24 Hours', nodeType: 'wait_delay', category: 'condition', config: { delayType: 'fixed', duration: 24, unit: 'hours' } } },
+      { id: 'action-followup', type: 'workflowNode', position: { x: 400, y: 740 }, data: { label: 'Send Follow-up', nodeType: 'send_whatsapp', category: 'action', config: { message: 'Hi {{contact.name}}, just checking in! Have you had a chance to think about our offer? Let us know if you have any questions!' } } },
+    ],
+    edges: [
+      { id: 'e1-2', source: 'trigger-1', target: 'action-welcome', type: 'smoothstep', animated: true },
+      { id: 'e2-3', source: 'action-welcome', target: 'action-tag', type: 'smoothstep', animated: true },
+      { id: 'e3-4', source: 'action-tag', target: 'ai-score', type: 'smoothstep', animated: true },
+      { id: 'e4-5', source: 'ai-score', target: 'condition-hot', type: 'smoothstep', animated: true },
+      { id: 'e5-true', source: 'condition-hot', target: 'action-notify', sourceHandle: 'true', type: 'smoothstep', animated: true, label: 'Hot Lead' },
+      { id: 'e5-false', source: 'condition-hot', target: 'action-wait', sourceHandle: 'false', type: 'smoothstep', animated: true, label: 'Normal' },
+      { id: 'e6-7', source: 'action-wait', target: 'action-followup', type: 'smoothstep', animated: true },
+    ],
+  },
+];
+
+// Get all workflow deployment templates
+router.get('/deploy-templates', async (_req: AuthRequest, res: Response) => {
+  try {
+    res.json({ success: true, data: DEPLOYABLE_TEMPLATES });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Failed to fetch deploy templates', details: error.message });
+  }
+});
+
+// Deploy a template - creates a real Workflow from a template (no internal HTTP call)
+router.post('/deploy-template', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: Response) => {
+  try {
+    const { templateId, name, config } = req.body;
+    if (!templateId) {
+      return res.status(400).json({ success: false, error: 'templateId is required' });
+    }
+
+    const fullTemplate = DEPLOYABLE_TEMPLATES.find(t => t.id === templateId);
+    if (!fullTemplate) {
+      return res.status(404).json({ success: false, error: 'Template not found' });
+    }
+
+    // Create the workflow from template
+    const workflow = await prisma.workflow.create({
+      data: {
+        businessId: req.user.businessId,
+        name: name || fullTemplate.name,
+        description: fullTemplate.description || '',
+        triggerType: fullTemplate.triggerType || 'lead_created',
+        triggerConfig: config || fullTemplate.config || {},
+        nodes: fullTemplate.nodes || [],
+        edges: fullTemplate.edges || [],
+        isActive: false,
+        createdBy: req.user.id,
+      },
+    });
+
+    // Log activity
+    await prisma.activity.create({
+      data: {
+        businessId: req.user.businessId,
+        type: 'workflow_deployed',
+        title: `Workflow deployed: ${workflow.name}`,
+        content: `Template: ${fullTemplate.name}. Go to Workflows to activate it.`,
+        metadata: { templateId, workflowId: workflow.id },
+        createdBy: req.user.id,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: `Workflow "${workflow.name}" deployed successfully! Go to Workflows to activate it.`,
+      data: workflow,
+    });
+  } catch (error: any) {
+    console.error('Deploy template error:', error);
+    res.status(500).json({ success: false, error: 'Failed to deploy template', details: error.message });
+  }
+});
+
 export default router;

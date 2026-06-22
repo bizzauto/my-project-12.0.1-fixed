@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
-import { Users, Search, Download, MessageSquare, Mail, Phone, Plus, X, Eye, Send, Trash2, MapPin, Package, Truck, CheckCircle, AlertCircle, RefreshCw, ArrowUpRight, TrendingUp, UserPlus, Settings, Upload, Zap, MailOpen, Shield } from 'lucide-react';
+import { Users, Search, Download, MessageSquare, Mail, Phone, Plus, X, Eye, Send, Trash2, MapPin, Package, Truck, CheckCircle, AlertCircle, RefreshCw, ArrowUpRight, TrendingUp, UserPlus, Settings, Upload, Zap, MailOpen, Shield, ChevronDown, Loader2, Info } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RT, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import LeadFinderPage from './LeadFinderPage';
 import OutreachCampaignPage from './OutreachCampaignPage';
@@ -8,6 +8,13 @@ const API = import.meta.env.VITE_API_URL || '/api';
 interface Lead { id:string; name:string; phone:string; email?:string; company?:string; source:string; tags:string[]; location?:string; product?:string; supplier?:string; requirement?:string; status:'new'|'contacted'|'qualified'|'won'|'lost'; dealValue?:number; createdAt:string; lastActivity?:string; metadata?:any; }
 interface FormData { name:string; phone:string; email:string; company:string; location:string; product:string; supplier:string; requirement:string; source:string; tags:string; }
 const SC:Record<string,string>={indiamart:'#FF6B00',justdial:'#FFD700',facebook_ads:'#1877F2',instagram_ads:'#E4405F',whatsapp:'#25D366',manual:'#6B7280',website:'#8B5CF6',referral:'#10B981',google_ads:'#4285F4'};
+
+const AUTOMATION_TEMPLATES = [
+  { id: 'leadgen-whatsapp-reply', name: 'Lead Gen → WhatsApp Auto Reply', desc: 'Auto-send WhatsApp + follow-up when a lead is captured', color: 'emerald', icon: 'Zap' },
+  { id: 'leadgen-ai-reply', name: 'Lead Gen → AI Smart Reply', desc: 'AI generates personalized WhatsApp reply for each lead', color: 'purple', icon: 'Brain' },
+  { id: 'incoming-msg-autoreply', name: 'Incoming Msg → AI Auto Reply', desc: 'AI replies to incoming WhatsApp messages automatically', color: 'blue', icon: 'MessageSquare' },
+  { id: 'leadgen-full-funnel', name: 'Complete Lead Funnel', desc: 'Full funnel: reply → tag → score → notify → follow-up', color: 'indigo', icon: 'Workflow' },
+];
 const STC:Record<string,string>={new:'#3B82F6',contacted:'#F59E0B',qualified:'#8B5CF6',won:'#10B981',lost:'#EF4444'};
 const EF:FormData={name:'',phone:'',email:'',company:'',location:'',product:'',supplier:'',requirement:'',source:'manual',tags:''};
 // Mock leads removed - data comes from real API
@@ -40,6 +47,34 @@ export default function LeadGenerationPage(){
   const[detail,setDetail]=useState<Lead|null>(null);
   const[toast,setToast]=useState<{m:string;t:'success'|'error'}|null>(null);
   const[stats,setStats]=useState({total:0,today:0,bySource:[] as any[],byStatus:[] as any[]});
+  const[showAutomation,setShowAutomation]=useState(false);
+  const[deploying,setDeploying]=useState<string|null>(null);
+  const[deployMsg,setDeployMsg]=useState<{template:string;msg:string;err?:boolean}|null>(null);
+
+  const deployTemplate=async(templateId:string,templateName:string)=>{
+    setDeploying(templateId);
+    setDeployMsg(null);
+    try{
+      const token=localStorage.getItem('token');
+      const r=await fetch('/api/automations/deploy-template',{
+        method:'POST',
+        headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},
+        body:JSON.stringify({templateId,name:templateName})
+      });
+      const d=await r.json();
+      if(d.success){
+        setDeployMsg({template:templateId,msg:d.message||'Workflow deployed Successfully! 🎉',err:false});
+        toast_(d.message||'Workflow deployed! Activate it from Workflows page.','success');
+      }else{
+        setDeployMsg({template:templateId,msg:d.error||'Failed to deploy','err':true});
+        toast_(d.error||'Failed to deploy','error');
+      }
+    }catch(e:any){
+      setDeployMsg({template:templateId,msg:e.message||'Failed','err':true});
+      toast_(e.message||'Deployment failed','error');
+    }
+    setDeploying(null);
+  };
 
   const calc=(ll:Lead[])=>{const td=new Date().toDateString();const tc=ll.filter(l=>new Date(l.createdAt).toDateString()===td).length;const sm:Record<string,number>={},stm:Record<string,number>={};ll.forEach(l=>{sm[l.source]=(sm[l.source]||0)+1;const s=l.status||'new';stm[s]=(stm[s]||0)+1;});setStats({total:ll.length,today:tc,bySource:Object.entries(sm).map(([name,value])=>({name,value})),byStatus:Object.entries(stm).map(([name,value])=>({name,value}))});};
 
@@ -294,6 +329,93 @@ export default function LeadGenerationPage(){
    </div>
   ))}
  </div>
+      {/* Quick Deploy Automation Section */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <button
+          onClick={()=>setShowAutomation(!showAutomation)}
+          className="w-full flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
+              <Zap size={18} className="text-white" />
+            </div>
+            <div className="text-left">
+              <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">Quick Deploy Automation</h3>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">One-click setup: Lead Gen → WhatsApp Auto Reply workflows</p>
+            </div>
+          </div>
+          <div className={`transition-transform ${showAutomation?'rotate-180':''}`}>
+            <ChevronDown size={20} className="text-gray-400" />
+          </div>
+        </button>
+
+        {showAutomation&&(
+          <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-3">
+            {deployMsg&&(
+              <div className={`p-3 rounded-lg flex items-center gap-2 text-sm ${
+                deployMsg.err?'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+                  :'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+              }`}>
+                {deployMsg.err?<AlertCircle size={16}/>:<CheckCircle size={16}/>}
+                <span className="flex-1">{deployMsg.msg}</span>
+                <button onClick={()=>setDeployMsg(null)} className="p-1 hover:opacity-70"><X size={14}/></button>
+              </div>
+            )}
+            <p className="text-xs text-gray-500 dark:text-gray-400">Choose a pre-built automation to deploy instantly:</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {AUTOMATION_TEMPLATES.map(t=>{
+                const gradColors: Record<string,string> = {
+                  emerald: 'from-emerald-500 to-green-600',
+                  purple: 'from-purple-500 to-indigo-600',
+                  blue: 'from-blue-500 to-cyan-600',
+                  indigo: 'from-indigo-500 to-purple-600',
+                };
+                const gradIcon: Record<string,string> = {
+                  emerald: 'from-emerald-500/20 to-green-600/20 text-emerald-600 dark:text-emerald-400',
+                  purple: 'from-purple-500/20 to-indigo-600/20 text-purple-600 dark:text-purple-400',
+                  blue: 'from-blue-500/20 to-cyan-600/20 text-blue-600 dark:text-blue-400',
+                  indigo: 'from-indigo-500/20 to-purple-600/20 text-indigo-600 dark:text-indigo-400',
+                };
+                const gc = gradColors[t.color]||'from-blue-500 to-purple-600';
+                const gi = gradIcon[t.color]||'from-blue-500/20 to-purple-600/20 text-blue-600';
+                return(
+                <div key={t.id} className="border border-gray-200 dark:border-gray-600 rounded-xl p-4 hover:border-blue-300 dark:hover:border-blue-700 transition-colors bg-gray-50 dark:bg-gray-700/50">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`p-1.5 rounded-lg bg-gradient-to-r ${gi}`}>
+                        <Zap size={16}/>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{t.name}</h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t.desc}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={()=>deployTemplate(t.id,t.name)}
+                    disabled={deploying===t.id}
+                    className={`w-full mt-2 px-3 py-2 text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
+                      deploying===t.id
+                        ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed'
+                        : 'bg-gradient-to-r text-white hover:opacity-90 '+gc
+                    }`}
+                  >
+                    {deploying===t.id
+                      ? <><Loader2 size={14} className="animate-spin"/> Deploying...</>
+                      : <><Zap size={14}/> Deploy Now</>
+                    }
+                  </button>
+                </div>
+              )})}
+            </div>
+            <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
+              <Info size={12}/>
+              Workflow will be created in draft mode. Go to Workflows page to activate it.
+            </p>
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <SCard icon={<Users size={22}/>} label="Total Leads" value={stats.total} c="blue"/>
         <SCard icon={<TrendingUp size={22}/>} label="Today's Leads" value={stats.today} c="green"/>
