@@ -310,7 +310,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* ===== MAIN CONTENT AREA ===== */}
-      <div className={`flex-1 flex flex-col w-full transition-all duration-300 ${
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${
         isMobile ? 'ml-0' :
         isTablet ? (sidebarOpen ? 'ml-72' : 'ml-0') :
         (collapsed ? 'lg:ml-20' : 'lg:ml-64')
