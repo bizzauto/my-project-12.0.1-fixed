@@ -188,13 +188,13 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
       {/* ===== SIDEBAR ===== */}
       {/* Mobile: completely hidden */}
-      {/* Tablet (md-lg): slide-out drawer with w-72 */}
-      {/* Desktop (lg+): always visible, collapsible w-64/w-20 */}
+      {/* Tablet (md-lg): slide-out drawer with w-72 (fixed position) */}
+      {/* Desktop (lg+): always visible, collapsible w-64/w-20 (flex item, not fixed) */}
       <div
-        className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 fixed left-0 top-0 z-50 flex-col transition-all duration-300 sidebar-glow ${
+        className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex-col transition-all duration-300 sidebar-glow ${
           isMobile ? 'hidden' :
-          isTablet ? (sidebarOpen ? 'flex w-72 shadow-2xl' : 'hidden') :
-          'flex ' + (collapsed ? 'w-20' : 'w-64')
+          isTablet ? `fixed left-0 top-0 z-50 ${sidebarOpen ? 'flex w-72 shadow-2xl' : 'hidden'}` :
+          `flex flex-shrink-0 ${collapsed ? 'w-20' : 'w-64'}`
         }`}
         style={{ height: '100dvh', maxHeight: '100dvh', overflow: 'hidden' }}
       >
@@ -310,10 +310,11 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* ===== MAIN CONTENT AREA ===== */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${
+      {/* On desktop, sidebar is a flex item so no margin needed — flex-1 handles sizing */}
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
         isMobile ? 'ml-0' :
         isTablet ? (sidebarOpen ? 'ml-72' : 'ml-0') :
-        (collapsed ? 'lg:ml-20' : 'lg:ml-64')
+        ''
       }`}>
         {/* ===== MOBILE TOP BAR (visible only on mobile) =====
             backdrop-blur removed on mobile — kills Android scroll perf. */}
