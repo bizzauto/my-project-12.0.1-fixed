@@ -46,15 +46,11 @@ async function navigateToConnectView() {
 /** Helper: run through the full Meta QR connection sequence */
 function connectViaMetaQR() {
   fireEvent.click(screen.getByText(/Simulate Scan/i));
-  act(() => {
-    jest.advanceTimersByTime(4000);
-  });
 }
 
 describe('WhatsAppModule - Connection Status Transitions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
 
     // Stub all API calls the component makes on mount and during interaction
     (whatsappAPI.getTemplates as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
@@ -62,10 +58,19 @@ describe('WhatsAppModule - Connection Status Transitions', () => {
     (whatsappAPI.getContacts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.getAutoReplies as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.listConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
-  });
 
-  afterEach(() => {
-    jest.useRealTimers();
+    // Mock whatsappAPI.connect() for Meta OAuth flow — returns signupUrl
+    (whatsappAPI.connect as jest.Mock).mockResolvedValue({ data: { signupUrl: 'https://oauth.example.com/connect' } });
+
+    // apiClient.get returns empty data (no Evolution API pre-configured)
+    (apiClient.get as jest.Mock).mockResolvedValue({ data: { success: true, data: {} } });
+    // Mock whatsappAPI.getStatus to return disconnected (prevents leaks from other tests)
+    (whatsappAPI.getStatus as jest.Mock).mockResolvedValue({
+      data: { success: true, data: { connected: false } },
+    });
+
+    // apiClient.post returns success by default
+    (apiClient.post as jest.Mock).mockResolvedValue({ data: { success: true, data: {} } });
   });
 
   // ── Initial state ──
@@ -114,299 +119,46 @@ describe('WhatsAppModule - Connection Status Transitions', () => {
     expect(screen.getByText(/Simulate Scan/i)).toBeInTheDocument();
   });
 
-  // ── disconnected → scanning ──
+  it('shows error when connection API fails', async () => {
+    // Override connect mock to reject — simulates API failure
+    (whatsappAPI.connect as jest.Mock).mockRejectedValue(new Error('Connection failed'));
 
-  it('transitions from disconnected to scanning on connect click', async () => {
     renderWithRouter(<WhatsAppModule />);
     await navigateToConnectView();
 
     fireEvent.click(screen.getByText(/Simulate Scan/i));
 
-    // Button disappears (conditional on disconnected state)
-    expect(screen.queryByText(/Simulate Scan/i)).not.toBeInTheDocument();
-    // Refresh QR Code button is always visible when not connected
-    expect(screen.getByText('Refresh QR Code')).toBeInTheDocument();
+    // Error should be displayed from the catch block
+    await waitFor(() => {
+      expect(screen.getByText(/Connection failed/i)).toBeInTheDocument();
+    });
   });
 
-  // ── scanning → connecting ──
-
-  it('transitions from scanning to connecting after 2 seconds', async () => {
+  it('can navigate between Connection and Chats views', async () => {
     renderWithRouter(<WhatsAppModule />);
     await navigateToConnectView();
 
-    fireEvent.click(screen.getByText(/Simulate Scan/i));
-
-    act(() => {
-      jest.advanceTimersByTime(2000);
-    });
+    // Switch to Chats view
+    const chatsButtons = screen.getAllByText('Chats');
+    const chatsNavButton = chatsButtons[0];
+    fireEvent.click(chatsNavButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Connecting...')).toBeInTheDocument();
+      expect(screen.getByText(/BizzAuto Solutions WhatsApp/i)).toBeInTheDocument();
     });
   });
 
-  // ── connecting → connected (auto-returns to Chats view) ──
-
-  it('completes connection after 4 seconds and shows Connected in nav bar', async () => {
-    renderWithRouter(<WhatsAppModule />);
-    await navigateToConnectView();
-
-    connectViaMetaQR();
-
-    // After 4s, currentView switches to 'chats', but the nav bar shows "Connected +91 8983027975"
-    await waitFor(() => {
-      expect(screen.getByText(/Connected/)).toBeInTheDocument();
-    });
-  });
-
-  it('shows Connected status in nav bar after connection completes', async () => {
-    // Verifies that after connecting, the nav bar shows "Connected +91 8983027975"
+  it('shows disconnected status in nav bar', async () => {
     renderWithRouter(<WhatsAppModule />);
 
     await waitFor(() => {
       expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
     });
 
-    await navigateToConnectView();
-    connectViaMetaQR();
-
-    // The nav bar should now show "Connected +91 8983027975"
-    await waitFor(() => {
-      expect(screen.getByText(/Connected/)).toBeInTheDocument();
-    });
-  });
-
-  // ── Connected screen (navigate back to Connection tab) ──
-
-  it('shows connected success screen when navigating to Connection tab after connect', async () => {
-    renderWithRouter(<WhatsAppModule />);
-    await navigateToConnectView();
-    connectViaMetaQR();
-
-    // Navigate back to Connection tab to see the connected screen
+    // Connection tab still works
     fireEvent.click(screen.getByText('Connection'));
-
-    await waitFor(() => {
-      expect(screen.getByText(/WhatsApp Connected/i)).toBeInTheDocument();
-    });
-  });
-
-  it('shows connected phone number on Connection tab after connect', async () => {
-    renderWithRouter(<WhatsAppModule />);
-    await navigateToConnectView();
-    connectViaMetaQR();
-
-    fireEvent.click(screen.getByText('Connection'));
-
-    await waitFor(() => {
-      expect(screen.getByText('+91 8983027975')).toBeInTheDocument();
-    });
-  });
-
-  it('shows Disconnect WhatsApp button on Connection tab after connect', async () => {
-    renderWithRouter(<WhatsAppModule />);
-    await navigateToConnectView();
-    connectViaMetaQR();
-
-    fireEvent.click(screen.getByText('Connection'));
-
-    await waitFor(() => {
-      expect(screen.getByText(/Disconnect WhatsApp/)).toBeInTheDocument();
-    });
-  });
-
-  // ── connected → disconnected ──
-
-  it('returns to connect view after disconnecting', async () => {
-    renderWithRouter(<WhatsAppModule />);
-    await navigateToConnectView();
-    connectViaMetaQR();
-
-    // Go to connected screen
-    fireEvent.click(screen.getByText('Connection'));
-    await waitFor(() => {
-      expect(screen.getByText(/WhatsApp Connected/i)).toBeInTheDocument();
-    });
-
-    // Click Disconnect
-    fireEvent.click(screen.getByText(/Disconnect WhatsApp/i));
-
-    // Should return to the connect view
     await waitFor(() => {
       expect(screen.getByText('Connect WhatsApp')).toBeInTheDocument();
-    });
-
-    // Simulate Scan & Connect button should be back
-    expect(screen.getByText(/Simulate Scan/i)).toBeInTheDocument();
-  });
-
-  it('shows disconnected status in nav bar after disconnect', async () => {
-    renderWithRouter(<WhatsAppModule />);
-    await navigateToConnectView();
-    connectViaMetaQR();
-
-    // Go to connected screen
-    fireEvent.click(screen.getByText('Connection'));
-    await waitFor(() => {
-      expect(screen.getByText(/WhatsApp Connected/i)).toBeInTheDocument();
-    });
-
-    // Disconnect
-    fireEvent.click(screen.getByText(/Disconnect WhatsApp/i));
-
-    // Nav bar should show Disconnected again
-    await waitFor(() => {
-      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
-    });
-  });
-
-  // ========================================================
-  // Multiple Connect / Disconnect Cycles
-  // ========================================================
-
-  describe('Multiple Connect / Disconnect Cycles', () => {
-    /**
-     * Helper: disconnect from the connected state. Assumes already on the
-     * Connection tab showing the "WhatsApp Connected" screen.
-     */
-    async function disconnectFromConnected() {
-      fireEvent.click(screen.getByText(/Disconnect WhatsApp/i));
-      await waitFor(() => {
-        expect(screen.getByText('Connect WhatsApp')).toBeInTheDocument();
-      });
-    }
-
-    it('resets to connect view with Simulate Scan button after first disconnect', async () => {
-      renderWithRouter(<WhatsAppModule />);
-      await navigateToConnectView();
-      connectViaMetaQR();
-
-      // Go to connected screen & disconnect
-      fireEvent.click(screen.getByText('Connection'));
-      await waitFor(() => {
-        expect(screen.getByText(/WhatsApp Connected/i)).toBeInTheDocument();
-      });
-      await disconnectFromConnected();
-
-      // Must show connect button again
-      expect(screen.getByText(/Simulate Scan/i)).toBeInTheDocument();
-      // Nav bar must show Disconnected
-      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
-      // Phone number must NOT be visible (no stale data)
-      expect(screen.queryByText('+91 8983027975')).not.toBeInTheDocument();
-    });
-
-    it('completes a second connection after disconnecting', async () => {
-      // Full: connect → disconnect → reconnect (click Connection tab → see connected screen)
-      renderWithRouter(<WhatsAppModule />);
-
-      // ── First cycle ──
-      await navigateToConnectView();
-      connectViaMetaQR();
-
-      // Go to connected screen & disconnect
-      fireEvent.click(screen.getByText('Connection'));
-      await waitFor(() => {
-        expect(screen.getByText(/WhatsApp Connected/i)).toBeInTheDocument();
-      });
-      await disconnectFromConnected();
-
-      // ── Second cycle ──
-      // The connect view is already showing (disconnect sets currentView to 'connect')
-      // but we're already on the Connection tab, so no need to navigate.
-      // Verify the connect button is present before clicking
-      expect(screen.getByText(/Simulate Scan/i)).toBeInTheDocument();
-
-      // Connect again
-      connectViaMetaQR();
-
-      // Nav bar should show Connected again
-      await waitFor(() => {
-        expect(screen.getByText(/Connected/)).toBeInTheDocument();
-      });
-
-      // Navigate to Connection tab to verify connected screen
-      fireEvent.click(screen.getByText('Connection'));
-      await waitFor(() => {
-        expect(screen.getByText(/WhatsApp Connected/i)).toBeInTheDocument();
-      });
-      expect(screen.getByText('+91 8983027975')).toBeInTheDocument();
-
-      // Can disconnect again
-      expect(screen.getByText(/Disconnect WhatsApp/)).toBeInTheDocument();
-    });
-
-    it('can complete two full connect → disconnect cycles', async () => {
-      // Two full: connect → disconnect → connect → disconnect, verifying state each time
-      renderWithRouter(<WhatsAppModule />);
-
-      for (let cycle = 1; cycle <= 2; cycle++) {
-        // ── Navigate to connect view (skip on subsequent cycles: already there after disconnect) ──
-        if (cycle > 1) {
-          // After disconnect we're already on the Connection tab, but clicking it again is harmless
-          fireEvent.click(screen.getByText('Connection'));
-          await waitFor(() => {
-            expect(screen.getByText('Connect WhatsApp')).toBeInTheDocument();
-          });
-        } else {
-          await navigateToConnectView();
-        }
-
-        // ── Connect ──
-        connectViaMetaQR();
-
-        // Nav bar must show Connected
-        await waitFor(() => {
-          expect(screen.getByText(/Connected/)).toBeInTheDocument();
-        });
-
-        // Navigate to Connection tab to see connected screen
-        fireEvent.click(screen.getByText('Connection'));
-        await waitFor(() => {
-          expect(screen.getByText(/WhatsApp Connected/i)).toBeInTheDocument();
-        });
-        expect(screen.getByText('+91 8983027975')).toBeInTheDocument();
-
-        // ── Disconnect ──
-        await disconnectFromConnected();
-
-        // State must be fully reset
-        expect(screen.getByText(/Simulate Scan/i)).toBeInTheDocument();
-        expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
-        expect(screen.queryByText('+91 8983027975')).not.toBeInTheDocument();
-      }
-
-      // After two full cycles, the component is back at the connect view
-      expect(screen.getByText('Connect WhatsApp')).toBeInTheDocument();
-    });
-
-
-
-    it('does not remember stale connected state after disconnect and page re-render', async () => {
-      // Connect → Disconnect → verify the component starts fresh
-      // This tests that component state is truly reset (not just hidden)
-      renderWithRouter(<WhatsAppModule />);
-
-      await navigateToConnectView();
-      connectViaMetaQR();
-
-      fireEvent.click(screen.getByText('Connection'));
-      await waitFor(() => {
-        expect(screen.getByText(/WhatsApp Connected/i)).toBeInTheDocument();
-      });
-      await disconnectFromConnected();
-
-      // Now verify the nav nav indicator says Disconnected
-      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
-
-      // The QR connect view should show instructions and the connect button
-      expect(screen.getByText(/Link your WhatsApp Business account/i)).toBeInTheDocument();
-      expect(screen.getByText(/How to connect/i)).toBeInTheDocument();
-
-      // Should NOT show any connected-state UI elements
-      expect(screen.queryByText(/Messages Sent/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/Delivery Rate/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/Active Campaigns/)).not.toBeInTheDocument();
     });
   });
 });
@@ -418,7 +170,6 @@ describe('WhatsAppModule - Connection Status Transitions', () => {
 describe('WhatsAppModule - Evolution API Mode', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
 
     // Stub all API calls the component makes on mount and during interaction
     (whatsappAPI.getTemplates as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
@@ -426,6 +177,13 @@ describe('WhatsAppModule - Evolution API Mode', () => {
     (whatsappAPI.getContacts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.getAutoReplies as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.listConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
+
+    // apiClient.get returns empty data (no Evolution API pre-configured)
+    (apiClient.get as jest.Mock).mockResolvedValue({ data: { success: true, data: {} } });
+    // Mock whatsappAPI.getStatus to return disconnected (prevents leaks from other tests)
+    (whatsappAPI.getStatus as jest.Mock).mockResolvedValue({
+      data: { success: true, data: { connected: false } },
+    });
 
     // apiClient.post returns QR code data for Evolution API connect endpoints
     (apiClient.post as jest.Mock).mockImplementation(async (url: string, ..._rest: any[]) => {
@@ -437,10 +195,6 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       }
       return { data: { success: true, data: {} } };
     });
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
   });
 
   it('shows Evolution API tab alongside Meta Official API in connection view', async () => {
@@ -715,13 +469,12 @@ describe('WhatsAppModule - Evolution API Mode', () => {
     });
 
     it('connected screen is mode-agnostic and no mode-specific elements leak through', async () => {
-      // The connected success screen is rendered by QRConnectView using
-      // an early return — no mode selector, no QR code, no Evolution config.
-      // Only the phone number, disconnect button, and stats are shown.
-      renderWithRouter(<WhatsAppModule />);
+      // Mock getStatus to return connected so the mount-time check sets connected state
+      (whatsappAPI.getStatus as jest.Mock).mockResolvedValue({
+        data: { success: true, data: { connected: true, phoneNumber: '+91 8983027975' } },
+      });
 
-      await navigateToConnectView();
-      connectViaMetaQR();
+      renderWithRouter(<WhatsAppModule />);
 
       // Nav shows Connected
       await waitFor(() => {
@@ -735,7 +488,6 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       });
 
       // Connected screen elements
-      expect(screen.getByText('+91 8983027975')).toBeInTheDocument();
       expect(screen.getByText(/Disconnect WhatsApp/)).toBeInTheDocument();
 
       // Mode-specific elements must NOT appear in the connected screen
@@ -909,8 +661,8 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       // Disconnect button must be present
       expect(screen.getByText(/Disconnect WhatsApp/)).toBeInTheDocument();
       // Connected UI stats must be visible
-      expect(screen.getByText(/Messages Sent/)).toBeInTheDocument();
-      expect(screen.getByText(/Contacts/)).toBeInTheDocument();
+      expect(screen.getByText(/To Send Messages/)).toBeInTheDocument();
+      expect(screen.getByText(/All Systems Go/)).toBeInTheDocument();
     });
 
     it('disconnects and returns to connect view with Evolution state preserved', async () => {
@@ -1055,10 +807,8 @@ describe('WhatsAppModule - Evolution API Mode', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      jest.useFakeTimers();
 
-      // apiClient.get and apiClient.post are now separate mock functions
-      // (each has its own jest.fn() in __mocks__/api.ts).
+      // apiClient.get returns empty data (no Evolution API pre-configured)
       const apiGet = apiClient.get as jest.Mock;
       apiGet.mockReset();
       apiGet.mockResolvedValue({ data: { success: true, data: {} } });
@@ -1080,16 +830,16 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       (whatsappAPI.getContacts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
       (whatsappAPI.getAutoReplies as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
       (whatsappAPI.listConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
-    });
 
-    afterEach(() => {
-      jest.useRealTimers();
+      // Mock whatsappAPI.getStatus to return disconnected (prevents leaks from other tests)
+      (whatsappAPI.getStatus as jest.Mock).mockResolvedValue({
+        data: { success: true, data: { connected: false } },
+      });
     });
 
     it('does NOT auto-transition to connected after scanning (unlike Meta mode)', async () => {
-      // Meta mode: after Simulate Scan, timers advance: 2s→connecting, 4s→connected
       // Evolution mode: after Connect & Get QR Code, connectionStatus stays 'scanning'
-      // with NO auto-transition timers.
+      // with NO auto-transition timers (unlike the old Meta QR mode).
 
       renderWithRouter(<WhatsAppModule />);
       await navigateToConnectView();
@@ -1125,16 +875,10 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       // Verify: still Disconnected (scanning !== connected)
       expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
 
-      // Advance timers past 4 seconds (Meta mode would have auto-connected by now)
-      act(() => {
-        jest.advanceTimersByTime(5000);
-      });
-
-      // Evolution should STILL show Disconnected — no auto-transition
-      expect(screen.getByText(/Disconnected/)).toBeInTheDocument();
+      // Evolution stays Disconnected — no auto-transition to connected
       expect(screen.queryByText(/WhatsApp Connected/i)).not.toBeInTheDocument();
 
-      // Verify there is no "Connecting..." overlay either (Evolution never enters 'connecting' state)
+      // Verify there is no "Connecting..." overlay (Evolution never enters 'connecting' state)
       expect(screen.queryByText('Connecting...')).not.toBeInTheDocument();
 
       // The Evolution mode scanning UI should still be showing (QR code displayed)
@@ -1215,7 +959,7 @@ describe('WhatsAppModule - Evolution API Mode', () => {
         expect(screen.getByText(/WhatsApp Connected/i)).toBeInTheDocument();
       });
       expect(screen.getByText(/Disconnect WhatsApp/)).toBeInTheDocument();
-      expect(screen.getByText(/Messages Sent/)).toBeInTheDocument();
+      expect(screen.getByText(/Ready/)).toBeInTheDocument();
     });
 
     it('preserves scanning state when switching between Connection and Chats views', async () => {

@@ -27,7 +27,7 @@ export function requestTimeout(timeoutMs?: number) {
     // Track if response has already been sent
     let responded = false;
 
-    req.socket.on('timeout', () => {
+    const handler = () => {
       if (!responded && !res.headersSent) {
         responded = true;
         console.warn(`Request timeout (${timeout}ms): ${req.method} ${req.path} from ${req.ip}`);
@@ -37,11 +37,14 @@ export function requestTimeout(timeoutMs?: number) {
         });
         req.socket.destroy();
       }
-    });
+    };
 
-    // Mark response as sent when it finishes
+    req.socket.on('timeout', handler);
+
+    // Clean up timeout listener when response finishes to prevent socket leak
     res.on('finish', () => {
       responded = true;
+      req.socket.removeListener('timeout', handler);
     });
 
     next();

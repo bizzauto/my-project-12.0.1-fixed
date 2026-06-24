@@ -84,7 +84,7 @@ const SocialMediaPage: React.FC = () => {
   // Social analytics state (from real API)
 
   // Social Accounts state
-  const [socialAccounts, setSocialAccounts] = useState<Array<{ platform: string; connected: boolean; details?: any }>([]);
+  const [socialAccounts, setSocialAccounts] = useState<Array<{ platform: string; connected: boolean; details?: any }>>([]);
   const [loadingSocialStatus, setLoadingSocialStatus] = useState(true);
   const [connectModal, setConnectModal] = useState<{ platform: string; open: boolean } | null>(null);
   const [connectForm, setConnectForm] = useState<Record<string, string>>({});

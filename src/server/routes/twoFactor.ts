@@ -131,7 +131,7 @@ router.delete('/disable', authenticate, async (req: any, res: Response) => {
     }
 
     // Verify password first
-    const { prisma } = await import('../index.js');
+    const { prisma } = await import('../db.js');
     const { comparePassword } = await import('../utils/auth.js');
     const user = await prisma.user.findUnique({
       where: { id: userId },

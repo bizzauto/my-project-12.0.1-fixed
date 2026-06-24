@@ -298,9 +298,12 @@ ${business?.name || 'Team'}`;
     return { queued, errors };
   }
 
-  static async getCampaignStats(campaignId: string): Promise<any> {
-    const campaign = await prisma.outreachCampaign.findUnique({
-      where: { id: campaignId },
+  static async getCampaignStats(campaignId: string, businessId?: string): Promise<any> {
+    const where: any = { id: campaignId };
+    if (businessId) where.businessId = businessId;
+
+    const campaign = await prisma.outreachCampaign.findFirst({
+      where,
       include: {
         outreachLogs: {
           select: { status: true, messageType: true, sentAt: true, repliedAt: true },

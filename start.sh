@@ -39,7 +39,7 @@ if [ ! -f node_modules/.prisma/client/index.js ]; then
 else
   echo "Prisma client already generated, skipping."
 fi
-timeout 60 npx prisma db push --accept-data-loss --skip-generate 2>&1 || echo "Warning: Prisma DB push failed or timed out, continuing..."
+timeout 60 npx prisma migrate deploy 2>&1 || echo "Warning: Prisma migrate deploy failed or timed out, continuing..."
 
 echo "Starting server..."
 exec node dist/server/index.js

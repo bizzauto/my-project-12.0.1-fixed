@@ -19,6 +19,12 @@ async function executeNode(
   ctx: WorkflowContext,
   previousOutput?: any
 ): Promise<any> {
+  const depth = (ctx.nodeResults as any).__depth || 0;
+  if (depth > 5) {
+    return { error: 'Max workflow recursion depth reached' };
+  }
+  (ctx.nodeResults as any).__depth = depth + 1;
+
   const contact = ctx.triggerData.contact || {};
   const phone = contact.phone || ctx.triggerData.phone || '';
   const email = contact.email || ctx.triggerData.email || '';
@@ -147,7 +153,9 @@ async function executeNode(
     }
 
     case 'send_sms': {
-      return { sent: true, to: phone, message: data.message || 'SMS sent', channel: 'sms' };
+      // SMS requires a configured provider (Twilio, etc.)
+      console.warn('[Workflow] send_sms node triggered but no SMS provider configured');
+      return { sent: false, error: 'SMS provider not configured', to: phone, message: data.message, channel: 'sms' };
     }
 
     case 'update_contact': {
@@ -258,15 +266,16 @@ async function executeNode(
           }
 
           await prisma.leadScore.upsert({
-            where: { contactId: contactId },
+            where: { businessId_contactId: { businessId: ctx.businessId, contactId } },
             update: { 
-              overallScore, engagementScore, recencyScore, 
-              intentScore, fitScore, lastCalculated: new Date() 
+              score: overallScore, engagementScore, recencyScore, 
+              intentScore, fitScore, lastScoredAt: new Date() 
             },
             create: { 
+              businessId: ctx.businessId,
               contactId: contactId, 
-              overallScore, engagementScore, recencyScore, 
-              intentScore, fitScore, lastCalculated: new Date() 
+              score: overallScore, engagementScore, recencyScore, 
+              intentScore, fitScore, lastScoredAt: new Date() 
             }
           });
         } catch (err: any) {
@@ -320,7 +329,27 @@ async function executeNode(
 
     case 'delay':
     case 'wait': {
-      return { waited: true, duration: data.duration || '1h', scheduled: true };
+      // Parse duration string (e.g., "30m", "1h", "2d") to milliseconds
+      const durationStr = data.duration || '1h';
+      let delayMs = 60 * 60 * 1000; // default 1h
+      const match = durationStr.match(/^(\d+)(m|h|d)$/);
+      if (match) {
+        const val = parseInt(match[1]);
+        if (match[2] === 'm') delayMs = val * 60 * 1000;
+        else if (match[2] === 'h') delayMs = val * 60 * 60 * 1000;
+        else if (match[2] === 'd') delayMs = val * 24 * 60 * 60 * 1000;
+      }
+
+      // For short delays (≤30s), actually wait in-process
+      if (delayMs <= 30000) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+        return { waited: true, duration: durationStr, actualMs: delayMs, scheduled: false };
+      }
+
+      // For longer delays, the workflow should be re-queued via BullMQ
+      // Log warning — proper fix is to schedule remaining steps via queue
+      console.warn(`[Workflow] Delay node "${durationStr}" (${delayMs}ms) — in-process wait too long, continuing immediately. Implement queue-based scheduling for production.`);
+      return { waited: false, duration: durationStr, scheduled: false, warning: 'Long delays require queue-based scheduling' };
     }
 
     case 'add_activity': {

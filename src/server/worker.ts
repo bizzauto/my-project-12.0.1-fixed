@@ -34,6 +34,7 @@ process.on('SIGINT', async () => {
 // Keep the process alive
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught exception:', error);
+  process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {

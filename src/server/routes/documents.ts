@@ -32,10 +32,22 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
 router.post('/', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
+    const { name, type, content, html, clientName, clientPhone, clientEmail, amount, contactId } = req.body;
     const docNumber = `DOC-${Date.now().toString(36).toUpperCase()}`;
-    const document = await prisma.document.create({
-      data: { businessId: req.user.businessId, documentNumber: docNumber, ...req.body },
-    });
+    const data: any = {
+      business: { connect: { id: req.user.businessId } },
+      documentNumber: docNumber,
+      name: name || undefined,
+      type: type || undefined,
+      content: content || undefined,
+      html: html || undefined,
+      clientName: clientName || undefined,
+      clientPhone: clientPhone || undefined,
+      clientEmail: clientEmail || undefined,
+      amount: amount ? parseFloat(amount) : undefined,
+    };
+    if (contactId) data.contact = { connect: { id: contactId } };
+    const document = await prisma.document.create({ data });
     res.status(201).json({ success: true, data: document });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
@@ -71,8 +83,15 @@ router.get('/templates', async (req: AuthRequest, res: Response) => {
 
 router.post('/templates', requireRole('OWNER', 'ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
+    const { name, content, type, isDefault } = req.body;
     const template = await prisma.documentTemplate.create({
-      data: { businessId: req.user.businessId, ...req.body },
+      data: {
+        businessId: req.user.businessId,
+        name: name || 'Untitled Template',
+        type: type || 'invoice',
+        content: content || undefined,
+        isDefault: isDefault || false,
+      },
     });
     res.status(201).json({ success: true, data: template });
   } catch (error: any) {
@@ -102,8 +121,16 @@ router.get('/ai-content', async (req: AuthRequest, res: Response) => {
 
 router.post('/ai-content', async (req: AuthRequest, res: Response) => {
   try {
+    const { type, prompt, model } = req.body;
     const aiContent = await prisma.aIContent.create({
-      data: { userId: req.user.id, ...req.body },
+      data: {
+        user: { connect: { id: req.user.id } },
+        type: type || 'text',
+        prompt: prompt || '',
+        model: model || undefined,
+        result: '',
+        tokensUsed: 0,
+      },
     });
     res.status(201).json({ success: true, data: aiContent });
   } catch (error: any) {

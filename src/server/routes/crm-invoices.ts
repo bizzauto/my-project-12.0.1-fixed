@@ -174,7 +174,7 @@ router.put('/:id', authenticate, validate(updateInvoiceSchema), async (req: Auth
     if (paymentMethod !== undefined) newContent.paymentMethod = paymentMethod;
 
     const updated = await prisma.document.update({
-      where: { id },
+      where: { id, businessId },
       data: {
         ...(status !== undefined && { status }),
         content: newContent,
@@ -205,7 +205,7 @@ router.put('/:id/pay', authenticate, validate(markInvoicePaidSchema), async (req
     const existingContent = (existing.content as any) || {};
 
     const updated = await prisma.document.update({
-      where: { id },
+      where: { id, businessId },
       data: {
         status: 'paid',
         content: {
@@ -237,7 +237,7 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: any) => {
       return res.status(404).json({ success: false, error: 'Invoice not found' });
     }
 
-    await prisma.document.delete({ where: { id } });
+    await prisma.document.delete({ where: { id, businessId } });
     res.json({ success: true, message: 'Invoice deleted' });
   } catch (error: any) {
     console.error('Delete invoice error:', error);

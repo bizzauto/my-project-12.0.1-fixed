@@ -248,8 +248,9 @@ router.patch('/notifications/read-all', async (req: any, res: any) => {
 // Create notification
 router.post('/notifications', async (req: any, res: any) => {
   try {
+    const { title, message, type, entityType, entityId } = req.body;
     const notification = await prisma.notification.create({
-      data: { businessId: req.user.businessId, ...req.body },
+      data: { businessId: req.user.businessId, title, message, type, entityType, entityId, userId: req.user.id },
     });
     res.status(201).json({ success: true, data: notification });
   } catch (error: any) {

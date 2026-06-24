@@ -14,7 +14,7 @@ services:
       - NODE_ENV=production
       - PORT=4000
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://:bizzauto-redis-pass@redis:6379
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       # === Payments ===
@@ -35,11 +35,18 @@ services:
       - GOOGLE_AUTH_REDIRECT_URL=${GOOGLE_AUTH_REDIRECT_URL:-https://bizzautoai.com/api/auth/google/callback}
       - GOOGLE_BUSINESS_REDIRECT_URL=${GOOGLE_BUSINESS_REDIRECT_URL:-https://bizzautoai.com/api/google-business/auth/callback}
     depends_on:
-      - postgres
-      - redis
-      - evolution-api
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      evolution-api:
+        condition: service_healthy
     networks:
       - bizzauto-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   # PostgreSQL Database
   postgres:
@@ -60,13 +67,17 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   # Redis for caching and sessions
   redis:
     image: redis:7-alpine
     container_name: bizzauto-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --save 60 1000 --save 300 10 --requirepass bizzauto-redis-pass
     volumes:
       - redis_data:/data
     networks:
@@ -76,6 +87,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
   # n8n - Workflow Automation
   n8n:
@@ -144,6 +159,40 @@ services:
       retries: 3
       start_period: 40s
 
+  # Automated Backup Service
+  backup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bizzauto-backup
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_PASSWORD=bizzauto-redis-pass
+      - PGPASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - backups:/backups
+      - ./scripts/backup.sh:/scripts/backup.sh:ro
+      - uploads_data:/app/uploads
+    networks:
+      - bizzauto-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        apk add --no-cache redis bash postgresql-client coreutils findutils tar gzip
+        echo "0 2 * * * /scripts/backup.sh >> /var/log/backup.log 2>&1" > /etc/crontabs/root
+        crond -f -l 2
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
 networks:
   bizzauto-network:
     driver: bridge
@@ -153,3 +202,4 @@ volumes:
   redis_data:
   n8n_data:
   evolution_data:
+  backups:

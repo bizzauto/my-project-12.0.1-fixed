@@ -116,21 +116,36 @@ router.get('/plans', authenticate, async (req: any, res: any) => {
         'API Access',
       ],
     },
-    {
-      id: 'AGENCY',
-      name: 'Agency',
-      price: { month: 9999, year: 99990 },
-      features: [
-        'Unlimited Contacts',
-        'Unlimited WhatsApp messages',
-        '10,000 AI credits',
-        'Unlimited Users',
-        'Multi-tenant Support',
-        'Custom Branding',
-        'Premium Support',
-        'SLA Guarantee',
-      ],
-    },
+      {
+        id: 'AGENCY',
+        name: 'Agency',
+        price: { month: 9999, year: 99990 },
+        features: [
+          'Unlimited Contacts',
+          'Unlimited WhatsApp messages',
+          '10,000 AI credits',
+          'Unlimited Users',
+          'Multi-tenant Support',
+          'Custom Branding',
+          'Premium Support',
+          'SLA Guarantee',
+        ],
+      },
+      {
+        id: 'ENTERPRISE',
+        name: 'Enterprise',
+        price: { month: 19999, year: 199990 },
+        features: [
+          'Unlimited Contacts',
+          'Unlimited WhatsApp messages',
+          'Unlimited AI credits',
+          'Unlimited Users',
+          'White-label',
+          'Custom Integrations',
+          'Dedicated Support',
+          'SLA Guarantee',
+        ],
+      },
   ];
 
   res.json({ success: true, data: plans });
@@ -177,9 +192,11 @@ router.post('/verify', authenticate, requireBusinessOwner, async (req: any, res:
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      plan,
-      period
     } = req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ success: false, error: 'Missing required payment fields' });
+    }
 
     // Verify signature
     const isValid = razorpayService.verifyPaymentSignature(
@@ -192,6 +209,54 @@ router.post('/verify', authenticate, requireBusinessOwner, async (req: any, res:
       return res.status(400).json({
         success: false,
         error: 'Payment verification failed'
+      });
+    }
+
+    // Fetch order from Razorpay to get authoritative plan and period (never trust client)
+    const Razorpay = (await import('razorpay')).default;
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID || '',
+      key_secret: process.env.RAZORPAY_KEY_SECRET || '',
+    });
+    const order = await razorpay.orders.fetch(razorpay_order_id);
+    if (!order || order.status !== 'paid') {
+      return res.status(400).json({ success: false, error: 'Payment not completed' });
+    }
+
+    // Get plan and period from order notes (set during checkout creation)
+    const plan = (order.notes as any)?.plan || (order.notes as any)?.subscription_plan;
+    const period = (order.notes as any)?.period || (order.notes as any)?.duration || 'month';
+
+    if (!plan) {
+      return res.status(400).json({ success: false, error: 'Plan not found in order details' });
+    }
+
+    const validPlans = ['FREE', 'STARTER', 'GROWTH', 'PRO', 'AGENCY', 'ENTERPRISE'];
+    if (!validPlans.includes(plan)) {
+      return res.status(400).json({ success: false, error: 'Invalid plan' });
+    }
+
+    const existingOrderSub = await prisma.subscription.findFirst({
+      where: { razorpayOrderId: razorpay_order_id },
+    });
+    if (existingOrderSub && existingOrderSub.status === 'active') {
+      return res.json({ success: true, data: { subscription: existingOrderSub } });
+    }
+
+    const expectedAmount = razorpayService.PLAN_PRICES[plan as keyof typeof razorpayService.PLAN_PRICES]?.[period as 'month' | 'year'] || 0;
+    const orderAmountPaise = Number(order.amount);
+    if (expectedAmount > 0 && orderAmountPaise !== expectedAmount * 100) {
+      return res.status(400).json({ success: false, error: 'Amount mismatch' });
+    }
+
+    // Cancel any existing active subscription
+    const existingSub = await prisma.subscription.findFirst({
+      where: { businessId: req.user.businessId, status: 'active' },
+    });
+    if (existingSub) {
+      await prisma.subscription.update({
+        where: { id: existingSub.id },
+        data: { status: 'cancelled', cancelledAt: new Date() },
       });
     }
 
@@ -217,6 +282,7 @@ router.post('/verify', authenticate, requireBusinessOwner, async (req: any, res:
         currentPeriodStart: startDate,
         currentPeriodEnd: endDate,
         status: 'active',
+        razorpayOrderId: razorpay_order_id,
         razorpaySubId: razorpay_payment_id,
       },
     });
@@ -237,7 +303,7 @@ router.post('/verify', authenticate, requireBusinessOwner, async (req: any, res:
       data: { subscription }
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: 'Failed to verify payment', details: error.message });
+    res.status(500).json({ success: false, error: 'Payment verification failed' });
   }
 });
 
@@ -292,73 +358,24 @@ router.post('/cancel', authenticate, requireBusinessOwner, async (req: any, res:
   }
 });
 
-// Webhook handler for Razorpay events
-router.post('/webhook', async (req: any, res: any) => {
-  try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-
-    // Verify webhook signature
-    const crypto = await import('crypto');
-    const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '');
-    shasum.update(`${razorpay_order_id}|${razorpay_payment_id}`);
-    const digest = shasum.digest('hex');
-
-    if (digest !== razorpay_signature) {
-      return res.status(400).json({ success: false, error: 'Invalid signature' });
-    }
-
-    // Find subscription by order ID
-    const subscription = await prisma.subscription.findFirst({
-      where: { razorpayOrderId: razorpay_order_id },
-    });
-
-    if (subscription) {
-      await prisma.subscription.update({
-        where: { id: subscription.id },
-        data: {
-          status: 'active',
-          razorpayPaymentId: razorpay_payment_id,
-        },
-      });
-
-      // Trigger auto-onboarding
-      try {
-        const { AutoOnboardingService } = await import('../services/auto-onboarding.service.js');
-        const business = await prisma.business.findUnique({
-          where: { id: subscription.businessId },
-        });
-
-        await AutoOnboardingService.processPayment({
-          razorpayPaymentId: razorpay_payment_id,
-          razorpayOrderId: razorpay_order_id,
-          amount: subscription.amount,
-          currency: subscription.currency || 'INR',
-          contactName: business?.name,
-          contactEmail: business?.email,
-          contactPhone: business?.phone,
-          planName: subscription.plan,
-          metadata: { businessId: subscription.businessId },
-        });
-        console.log(`[Webhook] Auto-onboarding triggered for ${subscription.businessId}`);
-      } catch (onboardingError: any) {
-        console.error(`[Webhook] Auto-onboarding error:`, onboardingError.message);
-      }
-    }
-
-    res.json({ success: true });
-  } catch (error: any) {
-    console.error('Webhook error:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
 // Manual onboarding trigger
-router.post('/onboard', authenticate, async (req: any, res: any) => {
+router.post('/onboard', authenticate, requireBusinessOwner, async (req: any, res: any) => {
   try {
     const { contactId, amount, planName, paymentId } = req.body;
 
     if (!contactId) {
       return res.status(400).json({ success: false, error: 'contactId is required' });
+    }
+
+    if (amount != null && planName) {
+      const validPlan = Object.keys(razorpayService.PLAN_PRICES).includes(planName);
+      if (!validPlan) {
+        return res.status(400).json({ success: false, error: 'Invalid plan' });
+      }
+      const expectedAmount = razorpayService.PLAN_PRICES[planName as keyof typeof razorpayService.PLAN_PRICES]?.month || 0;
+      if (expectedAmount > 0 && amount !== expectedAmount) {
+        return res.status(400).json({ success: false, error: 'Amount does not match plan price' });
+      }
     }
 
     const contact = await prisma.contact.findUnique({
@@ -421,43 +438,46 @@ router.get('/invoices', authenticate, async (req: any, res: any) => {
   }
 });
 
-// Upgrade subscription
+// Upgrade subscription — redirects to Razorpay checkout (no free upgrades)
 router.post('/upgrade', authenticate, requireBusinessOwner, async (req: any, res: any) => {
   try {
-    const { plan } = req.body;
+    const { plan, period = 'month' } = req.body;
 
     if (!plan) {
       return res.status(400).json({ success: false, error: 'Plan is required' });
     }
 
-    // Get current subscription
-    const current = await prisma.subscription.findFirst({
-      where: { businessId: req.user.businessId, status: 'active' },
-    });
-
-    if (current) {
-      // Cancel current subscription
-      await prisma.subscription.update({
-        where: { id: current.id },
-        data: { status: 'cancelled' },
-      });
+    const validPlans = ['STARTER', 'GROWTH', 'PRO', 'AGENCY', 'ENTERPRISE'];
+    if (!validPlans.includes(plan)) {
+      return res.status(400).json({ success: false, error: 'Invalid plan' });
     }
 
-    // Create new subscription
-    const subscription = await prisma.subscription.create({
-      data: {
-        business: { connect: { id: req.user.businessId } },
-        plan,
-        status: 'pending',
-        amount: getPlanAmount(plan),
-        startDate: new Date(),
-        interval: 'monthly',
-      },
+    const validPeriods = ['month', 'year'];
+    if (!validPeriods.includes(period)) {
+      return res.status(400).json({ success: false, error: 'Period must be month or year' });
+    }
+
+    // Get business info
+    const business = await prisma.business.findUnique({
+      where: { id: req.user.businessId },
+      select: { email: true, name: true },
     });
 
-    res.json({ success: true, data: subscription });
+    // Create Razorpay order (forces payment — no free upgrades)
+    const result = await razorpayService.createRazorpayOrder(
+      req.user.businessId,
+      plan,
+      period,
+      business?.email || 'user@example.com'
+    );
+
+    if (!result.success) {
+      return res.status(500).json({ success: false, error: result.error });
+    }
+
+    res.json({ success: true, data: result.data });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'Upgrade failed' });
   }
 });
 
@@ -561,11 +581,12 @@ router.get('/analytics/revenue', authenticate, async (req: any, res: any) => {
 
 function getPlanAmount(plan: string): number {
   const amounts: Record<string, number> = {
-    starter: 499,
-    professional: 1499,
-    enterprise: 4999,
+    STARTER: 999,
+    GROWTH: 2499,
+    PRO: 4999,
+    AGENCY: 9999,
   };
-  return amounts[plan] || 499;
+  return amounts[plan] || 0;
 }
 
 export default router;

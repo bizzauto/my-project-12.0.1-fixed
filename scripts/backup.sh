@@ -1,26 +1,35 @@
 #!/bin/bash
+set -euo pipefail
 
-# ==========================================
-# Database Backup Script
-# ==========================================
+BACKUP_DIR="/backups/$(date +%Y%m%d_%H%M%S)"
+RETENTION_DAYS=7
+LOG_FILE="/var/log/bizzauto-backup.log"
 
-set -e
+log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"; }
 
-BACKUP_DIR="/opt/saas-automation/backups"
-DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="$BACKUP_DIR/backup_$DATE.sql.gz"
+mkdir -p "$BACKUP_DIR"
 
-# Create backup directory
-mkdir -p $BACKUP_DIR
+# PostgreSQL backup
+log "Starting PostgreSQL backup..."
+PGPASSWORD="${DB_PASSWORD:-}" pg_dump "${DATABASE_URL}" | gzip > "$BACKUP_DIR/postgres.sql.gz"
 
-# Backup PostgreSQL
-echo "📦 Creating database backup..."
-docker-compose exec -T postgres pg_dump -U postgres whatsapp_saas | gzip > $BACKUP_FILE
+# Redis backup
+log "Starting Redis backup..."
+redis-cli -a "${REDIS_PASSWORD:-}" BGSAVE
+sleep 5
+cp /data/dump.rdb "$BACKUP_DIR/redis_dump.rdb" 2>/dev/null || log "Warning: Redis dump not found"
 
-echo "✅ Backup created: $BACKUP_FILE"
+# Uploads backup
+log "Starting uploads backup..."
+tar czf "$BACKUP_DIR/uploads.tar.gz" uploads/ 2>/dev/null || log "Warning: No uploads directory"
 
-# Keep only last 30 days of backups
-find $BACKUP_DIR -name "backup_*.sql.gz" -mtime +30 -delete
+# Compress everything
+log "Compressing backup..."
+tar czf "$BACKUP_DIR.tar.gz" -C "$(dirname $BACKUP_DIR)" "$(basename $BACKUP_DIR)"
+rm -rf "$BACKUP_DIR"
 
-echo "🗑️  Old backups cleaned"
-echo "📊 Backup size: $(du -h $BACKUP_FILE | cut -f1)"
+# Cleanup old backups
+log "Cleaning up old backups..."
+find /backups -name "*.tar.gz" -mtime +$RETENTION_DAYS -delete
+
+log "Backup completed: $BACKUP_DIR.tar.gz"

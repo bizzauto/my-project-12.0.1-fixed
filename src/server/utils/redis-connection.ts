@@ -75,9 +75,9 @@ function connectToRedis(url: string) {
   function handleNoAuth(ctx: string) {
     return (err: any) => {
       if (err?.message?.includes('NOAUTH') || err?.message?.includes('AUTH') || err?.message?.includes('ERR')) {
-        console.error(`[Redis] NOAUTH ${ctx} — credentials rejected. Redis permanently disabled.`);
+        console.warn(`[Redis] Auth failed (${ctx}), retrying in 10s...`);
         redisDisabled = true;
-        try { client.destroy(); } catch {}
+        setTimeout(() => { redisDisabled = false; }, 10000);
         return true;
       }
       return false;

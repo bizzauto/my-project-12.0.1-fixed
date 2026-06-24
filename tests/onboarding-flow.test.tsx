@@ -60,6 +60,7 @@ jest.mock('lucide-react', () => {
   const iconNames = [
     'Check', 'ArrowRight', 'ArrowLeft', 'Building2',
     'MessageSquare', 'Zap', 'Star', 'CheckCircle', 'RefreshCw',
+    'Upload', 'Sparkles',
   ];
   const mock: Record<string, any> = {};
   for (const name of iconNames) {
@@ -99,6 +100,9 @@ import OnboardingWizard from '../src/components/OnboardingWizard';
 //  Test helpers
 // ════════════════════════════════════════════════════════════════════════
 
+// Helper: advance from step 0 to step 1 (welcome/choice) then to step 2 (business) via Manual Setup
+const clickManualSetup = () => fireEvent.click(screen.getByText(/✍️ Manual Setup/));
+
 const renderOnboarding = () =>
   render(
     <MemoryRouter>
@@ -111,12 +115,14 @@ const clickContinue = () => fireEvent.click(screen.getByText(/^Continue$/));
 const clickBack = () => fireEvent.click(screen.getByText(/^Back$/));
 
 /**
- * Advance from step 1 through step 3 (ready for testing tool connections or Get Started).
+ * Advance from step 0 (empty) through to step 3 (Connect tools).
+ * Flow: step 0 (empty) → click Continue → step 1 (Welcome) → click Manual Setup → step 2 (Business) → click Continue → step 3 (Connect)
  */
 const advanceToStep3 = () => {
   renderOnboarding();
-  clickContinue(); // step 1 → 2
-  clickContinue(); // step 2 → 3
+  clickContinue();          // step 0 → step 1 (Welcome with Quick/Manual buttons)
+  clickManualSetup();       // step 1 → step 2 (Business info)
+  clickContinue();          // step 2 → step 3 (Connect tools)
 };
 
 /**
@@ -124,7 +130,7 @@ const advanceToStep3 = () => {
  */
 const advanceToStep4 = () => {
   advanceToStep3();
-  clickContinue(); // step 3 → 4
+  clickContinue();          // step 3 → step 4 (Done)
 };
 
 // ════════════════════════════════════════════════════════════════════════
@@ -153,33 +159,54 @@ beforeEach(() => {
 // ════════════════════════════════════════════════════════════════════════
 
 describe('Step progression', () => {
-  it('renders step 1 (Welcome) initially with the user name', () => {
+  it('renders initial step 0 with Continue button, no Welcome text yet', () => {
     renderOnboarding();
 
-    expect(screen.getByText(/Welcome to BizzAuto Solutions!/)).toBeInTheDocument();
-    expect(screen.getByText(/Hey Test User/)).toBeInTheDocument();
-    expect(screen.getByText(/Continue/)).toBeInTheDocument();
+    // Step 0 shows only the Continue button, no step content
+    expect(screen.getByText(/^Continue$/)).toBeInTheDocument();
+    // Welcome text and choice buttons NOT yet visible
+    expect(screen.queryByText(/Welcome to BizzAuto!/)).not.toBeInTheDocument();
   });
 
-  it('Continue moves from step 1 → step 2 (Business)', () => {
+  it('Continue moves from step 0 → step 1 (Welcome with choice buttons)', () => {
     renderOnboarding();
     clickContinue();
+
+    // Step 1 shows the Welcome text with Quick/Manual choice buttons
+    expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument();
+    expect(screen.getByText(/Hey Test User/)).toBeInTheDocument();
+    expect(screen.getByText(/⚡ Quick Setup/)).toBeInTheDocument();
+    expect(screen.getByText(/✍️ Manual Setup/)).toBeInTheDocument();
+    // No Continue button on the choice screen (only Quick/Manual buttons)
+  });
+
+  it('Manual Setup moves from step 1 → step 2 (Business)', () => {
+    renderOnboarding();
+    clickContinue();
+    clickManualSetup();
 
     expect(screen.getByText('Tell us about your business')).toBeInTheDocument();
     expect(screen.getByText(/Back/)).toBeInTheDocument();
+    expect(screen.getByText(/^Continue$/)).toBeInTheDocument();
   });
 
-  it('Back from step 2 returns to step 1', () => {
+  it('Back from step 2 returns to step 1 (setupMode=manual, no choice buttons)', () => {
     renderOnboarding();
     clickContinue();
+    clickManualSetup();
     clickBack();
 
-    expect(screen.getByText(/Welcome to BizzAuto Solutions!/)).toBeInTheDocument();
+    // Step 1 with setupMode='manual' shows no step content (only the progress bar and Continue button)
+    // The Continue button IS visible since step < totalSteps
+    expect(screen.getByText(/^Continue$/)).toBeInTheDocument();
+    // Welcome/choice text should NOT be here (setupMode is still 'manual')
+    expect(screen.queryByText(/Welcome to BizzAuto!/)).not.toBeInTheDocument();
   });
 
   it('Continue from step 2 → step 3 (Connect)', () => {
     renderOnboarding();
     clickContinue();
+    clickManualSetup();
     clickContinue();
 
     expect(screen.getByText('Connect your tools')).toBeInTheDocument();
@@ -188,6 +215,7 @@ describe('Step progression', () => {
   it('Back from step 3 returns to step 2', () => {
     renderOnboarding();
     clickContinue();
+    clickManualSetup();
     clickContinue();
     clickBack();
 
@@ -197,6 +225,7 @@ describe('Step progression', () => {
   it('Continue from step 3 → step 4 (Done)', () => {
     renderOnboarding();
     clickContinue();
+    clickManualSetup();
     clickContinue();
     clickContinue();
 
@@ -207,6 +236,7 @@ describe('Step progression', () => {
   it('Back from step 4 returns to step 3', () => {
     renderOnboarding();
     clickContinue();
+    clickManualSetup();
     clickContinue();
     clickContinue();
     clickBack();
@@ -363,9 +393,12 @@ describe('onComplete callback', () => {
       </MemoryRouter>,
     );
 
-    clickContinue(); // 1 → 2
-    clickContinue(); // 2 → 3
-    clickContinue(); // 3 → 4
+    clickContinue();  // step 0 → step 1 (Welcome + choice buttons)
+    // On step 1, there's no Continue button, only choice buttons
+    // Need to click Manual Setup to advance
+    clickManualSetup();  // step 1 → step 2 (Business info)
+    clickContinue();  // step 2 → step 3 (Connect tools)
+    clickContinue();  // step 3 → step 4 (Done)
     fireEvent.click(screen.getByText(/Get Started/));
 
     expect(onComplete).toHaveBeenCalledTimes(1);
@@ -380,8 +413,9 @@ describe('onComplete callback', () => {
       </MemoryRouter>,
     );
 
-    clickContinue(); // 1 → 2
-    clickContinue(); // 2 → 3
+    clickContinue();   // step 0 → step 1 (Welcome)
+    clickManualSetup();  // step 1 → step 2 (Business info)
+    clickContinue();   // step 2 → step 3 (Connect tools)
 
     await waitFor(() => {
       expect(screen.getAllByText('Connect').length).toBeGreaterThanOrEqual(3);

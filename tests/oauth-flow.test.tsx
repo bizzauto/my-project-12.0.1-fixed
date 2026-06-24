@@ -20,7 +20,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 // ────── Shared mock state ──────
 
-/** Captured GoogleLogin callbacks so tests can trigger success/error */
+/** Captured callbacks from GoogleLoginButton mock so tests can trigger success/error */
 let googleCallbacks: {
   onSuccess: (res: { credential?: string }) => void;
   onError: () => void;
@@ -31,13 +31,46 @@ let googleCallbacks: {
 
 // ────── Module mocks (jest.mock is hoisted — order here doesn't matter) ──────
 
+// GoogleLoginButton uses import.meta.env which Jest can't handle — mock it
+// Captures onSuccess/onError callbacks so tests can trigger the OAuth flow
+jest.mock('../src/components/GoogleLoginButton', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: (props: any) => {
+      // Expose callbacks via the shared googleCallbacks variable
+      googleCallbacks = {
+        onSuccess: async (res: { credential?: string }) => {
+          try {
+            const { authAPI } = require('../src/lib/api');
+            const response = await authAPI.googleLogin(res?.credential || 'mock-google-credential');
+            const data = response.data?.data || response.data;
+            if (data) {
+              const { useAuthStore } = require('../src/lib/authStore');
+              useAuthStore.setState({
+                user: data.user,
+                business: data.business,
+                token: data.token,
+                isAuthenticated: true,
+              });
+            }
+          } catch (err: any) {
+            props.onError?.(err.message || 'Google sign-in failed');
+          }
+        },
+        onError: () => {
+          props.onError?.('Google sign-in failed. Please try again.');
+        },
+      };
+      return React.createElement('button', { 'data-testid': 'google-login' }, props.label || 'Continue with Google');
+    },
+  };
+});
+
 jest.mock('@react-oauth/google', () => {
   const React = require('react');
   return {
-    GoogleLogin: (props: any) => {
-      googleCallbacks = { onSuccess: props.onSuccess, onError: props.onError };
-      return React.createElement('button', { 'data-testid': 'google-login' }, 'Sign in with Google');
-    },
+    GoogleLogin: () => React.createElement('button', { 'data-testid': 'google-oauth-login' }, 'Sign in with Google'),
     GoogleOAuthProvider: ({ children }: any) => children,
   };
 });
@@ -69,6 +102,12 @@ jest.mock('lucide-react', () => {
   const icons = [
     'Mail', 'Lock', 'Eye', 'EyeOff', 'ArrowRight', 'Shield', 'Zap',
     'AlertCircle', 'ArrowLeft', 'User', 'Phone', 'Building2', 'Check',
+    'TrendingUp', 'Users', 'MessageSquare', 'BarChart3', 'CheckCircle',
+    'Star', 'Brain', 'ShoppingCart', 'Share2', 'Activity', 'Sparkles',
+    'Wand2', 'Crown', 'Rocket', 'Bot', 'Globe', 'Target', 'FileText',
+    'Calendar', 'CreditCard', 'Heart', 'Megaphone', 'Layers', 'Send',
+    'Instagram', 'Facebook', 'Twitter', 'Youtube', 'Image', 'Mic',
+    'Briefcase', 'ChevronRight',
   ];
   const mock: Record<string, any> = {};
   for (const name of icons) {

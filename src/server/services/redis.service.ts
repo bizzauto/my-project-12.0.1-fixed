@@ -60,8 +60,8 @@ export async function initRedis(): Promise<IORedis | null> {
     redisClient = new IORedis(finalUrl, {
       maxRetriesPerRequest: null,
       retryStrategy(times: number) {
-        if (redisDisabled || times > 3) return null;
-        return Math.min(times * 200, 2000);
+        if (redisDisabled || times > 10) return null;
+        return Math.min(times * 200, 5000);
       },
       enableOfflineQueue: false,
       connectTimeout: 5000,

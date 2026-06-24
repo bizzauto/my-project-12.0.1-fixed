@@ -32,9 +32,14 @@ router.post('/:businessId', async (req: Request, res: Response) => {
           .createHmac('sha256', business.dograhWebhookSecret)
           .update(JSON.stringify(payload))
           .digest('hex');
-        if (signature !== expected) {
+        const sigBuf = Buffer.from(expected, 'hex');
+        const userSigBuf = Buffer.from(signature, 'hex');
+        if (sigBuf.length !== userSigBuf.length || !crypto.timingSafeEqual(sigBuf, userSigBuf)) {
           console.warn('Dograh webhook signature mismatch for business:', businessId);
+          return res.status(401).json({ success: false, error: 'Invalid webhook signature' });
         }
+      } else {
+        return res.status(401).json({ success: false, error: 'Missing webhook signature' });
       }
     }
 

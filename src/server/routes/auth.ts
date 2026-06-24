@@ -1157,6 +1157,14 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req: Request, res:
       }
     }
 
+    // Evict stale entries if store grows too large
+    if (otpStore.size > 10000) {
+      const now = Date.now();
+      for (const [key, val] of otpStore) {
+        if (now - val.expiresAt > 300000) otpStore.delete(key);
+      }
+    }
+
     const otp = crypto.randomInt(100000, 999999).toString();
     const attempts = (existing?.attempts || 0) + 1;
     otpStore.set(email, { otp, expiresAt: Date.now() + 10 * 60 * 1000, attempts });

@@ -379,9 +379,12 @@ router.post('/store/:businessId/orders/:orderId/verify-payment', async (req: Req
     }
 
     if (razorpay_order_id && razorpay_payment_id && razorpay_signature) {
+      if (!process.env.RAZORPAY_KEY_SECRET) {
+        return res.status(500).json({ success: false, error: 'Payment service misconfigured' });
+      }
       const body = razorpay_order_id + '|' + razorpay_payment_id;
       const expectedSig = crypto
-        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
         .update(body)
         .digest('hex');
 

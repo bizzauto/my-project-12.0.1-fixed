@@ -6,10 +6,15 @@ import path from 'path';
 
 const router = Router();
 
-// Configure multer for file uploads
+// Configure multer for file uploads with business-scoped subdirectory
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    const businessId = (req as any).user?.businessId || 'unknown';
+    const dir = `uploads/${businessId}`;
+    import('fs').then(fs => {
+      fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    }).catch(() => cb(null, 'uploads/'));
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

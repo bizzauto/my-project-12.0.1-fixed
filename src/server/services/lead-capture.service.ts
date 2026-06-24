@@ -24,8 +24,25 @@ export class LeadCaptureService {
       requirement?: string;
       city?: string;
       state?: string;
-    }
+    },
+    idempotencyKey?: string
   ): Promise<any> {
+    // Idempotency: check if this lead was recently captured (within last 5 minutes)
+    if (idempotencyKey) {
+      const recent = await prisma.activity.findFirst({
+        where: {
+          businessId,
+          type: 'lead_captured',
+          metadata: { path: ['idempotencyKey'], equals: idempotencyKey },
+          createdAt: { gte: new Date(Date.now() - 5 * 60 * 1000) },
+        },
+      });
+      if (recent) {
+        console.log(`[LeadCapture] Duplicate IndiaMART lead ignored: ${idempotencyKey}`);
+        return { success: true, duplicate: true };
+      }
+    }
+
     // Create or update contact
     const contact = await this.upsertContact(businessId, {
       name: leadData.name,
@@ -89,7 +106,7 @@ export class LeadCaptureService {
         type: 'lead_captured',
         title: 'New lead from IndiaMART',
         content: `Product: ${leadData.product}, Requirement: ${leadData.requirement}`,
-        metadata: { source: 'indiamart', ...leadData },
+        metadata: { source: 'indiamart', idempotencyKey, ...leadData },
         createdBy: 'lead_capture_service',
       },
     });

@@ -10,6 +10,7 @@ const PLAN_LIMITS: Record<string, RateLimitConfig> = {
   STARTER: { windowMs: 60000, maxRequests: 50 },   // 50 req/min
   GROWTH: { windowMs: 60000, maxRequests: 200 },   // 200 req/min
   PRO: { windowMs: 60000, maxRequests: 500 },      // 500 req/min
+  AGENCY: { windowMs: 60000, maxRequests: 1000 },  // 1000 req/min
   ENTERPRISE: { windowMs: 60000, maxRequests: 2000 }, // 2000 req/min
 };
 

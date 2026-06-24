@@ -35,7 +35,7 @@ router.post('/', authenticate, async (req: any, res: any) => {
 router.put('/:id', authenticate, async (req: any, res: any) => {
   try {
     const { url, events, isActive } = req.body;
-    await prisma.webhook.update({ where: { id: req.params.id }, data: { url, events, isActive } });
+    await prisma.webhook.update({ where: { id: req.params.id, businessId: req.user.businessId }, data: { url, events, isActive } });
     res.json({ success: true, message: 'Webhook updated' });
   } catch (error: any) {
     res.status(500).json({ success: false, error: 'Failed to update webhook', details: error.message });
@@ -45,7 +45,7 @@ router.put('/:id', authenticate, async (req: any, res: any) => {
 // Delete webhook
 router.delete('/:id', authenticate, async (req: any, res: any) => {
   try {
-    await prisma.webhook.delete({ where: { id: req.params.id } });
+    await prisma.webhook.delete({ where: { id: req.params.id, businessId: req.user.businessId } });
     res.json({ success: true, message: 'Webhook deleted' });
   } catch (error: any) {
     res.status(500).json({ success: false, error: 'Failed to delete webhook', details: error.message });

@@ -44,7 +44,10 @@ async function authenticateViaN8nApiKey(req: AuthRequest): Promise<boolean> {
     .update(rawBusinessId)
     .digest('hex');
 
-  if (!crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature))) {
+  // Check buffer lengths match before timingSafeEqual to prevent crash
+  const expectedBuf = Buffer.from(expectedSignature, 'hex');
+  const signatureBuf = Buffer.from(signature, 'hex');
+  if (expectedBuf.length !== signatureBuf.length || !crypto.timingSafeEqual(expectedBuf, signatureBuf)) {
     console.warn('[n8nAuth] Invalid business signature — possible tenant breakout attempt');
     return false; // Let the calling authenticate middleware handle the 403
   }
@@ -113,7 +116,7 @@ export const authenticate = async (
     req.user = {
       id: user.id,
       email: user.email,
-      businessId: user.businessId || 'super-admin',
+      businessId: user.businessId || null,
       role: user.role,
     };
 

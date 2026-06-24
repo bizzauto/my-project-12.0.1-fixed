@@ -1,5 +1,6 @@
 import { prisma } from '../db.js';
 import { authenticate } from '../middleware/auth.js';
+import { AIService } from '../services/ai.service.js';
 import axios from 'axios';
 import express, { Request, Response } from 'express';
 
@@ -13,32 +14,20 @@ router.post('/generate', authenticate, async (req: any, res: any) => {
       return res.status(400).json({ success: false, error: 'Prompt is required' });
     }
 
-    const business = await prisma.business.findUnique({ where: { id: req.user.businessId } });
-    if (!business) {
-      return res.status(404).json({ success: false, error: 'Business not found' });
-    }
+    const sanitizedPrompt = prompt.replace(/\b(hack|exploit|bypass|crack)\b/gi, '[filtered]');
 
-    const creditsUsed = business.aiCreditsUsed || 0;
-    const creditsLimit = business.aiCreditsLimit || 100;
+    const model = getOptimalModel(type);
+    const response = await callAIProvider(model, sanitizedPrompt);
+    const tokensUsed = estimateTokens(sanitizedPrompt, response.text);
+    const creditCost = Math.ceil(tokensUsed / 1000);
 
-    if (creditsUsed >= creditsLimit) {
+    const credited = await AIService.useCredit(req.user.businessId, creditCost);
+    if (!credited) {
       return res.status(429).json({
         success: false,
         error: 'AI credits exhausted. Please upgrade your plan or purchase more credits.',
-        current: creditsUsed,
-        limit: creditsLimit,
       });
     }
-
-    const model = getOptimalModel(type);
-    const response = await callAIProvider(model, prompt);
-    const tokensUsed = estimateTokens(prompt, response.text);
-    const creditCost = Math.ceil(tokensUsed / 1000);
-
-    await prisma.business.update({
-      where: { id: req.user.businessId },
-      data: { aiCreditsUsed: { increment: creditCost } },
-    });
 
     res.json({
       success: true,
@@ -51,62 +40,97 @@ router.post('/generate', authenticate, async (req: any, res: any) => {
     });
   } catch (error: any) {
     console.error('AI generation error:', error);
-    res.status(500).json({ success: false, error: 'AI generation failed', details: error.message });
+    res.status(500).json({ success: false, error: 'AI generation failed' });
   }
 });
 
-router.post('/caption', authenticate, async (req: Request, res: Response) => {
+router.post('/caption', authenticate, async (req: any, res: Response) => {
   try {
     const { topic, businessType, platform, language = 'en' } = req.body;
+
     const prompt = `Generate a ${platform} caption for a ${businessType} in India. Topic: ${topic}. Include emojis and relevant hashtags. Keep it engaging and under 280 characters for Twitter, or appropriate length for ${platform}.`;
     const response = await callAIProvider({ provider: 'openrouter', model: 'meta-llama/llama-3.1-8b-instruct:free' }, prompt);
+
+    const credited = await AIService.useCredit(req.user.businessId);
+    if (!credited) {
+      return res.status(429).json({ success: false, error: 'AI credits exhausted' });
+    }
+
     res.json({ success: true, data: { caption: response.text } });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: 'Failed to generate caption', details: error.message });
+    res.status(500).json({ success: false, error: 'Failed to generate caption' });
   }
 });
 
-router.post('/hashtags', authenticate, async (req: Request, res: Response) => {
+router.post('/hashtags', authenticate, async (req: any, res: Response) => {
   try {
     const { topic, platform } = req.body;
+
     const prompt = `Generate 15-20 relevant hashtags for ${topic} on ${platform}. Mix of popular and niche hashtags. Return as JSON array.`;
     const response = await callAIProvider({ provider: 'openrouter', model: 'meta-llama/llama-3.1-8b-instruct:free' }, prompt);
+
+    const credited = await AIService.useCredit(req.user.businessId);
+    if (!credited) {
+      return res.status(429).json({ success: false, error: 'AI credits exhausted' });
+    }
+
     res.json({ success: true, data: { hashtags: response.text } });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: 'Failed to generate hashtags', details: error.message });
+    res.status(500).json({ success: false, error: 'Failed to generate hashtags' });
   }
 });
 
-router.post('/review-reply', authenticate, async (req: Request, res: Response) => {
+router.post('/review-reply', authenticate, async (req: any, res: Response) => {
   try {
     const { reviewText, rating, businessType, businessName } = req.body;
+
     const prompt = `Generate a professional reply to this ${rating}-star review for ${businessName}, a ${businessType} in India. Review: "${reviewText}". Keep it under 100 words, thank the customer, and address their concerns. Use Indian English tone.`;
     const response = await callAIProvider({ provider: 'grok', model: 'grok-3-mini' }, prompt);
+
+    const credited = await AIService.useCredit(req.user.businessId);
+    if (!credited) {
+      return res.status(429).json({ success: false, error: 'AI credits exhausted' });
+    }
+
     res.json({ success: true, data: { reply: response.text } });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: 'Failed to generate review reply', details: error.message });
+    res.status(500).json({ success: false, error: 'Failed to generate review reply' });
   }
 });
 
-router.post('/smart-replies', authenticate, async (req: Request, res: Response) => {
+router.post('/smart-replies', authenticate, async (req: any, res: Response) => {
   try {
     const { conversation, tone = 'professional', context } = req.body;
+
     const prompt = `Generate 3-5 smart reply suggestions for this customer message: "${conversation}". The tone should be ${tone}. Consider the context: ${context}. Each reply should be concise, helpful, and appropriate for customer service. Return as JSON array.`;
     const response = await callAIProvider({ provider: 'openrouter', model: 'meta-llama/llama-3.1-8b-instruct:free' }, prompt);
+
+    const credited = await AIService.useCredit(req.user.businessId);
+    if (!credited) {
+      return res.status(429).json({ success: false, error: 'AI credits exhausted' });
+    }
+
     res.json({ success: true, data: { replies: response.text } });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: 'Failed to generate smart replies', details: error.message });
+    res.status(500).json({ success: false, error: 'Failed to generate smart replies' });
   }
 });
 
-router.post('/content-calendar', authenticate, async (req: Request, res: Response) => {
+router.post('/content-calendar', authenticate, async (req: any, res: Response) => {
   try {
     const { businessType, city, month, year } = req.body;
+
     const prompt = `Generate a ${month} ${year} content calendar for a ${businessType} in ${city}, India. Include 30 posts with: date, topic, caption, hashtags, and post_type (promotional, educational, engagement, festival). Return as JSON array.`;
     const response = await callAIProvider({ provider: 'openrouter', model: 'meta-llama/llama-3.1-70b-instruct' }, prompt);
+
+    const credited = await AIService.useCredit(req.user.businessId);
+    if (!credited) {
+      return res.status(429).json({ success: false, error: 'AI credits exhausted' });
+    }
+
     res.json({ success: true, data: { calendar: response.text } });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: 'Failed to generate content calendar', details: error.message });
+    res.status(500).json({ success: false, error: 'Failed to generate content calendar' });
   }
 });
 
@@ -128,7 +152,7 @@ router.post('/backup', authenticate, async (req: Request, res: Response) => {
 
     res.json({ success: true, data: { backup: backupData } });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: 'Failed to create backup', details: error.message });
+    res.status(500).json({ success: false, error: 'Failed to create backup' });
   }
 });
 
@@ -144,7 +168,7 @@ router.post('/restore', authenticate, async (req: Request, res: Response) => {
     }
     res.json({ success: true, data: { backup } });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: 'Failed to restore backup', details: error.message });
+    res.status(500).json({ success: false, error: 'Failed to restore backup' });
   }
 });
 
@@ -166,7 +190,7 @@ async function callAIProvider(model: any, prompt: string) {
     if (model.provider === 'openrouter') {
       const apiKey = process.env.OPENROUTER_API_KEY;
       if (!apiKey || apiKey === 'your_openrouter_api_key') {
-        throw new Error('OPENROUTER_API_KEY not configured in .env');
+        throw new Error('AI service not configured');
       }
       const response = await axios.post(
         'https://openrouter.ai/api/v1/chat/completions',
@@ -181,7 +205,7 @@ async function callAIProvider(model: any, prompt: string) {
       if (!grokKey || grokKey === 'your_grok_api_key') {
         const openrouterKey = process.env.OPENROUTER_API_KEY;
         if (!openrouterKey || openrouterKey === 'your_openrouter_api_key') {
-          throw new Error('Neither GROK_API_KEY nor OPENROUTER_API_KEY configured in .env');
+          throw new Error('AI service not configured');
         }
         const response = await axios.post(
           'https://openrouter.ai/api/v1/chat/completions',

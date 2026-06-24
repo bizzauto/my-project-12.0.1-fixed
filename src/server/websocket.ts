@@ -37,6 +37,17 @@ export function setupWebSocket(httpServer: HttpServer) {
       }
 
       const decoded = jwt.verify(token as string, process.env.JWT_SECRET!) as any;
+
+      // Verify user still exists and is active
+      const { prisma } = await import('./db.js');
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        select: { id: true, isActive: true },
+      });
+      if (!user || !user.isActive) {
+        return next(new Error('User not found or deactivated'));
+      }
+
       socket.userId = decoded.userId;
       socket.businessId = decoded.businessId;
       socket.plan = decoded.plan || 'FREE';

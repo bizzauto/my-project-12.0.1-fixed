@@ -23,14 +23,6 @@ const PLAN_LIMITS: Record<string, PlanLimits> = {
     posters: 20,
     aiCredits: 10,
   },
-  BASIC: {
-    contacts: 1000,
-    messages: 1000,
-    users: 3,
-    posts: 50,
-    posters: 100,
-    aiCredits: 100,
-  },
   STARTER: {
     contacts: 2000,
     messages: 5000,
@@ -38,14 +30,6 @@ const PLAN_LIMITS: Record<string, PlanLimits> = {
     posts: 50,
     posters: 100,
     aiCredits: 100,
-  },
-  PROFESSIONAL: {
-    contacts: 10000,
-    messages: 25000,
-    users: 10,
-    posts: 200,
-    posters: 500,
-    aiCredits: 500,
   },
   GROWTH: {
     contacts: 10000,
@@ -63,14 +47,6 @@ const PLAN_LIMITS: Record<string, PlanLimits> = {
     posters: 2000,
     aiCredits: 1000,
   },
-  ENTERPRISE: {
-    contacts: 999999999,
-    messages: 999999999,
-    users: 999999,
-    posts: 999999,
-    posters: 999999,
-    aiCredits: 999999,
-  },
   AGENCY: {
     contacts: 100000,
     messages: 100000,
@@ -78,6 +54,14 @@ const PLAN_LIMITS: Record<string, PlanLimits> = {
     posts: 10000,
     posters: 10000,
     aiCredits: 10000,
+  },
+  ENTERPRISE: {
+    contacts: 999999999,
+    messages: 999999999,
+    users: 999999,
+    posts: 999999,
+    posters: 999999,
+    aiCredits: 999999,
   },
 };
 
@@ -179,7 +163,7 @@ export const checkMessageLimit = async (
     const currentCount = await prisma.message.count({
       where: {
         businessId: user.businessId,
-        direction: 'outgoing',
+        direction: 'outbound',
         createdAt: { gte: monthStart },
       },
     });
@@ -310,7 +294,7 @@ export const getUsageStats = async (businessId: string) => {
   const [contactsCount, messagesCount, usersCount] = await Promise.all([
     prisma.contact.count({ where: { businessId } }),
     prisma.message.count({
-      where: { businessId, direction: 'outgoing', createdAt: { gte: monthStart } },
+      where: { businessId, direction: 'outbound', createdAt: { gte: monthStart } },
     }),
     prisma.user.count({ where: { businessId, isActive: true } }),
   ]);

@@ -67,13 +67,13 @@ export function validateEnvironment(): ValidationResult {
     }
   }
 
-  // Security checks
-  if (process.env.JWT_SECRET === 'your-jwt-secret-min-32-chars-long') {
-    errors.push('❌ SECURITY: JWT_SECRET is still the default placeholder value!');
+  // Security checks — catch placeholder values that don't meet minimum length
+  if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
+    errors.push('❌ SECURITY: JWT_SECRET is too short — must be at least 32 characters');
   }
 
-  if (process.env.ENCRYPTION_KEY === 'your-aes-256-encryption-key-64-hex-chars') {
-    errors.push('❌ SECURITY: ENCRYPTION_KEY is still the default placeholder value!');
+  if (process.env.ENCRYPTION_KEY && !/^[a-f0-9]{64}$/i.test(process.env.ENCRYPTION_KEY)) {
+    errors.push('❌ SECURITY: ENCRYPTION_KEY must be exactly 64 hex characters');
   }
 
   if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'development') {

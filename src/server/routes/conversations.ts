@@ -147,6 +147,7 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
         const unreadCount = await prisma.message.count({
           where: {
             contactId: contact.id,
+            businessId,
             direction: 'incoming',
             status: 'received',
           },

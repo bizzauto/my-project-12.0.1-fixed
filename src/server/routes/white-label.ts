@@ -5,8 +5,11 @@ import { prisma } from '../db.js';
 
 const router = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || process.env.JWT_REFRESH_SECRET || 'bizzauto-wl-secret-key-change-in-production';
-const PLAN_PRICES: Record<string, number> = { STARTER: 999, PRO: 2499, ENTERPRISE: 9999 };
+const JWT_SECRET = process.env.JWT_SECRET || process.env.JWT_REFRESH_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('CRITICAL: Neither JWT_SECRET nor JWT_REFRESH_SECRET is set. Cannot start white-label module.');
+}
+const PLAN_PRICES: Record<string, number> = { STARTER: 999, PRO: 4999, ENTERPRISE: 9999 };
 
 // Auth middleware for white-label routes
 const wlAuth = async (req: Request, res: Response, next: Function) => {

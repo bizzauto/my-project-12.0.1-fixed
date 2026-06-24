@@ -761,8 +761,6 @@ export async function shutdownWorkers() {
   console.log('All workers shut down successfully');
 }
 
-// Handle process termination
-process.on('SIGTERM', shutdownWorkers);
-process.on('SIGINT', shutdownWorkers);
+// Shutdown is handled by the main server gracefulShutdown() which calls shutdownWorkers via webhook-retry.service
 
 export default { queues, workers };

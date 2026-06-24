@@ -8,7 +8,7 @@
 import { EvolutionApiService } from '../src/server/services/evolution.service';
 
 // ======== Mocks ========
-jest.mock('../src/server/index', () => ({
+jest.mock('../src/server/db', () => ({
   prisma: {
     integration: {
       findFirst: jest.fn(),
@@ -25,6 +25,9 @@ jest.mock('../src/server/index', () => ({
       findFirst: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+    },
+    activity: {
+      create: jest.fn(),
     },
     campaign: {
       update: jest.fn(),
@@ -43,7 +46,7 @@ jest.mock('../src/server/utils/auth', () => ({
 }));
 
 import axios from 'axios';
-import { prisma } from '../src/server/index';
+import { prisma } from '../src/server/db';
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 const mockedPrisma = prisma as any;
@@ -73,6 +76,7 @@ describe('EvolutionApiService', () => {
           instanceName: '',
           baseUrl: '',
           apiKey: '',
+          phone: '',
         });
         expect(mockedPrisma.integration.findFirst).toHaveBeenCalledWith({
           where: { businessId: BUSINESS_ID, type: 'evolution_api' },
@@ -86,6 +90,7 @@ describe('EvolutionApiService', () => {
             apiKey: API_KEY,
             instanceName: INSTANCE_NAME,
             status: 'connected',
+            phone: '',
           },
         });
 
@@ -97,6 +102,7 @@ describe('EvolutionApiService', () => {
           instanceName: INSTANCE_NAME,
           baseUrl: BASE_URL,
           apiKey: API_KEY,
+          phone: '',
         });
       });
 
@@ -112,6 +118,7 @@ describe('EvolutionApiService', () => {
 
         expect(result.configured).toBe(true);
         expect(result.status).toBe('disconnected');
+        expect(result.phone).toBe('');
       });
     });
 
@@ -137,6 +144,7 @@ describe('EvolutionApiService', () => {
               apiKey: API_KEY,
               instanceName: INSTANCE_NAME,
               status: 'disconnected',
+              phone: '',
             },
             isActive: true,
           },
@@ -146,6 +154,7 @@ describe('EvolutionApiService', () => {
               apiKey: API_KEY,
               instanceName: INSTANCE_NAME,
               status: 'disconnected',
+              phone: '',
             },
             isActive: true,
           },
@@ -162,6 +171,7 @@ describe('EvolutionApiService', () => {
 
         const upsertCall = mockedPrisma.integration.upsert.mock.calls[0][0];
         expect(upsertCall.create.config.instanceName).toBe(`biz_${BUSINESS_ID.slice(-8)}`);
+        expect(upsertCall.create.config.phone).toBe('');
       });
     });
   });
@@ -169,6 +179,10 @@ describe('EvolutionApiService', () => {
   // ==================== INSTANCE MANAGEMENT ====================
 
   describe('Instance Management', () => {
+    // connectInstance has hardcoded real setTimeout delays (3s + 2s)
+    // so we need a longer timeout
+    jest.setTimeout(30000);
+
     describe('createInstance', () => {
       it('creates instance and saves integration', async () => {
         mockedAxios.post.mockResolvedValue({
@@ -264,19 +278,26 @@ describe('EvolutionApiService', () => {
     });
 
     describe('connectInstance', () => {
-      it('connects and returns QR code data', async () => {
-        // Mock getConfig via findFirst
-        mockedPrisma.integration.findFirst.mockResolvedValue({
-          config: { baseUrl: BASE_URL, apiKey: API_KEY, instanceName: INSTANCE_NAME },
-        });
-        mockedPrisma.integration.update.mockResolvedValue({});
+      beforeEach(() => {
+        // Set up all the axios mocks needed for the complex connectInstance flow
+        // connectInstance does: delete(fetchInstances) -> wait3s -> create -> wait2s -> connect(with retries)
+        mockedAxios.delete.mockResolvedValue({ data: {} });
+        mockedAxios.post.mockResolvedValue({ data: { instance: { id: 'inst-123' } } });
+        mockedPrisma.integration.upsert.mockResolvedValue({});
 
-        // Service uses axios.get for connect endpoint
-        // Use only qrcode.code (not base64Image) to test that code path
+        // Default get mock - first call (fetchInstances) returns non-array (handled by catch)
+        // Subsequent calls (connect) return QR data
         mockedAxios.get.mockResolvedValue({
           data: {
             qrcode: { code: 'qr-code-string' },
           },
+        });
+      });
+
+      it('connects and returns QR code data', async () => {
+        // Mock getConfig via findFirst
+        mockedPrisma.integration.findFirst.mockResolvedValue({
+          config: { baseUrl: BASE_URL, apiKey: API_KEY, instanceName: INSTANCE_NAME },
         });
 
         const result = await EvolutionApiService.connectInstance(BUSINESS_ID);
@@ -288,19 +309,18 @@ describe('EvolutionApiService', () => {
 
         expect(mockedAxios.get).toHaveBeenCalledWith(
           `${BASE_URL}/instance/connect/${INSTANCE_NAME}`,
-          expect.objectContaining({ headers: { apikey: API_KEY }, timeout: 15000 })
+          expect.objectContaining({ headers: { apikey: API_KEY }, timeout: 30000 })
         );
 
-        // Status should be updated to scanning
-        expect(mockedPrisma.integration.update).toHaveBeenCalled();
+        // Config should be saved via upsert
+        expect(mockedPrisma.integration.upsert).toHaveBeenCalled();
       });
 
       it('falls back to base64Image when qrcode.code is not available', async () => {
         mockedPrisma.integration.findFirst.mockResolvedValue({
           config: { baseUrl: BASE_URL, apiKey: API_KEY, instanceName: INSTANCE_NAME },
         });
-        mockedPrisma.integration.update.mockResolvedValue({});
-        mockedAxios.post.mockResolvedValue({ data: {} });
+        // Connect returns data with base64 (no qrcode.code)
         mockedAxios.get.mockResolvedValue({
           data: { base64: 'direct-base64' },
         });
@@ -322,15 +342,15 @@ describe('EvolutionApiService', () => {
         mockedPrisma.integration.findFirst.mockResolvedValue({
           config: { baseUrl: BASE_URL, apiKey: API_KEY, instanceName: INSTANCE_NAME },
         });
-        // Reset get to remove any lingering mockResolvedValue from previous tests
-        mockedAxios.get.mockReset();
-        mockedAxios.get.mockRejectedValue({
-          response: { data: { message: 'Connection timeout' } },
-        });
+        // Make the connect call (3rd, 4th etc. axios.get call) fail after retries
+        // connectInstance wraps connect in retry loop (3 attempts), so we mock all gets to reject
+        mockedAxios.get.mockRejectedValue(
+          new Error('Connection timeout')
+        );
 
         await expect(
           EvolutionApiService.connectInstance(BUSINESS_ID)
-        ).rejects.toThrow('Failed to connect Evolution API instance');
+        ).rejects.toThrow('Failed to connect after');
       });
     });
 
@@ -754,7 +774,7 @@ describe('EvolutionApiService', () => {
 
         expect(chats).toHaveLength(2);
         expect(mockedAxios.post).toHaveBeenCalledWith(
-          `${BASE_URL}/chat/fetchChats/${INSTANCE_NAME}`,
+          `${BASE_URL}/chat/findChats/${INSTANCE_NAME}`,
           {},
           expect.any(Object)
         );
@@ -781,7 +801,7 @@ describe('EvolutionApiService', () => {
 
         expect(messages).toHaveLength(2);
         expect(mockedAxios.post).toHaveBeenCalledWith(
-          `${BASE_URL}/chat/fetchMessages/${INSTANCE_NAME}`,
+          `${BASE_URL}/chat/findMessages/${INSTANCE_NAME}`,
           expect.objectContaining({
             where: { key: { remoteJid: '919876543210@s.whatsapp.net' } },
             limit: 10,
@@ -949,8 +969,9 @@ describe('EvolutionApiService', () => {
           })
         );
 
-        // Should update contact last activity
-        expect(mockedPrisma.contact.update).toHaveBeenCalled();
+        // Since findFirst returned null, the service should create (not update) the contact
+        // No contact.update should be called in this case
+        expect(mockedPrisma.contact.update).not.toHaveBeenCalled();
       });
 
       it('skips messages from self (fromMe=true)', async () => {

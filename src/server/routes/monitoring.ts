@@ -27,7 +27,12 @@ export function getGauge(name: string): number {
 }
 
 // GET /metrics — Prometheus text format
-router.get('/metrics', async (_req: Request, res: Response) => {
+router.get('/metrics', async (req: Request, res: Response) => {
+  const isLocal = req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1';
+  const hasKey = req.headers['x-monitor-key'] === process.env.MONITOR_KEY;
+  if (!isLocal && !hasKey) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
   const lines: string[] = [];
 
   // Process metrics
@@ -95,7 +100,12 @@ router.get('/metrics', async (_req: Request, res: Response) => {
 });
 
 // GET /health/enhanced — Detailed health check with component status
-router.get('/health/enhanced', async (_req: Request, res: Response) => {
+router.get('/health/enhanced', async (req: Request, res: Response) => {
+  const isLocal = req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1';
+  const hasKey = req.headers['x-monitor-key'] === process.env.MONITOR_KEY;
+  if (!isLocal && !hasKey) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
   const checks: Record<string, { status: string; latencyMs?: number; error?: string }> = {};
 
   // Database check

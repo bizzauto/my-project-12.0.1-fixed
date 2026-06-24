@@ -301,7 +301,7 @@ app.use('/api', (req, res, next) => {
     return next();
   }
   // Skip CSRF for webhook endpoints (they use webhook-secret validation instead)
-  const webhookPaths = ['/dograh/webhook', '/payments/webhook', '/payments/verify'];
+  const webhookPaths = ['/dograh/webhook', '/payments/webhook', '/payments/verify', '/subscriptions/webhook'];
   if (webhookPaths.some(p => req.path.startsWith(p))) {
     return next();
   }
@@ -530,7 +530,8 @@ if (NODE_ENV === 'production') {
     printValidationResult(result);
 
     if (!result.valid && NODE_ENV === 'production') {
-      logger.error('CRITICAL: Environment validation failed. Server starting in degraded mode.');
+      console.error('CRITICAL: Environment validation failed. Cannot start in production.');
+      process.exit(1);
     }
   } catch (e) {
     // Fallback basic check
@@ -570,49 +571,15 @@ app.use((req, res) => {
 });
 
 // Graceful shutdown
-process.on('unhandledRejection', (error: any) => {
-  console.error('UNHANDLED REJECTION:', error);
-  console.error('Stack:', error?.stack);
-  logger.error('Unhandled Rejection:', error);
+process.on('unhandledRejection', (reason: any) => {
+  console.error('UNHANDLED REJECTION:', reason);
+  console.error('Stack:', reason?.stack);
+  logger.error('Unhandled Rejection:', reason);
+  setTimeout(() => process.exit(1), 5000);
 });
 
-process.on('SIGTERM', async () => {
-  logger.info('SIGTERM received, shutting down gracefully');
-  try {
-    stopAuditPruneCron();
-    circuitBreaker.destroy();
-    await shutdownWebhookWorker();
-    await prisma.$disconnect();
-  } catch (e) {
-    // ignore disconnect errors during shutdown
-  }
-  logger.on('finish', () => process.exit(0));
-  logger.end();
-  // Give up to 30s for in-flight transactions to complete before force-exit
-  setTimeout(() => {
-    console.warn('[Shutdown] Force exit after 30s timeout');
-    process.exit(0);
-  }, 30000); // Increased from 5000ms to 30000ms
-});
-
-process.on('SIGINT', async () => {
-  logger.info('SIGINT received, shutting down gracefully');
-  try {
-    stopAuditPruneCron();
-    circuitBreaker.destroy();
-    await shutdownWebhookWorker();
-    await prisma.$disconnect();
-  } catch (e) {
-    // ignore
-  }
-  logger.on('finish', () => process.exit(0));
-  logger.end();
-  // Give up to 30s for in-flight transactions to complete before force-exit
-  setTimeout(() => {
-    console.warn('[Shutdown] Force exit after 30s timeout');
-    process.exit(0);
-  }, 30000); // Increased from 5000ms to 30000ms
-});
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 process.on('uncaughtException', async (error) => {
   console.error('UNCAUGHT EXCEPTION:', error);
@@ -630,10 +597,45 @@ startAuditPruneCron();
 
 // Start server
 console.log(`Starting server on ${HOST}:${PORT} in ${NODE_ENV} mode`);
-app.listen(Number(PORT), () => {
+const httpServer = app.listen(Number(PORT), () => {
   console.log(`Server running on port ${PORT} in ${NODE_ENV} mode`);
   logger.info(`Server running on port ${PORT} in ${NODE_ENV} mode`);
 });
+
+// Graceful shutdown helper
+function gracefulShutdown(signal: string) {
+  logger.info(`${signal} received, shutting down gracefully`);
+
+  // Wait for in-flight requests to finish (up to 25s)
+  const serverClosed = new Promise<void>((resolve) => {
+    httpServer.close(() => resolve());
+  });
+
+  // Cleanup in parallel, then force exit
+  const forceExitTimeout = setTimeout(() => {
+    console.warn('[Shutdown] Force exit after 30s timeout');
+    process.exit(0);
+  }, 30000);
+
+  // Unref so it doesn't keep process alive
+  forceExitTimeout.unref();
+
+  (async () => {
+    await Promise.race([serverClosed, new Promise(r => setTimeout(r, 25000))]);
+    logger.info('HTTP server closed, no new connections accepted');
+
+    try {
+      stopAuditPruneCron();
+      circuitBreaker.destroy();
+      await shutdownWebhookWorker();
+    } catch (e) { /* ignore */ }
+    try {
+      await prisma.$disconnect();
+    } catch (e) { /* ignore */ }
+    clearTimeout(forceExitTimeout);
+    process.exit(0);
+  })();
+}
 
 // Export authenticate middleware for use in routes
 export { authenticate } from './middleware/auth.js';

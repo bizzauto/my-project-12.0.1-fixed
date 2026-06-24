@@ -237,7 +237,7 @@ router.put('/:id/stage', authenticate, requireRole('OWNER', 'ADMIN'), validate(u
     const oldStage = contact.dealStage || contact.stage;
 
     const updated = await prisma.contact.update({
-      where: { id },
+      where: { id, businessId },
       data: {
         ...(stage !== undefined && { dealStage: stage, stage }),
         ...(stageId !== undefined && { stageId }),
@@ -295,7 +295,7 @@ router.put('/:id', authenticate, requireRole('OWNER', 'ADMIN'), validate(updateD
     }
 
     const updated = await prisma.contact.update({
-      where: { id },
+      where: { id, businessId },
       data: {
         ...(dealValue !== undefined && { dealValue: parseFloat(dealValue) }),
         ...(dealStage !== undefined && { dealStage }),

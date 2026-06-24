@@ -198,6 +198,12 @@ model Business {
   workflows              Workflow[]
   workflowExecutions     WorkflowExecution[]
   workflowRuns           WorkflowRun[]
+  outreachCampaigns      OutreachCampaign[]
+  outreachLogs           OutreachLog[]
+  leads                  Lead[]
+  crmInvoices            CrmInvoice[]
+  deals                  Deal[]
+  leadFinderSearches     LeadFinderSearch[]
 
   @@index([plan])
 }
@@ -243,6 +249,9 @@ model Contact {
   state                String?
   source               String                 @default("manual")
   sourceId             String?
+  leadFinderData       Json?
+  leadFinderSource     String?
+  leadFinderScore      Int?
   pipelineId           String?
   stageId              String?
   stageName            String?
@@ -284,6 +293,7 @@ model Contact {
   pushSubscriptions    PushSubscription[]
   referredUsers        Referral[]             @relation("Referee")
   referredBy           Referral[]             @relation("Referrer")
+  outreachLogs         OutreachLog[]
   returnRequests       ReturnRequest[]
   scheduledMessages    ScheduledMessage[]
   segmentMembers       SegmentMember[]
@@ -297,8 +307,12 @@ model Contact {
   @@index([businessId, source])
   @@index([businessId, createdAt])
   @@index([businessId, lastMessageAt])
+  @@index([businessId, stage])
+  @@index([businessId, status])
   @@index([source])
   @@index([tags])
+  @@index([stage])
+  @@index([status])
 }
 
 model Pipeline {
@@ -393,6 +407,8 @@ model Message {
   @@index([businessId, contactId])
   @@index([businessId, status])
   @@index([businessId, createdAt])
+  @@index([businessId, direction])
+  @@index([direction])
   @@index([status])
   @@index([createdAt])
 }
@@ -460,6 +476,8 @@ model Campaign {
   @@index([status])
   @@index([scheduledAt])
   @@index([businessId, status])
+  @@index([businessId, createdAt])
+  @@index([businessId, scheduledAt])
 }
 
 model Appointment {
@@ -570,6 +588,7 @@ model Order {
   @@index([contactId])
   @@index([businessId, status])
   @@index([businessId, createdAt])
+  @@index([contactId, status])
   @@index([status])
   @@index([createdAt])
 }
@@ -1339,6 +1358,7 @@ model AuditLog {
   @@index([businessId, createdAt])
   @@index([businessId, action])
   @@index([businessId, entity])
+  @@index([entity])
 }
 
 model Notification {
@@ -2857,4 +2877,118 @@ enum PaymentMethod {
 enum CouponType {
   PERCENTAGE
   FIXED
+}
+
+model OutreachCampaign {
+  id           String          @id @default(cuid())
+  businessId   String
+  name         String
+  template     String?
+  status       String          @default("draft")
+  totalLeads   Int             @default(0)
+  sent         Int             @default(0)
+  replied      Int             @default(0)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  business     Business        @relation(fields: [businessId], references: [id])
+  outreachLogs OutreachLog[]
+
+  @@index([businessId])
+}
+
+model OutreachLog {
+  id           String          @id @default(cuid())
+  campaignId   String
+  contactId    String
+  businessId   String
+  messageType  String          @default("initial")
+  message      String          @default("")
+  status       String          @default("pending")
+  sentAt       DateTime?
+  repliedAt    DateTime?
+  replyContent String?
+  whatsappMsgId String?
+  createdAt    DateTime        @default(now())
+  campaign     OutreachCampaign @relation(fields: [campaignId], references: [id])
+  contact      Contact         @relation(fields: [contactId], references: [id])
+  business     Business        @relation(fields: [businessId], references: [id])
+
+  @@index([campaignId])
+  @@index([contactId])
+  @@index([businessId])
+  @@index([campaignId, contactId, messageType])
+}
+
+model Lead {
+  id           String    @id @default(cuid())
+  businessId   String
+  name         String?
+  phone        String?
+  email        String?
+  company      String?
+  source       String?
+  status       String    @default("new")
+  score        Int?
+  notes        String?
+  customFields Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  business     Business  @relation(fields: [businessId], references: [id])
+
+  @@index([businessId])
+  @@index([businessId, status])
+}
+
+model CrmInvoice {
+  id           String    @id @default(cuid())
+  businessId   String
+  contactId    String?
+  total        Float     @default(0)
+  status       String    @default("draft")
+  dueDate      DateTime?
+  paidAt       DateTime?
+  items        Json?
+  notes        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  business     Business  @relation(fields: [businessId], references: [id])
+
+  @@index([businessId])
+  @@index([businessId, status])
+}
+
+model Deal {
+  id           String    @id @default(cuid())
+  businessId   String
+  contactId    String?
+  name         String
+  value        Float     @default(0)
+  stage        String    @default("Lead")
+  probability  Int?
+  expectedClose DateTime?
+  notes        String?
+  customFields Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  business     Business  @relation(fields: [businessId], references: [id])
+
+  @@index([businessId])
+  @@index([businessId, stage])
+  @@index([contactId])
+  @@index([stage])
+}
+
+model LeadFinderSearch {
+  id            String    @id @default(cuid())
+  businessId    String
+  query         String
+  category      String?
+  city          String?
+  radius        Int?
+  resultsCount  Int       @default(0)
+  importedCount Int?
+  createdAt     DateTime  @default(now())
+  business      Business  @relation(fields: [businessId], references: [id])
+
+  @@index([businessId])
 }

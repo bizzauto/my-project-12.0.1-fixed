@@ -92,7 +92,8 @@ export class FollowUpEngineService {
       const message = await this.generateFollowUpMessage(contact, template, followUpCount + 1);
 
       // Create follow-up log (will be sent by worker after delay)
-      const delayMs = rules.delayHours * Math.pow(2, followUpCount) * 60 * 60 * 1000; // Exponential backoff
+      const maxDelay = 7 * 24 * 60 * 60 * 1000; // 7 days
+      const delayMs = Math.min(rules.delayHours * Math.pow(2, followUpCount) * 60 * 60 * 1000, maxDelay);
 
       await prisma.outreachLog.create({
         data: {

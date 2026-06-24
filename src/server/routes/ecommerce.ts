@@ -355,8 +355,21 @@ router.get('/cart', async (req: AuthRequest, res: Response) => {
   try {
     const businessId = req.user.businessId;
 
-    // For authenticated users, we use their userId as contactId
-    const contactId = req.user.id;
+    // Find or create a contact for this user to use as cart owner
+    let contact = await prisma.contact.findFirst({
+      where: { businessId, email: req.user.email },
+    });
+    if (!contact) {
+      contact = await prisma.contact.create({
+        data: {
+          businessId,
+          name: req.user.email || 'Customer',
+          email: req.user.email || undefined,
+          source: 'cart',
+        },
+      });
+    }
+    const contactId = contact.id;
 
     let cart = await prisma.cart.findFirst({
       where: { businessId, contactId },
@@ -395,7 +408,16 @@ router.get('/cart', async (req: AuthRequest, res: Response) => {
 router.post('/cart/items', async (req: AuthRequest, res: Response) => {
   try {
     const businessId = req.user.businessId;
-    const contactId = req.user.id;
+    // Find or create a contact for this user
+    let contact = await prisma.contact.findFirst({
+      where: { businessId, email: req.user.email },
+    });
+    if (!contact) {
+      contact = await prisma.contact.create({
+        data: { businessId, name: req.user.email || 'Customer', email: req.user.email || undefined, source: 'cart' },
+      });
+    }
+    const contactId = contact.id;
     const { productId, quantity = 1, variantId, variantName, variantPrice } = req.body;
 
     if (!productId) {
@@ -575,15 +597,15 @@ router.delete('/cart/items/:itemId', async (req: AuthRequest, res: Response) => 
 router.delete('/cart', async (req: AuthRequest, res: Response) => {
   try {
     const businessId = req.user.businessId;
-    const contactId = req.user.id;
+    let contact = await prisma.contact.findFirst({ where: { businessId, email: req.user.email } });
+    const contactId = contact?.id;
 
-    const cart = await prisma.cart.findFirst({
-      where: { businessId, contactId },
-    });
-
-    if (cart) {
-      await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
-      await prisma.cart.delete({ where: { id: cart.id } });
+    if (contactId) {
+      const cart = await prisma.cart.findFirst({ where: { businessId, contactId } });
+      if (cart) {
+        await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+        await prisma.cart.delete({ where: { id: cart.id } });
+      }
     }
 
     res.json({ success: true, message: 'Cart cleared' });
@@ -598,7 +620,13 @@ router.delete('/cart', async (req: AuthRequest, res: Response) => {
 router.post('/checkout', async (req: AuthRequest, res: Response) => {
   try {
     const businessId = req.user.businessId;
-    const contactId = req.user.id;
+    let contact = await prisma.contact.findFirst({ where: { businessId, email: req.user.email } });
+    if (!contact) {
+      contact = await prisma.contact.create({
+        data: { businessId, name: req.user.email || 'Customer', email: req.user.email || undefined, source: 'checkout' },
+      });
+    }
+    const contactId = contact.id;
     const { shippingAddress, notes, couponCode, paymentMethod = 'razorpay' } = req.body;
 
     // Get cart

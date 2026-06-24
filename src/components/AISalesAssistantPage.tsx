@@ -49,7 +49,7 @@ export default function AISalesAssistantPage() {
         // No data available - show empty state
       setInsights([]);
       setHotLeads([]);
-      setForecast({ expected: 0, confidence: 0, pipelineValue: 0 });
+      setForecast({ expected: 0, confidence: 0, pipeline: 0 });
       }
     } catch {
       setInsights([]);

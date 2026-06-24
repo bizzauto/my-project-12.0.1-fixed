@@ -244,9 +244,14 @@ router.post('/check-number', authenticate, async (req: any, res: any) => {
 
 // ==================== WEBHOOK ====================
 
-// Webhook receiver (no auth - called by Evolution API server)
+// Webhook receiver — validates shared secret before processing
 router.post('/webhook/:businessId', async (req: any, res: any) => {
   try {
+    const webhookSecret = req.headers['x-webhook-secret'] || req.query.secret;
+    if (webhookSecret !== process.env.EVOLUTION_WEBHOOK_SECRET) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+
     const { businessId } = req.params;
     if (!businessId) return res.status(400).json({ success: false, error: 'Business ID required' });
 

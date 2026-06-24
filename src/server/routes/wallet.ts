@@ -6,6 +6,9 @@ import Razorpay from 'razorpay';
 const router = Router();
 
 // Initialize Razorpay
+if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+  console.warn('[Wallet] Razorpay keys not configured — wallet recharge will be unavailable');
+}
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || '',
   key_secret: process.env.RAZORPAY_KEY_SECRET || '',
@@ -114,17 +117,44 @@ router.post('/recharge', authenticate, async (req: AuthRequest, res: Response) =
 // POST /api/wallet/recharge/verify - Verify payment and add balance
 router.post('/recharge/verify', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, amount } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ success: false, error: 'Missing required payment fields' });
+    }
 
     // Verify signature
+    const crypto = await import('crypto');
     const body = razorpay_order_id + '|' + razorpay_payment_id;
-    const expectedSignature = require('crypto')
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret) {
+      console.error('[Wallet] RAZORPAY_KEY_SECRET not configured');
+      return res.status(500).json({ success: false, error: 'Payment service misconfigured' });
+    }
+    const expectedSignature = crypto
+      .createHmac('sha256', secret)
       .update(body)
       .digest('hex');
 
-    if (expectedSignature !== razorpay_signature) {
+    const sigBuf = Buffer.from(expectedSignature, 'hex');
+    const userSigBuf = Buffer.from(razorpay_signature, 'hex');
+    if (sigBuf.length !== userSigBuf.length || !crypto.timingSafeEqual(sigBuf, userSigBuf)) {
       return res.status(400).json({ success: false, error: 'Invalid payment signature' });
+    }
+
+    // Fetch order from Razorpay to get authoritative amount (never trust client)
+    const order = await razorpay.orders.fetch(razorpay_order_id);
+    if (!order || order.status !== 'paid') {
+      return res.status(400).json({ success: false, error: 'Payment not completed' });
+    }
+
+    const rechargeAmount = Number(order.amount) / 100; // Razorpay amount is in paise
+
+    const existingTx = await prisma.walletTransaction.findFirst({
+      where: { razorpayPaymentId: razorpay_payment_id },
+    });
+    if (existingTx) {
+      return res.json({ success: true, message: 'Already processed' });
     }
 
     // Ensure wallet exists
@@ -137,14 +167,11 @@ router.post('/recharge/verify', authenticate, async (req: AuthRequest, res: Resp
       });
     }
 
-    const rechargeAmount = Number(amount) / 100; // Convert from paise
-    const newBalance = Math.round((wallet.balance + rechargeAmount) * 100) / 100;
-
-    // Update wallet
-    await prisma.wallet.update({
+    // Use atomic increment to prevent race conditions
+    const updatedWallet = await prisma.wallet.update({
       where: { id: wallet.id },
       data: {
-        balance: newBalance,
+        balance: { increment: rechargeAmount },
         totalRecharged: { increment: rechargeAmount },
       },
     });
@@ -156,7 +183,7 @@ router.post('/recharge/verify', authenticate, async (req: AuthRequest, res: Resp
         businessId: req.user.businessId,
         type: 'recharge',
         amount: rechargeAmount,
-        balance: newBalance,
+        balance: updatedWallet.balance,
         description: `Wallet recharge ₹${rechargeAmount}`,
         razorpayOrderId: razorpay_order_id,
         razorpayPaymentId: razorpay_payment_id,
@@ -167,14 +194,14 @@ router.post('/recharge/verify', authenticate, async (req: AuthRequest, res: Resp
     res.json({
       success: true,
       data: {
-        balance: newBalance,
+        balance: updatedWallet.balance,
         transactionId: transaction.id,
         message: `₹${rechargeAmount} added to wallet`,
       },
     });
   } catch (error: any) {
     console.error('Error verifying recharge:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'Payment verification failed' });
   }
 });
 

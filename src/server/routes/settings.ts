@@ -106,8 +106,9 @@ router.get('/appointments', async (req: any, res: any) => {
 // Create appointment
 router.post('/appointments', requireRole('OWNER', 'ADMIN'), async (req: any, res: any) => {
   try {
+    const { title, description, service, startTime, endTime, contactId, location, isOnline, meetingLink, meetingUrl, status } = req.body;
     const appointment = await prisma.appointment.create({
-      data: { businessId: req.user.businessId, ...req.body },
+      data: { businessId: req.user.businessId, createdBy: req.user.id, title, description, service, startTime, endTime, contactId, location, isOnline, meetingLink, meetingUrl, status },
       include: { contact: true },
     });
     res.status(201).json({ success: true, data: appointment });

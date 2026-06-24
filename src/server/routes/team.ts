@@ -236,7 +236,7 @@ router.put('/:id/role', requireRole('OWNER', 'ADMIN'), async (req: any, res: any
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: req.params.id },
+      where: { id: req.params.id, businessId: req.user.businessId },
       data: { role },
       select: {
         id: true,
@@ -306,7 +306,7 @@ router.delete('/:id', requireRole('OWNER', 'ADMIN'), async (req: any, res: any) 
     }
 
     await prisma.user.delete({
-      where: { id: req.params.id },
+      where: { id: req.params.id, businessId: req.user.businessId },
     });
 
     res.json({
@@ -339,8 +339,29 @@ router.put('/members/:id', requireRole('OWNER', 'ADMIN'), async (req: any, res: 
       });
     }
 
+    // Prevent role escalation: only OWNER can assign OWNER role
+    if (role === 'OWNER' && req.user.role !== 'OWNER') {
+      return res.status(403).json({
+        success: false,
+        error: 'Only the current owner can assign the owner role',
+      });
+    }
+
+    // Prevent removing the last OWNER
+    if (user.role === 'OWNER' && role && role !== 'OWNER') {
+      const ownerCount = await prisma.user.count({
+        where: { businessId: req.user.businessId, role: 'OWNER' },
+      });
+      if (ownerCount <= 1) {
+        return res.status(400).json({
+          success: false,
+          error: 'Cannot remove the last owner. Assign another owner first.',
+        });
+      }
+    }
+
     const updated = await prisma.user.update({
-      where: { id: req.params.id },
+      where: { id: req.params.id, businessId: req.user.businessId },
       data: {
         ...(name !== undefined && { name }),
         ...(phone !== undefined && { phone }),
@@ -358,7 +379,6 @@ router.put('/members/:id', requireRole('OWNER', 'ADMIN'), async (req: any, res: 
     res.status(500).json({
       success: false,
       error: 'Failed to update team member',
-      details: error.message,
     });
   }
 });
@@ -385,7 +405,7 @@ router.delete('/members/:id', requireRole('OWNER', 'ADMIN'), async (req: any, re
     }
 
     await prisma.user.delete({
-      where: { id: req.params.id },
+      where: { id: req.params.id, businessId: req.user.businessId },
     });
 
     res.json({
@@ -425,7 +445,7 @@ router.post('/:id/reset-password', requireRole('OWNER', 'ADMIN'), async (req: an
     const hashedPassword = await hashPassword(tempPassword);
 
     await prisma.user.update({
-      where: { id: req.params.id },
+      where: { id: req.params.id, businessId: req.user.businessId },
       data: { password: hashedPassword },
     });
 

@@ -1,91 +1,96 @@
 # ==============================================
-# BizzAuto CRM - Coolify Production Stack
-# All 4 services wired together:
-#   app + supabase (DB) + evolution-api (WhatsApp) + n8n (automation)
+# BizzAuto CRM - Production Stack
+# Nginx (SSL) + App + DB + Redis + n8n + Evolution
 # ==============================================
-# Usage in Coolify:
-#   - Option A: Deploy as a Docker Compose stack (this file)
-#   - Option B: Deploy each service separately and use env vars to connect
-#
-# For Option B, each service needs:
-#   App → env: DATABASE_URL (Supabase), EVOLUTION_API_URL, N8N_URL
-#   n8n  → env: WEBHOOK_URL (points to app's public URL)
-#   Evolution API → env: no special wiring, App calls it directly
 
 version: '3.8'
 
 services:
+  # ==================== NGINX (Reverse Proxy + SSL) ====================
+  nginx:
+    image: nginx:alpine
+    container_name: bizzauto-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/letsencrypt:ro
+      - uploads_data:/var/www/uploads:ro
+      - certbot-www:/var/www/certbot:ro
+    depends_on:
+      - app
+    networks:
+      - bizzauto-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ==================== CERTBOT (SSL Auto-Renewal) ====================
+  certbot:
+    image: certbot/certbot:latest
+    container_name: bizzauto-certbot
+    volumes:
+      - ./nginx/ssl:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'"
+    networks:
+      - bizzauto-network
+
   # ==================== BIZZAUTO APP ====================
   app:
     image: ghcr.io/infoledbrighter-boop/bizzauto:latest
     container_name: bizzauto-app
     restart: always
-    ports:
-      - "${APP_PORT:-4000}:4000"
+    expose:
+      - "4000"
     environment:
       - NODE_ENV=production
       - PORT=4000
-
-      # === Database (Supabase PostgreSQL) ===
       - DATABASE_URL=${DATABASE_URL}
-
-      # === Redis (Caching/Queue) ===
       - REDIS_URL=${REDIS_URL:-redis://redis:6379}
-
-      # === Auth ===
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
-
-      # === CORS & URLs ===
       - CORS_ORIGIN=${FRONTEND_URL}
       - FRONTEND_URL=${FRONTEND_URL}
       - VITE_API_URL=${API_URL}
-
-      # === Evolution API (WhatsApp) ===
       - EVOLUTION_API_URL=${EVOLUTION_API_URL:-http://evolution-api:8080}
       - EVOLUTION_API_KEY=${EVOLUTION_API_KEY}
       - EVOLUTION_INSTANCE_NAME=${EVOLUTION_INSTANCE_NAME:-bizzauto}
-
-      # === n8n (Workflow Automation) ===
       - N8N_URL=${N8N_URL:-http://n8n:5678}
       - N8N_APP_API_KEY=${N8N_APP_API_KEY}
       - N8N_API_KEY=${N8N_API_KEY}
       - N8N_PASSWORD=${N8N_PASSWORD}
-
-      # === AI Services ===
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - GROK_API_KEY=${GROK_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - NVIDIA_NIM_API_KEY=${NVIDIA_NIM_API_KEY}
-
-      # === SMTP / Email ===
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
       - SMTP_FROM=${SMTP_FROM:-"BizzAuto CRM <noreply@bizzautoai.com>"}
-
-      # === Payments ===
       - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
       - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
       - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET}
-
-      # === Meta / Facebook (WhatsApp Business API) ===
       - META_APP_ID=${META_APP_ID}
       - WHATSAPP_REDIRECT_URL=${WHATSAPP_REDIRECT_URL}
-
-      # === Google ===
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - GOOGLE_REDIRECT_URL=${GOOGLE_REDIRECT_URL}
-
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - bizzauto-network
+    depends_on:
+      - redis
     deploy:
       resources:
         limits:
@@ -93,7 +98,7 @@ services:
         reservations:
           memory: 512M
 
-  # ==================== REDIS (Caching/Queue) ====================
+  # ==================== REDIS ====================
   redis:
     image: redis:7-alpine
     container_name: bizzauto-redis
@@ -106,46 +111,35 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      - bizzauto-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
   # ==================== EVOLUTION API (WhatsApp) ====================
-  # Connects WhatsApp via QR code scanning — no Meta approval needed
-  # Uses Supabase PostgreSQL for persistent storage and existing Redis for cache
   evolution-api:
     image: evoapicloud/evolution-api:latest
     container_name: bizzauto-evolution
     restart: always
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     environment:
-      # === Server Config ===
       - SERVER_PORT=8080
       - SERVER_TYPE=http
-
-      # === Auth ===
-      # EVOLUTION_API_KEY from .env / Coolify is also used as AUTHENTICATION_API_KEY
       - AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY}
       - AUTHENTICATION_EXCLUDE_INSTANCES=default
-
-      # === Database (use same Supabase PostgreSQL as app) ===
       - DATABASE_ENABLED=true
-      # Evolution API will use the same Supabase DB — creates its own tables:
       - DATABASE_CONNECTION_URI=${EVOLUTION_DATABASE_URL:-${DATABASE_URL}}
       - DATABASE_SAVE_MESSAGES=true
       - DATABASE_SAVE_CONTACTS=true
       - DATABASE_SAVE_INSTANCES=true
-
-      # === Redis (use existing Redis from stack) ===
       - REDIS_ENABLED=true
       - REDIS_URI=${REDIS_URL:-redis://redis:6379}
-
-      # === Logging ===
       - LOG_LEVEL=${LOG_LEVEL:-info}
-
-      # === Webhook (points back to the app for incoming message processing) ===
       - WEBHOOK_GLOBAL_URL=${EVOLUTION_WEBHOOK_URL:-${FRONTEND_URL:-https://bizzautoai.com}/api/evolution/webhook}
       - WEBHOOK_GLOBAL_ENABLED=true
-
-      # === QR Code Setup ===
       - QRCODE_LIMIT=30
       - QRCODE_COLOR=#25D366
     volumes:
@@ -159,6 +153,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    networks:
+      - bizzauto-network
     deploy:
       resources:
         limits:
@@ -167,13 +163,12 @@ services:
           memory: 256M
 
   # ==================== n8n WORKFLOW AUTOMATION ====================
-  # Connects to: BizzAuto App (via webhooks) and Supabase (via DB)
   n8n:
     image: n8nio/n8n:latest
     container_name: bizzauto-n8n
     restart: always
-    ports:
-      - "5678:5678"
+    expose:
+      - "5678"
     environment:
       - N8N_PORT=5678
       - N8N_HOST=${N8N_HOST:-localhost}
@@ -189,9 +184,6 @@ services:
       - GENERIC_TIMEZONE=Asia/Kolkata
       - DB_TYPE=sqlite
       - DB_SQLITE_DATABASE=/home/node/.n8n/database.sqlite
-
-      # === n8n variables for workflows ===
-      # These are accessible in n8n as $env.N8N_APP_URL
       - N8N_APP_URL=${FRONTEND_URL:-https://bizzautoai.com}
       - N8N_API_URL=${API_URL:-https://bizzautoai.com}
       - N8N_OPENROUTER_KEY=${OPENROUTER_API_KEY}
@@ -203,8 +195,20 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - bizzauto-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+networks:
+  bizzauto-network:
+    driver: bridge
 
 volumes:
   redis_data:
   n8n_data:
   evolution_instances:
+  uploads_data:
+  certbot-www:

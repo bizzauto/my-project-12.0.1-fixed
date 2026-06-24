@@ -186,7 +186,7 @@ router.get('/campaigns', authenticate, async (req: any, res: Response) => {
 router.get('/campaigns/:id', authenticate, async (req: any, res: Response) => {
   try {
     const { id } = req.params;
-    const result = await AiOutreachService.getCampaignStats(id);
+    const result = await AiOutreachService.getCampaignStats(id, req.user.businessId);
 
     res.json({ success: true, data: result });
   } catch (error: any) {
@@ -203,7 +203,7 @@ router.post('/campaigns/:id/activate', authenticate, async (req: any, res: Respo
     const { id } = req.params;
 
     await prisma.outreachCampaign.update({
-      where: { id },
+      where: { id, businessId: req.user.businessId },
       data: { status: 'active' },
     });
 
@@ -222,7 +222,7 @@ router.post('/campaigns/:id/pause', authenticate, async (req: any, res: Response
     const { id } = req.params;
 
     await prisma.outreachCampaign.update({
-      where: { id },
+      where: { id, businessId: req.user.businessId },
       data: { status: 'paused' },
     });
 

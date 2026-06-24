@@ -155,10 +155,10 @@ describe('AppointmentsPage', () => {
     });
   });
 
-  it('shows view mode tabs (Calendar, List, Services)', async () => {
+  it('shows view mode tabs (Month, List, Services)', async () => {
     renderWithRouter(<AppointmentsPage />);
     await waitFor(() => {
-      expect(screen.getByText('Calendar')).toBeInTheDocument();
+      expect(screen.getByText('Month')).toBeInTheDocument();
       expect(screen.getByText('List')).toBeInTheDocument();
       expect(screen.getByText('Services')).toBeInTheDocument();
     });

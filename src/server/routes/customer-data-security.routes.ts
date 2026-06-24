@@ -18,14 +18,15 @@ const prisma = new PrismaClient();
  * POST /api/customer-security/export-data
  * Customer requests export of their personal data (GDPR Right to Portability)
  */
-router.post('/export-data', async (req: Request, res: Response) => {
+router.post('/export-data', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { phone, email, contactId, businessId } = req.body;
+    const { phone, email, contactId } = req.body;
+    const businessId = req.user.businessId;
     
-    // Find contact by phone, email, or ID
+    // Find contact by phone, email, or ID — always scoped to business
     let contact;
     if (contactId) {
-      contact = await prisma.contact.findUnique({ where: { id: contactId } });
+      contact = await prisma.contact.findFirst({ where: { id: contactId, businessId } });
     } else if (phone) {
       contact = await prisma.contact.findFirst({ where: { phone, businessId } });
     } else if (email) {
@@ -117,14 +118,15 @@ router.post('/export-data', async (req: Request, res: Response) => {
  * POST /api/customer-security/delete-data
  * Customer requests deletion of their personal data (GDPR Right to Erasure)
  */
-router.post('/delete-data', async (req: Request, res: Response) => {
+router.post('/delete-data', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { phone, email, contactId, businessId, reason } = req.body;
+    const { phone, email, contactId, reason } = req.body;
+    const businessId = req.user.businessId;
     
-    // Find contact
+    // Find contact — always scoped to business
     let contact;
     if (contactId) {
-      contact = await prisma.contact.findUnique({ where: { id: contactId } });
+      contact = await prisma.contact.findFirst({ where: { id: contactId, businessId } });
     } else if (phone) {
       contact = await prisma.contact.findFirst({ where: { phone, businessId } });
     } else if (email) {
@@ -185,12 +187,19 @@ router.post('/delete-data', async (req: Request, res: Response) => {
  * POST /api/customer-security/consent
  * Update customer consent preferences
  */
-router.post('/consent', async (req: Request, res: Response) => {
+router.post('/consent', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { contactId, whatsappOptIn, emailOptIn, businessId } = req.body;
+    const { contactId, whatsappOptIn, emailOptIn } = req.body;
+    const businessId = req.user.businessId;
     
     if (!contactId) {
       return res.status(400).json({ success: false, error: 'Contact ID required' });
+    }
+    
+    // Verify contact belongs to this business
+    const contact = await prisma.contact.findFirst({ where: { id: contactId, businessId } });
+    if (!contact) {
+      return res.status(404).json({ success: false, error: 'Contact not found' });
     }
     
     await prisma.contact.update({
@@ -268,9 +277,10 @@ router.get('/access-log/:contactId', authenticate, async (req: Request, res: Res
  * Anonymize old customer data (for data retention compliance)
  * Run this as a scheduled job
  */
-router.post('/anonymize-old', authenticate, async (req: Request, res: Response) => {
+router.post('/anonymize-old', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { businessId, retentionDays = 365 } = req.body;
+    const { retentionDays = 365 } = req.body;
+    const businessId = req.user.businessId;
     
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);

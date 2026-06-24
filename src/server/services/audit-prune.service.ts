@@ -316,9 +316,7 @@ export async function manualPrune(retentionDays?: number): Promise<{
   });
 }
 
-// Handle process shutdown
-process.on('SIGTERM', stopAuditPruneCron);
-process.on('SIGINT', stopAuditPruneCron);
+// Shutdown is handled by the main server gracefulShutdown() which calls stopAuditPruneCron()
 
 export default {
   startAuditPruneCron,
