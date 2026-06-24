@@ -8,7 +8,7 @@ version: '3.8'
 services:
   # ==================== NGINX (Reverse Proxy + SSL) ====================
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27-alpine
     container_name: bizzauto-nginx
     restart: always
     ports:
@@ -23,14 +23,20 @@ services:
       - app
     networks:
       - bizzauto-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 128M
+          cpus: '0.25'
 
   # ==================== CERTBOT (SSL Auto-Renewal) ====================
   certbot:
-    image: certbot/certbot:latest
+    image: certbot/certbot:v3.0.1
     container_name: bizzauto-certbot
     volumes:
       - ./nginx/ssl:/etc/letsencrypt
@@ -50,7 +56,7 @@ services:
       - NODE_ENV=production
       - PORT=4000
       - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - REDIS_URL=${REDIS_URL:-redis://:bizzauto-redis-pass@redis:6379}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
@@ -95,6 +101,7 @@ services:
       resources:
         limits:
           memory: 1024M
+          cpus: '1.5'
         reservations:
           memory: 512M
 
@@ -103,11 +110,11 @@ services:
     image: redis:7-alpine
     container_name: bizzauto-redis
     restart: always
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --save 60 1000 --save 300 10 --requirepass bizzauto-redis-pass --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "bizzauto-redis-pass", "ping"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -117,10 +124,11 @@ services:
       resources:
         limits:
           memory: 256M
+          cpus: '0.25'
 
   # ==================== EVOLUTION API (WhatsApp) ====================
   evolution-api:
-    image: evoapicloud/evolution-api:latest
+    image: evoapicloud/evolution-api:3.1.0
     container_name: bizzauto-evolution
     restart: always
     expose:
@@ -136,7 +144,7 @@ services:
       - DATABASE_SAVE_CONTACTS=true
       - DATABASE_SAVE_INSTANCES=true
       - REDIS_ENABLED=true
-      - REDIS_URI=${REDIS_URL:-redis://redis:6379}
+      - REDIS_URI=${REDIS_URL:-redis://:bizzauto-redis-pass@redis:6379}
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - WEBHOOK_GLOBAL_URL=${EVOLUTION_WEBHOOK_URL:-${FRONTEND_URL:-https://bizzautoai.com}/api/evolution/webhook}
       - WEBHOOK_GLOBAL_ENABLED=true
@@ -159,12 +167,13 @@ services:
       resources:
         limits:
           memory: 512M
+          cpus: '0.5'
         reservations:
           memory: 256M
 
   # ==================== n8n WORKFLOW AUTOMATION ====================
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:1.65.0
     container_name: bizzauto-n8n
     restart: always
     expose:
@@ -173,17 +182,20 @@ services:
       - N8N_PORT=5678
       - N8N_HOST=${N8N_HOST:-localhost}
       - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
-      - N8N_SECURE_COOKIE=false
       - N8N_METRICS=false
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
       - N8N_USER_MANAGEMENT_JWT_SECRET=${N8N_USER_MANAGEMENT_JWT_SECRET}
-      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_SECURE_COOKIE=false
       - N8N_BASIC_AUTH_USER=admin
       - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
       - WEBHOOK_URL=${N8N_WEBHOOK_URL:-https://bizzautoai.com}
       - GENERIC_TIMEZONE=Asia/Kolkata
-      - DB_TYPE=sqlite
-      - DB_SQLITE_DATABASE=/home/node/.n8n/database.sqlite
+      - DB_TYPE=postgres
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=${POSTGRES_USER}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
       - N8N_APP_URL=${FRONTEND_URL:-https://bizzautoai.com}
       - N8N_API_URL=${API_URL:-https://bizzautoai.com}
       - N8N_OPENROUTER_KEY=${OPENROUTER_API_KEY}
@@ -201,6 +213,7 @@ services:
       resources:
         limits:
           memory: 512M
+          cpus: '0.5'
 
 networks:
   bizzauto-network:

@@ -21,6 +21,7 @@ const messageRateLimits: Record<string, number> = {
   STARTER: 200,   // 200 messages/min
   GROWTH: 500,    // 500 messages/min
   PRO: 1000,      // 1000 messages/min
+  AGENCY: 3000,   // 3000 messages/min
   ENTERPRISE: 3000, // 3000 messages/min
 };
 

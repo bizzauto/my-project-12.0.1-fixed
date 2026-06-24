@@ -111,18 +111,15 @@ export function deepMaskPII(obj: any): any {
  * Middleware to mask PII in request/response logs
  */
 export const piiMaskingMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  // Store original json method
   const originalJson = res.json.bind(res);
-  
-  // Override json to mask PII in responses
+
   res.json = (body: any) => {
-    // Only mask in development, not in production (would affect performance)
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.PII_MASKING !== 'false') {
       return originalJson(deepMaskPII(body));
     }
     return originalJson(body);
   };
-  
+
   next();
 };
 

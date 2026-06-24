@@ -1,5 +1,7 @@
 import axios from 'axios';
+import crypto from 'crypto';
 import { prisma } from '../db.js';
+import { circuitBreaker } from '../services/circuit-breaker.service.js';
 
 /**
  * Evolution API Service
@@ -538,12 +540,17 @@ export class EvolutionApiService {
   ): Promise<any> {
     const config = await this.getConfig(businessId);
     const formattedNumber = this.formatPhone(to);
+    const idempotencyKey = crypto.randomUUID();
 
     try {
-      const response = await axios.post(
-        `${config.baseUrl}/message/sendText/${config.instanceName}`,
-        { number: formattedNumber, text: message, delay: options.delay || 0, linkPreview: options.linkPreview ?? true },
-        { headers: { apikey: config.apiKey } }
+      const response = await circuitBreaker.execute(
+        'evolution-api',
+        () => axios.post(
+          `${config.baseUrl}/message/sendText/${config.instanceName}`,
+          { number: formattedNumber, text: message, delay: options.delay || 0, linkPreview: options.linkPreview ?? true, optionsId: idempotencyKey },
+          { headers: { apikey: config.apiKey }, timeout: 15000 }
+        ),
+        { timeoutMs: 15000 }
       );
 
       await prisma.message.create({
@@ -575,10 +582,14 @@ export class EvolutionApiService {
     const formattedNumber = this.formatPhone(to);
 
     try {
-      const response = await axios.post(
-        `${config.baseUrl}/message/sendMedia/${config.instanceName}`,
-        { number: formattedNumber, mediatype: mediaType, media: { url: mediaUrl }, delay: options.delay || 0, ...(caption ? { caption } : {}) },
-        { headers: { apikey: config.apiKey } }
+      const response = await circuitBreaker.execute(
+        'evolution-api',
+        () => axios.post(
+          `${config.baseUrl}/message/sendMedia/${config.instanceName}`,
+          { number: formattedNumber, mediatype: mediaType, media: { url: mediaUrl }, delay: options.delay || 0, ...(caption ? { caption } : {}) },
+          { headers: { apikey: config.apiKey }, timeout: 15000 }
+        ),
+        { timeoutMs: 15000 }
       );
 
       await prisma.message.create({
@@ -606,22 +617,26 @@ export class EvolutionApiService {
   ): Promise<any> {
     const config = await this.getConfig(businessId);
     const formattedNumber = this.formatPhone(to);
-
-    try {
-      const response = await axios.post(
-        `${config.baseUrl}/message/sendButtons/${config.instanceName}`,
-        {
-          number: formattedNumber, text: template.text, footer: template.footer || '',
-          buttons: template.buttons.map((btn, i) => ({
-            index: i + 1,
-            type: btn.type === 'reply' ? 'replyButton' : btn.type === 'url' ? 'urlButton' : 'callButton',
-            title: btn.title, ...(btn.url ? { url: btn.url } : {}), ...(btn.phone ? { phone: btn.phone } : {}),
-          })),
-          delay: options.delay || 0,
-        },
-        { headers: { apikey: config.apiKey } }
+try {
+      const response = await circuitBreaker.execute(
+        'evolution-api',
+        () => axios.post(
+          `${config.baseUrl}/message/sendButtons/${config.instanceName}`,
+          {
+            number: formattedNumber,
+            text: template.text,
+            footer: template.footer || '',
+            buttons: template.buttons.map((btn, i) => ({
+              index: i + 1,
+              type: btn.type === 'reply' ? 'replyButton' : btn.type === 'url' ? 'urlButton' : 'callButton',
+              title: btn.title, ...(btn.url ? { url: btn.url } : {}), ...(btn.phone ? { phone: btn.phone } : {}),
+            })),
+            delay: options.delay || 0,
+          },
+          { headers: { apikey: config.apiKey }, timeout: 15000 }
+        ),
+        { timeoutMs: 15000 }
       );
-
       await prisma.message.create({
         data: { businessId, direction: 'outbound', type: 'template', content: template.text, interactiveType: 'button', waMessageId: response.data?.key?.id, status: 'sent' },
       });

@@ -1,0 +1,71 @@
+/**
+ * Account Lockout Service — Redis-backed per-email brute-force protection.
+ * Tracks failed login attempts per email and locks account after threshold.
+ */
+import { createRedisConnection } from '../utils/redis-connection.js';
+
+const redis = createRedisConnection();
+
+const ATTEMPT_PREFIX = 'lockout:attempts:';
+const LOCKOUT_PREFIX = 'lockout:locked:';
+
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_WINDOW_SECONDS = 15 * 60; // 15 minutes
+const LOCKOUT_DURATION_SECONDS = 30 * 60; // 30 minutes
+
+export interface LockoutStatus {
+  locked: boolean;
+  attemptsRemaining: number;
+  lockedUntil: number | null;
+}
+
+export async function recordFailedLoginAttempt(email: string): Promise<LockoutStatus> {
+  if (!redis) return { locked: false, attemptsRemaining: MAX_FAILED_ATTEMPTS, lockedUntil: null };
+
+  const attemptKey = `${ATTEMPT_PREFIX}${email.toLowerCase()}`;
+  const lockKey = `${LOCKOUT_PREFIX}${email.toLowerCase()}`;
+
+  const currentAttempts = await redis.incr(attemptKey);
+  if (currentAttempts === 1) {
+    await redis.expire(attemptKey, LOCKOUT_WINDOW_SECONDS);
+  }
+
+  if (currentAttempts >= MAX_FAILED_ATTEMPTS) {
+    await redis.setex(lockKey, LOCKOUT_DURATION_SECONDS, '1');
+    await redis.del(attemptKey);
+    return {
+      locked: true,
+      attemptsRemaining: 0,
+      lockedUntil: Date.now() + LOCKOUT_DURATION_SECONDS * 1000,
+    };
+  }
+
+  return {
+    locked: false,
+    attemptsRemaining: MAX_FAILED_ATTEMPTS - currentAttempts,
+    lockedUntil: null,
+  };
+}
+
+export async function clearFailedLoginAttempts(email: string): Promise<void> {
+  if (!redis) return;
+  const attemptKey = `${ATTEMPT_PREFIX}${email.toLowerCase()}`;
+  await redis.del(attemptKey);
+}
+
+export async function getLockoutStatus(email: string): Promise<LockoutStatus> {
+  if (!redis) return { locked: false, attemptsRemaining: MAX_FAILED_ATTEMPTS, lockedUntil: null };
+
+  const lockKey = `${LOCKOUT_PREFIX}${email.toLowerCase()}`;
+  const ttl = await redis.ttl(lockKey);
+
+  if (ttl > 0) {
+    return {
+      locked: true,
+      attemptsRemaining: 0,
+      lockedUntil: Date.now() + ttl * 1000,
+    };
+  }
+
+  return { locked: false, attemptsRemaining: MAX_FAILED_ATTEMPTS, lockedUntil: null };
+}

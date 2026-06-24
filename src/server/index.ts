@@ -123,6 +123,7 @@ import { startSlowQueryLogger } from './middleware/slow-query-logger.js';
 import { requestTimeout } from './middleware/request-timeout.js';
 import { circuitBreaker } from './services/circuit-breaker.service.js';
 import { shutdownWebhookWorker } from './services/webhook-retry.service.js';
+import { shutdownAllWorkers } from './workers/index.js';
 import { startAuditPruneCron, stopAuditPruneCron } from './services/audit-prune.service.js';
 import adminInfrastructureRoutes from './routes/admin-infrastructure.js';
 import appointmentRemindersRoutes from './routes/appointment-reminders.js';
@@ -141,6 +142,10 @@ import { razorpayWebhook, verifyPayment as verifyPaymentHandler } from './servic
 import { authenticate } from './middleware/auth.js';
 
 dotenv.config();
+
+// Initialize Sentry error tracking BEFORE any other imports
+import { initSentry } from './services/sentry.js';
+initSentry();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -627,7 +632,10 @@ function gracefulShutdown(signal: string) {
     try {
       stopAuditPruneCron();
       circuitBreaker.destroy();
-      await shutdownWebhookWorker();
+      await Promise.allSettled([
+        shutdownAllWorkers(),
+        shutdownWebhookWorker(),
+      ]);
     } catch (e) { /* ignore */ }
     try {
       await prisma.$disconnect();

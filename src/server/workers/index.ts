@@ -16,17 +16,32 @@ if (!redisAvailable) {
   console.log('[Workers] Redis not available — background jobs disabled. App will run without queues.');
 }
 
+const DEFAULT_JOB_OPTS = {
+  attempts: 3,
+  backoff: { type: 'exponential' as const, delay: 5000 },
+  removeOnComplete: { age: 86400, count: 1000 },
+  removeOnFail: { age: 604800, count: 5000 },
+};
+
 // Queues (only created if Redis is available)
 export const queues = redisAvailable ? {
-  whatsappMessages: new Queue('whatsapp-messages', { connection: redisConnection }),
-  emails: new Queue('emails', { connection: redisConnection }),
-  socialPublish: new Queue('social-publish', { connection: redisConnection }),
-  googleSheetsSync: new Queue('google-sheets-sync', { connection: redisConnection }),
-  leadProcessing: new Queue('lead-processing', { connection: redisConnection }),
-  campaignScheduler: new Queue('campaign-scheduler', { connection: redisConnection }),
-  gbpAutoPost: new Queue('gbp-auto-post', { connection: redisConnection }),
+  whatsappMessages: new Queue('whatsapp-messages', { connection: redisConnection, defaultJobOptions: DEFAULT_JOB_OPTS }),
+  emails: new Queue('emails', { connection: redisConnection, defaultJobOptions: DEFAULT_JOB_OPTS }),
+  socialPublish: new Queue('social-publish', { connection: redisConnection, defaultJobOptions: DEFAULT_JOB_OPTS }),
+  googleSheetsSync: new Queue('google-sheets-sync', { connection: redisConnection, defaultJobOptions: DEFAULT_JOB_OPTS }),
+  leadProcessing: new Queue('lead-processing', { connection: redisConnection, defaultJobOptions: DEFAULT_JOB_OPTS }),
+  campaignScheduler: new Queue('campaign-scheduler', { connection: redisConnection, defaultJobOptions: DEFAULT_JOB_OPTS }),
+  gbpAutoPost: new Queue('gbp-auto-post', { connection: redisConnection, defaultJobOptions: DEFAULT_JOB_OPTS }),
   webhookRetry: webhookDeliveryQueue,
 } : {} as any;
+
+// Export shutdown for graceful worker teardown
+export function shutdownAllWorkers(): Promise<void> {
+  const workers = [whatsappWorker, emailWorker, socialPublishWorker, googleSheetsSyncWorker, leadProcessingWorker, campaignSchedulerWorker, gbpAutoPostWorker];
+  return Promise.allSettled(
+    workers.map(w => w?.close())
+  ).then(() => {});
+}
 
 // ==================== JOB WORKERS (only if Redis is available) ====================
 

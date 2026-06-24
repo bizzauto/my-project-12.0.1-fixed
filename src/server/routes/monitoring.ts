@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { prisma } from '../db.js';
 import { getSlowQueryStats } from '../middleware/slow-query-logger.js';
 import { getRateLimitStats } from '../middleware/websocket-rate-limit.js';
+import { circuitBreaker } from '../services/circuit-breaker.service.js';
 
 const router = Router();
 
@@ -66,6 +67,39 @@ router.get('/metrics', async (req: Request, res: Response) => {
   for (const [key, value] of Object.entries(gauges)) {
     lines.push(`app_gauge{name="${key}"} ${value}`);
   }
+
+  // Circuit breaker states
+  lines.push(`# HELP circuit_breaker_state Circuit breaker state (0=closed, 1=half-open, 2=open)`);
+  lines.push(`# TYPE circuit_breaker_state gauge`);
+  const cbStats = circuitBreaker.getAllStats();
+  for (const stat of cbStats) {
+    const stateValue = stat.state === 'CLOSED' ? 0 : stat.state === 'HALF_OPEN' ? 1 : 2;
+    lines.push(`circuit_breaker_state{service="${stat.service}"} ${stateValue}`);
+  }
+
+  // BullMQ queue metrics
+  lines.push(`# HELP bull_queue_waiting Jobs waiting in queue`);
+  lines.push(`# TYPE bull_queue_waiting gauge`);
+  lines.push(`# HELP bull_queue_active Active jobs being processed`);
+  lines.push(`# TYPE bull_queue_active gauge`);
+  lines.push(`# HELP bull_queue_completed Completed jobs`);
+  lines.push(`# TYPE bull_queue_completed counter`);
+  lines.push(`# HELP bull_queue_failed Failed jobs`);
+  lines.push(`# TYPE bull_queue_failed counter`);
+  try {
+    const { queues } = await import('../workers/index.js');
+    const queueNames = ['whatsapp-messages', 'emails', 'social-publish', 'google-sheets-sync', 'lead-processing', 'campaign-scheduler', 'gbp-auto-post', 'webhook-retry'] as const;
+    for (const name of queueNames) {
+      const queue = (queues as any)[name];
+      if (queue && typeof queue.getJobCounts === 'function') {
+        const counts = await queue.getJobCounts();
+        lines.push(`bull_queue_waiting{queue="${name}"} ${counts.waiting || 0}`);
+        lines.push(`bull_queue_active{queue="${name}"} ${counts.active || 0}`);
+        lines.push(`bull_queue_completed{queue="${name}"} ${counts.completed || 0}`);
+        lines.push(`bull_queue_failed{queue="${name}"} ${counts.failed || 0}`);
+      }
+    }
+  } catch { /* Workers may not be initialized */ }
 
   // Database health
   let dbUp = 0;

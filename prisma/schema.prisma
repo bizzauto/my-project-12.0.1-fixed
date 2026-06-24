@@ -309,6 +309,10 @@ model Contact {
   @@index([businessId, lastMessageAt])
   @@index([businessId, stage])
   @@index([businessId, status])
+  @@index([businessId, assignedTo])
+  @@index([businessId, dealValue])
+  @@index([businessId, dealStage, dealValue])
+  @@index([assignedTo])
   @@index([source])
   @@index([tags])
   @@index([stage])
@@ -337,9 +341,11 @@ model Stage {
   name       String
   order      Int
   color      String?
+  businessId String
   pipeline   Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
 
   @@index([pipelineId])
+  @@index([businessId])
 }
 
 model Activity {
@@ -374,7 +380,7 @@ model Activity {
 model Message {
   id               String    @id @default(cuid())
   contactId        String?
-  businessId       String?
+  businessId       String    @default(cuid())
   waMessageId      String?
   direction        String
   type             String

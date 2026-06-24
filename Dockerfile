@@ -1,10 +1,10 @@
 FROM node:22-alpine AS builder
 
-ARG VITE_GOOGLE_CLIENT_ID=813332726800-sm0j12r7n1tcljokt027ac391t2ep73m.apps.googleusercontent.com
+ARG VITE_GOOGLE_CLIENT_ID
 ARG VITE_API_URL
 
 ENV NODE_ENV=development
-ENV VITE_GOOGLE_CLIENT_ID=813332726800-sm0j12r7n1tcljokt027ac391t2ep73m.apps.googleusercontent.com
+ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
 ENV VITE_API_URL=${VITE_API_URL}
 RUN apk add --no-cache openssl
 WORKDIR /app

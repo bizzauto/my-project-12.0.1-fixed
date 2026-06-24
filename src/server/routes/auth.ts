@@ -12,6 +12,8 @@ import { validate } from '../middleware/validate.js';
 import { registerSchema, loginSchema, changePasswordSchema } from '../validations/schemas.js';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
+import { revokeAllUserTokens } from '../services/token-blacklist.service.js';
+import { recordFailedLoginAttempt, clearFailedLoginAttempts, getLockoutStatus } from '../services/account-lockout.service.js';
 
 const router = Router();
 
@@ -742,6 +744,16 @@ router.post('/login', loginLimiter, validate(loginSchema), async (req: Request, 
     const { email, password, twoFactorToken } = req.body;
     const { TwoFactorService } = await import('../services/twoFactor.service.js');
 
+    // Check if account is locked
+    const lockStatus = await getLockoutStatus(email);
+    if (lockStatus.locked) {
+      return res.status(423).json({
+        success: false,
+        error: `Account temporarily locked. Try again after ${Math.ceil((lockStatus.lockedUntil! - Date.now()) / 60000)} minutes.`,
+        code: 'ACCOUNT_LOCKED',
+      });
+    }
+
     // Find user
     const user = await prisma.user.findUnique({
       where: { email },
@@ -759,11 +771,18 @@ router.post('/login', loginLimiter, validate(loginSchema), async (req: Request, 
     const isValid = await comparePassword(password, user.password);
 
     if (!isValid) {
+      const lockout = await recordFailedLoginAttempt(email);
       return res.status(401).json({
         success: false,
-        error: 'Invalid email or password',
+        error: lockout.locked
+          ? `Account temporarily locked. Try again after ${Math.ceil((lockout.lockedUntil! - Date.now()) / 60000)} minutes.`
+          : 'Invalid email or password',
+        attemptsRemaining: lockout.attemptsRemaining,
       });
     }
+
+    // Clear failed attempts on successful password verify
+    await clearFailedLoginAttempts(email);
 
     // Check if 2FA is enabled
     if (user.twoFactorEnabled) {
@@ -779,12 +798,17 @@ router.post('/login', loginLimiter, validate(loginSchema), async (req: Request, 
       // Verify 2FA token
       const verified = await TwoFactorService.verifyToken(user.id, twoFactorToken);
       if (!verified) {
+        const lockout = await recordFailedLoginAttempt(email);
         return res.status(401).json({
           success: false,
           error: 'Invalid two-factor authentication code',
+          attemptsRemaining: lockout.attemptsRemaining,
         });
       }
     }
+
+    // Clear failed attempts on full success
+    await clearFailedLoginAttempts(email);
 
     // Generate token
     const token = generateToken({
@@ -955,9 +979,11 @@ router.put('/change-password', authenticate, validate(changePasswordSchema), asy
       data: { password: hashedPassword },
     });
 
+    await revokeAllUserTokens(req.user.id);
+
     res.json({
       success: true,
-      message: 'Password updated successfully',
+      message: 'Password updated successfully. All sessions have been invalidated.',
     });
   } catch (error: any) {
     res.status(500).json({
@@ -1209,7 +1235,13 @@ router.post('/verify-otp', verifyOtpLimiter, async (req: Request, res: Response)
     if (!email || !otp) return res.status(400).json({ success: false, error: 'Email and OTP are required' });
 
     const stored = otpStore.get(email);
-    if (!stored || stored.otp !== otp || stored.expiresAt < Date.now()) {
+    if (!stored || stored.expiresAt < Date.now()) {
+      return res.status(400).json({ success: false, error: 'Invalid or expired OTP' });
+    }
+    const otpBuf = Buffer.from(otp.padStart(6, '0').slice(0, 6));
+    const storedBuf = Buffer.from(stored.otp.padStart(6, '0').slice(0, 6));
+    const match = otpBuf.length === storedBuf.length && crypto.timingSafeEqual(otpBuf, storedBuf);
+    if (!match) {
       return res.status(400).json({ success: false, error: 'Invalid or expired OTP' });
     }
 
@@ -1226,7 +1258,13 @@ router.post('/reset-password', resetPasswordLimiter, async (req: Request, res: R
     if (newPassword.length < 8) return res.status(400).json({ success: false, error: 'Password must be at least 8 characters' });
 
     const stored = otpStore.get(email);
-    if (!stored || stored.otp !== otp || stored.expiresAt < Date.now()) {
+    if (!stored || stored.expiresAt < Date.now()) {
+      return res.status(400).json({ success: false, error: 'Invalid or expired OTP' });
+    }
+    const otpBuf = Buffer.from(otp.padStart(6, '0').slice(0, 6));
+    const storedBuf = Buffer.from(stored.otp.padStart(6, '0').slice(0, 6));
+    const match = otpBuf.length === storedBuf.length && crypto.timingSafeEqual(otpBuf, storedBuf);
+    if (!match) {
       return res.status(400).json({ success: false, error: 'Invalid or expired OTP' });
     }
 

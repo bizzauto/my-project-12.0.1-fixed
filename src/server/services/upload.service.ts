@@ -34,13 +34,11 @@ const ALLOWED_MIME_TYPES: Record<string, string[]> = {
 // Storage limits per plan (in MB)
 const PLAN_STORAGE_LIMITS: Record<string, number> = {
   FREE: 50,
-  BASIC: 100,
   STARTER: 500,
   GROWTH: 1000,
-  PROFESSIONAL: 2500,
   PRO: 5000,
-  ENTERPRISE: 10000,
   AGENCY: 50000,
+  ENTERPRISE: 10000,
 };
 
 export class UploadService {
