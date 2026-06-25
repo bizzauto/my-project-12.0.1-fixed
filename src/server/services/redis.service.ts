@@ -12,19 +12,28 @@ export async function initRedis(): Promise<IORedis | null> {
 
   const redisUrl = process.env.REDIS_URL;
   const password = process.env.REDIS_PASSWORD || undefined;
+  const redisEnabled = process.env.REDIS_ENABLED;
   // Coolify sometimes injects the full Redis URL into REDIS_USERNAME by mistake
   const redisUsername = process.env.REDIS_USERNAME;
 
-  console.log(`[Redis Service] REDIS_URL: ${redisUrl ? 'SET' : 'NOT SET'}, REDIS_PASSWORD: ${password ? 'SET' : 'NOT SET'}`);
+  console.log(`[Redis Service] REDIS_URL: ${redisUrl ? 'SET' : 'NOT SET'}, REDIS_PASSWORD: ${password ? 'SET' : 'NOT SET'}, REDIS_ENABLED: ${redisEnabled || 'NOT SET'}`);
+
+  // NUCLEAR: Redis is completely disabled unless REDIS_ENABLED=true
+  // This prevents Coolify auto-injected env vars from causing connection timeouts
+  if (!redisEnabled) {
+    console.log('[Redis Service] REDIS_ENABLED not set to true — Redis disabled entirely. Set REDIS_ENABLED=true in env to enable.');
+    redisDisabled = true;
+    return null;
+  }
 
   // Check if REDIS_USERNAME contains a full Redis URL (Coolify quirk)
   const effectiveUrl = (redisUrl && redisUrl.includes('@')) ? redisUrl
     : (redisUsername && redisUsername.startsWith('redis://')) ? redisUsername
     : null;
 
-  // Same nuclear check as redis-connection.ts
-  if (!password && !process.env.REDIS_ENABLED && !effectiveUrl) {
-    console.log('[Redis Service] No REDIS_PASSWORD or REDIS_ENABLED — Redis disabled.');
+  // Require credentials for security
+  if (!password && !effectiveUrl && !process.env.REDIS_HOST) {
+    console.log('[Redis Service] REDIS_ENABLED but no Redis credentials provided.');
     redisDisabled = true;
     return null;
   }
