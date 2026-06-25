@@ -1,7 +1,6 @@
 import { google } from 'googleapis';
 import { prisma } from '../db.js';
 import { encrypt, decrypt } from '../utils/auth.js';
-import { createRedisConnection } from '../utils/redis-connection.js';
 
 /**
  * Google Sheets Integration Service
@@ -24,31 +23,13 @@ export class GoogleSheetsService {
     const lockKey = `google_sheets:lock:${businessId}:${lockName}`;
     const now = Date.now();
 
-    // Try Redis first
-    const redis = createRedisConnection();
-    if (redis) {
-      try {
-        const result = await redis.set(lockKey, now.toString(), 'PX', GoogleSheetsService.LOCK_TTL_MS, 'NX');
-        if (result === 'OK') return true;
-        // Check if lock expired
-        const lockTime = await redis.get(lockKey);
-        if (lockTime && (now - parseInt(lockTime)) > GoogleSheetsService.LOCK_TTL_MS) {
-          // Lock expired — steal it
-          await redis.set(lockKey, now.toString(), 'PX', GoogleSheetsService.LOCK_TTL_MS);
-          return true;
-        }
-        return false;
-      } catch {
-        // Redis failed, fall through to in-memory
-      } finally {
-        try { await redis.quit(); } catch {}
-      }
-    }
-
-    // Fallback: in-memory lock
+    // In-memory lock only — Redis is available through the centralized
+    // redis-connection.ts but its lazy-connect clients timeout on first
+    // command when no Redis server is running. Removing the Redis branch
+    // avoids creating ephemeral IORedis clients that spew timeout errors.
     const existingLock = GoogleSheetsService.inMemoryLocks.get(lockKey);
     if (existingLock && (now - existingLock) < GoogleSheetsService.LOCK_TTL_MS) {
-      return false; // Lock is still held
+      return false;
     }
     GoogleSheetsService.inMemoryLocks.set(lockKey, now);
     return true;
