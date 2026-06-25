@@ -76,7 +76,18 @@ router.get('/members', async (req: any, res: any) => {
     const { page = '1', limit = '20', search, role } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    const where: any = { businessId: req.user.businessId };
+    // SUPER_ADMIN sees all users; others see only their business users
+    const where: any = {};
+    if (req.user.role !== 'SUPER_ADMIN') {
+      if (!req.user.businessId) {
+        // User has no business — return empty
+        return res.json({
+          success: true,
+          data: { users: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } },
+        });
+      }
+      where.businessId = req.user.businessId;
+    }
     if (search) {
       where.OR = [
         { email: { contains: search, mode: 'insensitive' } },

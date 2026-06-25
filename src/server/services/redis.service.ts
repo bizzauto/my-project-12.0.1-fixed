@@ -12,30 +12,37 @@ export async function initRedis(): Promise<IORedis | null> {
 
   const redisUrl = process.env.REDIS_URL;
   const password = process.env.REDIS_PASSWORD || undefined;
+  // Coolify sometimes injects the full Redis URL into REDIS_USERNAME by mistake
+  const redisUsername = process.env.REDIS_USERNAME;
 
   console.log(`[Redis Service] REDIS_URL: ${redisUrl ? 'SET' : 'NOT SET'}, REDIS_PASSWORD: ${password ? 'SET' : 'NOT SET'}`);
 
+  // Check if REDIS_USERNAME contains a full Redis URL (Coolify quirk)
+  const effectiveUrl = (redisUrl && redisUrl.includes('@')) ? redisUrl
+    : (redisUsername && redisUsername.startsWith('redis://')) ? redisUsername
+    : null;
+
   // Same nuclear check as redis-connection.ts
-  if (!password && !process.env.REDIS_ENABLED) {
+  if (!password && !process.env.REDIS_ENABLED && !effectiveUrl) {
     console.log('[Redis Service] No REDIS_PASSWORD or REDIS_ENABLED — Redis disabled.');
     redisDisabled = true;
     return null;
   }
 
-  if (!redisUrl && !password) {
+  if (!effectiveUrl && !password) {
     console.log('[Redis Service] No credentials - skipping');
     redisDisabled = true;
     return null;
   }
 
-  if (redisUrl && !redisUrl.includes('@')) {
+  if (effectiveUrl && !effectiveUrl.includes('@')) {
     console.log('[Redis Service] REDIS_URL has no password (no @) — Redis disabled');
     redisDisabled = true;
     return null;
   }
 
-  if (redisUrl) {
-    const schemeFree = redisUrl.replace(/^rediss?:\/\//, '');
+  if (effectiveUrl) {
+    const schemeFree = effectiveUrl.replace(/^rediss?:\/\//, '');
     const passwordPart = schemeFree.split('@')[0];
     if (!passwordPart || passwordPart === ':' || passwordPart === '') {
       console.log('[Redis Service] REDIS_URL has empty password — Redis disabled');
@@ -54,7 +61,7 @@ export async function initRedis(): Promise<IORedis | null> {
     const host = process.env.REDIS_HOST || 'coolify-redis';
     const port = process.env.REDIS_PORT || '6379';
 
-    const finalUrl = redisUrl || `redis://:${password}@${host}:${port}`;
+    const finalUrl = effectiveUrl || `redis://:${password}@${host}:${port}`;
     console.log(`[Redis Service] Connecting to ${host}:${port}...`);
 
     redisClient = new IORedis(finalUrl, {

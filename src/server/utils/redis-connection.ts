@@ -12,26 +12,33 @@ export function createRedisConnection() {
   const redisUrl = process.env.REDIS_URL;
   const redisPassword = process.env.REDIS_PASSWORD;
   const redisHost = process.env.REDIS_HOST;
+  // Coolify sometimes injects the full Redis URL into REDIS_USERNAME by mistake
+  const redisUsername = process.env.REDIS_USERNAME;
 
   console.log(`[Redis] REDIS_URL: ${redisUrl ? 'SET' : 'NOT SET'}, REDIS_PASSWORD: ${redisPassword ? 'SET' : 'NOT SET'}, REDIS_HOST: ${redisHost || 'NOT SET'}`);
+
+  // Check if REDIS_USERNAME contains a full Redis URL (Coolify quirk)
+  const effectiveUrl = (redisUrl && redisUrl.includes('@')) ? redisUrl
+    : (redisUsername && redisUsername.startsWith('redis://')) ? redisUsername
+    : null;
 
   // NUCLEAR: If Redis is not explicitly configured by user, disable it
   // Coolify auto-injects REDIS_URL/REDIS_HOST for its linked Redis service
   // but that Redis uses ACL which causes NOAUTH spam
-  if (!redisPassword && !process.env.REDIS_ENABLED) {
+  if (!redisPassword && !process.env.REDIS_ENABLED && !effectiveUrl) {
     console.log('[Redis] No REDIS_PASSWORD or REDIS_ENABLED — Redis disabled. Set REDIS_ENABLED=true to enable.');
     redisDisabled = true;
     return null;
   }
 
-  if (redisUrl) {
-    const hasAt = redisUrl.includes('@');
+  if (effectiveUrl) {
+    const hasAt = effectiveUrl.includes('@');
     if (!hasAt) {
       console.log('[Redis] REDIS_URL has no @ (no auth) — Redis disabled.');
       redisDisabled = true;
       return null;
     }
-    const schemeFree = redisUrl.replace(/^rediss?:\/\//, '');
+    const schemeFree = effectiveUrl.replace(/^rediss?:\/\//, '');
     const passwordPart = schemeFree.split('@')[0];
     if (!passwordPart || passwordPart === ':' || passwordPart === '') {
       console.log('[Redis] REDIS_URL has empty password — Redis disabled.');
@@ -39,7 +46,7 @@ export function createRedisConnection() {
       return null;
     }
     console.log('[Redis] Connecting via REDIS_URL...');
-    return connectToRedis(redisUrl);
+    return connectToRedis(effectiveUrl);
   }
 
   if (redisPassword) {

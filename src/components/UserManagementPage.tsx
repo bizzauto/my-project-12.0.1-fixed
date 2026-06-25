@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, Search, Loader2, Check, X, Edit3, UserCheck, UserX } from 'lucide-react';
 import { useToast } from './Toast';
 import { useAuthStore } from '../lib/authStore';
-import { superAdminAPI } from '../lib/api';
+import { superAdminAPI, authAPI } from '../lib/api';
 
 interface User {
   id: string;
@@ -38,7 +38,12 @@ export default function UserManagementPage() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const res = await superAdminAPI.listUsers({ limit: 100 });
+      // SUPER_ADMIN uses super-admin API (sees all users platform-wide)
+      // OWNER/ADMIN uses auth API (sees only their business users)
+      const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
+      const res = isSuperAdmin
+        ? await superAdminAPI.listUsers({ limit: 100 })
+        : await authAPI.listUsers({ limit: 100 });
       const data = res.data;
       if (data.success) setUsers(data.data.users);
     } catch { toast.error('Failed to load users'); }

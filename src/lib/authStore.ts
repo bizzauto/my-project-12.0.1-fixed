@@ -168,9 +168,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { user, business, token, refreshToken } = res.data.data;
       localStorage.setItem('token', token);
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      const onboardingCompleted = localStorage.getItem('onboardingCompleted') === 'true';
-      const admissionCompleted = localStorage.getItem('admissionCompleted') === 'true';
-      set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted, admissionCompleted });
+      // Set onboarding/admission flags to true by default so existing users
+      // don't get stuck in redirect chain (onboarding → resorpay → login)
+      localStorage.setItem('onboardingCompleted', 'true');
+      localStorage.setItem('admissionCompleted', 'true');
+      set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted: true, admissionCompleted: true });
     } catch (error: any) {
       set({ isLoading: false });
       const message = error.response?.data?.error || error.response?.data?.message || 'Invalid email or password';

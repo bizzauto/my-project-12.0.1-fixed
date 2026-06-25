@@ -284,8 +284,18 @@ router.get('/google/callback', async (req: Request, res: Response) => {
     }
 
     // Generate JWT
-    const token = generateToken({ userId: user.id, role: user.role });
-    const refreshToken = generateRefreshToken({ userId: user.id });
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      businessId: user.businessId || 'super-admin',
+      role: user.role,
+    });
+    const refreshToken = generateRefreshToken({
+      id: user.id,
+      email: user.email,
+      businessId: user.businessId || 'super-admin',
+      role: user.role,
+    });
 
     // Redirect to frontend with tokens
     const params = new URLSearchParams({

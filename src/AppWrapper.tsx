@@ -283,9 +283,9 @@ function AppRoutes() {
       <Route
         path="/admin/users"
         element={
-          <SuperAdminRoute>
+          <ProtectedRoute>
             <UserManagementPage />
-          </SuperAdminRoute>
+          </ProtectedRoute>
         }
       />
 
