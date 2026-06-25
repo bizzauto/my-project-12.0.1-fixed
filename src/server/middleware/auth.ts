@@ -107,11 +107,21 @@ export const authenticate = async (
     }
 
     // Only generate CSRF token if not exists or expired (max once per session)
-    let csrfToken = await CSRFService.getToken(user.id);
-    if (!csrfToken) {
-      csrfToken = await CSRFService.generateToken(user.id);
+    let csrfToken: string | null = null;
+    try {
+      csrfToken = await CSRFService.getToken(user.id);
+      if (!csrfToken) {
+        csrfToken = await CSRFService.generateToken(user.id);
+      }
+    } catch (csrfErr: any) {
+      // Gracefully handle missing csrfToken column in production DB
+      // This can happen when Prisma migration hasn't been properly baselined
+      console.warn(`[Auth] CSRF token generation failed (${csrfErr?.message || String(csrfErr)}). Auth continues without CSRF.`);
+      csrfToken = null;
     }
-    res.setHeader('X-CSRF-Token', csrfToken);
+    if (csrfToken) {
+      res.setHeader('X-CSRF-Token', csrfToken);
+    }
 
     req.user = {
       id: user.id,

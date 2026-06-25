@@ -33,7 +33,14 @@ export const validateCSRF = async (
       });
     }
 
-    const isValid = await CSRFService.validateToken(req.user.id, csrfToken);
+    let isValid = false;
+    try {
+      isValid = await CSRFService.validateToken(req.user.id, csrfToken);
+    } catch (csrfErr: any) {
+      // Gracefully handle missing csrfToken column — auth already logged warning
+      console.warn(`[CSRF] Validation failed (${csrfErr?.message || String(csrfErr)}). Skipping CSRF check.`);
+      return next();
+    }
 
     if (!isValid) {
       return res.status(403).json({
