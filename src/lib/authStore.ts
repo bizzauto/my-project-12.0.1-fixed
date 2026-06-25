@@ -162,10 +162,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   login: async (email, password) => {
+    const debug = (window as any).__loginDebug;
+    if (debug) debug.storeStep = 'login_called';
     set({ isLoading: true });
     try {
+      if (debug) debug.storeStep = 'calling_auth_api';
       const res = await authAPI.login({ email, password });
+      if (debug) { debug.storeStep = 'auth_api_response_received'; debug.status = res.status; }
       const { user, business, token, refreshToken } = res.data.data;
+      if (debug) { debug.storeStep = 'parsed_response'; debug.hasToken = !!token; debug.hasUser = !!user; }
       localStorage.setItem('token', token);
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       // Set onboarding/admission flags to true by default so existing users
@@ -173,8 +178,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('onboardingCompleted', 'true');
       localStorage.setItem('admissionCompleted', 'true');
       set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted: true, admissionCompleted: true });
+      if (debug) debug.storeStep = 'state_updated_isAuthenticated_true';
     } catch (error: any) {
       set({ isLoading: false });
+      if (debug) { debug.storeStep = 'store_error'; debug.storeError = error?.response?.data || error?.message || String(error); }
       const message = error.response?.data?.error || error.response?.data?.message || 'Invalid email or password';
       throw new Error(message);
     }

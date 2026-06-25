@@ -24,21 +24,40 @@ const LoginPage: React.FC = () => {
     setError('');
     setIsLoading(true);
 
+    const debug = (window as any).__loginDebug = {
+      step: 'handleLogin_started',
+      email,
+      passwordLength: password.length,
+      ts: Date.now(),
+    };
+    console.log('[LOGIN_DEBUG] handleLogin STARTED', debug);
+
     try {
+      debug.step = 'calling_login_api';
       console.log('[LOGIN_DEBUG] Calling login API...');
       await login(email, password);
-      console.log('[LOGIN_DEBUG] Login API succeeded, role:', useAuthStore.getState().user?.role);
+      debug.step = 'login_api_succeeded';
+      debug.role = useAuthStore.getState().user?.role;
+      debug.isAuthenticated = useAuthStore.getState().isAuthenticated;
+      console.log('[LOGIN_DEBUG] Login API succeeded, role:', debug.role);
+
       const role = useAuthStore.getState().user?.role;
       if (role === 'SUPER_ADMIN') {
+        debug.navigateTo = '/admin';
         navigate('/admin');
       } else {
+        debug.navigateTo = '/dashboard';
         navigate('/dashboard');
       }
     } catch (err: any) {
+      debug.step = 'error';
+      debug.error = err?.message || String(err);
+      debug.errorStack = err?.stack?.split('\n').slice(0, 3).join(' | ');
       console.error('[LOGIN_DEBUG] Login error:', err);
-      setError(err.message || 'Login failed');
+      setError(debug.error || 'Login failed');
     } finally {
       setIsLoading(false);
+      debug.step += ' | finally_ran';
     }
   };
 
