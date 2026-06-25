@@ -468,7 +468,18 @@ app.post('/api/security/csp-report', express.json({ limit: '10kb' }), (req, res)
 });
 
 // Health check - comprehensive
-app.get('/health', async (req, res) => {
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: NODE_ENV,
+    version: '12.0.1',
+    buildTime: process.env.BUILD_TIME || new Date().toISOString(),
+  });
+});
+
+// Full detailed health check (includes DB query — use sparingly)
+app.get('/health/details', async (req, res) => {
   try {
     const { getHealthCheck } = await import('./utils/healthCheck.js');
     const health = await getHealthCheck();
@@ -477,13 +488,7 @@ app.get('/health', async (req, res) => {
     const statusCode = health.status === 'unhealthy' ? 503 : 200;
     res.status(statusCode).json(health);
   } catch {
-    res.json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      environment: NODE_ENV,
-      version: '12.0.1',
-      buildTime: process.env.BUILD_TIME || new Date().toISOString(),
-    });
+    res.json({ status: 'error', message: 'Health check failed' });
   }
 });
 

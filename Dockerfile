@@ -46,7 +46,7 @@ EXPOSE 3000
 
 USER appuser
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:${PORT:-3000}/health || exit 1
 
 CMD ["./start.sh"]

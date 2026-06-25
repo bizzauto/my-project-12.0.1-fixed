@@ -13,7 +13,7 @@ const poolUrl = POOL_SIZE > 0
     ? baseUrl
     : `${baseUrl}${separator}pool_timeout=10`;
 
-const slowQueryEnabled = process.env.SLOW_QUERY_LOG_ENABLED !== 'false' && NODE_ENV === 'production';
+const slowQueryEnabled = process.env.SLOW_QUERY_LOG_ENABLED === 'true' && NODE_ENV === 'production';
 export const prisma = new PrismaClient({
   log: [
     'error',
