@@ -20,12 +20,13 @@ export const globalRateLimiter = rateLimit({
  */
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 50,
   message: { success: false, error: 'Too many auth attempts. Please try again in 15 minutes.', code: 'AUTH_RATE_LIMIT_EXCEEDED' },
   standardHeaders: true,
   legacyHeaders: false,
   validate: false,
   skipSuccessfulRequests: true,
+  skip: (req) => req.method === 'GET' || req.method === 'OPTIONS',
 });
 
 /**
