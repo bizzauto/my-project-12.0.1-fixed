@@ -744,6 +744,8 @@ router.post('/login', loginLimiter, validate(loginSchema), async (req: Request, 
     const { email, password, twoFactorToken } = req.body;
     const { TwoFactorService } = await import('../services/twoFactor.service.js');
 
+    console.log(`[LOGIN_DEBUG] Login attempt for: ${email}`);
+
     // Check if account is locked
     const lockStatus = await getLockoutStatus(email);
     if (lockStatus.locked) {
@@ -768,7 +770,9 @@ router.post('/login', loginLimiter, validate(loginSchema), async (req: Request, 
     }
 
     // Verify password
+    console.log(`[LOGIN_DEBUG] User ${email} found, verifying password...`);
     const isValid = await comparePassword(password, user.password);
+    console.log(`[LOGIN_DEBUG] Password valid: ${isValid}`);
 
     if (!isValid) {
       const lockout = await recordFailedLoginAttempt(email);
@@ -832,6 +836,7 @@ router.post('/login', loginLimiter, validate(loginSchema), async (req: Request, 
       data: { lastLoginAt: new Date() },
     });
 
+    console.log(`[LOGIN_DEBUG] Login SUCCESS for ${email}`);
     res.json({
       success: true,
       data: {
@@ -854,7 +859,7 @@ router.post('/login', loginLimiter, validate(loginSchema), async (req: Request, 
       },
     });
   } catch (error: any) {
-    console.error('Login error:', error);
+    console.error('[LOGIN_DEBUG] Login error:', error.message, error.stack?.split('\n').slice(0, 3).join('\n'));
     res.status(500).json({
       success: false,
       error: 'Failed to login',

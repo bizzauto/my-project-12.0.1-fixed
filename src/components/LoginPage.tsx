@@ -25,7 +25,9 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
+      console.log('[LOGIN_DEBUG] Calling login API...');
       await login(email, password);
+      console.log('[LOGIN_DEBUG] Login API succeeded, role:', useAuthStore.getState().user?.role);
       const role = useAuthStore.getState().user?.role;
       if (role === 'SUPER_ADMIN') {
         navigate('/admin');
@@ -33,6 +35,7 @@ const LoginPage: React.FC = () => {
         navigate('/dashboard');
       }
     } catch (err: any) {
+      console.error('[LOGIN_DEBUG] Login error:', err);
       setError(err.message || 'Login failed');
     } finally {
       setIsLoading(false);
