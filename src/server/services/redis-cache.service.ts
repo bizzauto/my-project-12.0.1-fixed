@@ -13,9 +13,13 @@ interface CacheEntry {
   expiresAt: number;
 }
 
+function redisReady(): boolean {
+  return redis !== null && redis.status === 'ready';
+}
+
 export function cacheResponse(ttlSeconds: number = CACHE_TTL_DEFAULT) {
   return (req: any, res: any, next: any): void => {
-    if (req.method !== 'GET' || !redis) {
+    if (req.method !== 'GET' || !redisReady()) {
       return next();
     }
 

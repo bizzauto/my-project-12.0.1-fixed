@@ -10,7 +10,7 @@ import { createRedisConnection } from '../utils/redis-connection.js';
 
 // Redis connection
 const redisConnection = createRedisConnection();
-const redisAvailable = redisConnection !== null;
+const redisAvailable = redisConnection !== null && redisConnection.status === 'ready';
 
 if (!redisAvailable) {
   console.log('[Workers] Redis not available — background jobs disabled. App will run without queues.');
