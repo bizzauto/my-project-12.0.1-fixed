@@ -27,7 +27,7 @@ const TeamManagement: React.FC = () => {
     try {
       const res = await teamAPI.listMembers();
       if (res.data.success) {
-        setTeam(res.data.data?.members || []);
+        setTeam(res.data.data?.users || res.data.data?.members || []);
       }
     } catch (error) {
       console.error('Failed to fetch team:', error);

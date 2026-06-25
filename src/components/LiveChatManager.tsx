@@ -219,7 +219,7 @@ export default function LiveChatManager() {
     try {
       const res = await teamAPI.listMembers();
       if (res.data.success) {
-        setTeamMembers(res.data.data?.members || []);
+        setTeamMembers(res.data.data?.users || res.data.data?.members || []);
       }
     } catch { /* ignore */ }
   }, []);
