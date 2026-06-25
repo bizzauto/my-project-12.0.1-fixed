@@ -14,19 +14,26 @@ export function createRedisConnection() {
   const redisHost = process.env.REDIS_HOST;
   // Coolify sometimes injects the full Redis URL into REDIS_USERNAME by mistake
   const redisUsername = process.env.REDIS_USERNAME;
+  const redisEnabled = process.env.REDIS_ENABLED;
 
-  console.log(`[Redis] REDIS_URL: ${redisUrl ? 'SET' : 'NOT SET'}, REDIS_PASSWORD: ${redisPassword ? 'SET' : 'NOT SET'}, REDIS_HOST: ${redisHost || 'NOT SET'}`);
+  console.log(`[Redis] REDIS_URL: ${redisUrl ? 'SET' : 'NOT SET'}, REDIS_PASSWORD: ${redisPassword ? 'SET' : 'NOT SET'}, REDIS_HOST: ${redisHost || 'NOT SET'}, REDIS_USERNAME: ${redisUsername ? `SET (prefix: ${redisUsername.slice(0, 8)}...)` : 'NOT SET'}, REDIS_ENABLED: ${redisEnabled || 'NOT SET'}`);
 
   // Check if REDIS_USERNAME contains a full Redis URL (Coolify quirk)
   const effectiveUrl = (redisUrl && redisUrl.includes('@')) ? redisUrl
     : (redisUsername && redisUsername.startsWith('redis://')) ? redisUsername
     : null;
 
-  // NUCLEAR: If Redis is not explicitly configured by user, disable it
-  // Coolify auto-injects REDIS_URL/REDIS_HOST for its linked Redis service
-  // but that Redis uses ACL which causes NOAUTH spam
-  if (!redisPassword && !process.env.REDIS_ENABLED && !effectiveUrl) {
-    console.log('[Redis] No REDIS_PASSWORD or REDIS_ENABLED — Redis disabled. Set REDIS_ENABLED=true to enable.');
+  // NUCLEAR: Redis is completely disabled unless REDIS_ENABLED=true
+  // This prevents Coolify auto-injected env vars from causing connection floods
+  if (!redisEnabled) {
+    console.log('[Redis] REDIS_ENABLED not set to true — Redis disabled entirely. Set REDIS_ENABLED=true in env to enable.');
+    redisDisabled = true;
+    return null;
+  }
+
+  // If enabled, still require password for security
+  if (!redisPassword && !redisUrl && !redisHost) {
+    console.log('[Redis] REDIS_ENABLED but no Redis credentials provided.');
     redisDisabled = true;
     return null;
   }
