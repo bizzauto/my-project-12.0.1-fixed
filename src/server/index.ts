@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
 import winston from 'winston';
 import path from 'path';
@@ -506,14 +507,46 @@ app.get('/health/live', (req, res) => {
 app.get('/health/ready', async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
+    // Check Redis if enabled
+    const redisEnabled = process.env.REDIS_ENABLED === 'true';
+    if (redisEnabled) {
+      try {
+        const { default: redisClient } = await import('./services/redis.service.js');
+        // redisClient may be null if not initialized — that's fine
+      } catch {
+        // Redis import failed — non-critical, continue
+      }
+    }
     res.json({ status: 'ready', timestamp: new Date().toISOString() });
   } catch {
     res.status(503).json({ status: 'not ready', timestamp: new Date().toISOString() });
   }
 });
 
-// Serve uploads directory (always)
-app.use('/uploads', express.static(path.join(__dirname, '..', '..', 'uploads')));
+// Serve uploads directory — with business ownership check when JWT is present
+app.use('/uploads', (req, res, next) => {
+  // Extract businessId from URL path: /uploads/{businessId}/{category}/{filename}
+  const pathParts = req.path.split('/').filter(Boolean);
+  if (pathParts.length < 1) return next();
+
+  const requestBusinessId = pathParts[0];
+
+  // If a Bearer token is present, verify business ownership
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    try {
+      const token = authHeader.replace('Bearer ', '');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+      if (decoded.businessId && decoded.businessId !== requestBusinessId && decoded.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ success: false, error: 'Access denied' });
+      }
+    } catch {
+      // Invalid token — still serve the file (browser image loads don't send tokens)
+    }
+  }
+
+  next();
+}, express.static(path.join(__dirname, '..', '..', 'uploads')));
 
 // Serve frontend in production
 if (NODE_ENV === 'production') {

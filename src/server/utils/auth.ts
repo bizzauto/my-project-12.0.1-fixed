@@ -14,14 +14,9 @@ const DEV_JWT_FALLBACK = (() => {
   return crypto.createHash('sha256').update(seed).digest('hex').slice(0, 32);
 })();
 
-let _loggedSecret = false;
 export function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
   if (secret) {
-    if (!_loggedSecret) {
-      _loggedSecret = true;
-      console.log(`[Auth] JWT_SECRET loaded (length: ${secret.length}, first4: ${secret.slice(0, 4)}...)`);
-    }
     return secret;
   }
   const isProd = process.env.NODE_ENV === 'production';
@@ -101,7 +96,6 @@ export const generateToken = (payload: object): string => {
   const token = jwt.sign(payload, secret, {
     expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn'],
   });
-  console.log(`[AUTH_DEBUG] generateToken: secretLen=${secret.length}, secretFirst4=${secret.slice(0,4)}, tokenLen=${token.length}, parts=${token.split('.').length}`);
   return token;
 };
 
@@ -111,11 +105,6 @@ export const verifyToken = (token: string): any => {
     const decoded = jwt.verify(token, secret);
     return decoded;
   } catch (err: any) {
-    console.error(`[AUTH_DEBUG] jwt.verify FAILED: ${err.message}`);
-    console.error(`[AUTH_DEBUG] Secret length: ${secret.length}, first4: ${secret.slice(0, 4)}`);
-    console.error(`[AUTH_DEBUG] Token first 60: ${token.substring(0, 60)}`);
-    console.error(`[AUTH_DEBUG] Token length: ${token.length}`);
-    console.error(`[AUTH_DEBUG] Token parts: ${token.split('.').length}`);
     throw err;
   }
 };

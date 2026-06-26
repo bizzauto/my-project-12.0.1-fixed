@@ -4,8 +4,12 @@ import { readFileSync, writeFileSync, unlinkSync, existsSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { randomBytes } from 'crypto';
+import { authenticate, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
+
+// All Jimi routes require authentication
+router.use(authenticate);
 
 // ==================== JIMI AI CHAT ====================
 // POST /api/jimi/chat - AI chat using server-side NVIDIA NIM API

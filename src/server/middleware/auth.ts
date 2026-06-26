@@ -72,8 +72,6 @@ export const authenticate = async (
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
 
-    console.log(`[AUTH_MIDDLEWARE] Request: ${req.method} ${req.path}, Token present: ${!!token}, Token length: ${token?.length || 0}`);
-
     // If no Bearer token, try n8n API key auth
     if (!token) {
       const n8nAuthed = await authenticateViaN8nApiKey(req);
@@ -81,7 +79,6 @@ export const authenticate = async (
         return next();
       }
 
-      console.log(`[AUTH_MIDDLEWARE] No token provided for ${req.method} ${req.path}`);
       return res.status(401).json({
         success: false,
         error: 'Authentication required',
@@ -91,10 +88,7 @@ export const authenticate = async (
     let decoded: any;
     try {
       decoded = verifyToken(token) as any;
-      console.log(`[AUTH_MIDDLEWARE] Token verified OK. User ID: ${decoded.id}, Role: ${decoded.role}`);
     } catch (verifyError: any) {
-      console.error(`[AUTH_MIDDLEWARE] Token verification FAILED: ${verifyError.message}`);
-      console.error(`[AUTH_MIDDLEWARE] Token first 50 chars: ${token.substring(0, 50)}...`);
       return res.status(401).json({
         success: false,
         error: 'Invalid token',
@@ -107,7 +101,6 @@ export const authenticate = async (
     });
 
     if (!user) {
-      console.error(`[AUTH_MIDDLEWARE] User not found for ID: ${decoded.id}`);
       return res.status(401).json({
         success: false,
         error: 'User not found',

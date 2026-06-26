@@ -13,7 +13,6 @@ export const securityHeaders = helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com", "https://cdn.razorpay.com", "https://fonts.googleapis.com", "https://accounts.google.com", "https://apis.google.com"],
-      scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://accounts.google.com"],
       imgSrc: ["'self'", "data:", "https:", "blob:"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
@@ -28,7 +27,7 @@ export const securityHeaders = helmet({
   },
   
   // Allow Google OAuth iframes while preventing clickjacking
-  frameguard: false,
+  frameguard: { action: 'sameorigin' },
   
   // Prevent MIME type sniffing
   noSniff: true,
@@ -125,18 +124,11 @@ export const corsOptions = {
  * Cleans user input to prevent injection attacks
  */
 export const inputSanitizer = (req: Request, res: Response, next: NextFunction) => {
-  const sensitiveFields = ['password', 'token', 'secret', 'key', 'apiKey'];
-  
   const sanitizeObject = (obj: any): any => {
     if (!obj || typeof obj !== 'object') return obj;
     
     for (const key of Object.keys(obj)) {
       const value = obj[key];
-      
-      // Skip sensitive fields
-      if (sensitiveFields.some(f => key.toLowerCase().includes(f))) {
-        continue;
-      }
       
       if (typeof value === 'string') {
         // Remove potential script tags

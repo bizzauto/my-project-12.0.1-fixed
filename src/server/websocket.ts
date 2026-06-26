@@ -1,13 +1,14 @@
 import { Server as SocketServer, Socket } from 'socket.io';
 import { Server as HttpServer } from 'http';
 import jwt from 'jsonwebtoken';
+import { getJwtSecret } from './utils/auth.js';
 import { default as redisClient } from './services/redis.service.js';
 import { checkConnectionLimit, checkMessageLimit, cleanupSocketLimits, startRateLimitCleanup } from './middleware/websocket-rate-limit.js';
 
 export function setupWebSocket(httpServer: HttpServer) {
   const io = new SocketServer(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL || '*',
+      origin: process.env.FRONTEND_URL || 'https://bizzautoai.com',
       methods: ['GET', 'POST'],
       credentials: true,
     },
@@ -36,7 +37,7 @@ export function setupWebSocket(httpServer: HttpServer) {
         return next(new Error('Authentication required'));
       }
 
-      const decoded = jwt.verify(token as string, process.env.JWT_SECRET!) as any;
+      const decoded = jwt.verify(token as string, getJwtSecret()) as any;
 
       // Verify user still exists and is active
       const { prisma } = await import('./db.js');

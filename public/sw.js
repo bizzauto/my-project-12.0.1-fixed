@@ -59,6 +59,12 @@ self.addEventListener('fetch', (event) => {
 
   // Network first for API calls — always try fresh data
   if (url.pathname.startsWith('/api/')) {
+    // Never cache sensitive API responses
+    const sensitivePaths = ['/api/auth/', '/api/contacts', '/api/user', '/api/settings', '/api/leads', '/api/conversations'];
+    if (sensitivePaths.some(p => url.pathname.startsWith(p))) {
+      event.respondWith(fetch(request));
+      return;
+    }
     event.respondWith(networkFirst(request));
     return;
   }

@@ -1,7 +1,16 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../db.js';
+import { authenticate, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
+
+// All vCard routes require authentication
+router.use(authenticate);
+// Bridge: copy businessId from req.user to req for route handlers
+router.use((req: AuthRequest, _res, next) => {
+  (req as any).businessId = req.user?.businessId;
+  next();
+});
 
 // GET /api/vcard - List all vCards for business
 router.get('/', async (req: Request, res: Response) => {

@@ -435,6 +435,7 @@ model MessageTemplate {
   business     Business  @relation(fields: [businessId], references: [id])
 
   @@unique([businessId, name])
+  @@index([businessId])
 }
 
 model Campaign {
@@ -550,6 +551,7 @@ model Product {
   wishlist         Wishlist[]
 
   @@index([businessId])
+  @@index([businessId, isActive])
 }
 
 model ProductVariant {
@@ -1384,6 +1386,7 @@ model Notification {
 
   @@index([userId])
   @@index([isRead])
+  @@index([userId, isRead])
 }
 
 model ThemePreference {
@@ -1598,6 +1601,7 @@ model DripQueue {
 
   @@index([campaignId])
   @@index([status])
+  @@index([status, sendAt])
 }
 
 model EmailTemplate {
