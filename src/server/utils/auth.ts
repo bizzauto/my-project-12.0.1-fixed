@@ -97,13 +97,27 @@ export const comparePassword = async (
 };
 
 export const generateToken = (payload: object): string => {
-  return jwt.sign(payload, getJwtSecret(), {
+  const secret = getJwtSecret();
+  const token = jwt.sign(payload, secret, {
     expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn'],
   });
+  console.log(`[AUTH_DEBUG] generateToken: secretLen=${secret.length}, secretFirst4=${secret.slice(0,4)}, tokenLen=${token.length}, parts=${token.split('.').length}`);
+  return token;
 };
 
 export const verifyToken = (token: string): any => {
-  return jwt.verify(token, getJwtSecret());
+  const secret = getJwtSecret();
+  try {
+    const decoded = jwt.verify(token, secret);
+    return decoded;
+  } catch (err: any) {
+    console.error(`[AUTH_DEBUG] jwt.verify FAILED: ${err.message}`);
+    console.error(`[AUTH_DEBUG] Secret length: ${secret.length}, first4: ${secret.slice(0, 4)}`);
+    console.error(`[AUTH_DEBUG] Token first 60: ${token.substring(0, 60)}`);
+    console.error(`[AUTH_DEBUG] Token length: ${token.length}`);
+    console.error(`[AUTH_DEBUG] Token parts: ${token.split('.').length}`);
+    throw err;
+  }
 };
 
 export const verifyRefreshToken = (token: string): any => {

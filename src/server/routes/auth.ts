@@ -832,6 +832,8 @@ router.post('/login', loginLimiter, validate(loginSchema), async (req: Request, 
       role: user.role,
     });
 
+    console.log(`[LOGIN_DEBUG] Token generated: length=${token.length}, first50=${token.substring(0, 50)}`);
+
     // Generate refresh token for token rotation
     const refreshToken = generateRefreshToken({
       id: user.id,
@@ -1494,6 +1496,34 @@ router.get('/verification-status', authenticate, async (req: AuthRequest, res: R
     });
   } catch (error: any) {
     res.status(500).json({ success: false, error: 'Failed to check verification status' });
+  }
+});
+
+// DIAGNOSTIC ENDPOINT - test JWT sign/verify in the same process
+router.get('/jwt-test', (req: Request, res: Response) => {
+  const secret = getJwtSecret();
+  const testPayload = { id: 'test-123', email: 'test@test.com', role: 'SUPER_ADMIN', businessId: 'test-biz' };
+  const token = generateToken(testPayload);
+  try {
+    const decoded = verifyToken(token);
+    res.json({
+      success: true,
+      data: {
+        secretLen: secret.length,
+        secretFirst4: secret.slice(0, 4),
+        tokenLen: token.length,
+        tokenParts: token.split('.').length,
+        payload: decoded,
+        match: decoded.id === 'test-123',
+      },
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      secretLen: secret.length,
+      secretFirst4: secret.slice(0, 4),
+    });
   }
 });
 

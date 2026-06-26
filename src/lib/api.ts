@@ -23,6 +23,15 @@ apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    if (!(window as any).__apiAuthLogged) {
+      (window as any).__apiAuthLogged = true;
+      console.log(`[API_INTERCEPTOR] Sending token: length=${token.length}, first50=${token.substring(0, 50)}, url=${config.url}`);
+    }
+  } else {
+    if (!(window as any).__apiNoTokenLogged) {
+      (window as any).__apiNoTokenLogged = true;
+      console.warn(`[API_INTERCEPTOR] NO TOKEN in localStorage for url=${config.url}`);
+    }
   }
   return config;
 });
