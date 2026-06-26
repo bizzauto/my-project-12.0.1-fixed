@@ -14,9 +14,16 @@ const DEV_JWT_FALLBACK = (() => {
   return crypto.createHash('sha256').update(seed).digest('hex').slice(0, 32);
 })();
 
-function getJwtSecret(): string {
+let _loggedSecret = false;
+export function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
-  if (secret) return secret;
+  if (secret) {
+    if (!_loggedSecret) {
+      _loggedSecret = true;
+      console.log(`[Auth] JWT_SECRET loaded (length: ${secret.length}, first4: ${secret.slice(0, 4)}...)`);
+    }
+    return secret;
+  }
   const isProd = process.env.NODE_ENV === 'production';
   if (isProd) {
     console.error('CRITICAL: JWT_SECRET environment variable is not set. Server cannot start in production without a JWT_SECRET.');
@@ -97,6 +104,11 @@ export const generateToken = (payload: object): string => {
 
 export const verifyToken = (token: string): any => {
   return jwt.verify(token, getJwtSecret());
+};
+
+export const verifyRefreshToken = (token: string): any => {
+  const secret = process.env.JWT_REFRESH_SECRET || getJwtSecret();
+  return jwt.verify(token, secret);
 };
 
 export const generateRefreshToken = (payload: object): string => {

@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { prisma } from '../db.js';
-import { hashPassword, comparePassword, generateToken } from '../utils/auth.js';
+import { hashPassword, comparePassword, generateToken, verifyToken, verifyRefreshToken, getJwtSecret } from '../utils/auth.js';
 import { authenticate, requireRole, AuthRequest } from '../middleware/auth.js';
 import { generateRefreshToken } from '../utils/auth.js';
 import speakeasy from 'speakeasy';
@@ -110,7 +110,7 @@ router.get('/google/link-url', authenticate, (req: AuthRequest, res: Response) =
   // Create a JWT with the user's ID and mode=link
   const linkToken = jwt.sign(
     { userId: req.userId, mode: 'link' },
-    process.env.JWT_SECRET!,
+    getJwtSecret(),
     { expiresIn: '10m' }
   );
 
@@ -157,7 +157,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
     if (decoded.mode === 'link' && decoded.token) {
       isLinkMode = true;
       frontendUrl = decoded.redirect || frontendUrlDefault;
-      const jwtPayload = jwt.verify(decoded.token, process.env.JWT_SECRET!) as any;
+      const jwtPayload = jwt.verify(decoded.token, getJwtSecret()) as any;
       linkUserId = jwtPayload.userId;
     }
   } catch {
@@ -1334,7 +1334,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
     // Verify the refresh token
     let decoded: any;
     try {
-      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET!) as any;
+      decoded = verifyRefreshToken(refreshToken) as any;
     } catch {
       return res.status(401).json({
         success: false,
