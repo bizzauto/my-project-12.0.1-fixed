@@ -155,9 +155,16 @@ export const useAuthStore = create<AuthState>((set) => ({
         onboardingCompleted,
         admissionCompleted: admissionCompleted || business?.admissionCompleted || false,
       });
-    } catch {
-      localStorage.removeItem('token');
-      set({ token: null, user: null, business: null, isAuthenticated: false, isInitialized: true, isLoading: false });
+    } catch (error: any) {
+      const status = error?.response?.status;
+      const isAuthError = status === 401 || status === 403;
+      if (isAuthError) {
+        localStorage.removeItem('token');
+        set({ token: null, user: null, business: null, isAuthenticated: false });
+      } else {
+        console.warn('[Auth] initialize() failed — keeping token for retry:', error?.message || error);
+      }
+      set({ isInitialized: true, isLoading: false });
     }
   },
 

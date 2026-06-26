@@ -905,7 +905,7 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
           businessId: user.businessId,
           image: user.image,
         },
-        business: {
+        business: user.business ? {
           id: user.business.id,
           name: user.business.name,
           type: user.business.type,
@@ -913,7 +913,7 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
           plan: user.business.plan,
           aiCreditsUsed: user.business.aiCreditsUsed,
           aiCreditsLimit: user.business.aiCreditsLimit,
-        },
+        } : null,
       },
     });
   } catch (error: any) {

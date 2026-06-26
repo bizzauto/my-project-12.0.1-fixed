@@ -5,30 +5,25 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 
-// ── JWT_SECRET ──
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
+// ── JWT_SECRET (lazy resolution) ──
+// NOTE: process.env is read at CALL TIME, not module eval time.
+// This ensures dotenv.config() in index.ts has already run by the time
+// any token sign/verify happens, preventing the "different secret" bug.
+const DEV_JWT_FALLBACK = (() => {
+  const seed = os.hostname() + '__' + process.cwd();
+  return crypto.createHash('sha256').update(seed).digest('hex').slice(0, 32);
+})();
+
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (secret) return secret;
   const isProd = process.env.NODE_ENV === 'production';
-  const msg = `CRITICAL: JWT_SECRET environment variable is not set.`;
   if (isProd) {
-    console.error(msg + ' Server cannot start in production without a JWT_SECRET.');
+    console.error('CRITICAL: JWT_SECRET environment variable is not set. Server cannot start in production without a JWT_SECRET.');
     process.exit(1);
   }
-  // Dev mode: use a file-based secret so it persists across restarts
-  console.warn('WARNING: ' + msg + ' Generating persistent dev secret from hostname + project path.');
+  return DEV_JWT_FALLBACK;
 }
-
-/**
- * Get a deterministic dev fallback for JWT_SECRET
- * Uses machine hostname + project path to generate a consistent key
- * This ensures tokens don't invalidate on restart during development
- */
-function getDevJwtSecret(): string {
-  const seed = os.hostname() + '__' + process.cwd();
-  // Generate a 32-char hex from the seed
-  return crypto.createHash('sha256').update(seed).digest('hex').slice(0, 32);
-}
-const DEV_JWT_FALLBACK = getDevJwtSecret();
 
 // ── ENCRYPTION_KEY (AES-256) ──
 // In production, this MUST be set. In dev, persist to .encryption.key file so encrypted data survives restarts.
@@ -95,17 +90,17 @@ export const comparePassword = async (
 };
 
 export const generateToken = (payload: object): string => {
-  return jwt.sign(payload, (JWT_SECRET || DEV_JWT_FALLBACK)!, {
+  return jwt.sign(payload, getJwtSecret(), {
     expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn'],
   });
 };
 
 export const verifyToken = (token: string): any => {
-  return jwt.verify(token, JWT_SECRET || DEV_JWT_FALLBACK);
+  return jwt.verify(token, getJwtSecret());
 };
 
 export const generateRefreshToken = (payload: object): string => {
-  const secret = process.env.JWT_REFRESH_SECRET || JWT_SECRET || DEV_JWT_FALLBACK;
+  const secret = process.env.JWT_REFRESH_SECRET || getJwtSecret();
   return jwt.sign(payload, secret, {
     expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '30d') as jwt.SignOptions['expiresIn'],
   });

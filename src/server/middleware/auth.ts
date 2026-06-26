@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { prisma } from '../db.js';
 import { CSRFService } from '../services/csrf.service.js';
+import { verifyToken } from '../utils/auth.js';
 
 export interface AuthRequest extends Request {
   user?: any;
@@ -85,7 +85,7 @@ export const authenticate = async (
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = verifyToken(token) as any;
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
