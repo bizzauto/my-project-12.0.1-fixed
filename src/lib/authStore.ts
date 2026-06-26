@@ -162,7 +162,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         localStorage.removeItem('token');
         set({ token: null, user: null, business: null, isAuthenticated: false });
       } else {
-        console.warn('[Auth] initialize() failed — keeping token for retry:', error?.message || error);
+        // Server/network error — token is still valid, don't log out.
+        // Next API call will re-verify via middleware and interceptor.
+        set({ isAuthenticated: true });
       }
       set({ isInitialized: true, isLoading: false });
     }
