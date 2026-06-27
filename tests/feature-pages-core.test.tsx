@@ -4,7 +4,7 @@
  * Unit tests for CRMPage and WhatsAppModule feature pages.
  */
 
-import React from 'react';
+import type { ReactElement } from 'react';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { render, RenderOptions } from '@testing-library/react';
@@ -23,7 +23,6 @@ jest.mock('../src/lib/api');
 jest.mock('../src/lib/authStore');
 
 // ======== Imports after mocks ========
-import React from 'react';
 import apiClient, { whatsappAPI, contactsAPI, appointmentsAPI, ledgerAPI, dealsAPI, crmInvoicesAPI, goalsAPI } from '../src/lib/api';
 import CRMPage from '../src/components/CRMPage';
 import WhatsAppModule from '../src/components/WhatsAppModule';
@@ -32,10 +31,9 @@ import WhatsAppModule from '../src/components/WhatsAppModule';
 import { ToastProvider } from '../src/components/Toast';
 
 // ======== Test helpers ========
-const renderWithProviders = (ui: React.ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
-  render(ui, { wrapper: ({ children }) => <BrowserRouter><ToastProvider>{children}</ToastProvider></BrowserRouter>, ...options });
-
-const renderWithRouter = (ui: React.ReactElement) => renderWithProviders(ui);
+const renderWithProviders = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
+  render(ui, { wrapper: ({ children }: { children: React.ReactNode }) => <BrowserRouter><ToastProvider>{children}</ToastProvider></BrowserRouter>, ...options });
+const renderWithRouter = (ui: ReactElement) => renderWithProviders(ui);
 
 describe('CRMPage', () => {
   beforeEach(() => {
@@ -85,7 +83,7 @@ describe('WhatsAppModule', () => {
     (whatsappAPI.listBroadcasts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.getContacts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.getAutoReplies as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
-    (whatsappAPI.listConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
+    (whatsappAPI.getConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
   });
 
   it('renders the WhatsApp Business page header', async () => {

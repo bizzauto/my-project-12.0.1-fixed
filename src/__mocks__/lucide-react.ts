@@ -1,15 +1,15 @@
 // Manual mock for lucide-react icons
 // Uses a Proxy to auto-create any icon that's requested — no more "Element type is invalid" errors
-const React = require('react');
+const R = require('react');
 
-const iconCache = new Map();
+const iconCache = new Map<string, any>();
 
-const handler = {
-  get(_target, name) {
+const handler: Record<string, any> = {
+  get(_target: any, name: string | symbol) {
     if (typeof name === 'string' && name !== 'then' && name !== '$$typeof') {
       if (!iconCache.has(name)) {
-        const Icon = (props) =>
-          React.createElement('svg', {
+        const Icon = (props: Record<string, unknown>) =>
+          R.createElement('svg', {
             'data-testid': `icon-${name.toLowerCase()}`,
             key: name,
             ...props,
@@ -21,7 +21,7 @@ const handler = {
     }
     return undefined;
   },
-  has(target, name) {
+  has(_target: any, _name: string | symbol) {
     return true;
   },
 };
@@ -47,7 +47,7 @@ const preWarm = [
 ];
 preWarm.forEach((name) => {
   // Access once to prime the cache — result ignored
-  handler.get({}, name);
+  handler.get({} as any, name, undefined);
 });
 
 module.exports = new Proxy({}, handler);

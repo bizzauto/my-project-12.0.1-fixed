@@ -33,7 +33,7 @@ import WhatsAppModule from '../src/components/WhatsAppModule';
 
 // ======== Test helpers ========
 const renderWithRouter = (ui: React.ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
-  render(ui, { wrapper: ({ children }) => <BrowserRouter>{children}</BrowserRouter>, ...options });
+  render(ui, { wrapper: ({ children }: { children: React.ReactNode }) => <BrowserRouter>{children}</BrowserRouter>, ...options });
 
 /** Helper: navigate to the Connection view and wait for it to render */
 async function navigateToConnectView() {
@@ -57,7 +57,7 @@ describe('WhatsAppModule - Connection Status Transitions', () => {
     (whatsappAPI.listBroadcasts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.getContacts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.getAutoReplies as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
-    (whatsappAPI.listConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
+    (whatsappAPI.getConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
 
     // Mock whatsappAPI.connect() for Meta OAuth flow — returns signupUrl
     (whatsappAPI.connect as jest.Mock).mockResolvedValue({ data: { signupUrl: 'https://oauth.example.com/connect' } });
@@ -176,7 +176,7 @@ describe('WhatsAppModule - Evolution API Mode', () => {
     (whatsappAPI.listBroadcasts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.getContacts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
     (whatsappAPI.getAutoReplies as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
-    (whatsappAPI.listConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
+    (whatsappAPI.getConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
 
     // apiClient.get returns empty data (no Evolution API pre-configured)
     (apiClient.get as jest.Mock).mockResolvedValue({ data: { success: true, data: {} } });
@@ -829,7 +829,7 @@ describe('WhatsAppModule - Evolution API Mode', () => {
       (whatsappAPI.listBroadcasts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
       (whatsappAPI.getContacts as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
       (whatsappAPI.getAutoReplies as jest.Mock).mockResolvedValue({ data: { success: true, data: [] } });
-      (whatsappAPI.listConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
+      (whatsappAPI.getConversations as jest.Mock).mockResolvedValue({ data: { success: true, data: { conversations: [] } } });
 
       // Mock whatsappAPI.getStatus to return disconnected (prevents leaks from other tests)
       (whatsappAPI.getStatus as jest.Mock).mockResolvedValue({

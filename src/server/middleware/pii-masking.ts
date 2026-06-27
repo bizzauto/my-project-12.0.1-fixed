@@ -108,18 +108,11 @@ export function deepMaskPII(obj: any): any {
 }
 
 /**
- * Middleware to mask PII in request/response logs
+ * Middleware to mask PII in request/response logs.
+ * NOTE: Only masks logging — does NOT modify API response bodies.
+ * Frontend needs real data (phone numbers, emails, names).
  */
 export const piiMaskingMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const originalJson = res.json.bind(res);
-
-  res.json = (body: any) => {
-    if (process.env.PII_MASKING !== 'false') {
-      return originalJson(deepMaskPII(body));
-    }
-    return originalJson(body);
-  };
-
   next();
 };
 

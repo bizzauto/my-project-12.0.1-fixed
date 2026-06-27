@@ -23,15 +23,6 @@ apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    if (!(window as any).__apiAuthLogged) {
-      (window as any).__apiAuthLogged = true;
-      console.log(`[API_INTERCEPTOR] Sending token: length=${token.length}, first50=${token.substring(0, 50)}, url=${config.url}`);
-    }
-  } else {
-    if (!(window as any).__apiNoTokenLogged) {
-      (window as any).__apiNoTokenLogged = true;
-      console.warn(`[API_INTERCEPTOR] NO TOKEN in localStorage for url=${config.url}`);
-    }
   }
   return config;
 });
@@ -193,6 +184,7 @@ export const whatsappAPI = {
   updateAutoReply: (id: string, data: any) => apiClient.put(`/whatsapp/auto-replies/${id}`, data),
   deleteAutoReply: (id: string) => apiClient.delete(`/whatsapp/auto-replies/${id}`),
   sendBroadcast: (data: any) => apiClient.post('/whatsapp/broadcast', data),
+  listBroadcasts: (params?: any) => apiClient.get('/whatsapp/broadcasts', { params }),
   getContacts: (params?: any) => apiClient.get('/whatsapp/contacts', { params }),
   getStatus: () => apiClient.get('/whatsapp/status'),
   disconnect: () => apiClient.post('/whatsapp/disconnect'),
@@ -390,6 +382,9 @@ export const automationAPI = {
   updateRule: (id: string, data: any) => apiClient.put(`/automation/rules/${id}`, data),
   deleteRule: (id: string) => apiClient.delete(`/automation/rules/${id}`),
   toggleRule: (id: string, isActive: boolean) => apiClient.patch(`/automation/rules/${id}/toggle`, { isActive }),
+  getTemplates: () => apiClient.get('/automation/templates'),
+  getLogs: (params?: any) => apiClient.get('/automation/logs', { params }),
+  list: (params?: any) => apiClient.get('/automation/rules', { params }),
   getSettings: () => apiClient.get('/automation/settings'),
   updateSettings: (data: any) => apiClient.put('/automation/settings', data),
   getN8nStatus: () => apiClient.get('/automation/n8n/status'),

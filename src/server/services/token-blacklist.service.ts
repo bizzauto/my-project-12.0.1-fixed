@@ -16,18 +16,20 @@ function redisReady(): boolean {
 
 export function blacklistToken(jti: string, expiresInMs: number): void {
   if (!redisReady()) return;
+  const r = redis!;
   try {
     const key = `${TOKEN_BLACKLIST_PREFIX}${jti}`;
     const ttlSeconds = Math.ceil(expiresInMs / 1000);
-    redis.setex(key, ttlSeconds, '1').catch(() => {});
+    r.setex(key, ttlSeconds, '1').catch(() => {});
   } catch {}
 }
 
 export function isTokenBlacklisted(jti: string): boolean {
   if (!redisReady()) return false;
+  const r = redis!;
   try {
     const key = `${TOKEN_BLACKLIST_PREFIX}${jti}`;
-    const result = redis.get(key);
+    const result = r.get(key);
     return result !== null;
   } catch {
     return false;
@@ -36,18 +38,20 @@ export function isTokenBlacklisted(jti: string): boolean {
 
 export async function blacklistRefreshToken(userId: string, expiresInMs: number): Promise<void> {
   if (!redisReady()) return;
+  const r = redis!;
   try {
     const key = `${REFRESH_TOKEN_PREFIX}${userId}`;
     const ttlSeconds = Math.ceil(expiresInMs / 1000);
-    await redis.setex(key, ttlSeconds, 'revoked').catch(() => {});
+    await r.setex(key, ttlSeconds, 'revoked').catch(() => {});
   } catch {}
 }
 
 export async function isRefreshTokenRevoked(userId: string): Promise<boolean> {
   if (!redisReady()) return false;
+  const r = redis!;
   try {
     const key = `${REFRESH_TOKEN_PREFIX}${userId}`;
-    const val = await redis.get(key);
+    const val = await r.get(key);
     return val === 'revoked';
   } catch {
     return false;

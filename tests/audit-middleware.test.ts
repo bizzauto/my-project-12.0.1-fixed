@@ -269,7 +269,7 @@ describe('Audit Middleware - Entry Construction', () => {
   });
 
   it('should construct correct entry for PUT /contacts/abc123', () => {
-    const method = 'PUT';
+    const method: string = 'PUT';
     const path = '/contacts/abc123';
     const pathParts = path.split('/').filter(Boolean);
     const action = method === 'DELETE' ? 'delete' : method === 'POST' ? 'create' : 'update';

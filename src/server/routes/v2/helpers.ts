@@ -166,7 +166,7 @@ export function parsePagination(query: {
 }): { cursor?: string; take: number; parsedCursor?: { id: string; createdAt: Date } } {
   const take = Math.min(Math.max(parseInt(query.limit || '50'), 1), 100);
   const cursor = query.cursor;
-  const parsedCursor = cursor ? decodeCursor(cursor) : undefined;
+  const parsedCursor = cursor ? decodeCursor(cursor) ?? undefined : undefined;
   return { cursor, take, parsedCursor };
 }
 

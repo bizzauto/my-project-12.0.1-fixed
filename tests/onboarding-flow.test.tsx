@@ -100,37 +100,42 @@ import OnboardingWizard from '../src/components/OnboardingWizard';
 //  Test helpers
 // ════════════════════════════════════════════════════════════════════════
 
-// Helper: advance from step 0 to step 1 (welcome/choice) then to step 2 (business) via Manual Setup
-const clickManualSetup = () => fireEvent.click(screen.getByText(/✍️ Manual Setup/));
-
-const renderOnboarding = () =>
+const renderOnboarding = (onComplete?: () => void) =>
   render(
     <MemoryRouter>
-      <OnboardingWizard />
+      <OnboardingWizard onComplete={onComplete} />
     </MemoryRouter>,
   );
 
-// Use regex for button text because lucide-react mock renders icon text inside buttons
 const clickContinue = () => fireEvent.click(screen.getByText(/^Continue$/));
 const clickBack = () => fireEvent.click(screen.getByText(/^Back$/));
+const clickManualSetup = () => fireEvent.click(screen.getByText(/✍️ Manual Setup/));
 
 /**
- * Advance from step 0 (empty) through to step 3 (Connect tools).
- * Flow: step 0 (empty) → click Continue → step 1 (Welcome) → click Manual Setup → step 2 (Business) → click Continue → step 3 (Connect)
+ * Advance from step 0 through to step 3 (Connect tools), flushing async effects.
  */
-const advanceToStep3 = () => {
+const advanceToStep3 = async () => {
   renderOnboarding();
-  clickContinue();          // step 0 → step 1 (Welcome with Quick/Manual buttons)
-  clickManualSetup();       // step 1 → step 2 (Business info)
-  clickContinue();          // step 2 → step 3 (Connect tools)
+  clickContinue();
+  await waitFor(() => {
+    expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument();
+  });
+  clickManualSetup();
+  await waitFor(() => {
+    expect(screen.getByText(/Tell us about your business/)).toBeInTheDocument();
+  });
+  clickContinue();
+  await waitFor(() => {
+    expect(screen.getByText(/Connect your tools/)).toBeInTheDocument();
+  });
 };
 
-/**
- * Advance all the way to step 4 (Done/Get Started).
- */
-const advanceToStep4 = () => {
-  advanceToStep3();
-  clickContinue();          // step 3 → step 4 (Done)
+const advanceToStep4 = async () => {
+  await advanceToStep3();
+  clickContinue();
+  await waitFor(() => {
+    expect(screen.getByText(/You're all set!/)).toBeInTheDocument();
+  });
 };
 
 // ════════════════════════════════════════════════════════════════════════
@@ -168,80 +173,98 @@ describe('Step progression', () => {
     expect(screen.queryByText(/Welcome to BizzAuto!/)).not.toBeInTheDocument();
   });
 
-  it('Continue moves from step 0 → step 1 (Welcome with choice buttons)', () => {
+  it('Continue moves from step 0 → step 1 (Welcome with choice buttons)', async () => {
     renderOnboarding();
     clickContinue();
-
-    // Step 1 shows the Welcome text with Quick/Manual choice buttons
-    expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument();
+    // Step change is synchronous, but useEffect async calls may resolve after
+    await waitFor(() => {
+      expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument();
+    });
     expect(screen.getByText(/Hey Test User/)).toBeInTheDocument();
     expect(screen.getByText(/⚡ Quick Setup/)).toBeInTheDocument();
     expect(screen.getByText(/✍️ Manual Setup/)).toBeInTheDocument();
-    // No Continue button on the choice screen (only Quick/Manual buttons)
   });
 
-  it('Manual Setup moves from step 1 → step 2 (Business)', () => {
+  it('Manual Setup moves from step 1 → step 2 (Business)', async () => {
     renderOnboarding();
     clickContinue();
+    await waitFor(() => expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument());
     clickManualSetup();
-
-    expect(screen.getByText('Tell us about your business')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Tell us about your business')).toBeInTheDocument();
+    });
     expect(screen.getByText(/Back/)).toBeInTheDocument();
     expect(screen.getByText(/^Continue$/)).toBeInTheDocument();
   });
 
-  it('Back from step 2 returns to step 1 (setupMode=manual, no choice buttons)', () => {
+  it('Back from step 2 returns to step 1 (setupMode=manual, no choice buttons)', async () => {
     renderOnboarding();
     clickContinue();
+    await waitFor(() => expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument());
     clickManualSetup();
+    await waitFor(() => expect(screen.getByText(/Tell us about your business/)).toBeInTheDocument());
     clickBack();
-
-    // Step 1 with setupMode='manual' shows no step content (only the progress bar and Continue button)
-    // The Continue button IS visible since step < totalSteps
-    expect(screen.getByText(/^Continue$/)).toBeInTheDocument();
-    // Welcome/choice text should NOT be here (setupMode is still 'manual')
+    await waitFor(() => {
+      expect(screen.getByText(/^Continue$/)).toBeInTheDocument();
+    });
     expect(screen.queryByText(/Welcome to BizzAuto!/)).not.toBeInTheDocument();
   });
 
-  it('Continue from step 2 → step 3 (Connect)', () => {
+  it('Continue from step 2 → step 3 (Connect)', async () => {
     renderOnboarding();
     clickContinue();
+    await waitFor(() => expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument());
     clickManualSetup();
+    await waitFor(() => expect(screen.getByText(/Tell us about your business/)).toBeInTheDocument());
     clickContinue();
-
-    expect(screen.getByText('Connect your tools')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Connect your tools')).toBeInTheDocument();
+    });
   });
 
-  it('Back from step 3 returns to step 2', () => {
+  it('Back from step 3 returns to step 2', async () => {
     renderOnboarding();
     clickContinue();
+    await waitFor(() => expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument());
     clickManualSetup();
+    await waitFor(() => expect(screen.getByText(/Tell us about your business/)).toBeInTheDocument());
     clickContinue();
+    await waitFor(() => expect(screen.getByText(/Connect your tools/)).toBeInTheDocument());
     clickBack();
-
-    expect(screen.getByText('Tell us about your business')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Tell us about your business')).toBeInTheDocument();
+    });
   });
 
-  it('Continue from step 3 → step 4 (Done)', () => {
+  it('Continue from step 3 → step 4 (Done)', async () => {
     renderOnboarding();
     clickContinue();
+    await waitFor(() => expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument());
     clickManualSetup();
+    await waitFor(() => expect(screen.getByText(/Tell us about your business/)).toBeInTheDocument());
     clickContinue();
+    await waitFor(() => expect(screen.getByText(/Connect your tools/)).toBeInTheDocument());
     clickContinue();
-
-    expect(screen.getByText("You're all set!")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/You're all set!/)).toBeInTheDocument();
+    });
     expect(screen.getByText(/Get Started/)).toBeInTheDocument();
   });
 
-  it('Back from step 4 returns to step 3', () => {
+  it('Back from step 4 returns to step 3', async () => {
     renderOnboarding();
     clickContinue();
+    await waitFor(() => expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument());
     clickManualSetup();
+    await waitFor(() => expect(screen.getByText(/Tell us about your business/)).toBeInTheDocument());
     clickContinue();
+    await waitFor(() => expect(screen.getByText(/Connect your tools/)).toBeInTheDocument());
     clickContinue();
+    await waitFor(() => expect(screen.getByText(/You're all set!/)).toBeInTheDocument());
     clickBack();
-
-    expect(screen.getByText('Connect your tools')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Connect your tools')).toBeInTheDocument();
+    });
   });
 });
 
@@ -250,8 +273,8 @@ describe('Step progression', () => {
 // ════════════════════════════════════════════════════════════════════════
 
 describe('Navigation routing', () => {
-  it('Get Started navigates to /dashboard', () => {
-    advanceToStep4();
+  it('Get Started navigates to /dashboard', async () => {
+    await advanceToStep4();
 
     fireEvent.click(screen.getByText(/Get Started/));
 
@@ -260,7 +283,7 @@ describe('Navigation routing', () => {
   });
 
   it('Connect (WhatsApp) navigates to /whatsapp', async () => {
-    advanceToStep3();
+    await advanceToStep3();
 
     // Wait for all API calls to settle so buttons appear (not "Checking...")
     await waitFor(() => {
@@ -275,7 +298,7 @@ describe('Navigation routing', () => {
   });
 
   it('Connect (Google Business) navigates to /google-business', async () => {
-    advanceToStep3();
+    await advanceToStep3();
 
     await waitFor(() => {
       expect(screen.getAllByText('Connect').length).toBeGreaterThanOrEqual(3);
@@ -288,7 +311,7 @@ describe('Navigation routing', () => {
   });
 
   it('Connect (Google Sheets) navigates to /settings', async () => {
-    advanceToStep3();
+    await advanceToStep3();
 
     await waitFor(() => {
       expect(screen.getAllByText('Connect').length).toBeGreaterThanOrEqual(3);
@@ -301,7 +324,7 @@ describe('Navigation routing', () => {
   });
 
   it('Connect (Razorpay) navigates to /settings', async () => {
-    advanceToStep3();
+    await advanceToStep3();
 
     await waitFor(() => {
       expect(screen.getAllByText('Connect').length).toBeGreaterThanOrEqual(3);
@@ -325,7 +348,7 @@ describe('Connection status display', () => {
     (googleBusinessAPI.getStatus as jest.Mock).mockReturnValue(new Promise(() => {}));
     (subscriptionsAPI.getCurrent as jest.Mock).mockReturnValue(new Promise(() => {}));
 
-    advanceToStep3();
+    await advanceToStep3();
 
     // Three tools have API-dependent status (WhatsApp, GBP, Razorpay) — should show "Checking…"
     await waitFor(() => {
@@ -345,7 +368,7 @@ describe('Connection status display', () => {
       data: { success: true, data: { plan: 'PRO' } },
     });
 
-    advanceToStep3();
+    await advanceToStep3();
 
     // WhatsApp, GBP, Razorpay → Connected; Google Sheets → always Connect button
     await waitFor(() => {
@@ -357,7 +380,7 @@ describe('Connection status display', () => {
 
   it('shows "Connect" buttons when APIs return disconnected', async () => {
     // Default beforeEach already sets everything to disconnected
-    advanceToStep3();
+    await advanceToStep3();
 
     await waitFor(() => {
       // 4 Connect buttons for all tools
@@ -370,7 +393,7 @@ describe('Connection status display', () => {
     (googleBusinessAPI.getStatus as jest.Mock).mockRejectedValue(new Error('Network error'));
     (subscriptionsAPI.getCurrent as jest.Mock).mockRejectedValue(new Error('Network error'));
 
-    advanceToStep3();
+    await advanceToStep3();
 
     await waitFor(() => {
       // All four should default to disconnected → "Connect"
@@ -384,21 +407,19 @@ describe('Connection status display', () => {
 // ════════════════════════════════════════════════════════════════════════
 
 describe('onComplete callback', () => {
-  it('calls onComplete when the user finishes the wizard', () => {
+  it('calls onComplete when the user finishes the wizard', async () => {
     const onComplete = jest.fn();
+    renderOnboarding(onComplete);
 
-    render(
-      <MemoryRouter>
-        <OnboardingWizard onComplete={onComplete} />
-      </MemoryRouter>,
-    );
+    clickContinue();
+    await waitFor(() => expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument());
+    clickManualSetup();
+    await waitFor(() => expect(screen.getByText(/Tell us about your business/)).toBeInTheDocument());
+    clickContinue();
+    await waitFor(() => expect(screen.getByText(/Connect your tools/)).toBeInTheDocument());
+    clickContinue();
+    await waitFor(() => expect(screen.getByText(/You're all set!/)).toBeInTheDocument());
 
-    clickContinue();  // step 0 → step 1 (Welcome + choice buttons)
-    // On step 1, there's no Continue button, only choice buttons
-    // Need to click Manual Setup to advance
-    clickManualSetup();  // step 1 → step 2 (Business info)
-    clickContinue();  // step 2 → step 3 (Connect tools)
-    clickContinue();  // step 3 → step 4 (Done)
     fireEvent.click(screen.getByText(/Get Started/));
 
     expect(onComplete).toHaveBeenCalledTimes(1);
@@ -406,16 +427,14 @@ describe('onComplete callback', () => {
 
   it('calls onComplete when connecting a tool from step 3', async () => {
     const onComplete = jest.fn();
+    renderOnboarding(onComplete);
 
-    render(
-      <MemoryRouter>
-        <OnboardingWizard onComplete={onComplete} />
-      </MemoryRouter>,
-    );
-
-    clickContinue();   // step 0 → step 1 (Welcome)
-    clickManualSetup();  // step 1 → step 2 (Business info)
-    clickContinue();   // step 2 → step 3 (Connect tools)
+    clickContinue();
+    await waitFor(() => expect(screen.getByText(/Welcome to BizzAuto!/)).toBeInTheDocument());
+    clickManualSetup();
+    await waitFor(() => expect(screen.getByText(/Tell us about your business/)).toBeInTheDocument());
+    clickContinue();
+    await waitFor(() => expect(screen.getByText(/Connect your tools/)).toBeInTheDocument());
 
     await waitFor(() => {
       expect(screen.getAllByText('Connect').length).toBeGreaterThanOrEqual(3);

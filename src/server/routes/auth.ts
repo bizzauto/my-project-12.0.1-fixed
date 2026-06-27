@@ -277,7 +277,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
         },
       });
       user = await prisma.user.update({
-        where: { id: user.id },
+        where: { id: user!.id },
         data: { businessId: business.id },
         include: { business: true },
       });
@@ -852,13 +852,15 @@ router.post('/login', loginLimiter, validate(loginSchema), async (req: Request, 
           role: user.role,
           businessId: user.businessId,
           twoFactorEnabled: user.twoFactorEnabled,
+          onboardingCompleted: user.business?.onboardingCompleted ?? false,
+          admissionCompleted: user.business?.admissionCompleted ?? false,
         },
-        business: {
+        business: user.business ? {
           id: user.business.id,
           name: user.business.name,
           type: user.business.type,
           plan: user.business.plan,
-        },
+        } : undefined,
         token,
         refreshToken,
       },
@@ -1353,6 +1355,25 @@ router.post('/refresh', async (req: Request, res: Response) => {
         error: 'User not found or account suspended',
       });
     }
+
+    // Check if this refresh token has been revoked (token reuse detection)
+    try {
+      const { isRefreshTokenRevoked } = await import('../services/token-blacklist.service.js');
+      const revoked = await isRefreshTokenRevoked(user.id).catch(() => false);
+      if (revoked) {
+        return res.status(401).json({
+          success: false,
+          error: 'Refresh token reuse detected. Please log in again.',
+        });
+      }
+    } catch { /* Redis unavailable — skip check */ }
+
+    // Blacklist the old refresh token to prevent reuse (refresh token rotation)
+    try {
+      const { blacklistRefreshToken } = await import('../services/token-blacklist.service.js');
+      const expiresIn = (parseInt(process.env.JWT_REFRESH_EXPIRES_IN || '2592000', 10)) * 1000;
+      await blacklistRefreshToken(user.id, expiresIn).catch(() => {});
+    } catch { /* Redis unavailable — skip blacklist */ }
 
     // Issue new token pair (rotation)
     const newToken = generateToken({

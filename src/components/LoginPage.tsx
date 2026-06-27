@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
     setError('');
     setIsLoading(true);
 
-    const debug = (window as any).__loginDebug = {
+    const debug: any = (window as any).__loginDebug = {
       step: 'handleLogin_started',
       email,
       passwordLength: password.length,

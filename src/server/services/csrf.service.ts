@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import { randomBytes } from 'crypto';
 import { prisma } from '../db.js';
 
 /**
@@ -10,7 +10,7 @@ export class CSRFService {
    * Generate a new CSRF token for a user
    */
   static async generateToken(userId: string): Promise<string> {
-    const token = crypto.randomBytes(32).toString('hex');
+    const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     await prisma.user.update({

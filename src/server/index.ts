@@ -108,6 +108,7 @@ import jimiTtsRoutes from './routes/jimi-tts.js';
 import avaRoutes from './routes/ava.js';
 import { apiSecurityHeaders } from './middleware/security.js';
 import { validateCSRF } from './middleware/csrf.js';
+import { authenticatedCsrf } from './middleware/authenticated-csrf.js';
 import { sanitizeInput } from './middleware/sanitize.js';
 import { apiVersioning } from './middleware/api-versioning.js';
 import { requestCounting } from './middleware/request-counting.js';
@@ -258,10 +259,11 @@ app.use('/api', auditMiddleware);
 // API Security Headers
 app.use('/api', apiSecurityHeaders);
 
-// Global API Rate Limiter (1000 requests per 15 minutes per IP)
+// Global API Rate Limiter (100 requests per 15 minutes per IP — matching rateLimiters.ts globalRateLimiter)
+// NOTE: This was previously 1000 req/15min which was 10x more permissive
 const globalApiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 1000,
+  max: 100,
   message: { success: false, error: 'Too many requests. Please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -293,53 +295,34 @@ app.use((req, res, next) => {
 
 // API Routes
 
-// CSRF validation for authenticated state-changing routes
-// Applied globally — each route that needs CSRF will check X-CSRF-Token header
-// GET/HEAD/OPTIONS are always allowed (safe methods)
-app.use('/api', (req, res, next) => {
-  // Skip CSRF for safe methods (GET, HEAD, OPTIONS)
-  if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
-    return next();
-  }
-  // Skip CSRF for public endpoints (no auth needed)
-  const publicPaths = ['/api/store', '/api/auth', '/api/health'];
-  if (publicPaths.some(p => req.path.startsWith(p.replace('/api', '')))) {
-    return next();
-  }
-  // Skip CSRF for webhook endpoints (they use webhook-secret validation instead)
-  const webhookPaths = ['/dograh/webhook', '/payments/webhook', '/payments/verify', '/subscriptions/webhook'];
-  if (webhookPaths.some(p => req.path.startsWith(p))) {
-    return next();
-  }
-  // Apply CSRF validation to all other POST/PUT/PATCH/DELETE requests
-  validateCSRF(req, res, next);
-});
+// CSRF validation is now per-route via authenticatedCsrf middleware
+// (Global CSRF was broken — it ran before authenticate, so req.user was always undefined)
 
 // Public store routes (no auth required)
 app.use('/api/store', storePublicRoutes);
 app.use('/api/auth', authRateLimiter);
 app.use('/api/auth/login', loginRateLimiter);
 app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/referrals', referralRoutes);
+app.use('/api/user', authenticatedCsrf, userRoutes);
+app.use('/api/referrals', authenticatedCsrf, referralRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/appointments', appointmentsRoutes);
-app.use('/api/automation', automationRoutes);
-app.use('/api/business', businessRoutes);
-app.use('/api/campaigns', campaignsRoutes);
+app.use('/api/automation', authenticatedCsrf, automationRoutes);
+app.use('/api/business', authenticatedCsrf, businessRoutes);
+app.use('/api/campaigns', authenticatedCsrf, campaignsRoutes);
 app.use('/api/chatbot', chatbotRoutes);
-app.use('/api/contacts', contactsRoutes);
+app.use('/api/contacts', authenticatedCsrf, contactsRoutes);
 app.use('/api/customer-security', customerDataSecurityRoutes);
-app.use('/api/documents', documentsRoutes);
-app.use('/api/ecommerce', ecommerceRoutes);
-app.use('/api/email', emailRoutes);
+app.use('/api/documents', authenticatedCsrf, documentsRoutes);
+app.use('/api/ecommerce', authenticatedCsrf, ecommerceRoutes);
+app.use('/api/email', authenticatedCsrf, emailRoutes);
 app.use('/api/evolution', evolutionRoutes);
 app.use('/api/google-business', googleBusinessRoutes);
 app.use('/api/indiamart-email', indiamartEmailRoutes);
 app.use('/api/integrations', integrationsRoutes);
 app.use('/api/intelligence', intelligenceRoutes);
-app.use('/api/leads', leadsRoutes);
+app.use('/api/leads', authenticatedCsrf, leadsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/posters', postersRoutes);
 app.use('/api/posts', postsRoutes);
@@ -347,18 +330,18 @@ app.use('/api/instagram', instagramRoutes);
 app.use('/api/qwen-preview', qwenPreviewRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/reviews', reviewsRoutes);
-app.use('/api/settings', settingsRoutes);
+app.use('/api/settings', authenticatedCsrf, settingsRoutes);
 app.use('/api/social-accounts', socialAccountsRoutes);
 app.use('/api/surveys', surveysRoutes);
-app.use('/api/subscriptions', subscriptionsRoutes);
-app.use('/api/super-admin', superAdminRoutes);
-app.use('/api/team', teamRoutes);
+app.use('/api/subscriptions', authenticatedCsrf, subscriptionsRoutes);
+app.use('/api/super-admin', authenticatedCsrf, superAdminRoutes);
+app.use('/api/team', authenticatedCsrf, teamRoutes);
 app.use('/api/two-factor', twoFactorRoutes);
 app.use('/api/webhooks', webhooksRoutes);
-app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/whatsapp', authenticatedCsrf, whatsappRoutes);
 app.use('/api/whatsapp-media/cleanup', whatsappMediaCleanupRoutes);
 app.use('/api/whatsapp-catalog', whatsappCatalogRoutes);
-app.use('/api/workflows', workflowRoutes);
+app.use('/api/workflows', authenticatedCsrf, workflowRoutes);
 app.use('/api/payment-links', paymentLinksRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/client-portal', clientPortalRoutes);

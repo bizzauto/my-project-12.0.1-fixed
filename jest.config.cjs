@@ -9,7 +9,7 @@ module.exports = {
   },
   transform: {
     '^.+\\\\.tsx?$': ['ts-jest', {
-      tsconfig: 'tsconfig.json',
+      tsconfig: 'tsconfig.jest.json',
     }],
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setupTests.ts'],

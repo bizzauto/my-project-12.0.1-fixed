@@ -226,7 +226,7 @@ describe('EvolutionApiService', () => {
           webhookUrl,
         });
 
-        const axiosCall = mockedAxios.post.mock.calls[0][1];
+        const axiosCall: any = mockedAxios.post.mock.calls[0][1];
         expect(axiosCall.webhook).toBeDefined();
         expect(axiosCall.webhook.url).toBe(webhookUrl);
         expect(axiosCall.webhook.webhookByEvents).toBe(true);
@@ -244,7 +244,7 @@ describe('EvolutionApiService', () => {
           apiKey: API_KEY,
         });
 
-        const axiosCall = mockedAxios.post.mock.calls[0][1];
+        const axiosCall: any = mockedAxios.post.mock.calls[0][1];
         expect(axiosCall.instanceName).toBe(`biz_${BUSINESS_ID.slice(-8)}`);
       });
 
@@ -564,7 +564,7 @@ describe('EvolutionApiService', () => {
 
         await EvolutionApiService.sendText(BUSINESS_ID, '9876543210', MESSAGE);
 
-        const axiosCall = mockedAxios.post.mock.calls[0][1];
+        const axiosCall: any = mockedAxios.post.mock.calls[0][1];
         expect(axiosCall.number).toBe('919876543210');
       });
 
@@ -594,7 +594,7 @@ describe('EvolutionApiService', () => {
 
         await EvolutionApiService.sendText(BUSINESS_ID, TO_NUMBER, MESSAGE, { linkPreview: false });
 
-        const axiosCall = mockedAxios.post.mock.calls[0][1];
+        const axiosCall: any = mockedAxios.post.mock.calls[0][1];
         expect(axiosCall.linkPreview).toBe(false);
       });
     });
@@ -625,7 +625,7 @@ describe('EvolutionApiService', () => {
 
         await EvolutionApiService.sendMedia(BUSINESS_ID, TO_NUMBER, MEDIA_URL, 'video');
 
-        const axiosCall = mockedAxios.post.mock.calls[0][1];
+        const axiosCall: any = mockedAxios.post.mock.calls[0][1];
         expect(axiosCall.mediatype).toBe('video');
         expect(axiosCall.caption).toBeUndefined();
       });
@@ -635,7 +635,7 @@ describe('EvolutionApiService', () => {
 
         await EvolutionApiService.sendMedia(BUSINESS_ID, TO_NUMBER, MEDIA_URL, 'document');
 
-        const axiosCall = mockedAxios.post.mock.calls[0][1];
+        const axiosCall: any = mockedAxios.post.mock.calls[0][1];
         expect(axiosCall.mediatype).toBe('document');
       });
 
@@ -644,7 +644,7 @@ describe('EvolutionApiService', () => {
 
         await EvolutionApiService.sendMedia(BUSINESS_ID, TO_NUMBER, MEDIA_URL, 'audio');
 
-        const axiosCall = mockedAxios.post.mock.calls[0][1];
+        const axiosCall: any = mockedAxios.post.mock.calls[0][1];
         expect(axiosCall.mediatype).toBe('audio');
       });
     });
@@ -815,7 +815,7 @@ describe('EvolutionApiService', () => {
 
         await EvolutionApiService.fetchMessages(BUSINESS_ID, 'test@s.whatsapp.net');
 
-        const axiosCall = mockedAxios.post.mock.calls[0][1];
+        const axiosCall: any = mockedAxios.post.mock.calls[0][1];
         expect(axiosCall.limit).toBe(50);
       });
     });

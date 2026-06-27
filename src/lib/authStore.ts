@@ -180,13 +180,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (debug) { debug.storeStep = 'auth_api_response_received'; debug.status = res.status; }
       const { user, business, token, refreshToken } = res.data.data;
       if (debug) { debug.storeStep = 'parsed_response'; debug.hasToken = !!token; debug.hasUser = !!user; }
+      const onboardingCompleted = user.onboardingCompleted ?? false;
+      const admissionCompleted = user.admissionCompleted ?? false;
       localStorage.setItem('token', token);
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      // Set onboarding/admission flags to true by default so existing users
-      // don't get stuck in redirect chain (onboarding → resorpay → login)
-      localStorage.setItem('onboardingCompleted', 'true');
-      localStorage.setItem('admissionCompleted', 'true');
-      set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted: true, admissionCompleted: true });
+      localStorage.setItem('onboardingCompleted', String(onboardingCompleted));
+      localStorage.setItem('admissionCompleted', String(admissionCompleted));
+      set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted, admissionCompleted });
       if (debug) debug.storeStep = 'state_updated_isAuthenticated_true';
     } catch (error: any) {
       set({ isLoading: false });
@@ -201,9 +201,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const res = await authAPI.googleLogin(credential);
       const { user, business, token, refreshToken } = res.data.data;
+      const onboardingCompleted = user.onboardingCompleted ?? false;
+      const admissionCompleted = user.admissionCompleted ?? false;
       localStorage.setItem('token', token);
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted: true });
+      localStorage.setItem('onboardingCompleted', String(onboardingCompleted));
+      localStorage.setItem('admissionCompleted', String(admissionCompleted));
+      set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted, admissionCompleted });
     } catch (error: any) {
       set({ isLoading: false });
       const message = error.response?.data?.error || error.response?.data?.message || 'Google sign-in failed';
@@ -216,9 +220,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const res = await authAPI.appleLogin(credential, name);
       const { user, business, token, refreshToken } = res.data.data;
+      const onboardingCompleted = user.onboardingCompleted ?? false;
+      const admissionCompleted = user.admissionCompleted ?? false;
       localStorage.setItem('token', token);
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted: true });
+      localStorage.setItem('onboardingCompleted', String(onboardingCompleted));
+      localStorage.setItem('admissionCompleted', String(admissionCompleted));
+      set({ user, business, token, isAuthenticated: true, isLoading: false, onboardingCompleted, admissionCompleted });
     } catch (error: any) {
       set({ isLoading: false });
       const message = error.response?.data?.error || error.response?.data?.message || 'Apple sign-in failed';

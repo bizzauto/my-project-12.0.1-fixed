@@ -123,7 +123,7 @@ function connectToRedis(url: string) {
     if (handleNoAuth('on connect')(err)) return;
     console.error(`[Redis] Connect failed: ${err.message}`);
     redisDisabled = true;
-    try { client.destroy(); } catch {}
+    try { client.quit(); } catch {}
   });
 
   return client;

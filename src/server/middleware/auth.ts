@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import crypto from 'crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
 import { prisma } from '../db.js';
 import { CSRFService } from '../services/csrf.service.js';
 import { verifyToken } from '../utils/auth.js';
+import { ipBlocker } from './ipSecurity.js';
 
 export interface AuthRequest extends Request {
   user?: any;
@@ -38,16 +39,15 @@ async function authenticateViaN8nApiKey(req: AuthRequest): Promise<boolean> {
     return false; // Let the calling authenticate middleware handle the 401
   }
 
-  // Verify HMAC signature: HMAC-SHA256(apiKey, businessId) === signature
-  const expectedSignature = crypto
-    .createHmac('sha256', configuredKey)
-    .update(rawBusinessId)
-    .digest('hex');
+        // Verify HMAC signature: HMAC-SHA256(apiKey, businessId) === signature
+        const expectedSignature = createHmac('sha256', configuredKey)
+            .update(rawBusinessId)
+            .digest('hex');
 
   // Check buffer lengths match before timingSafeEqual to prevent crash
   const expectedBuf = Buffer.from(expectedSignature, 'hex');
   const signatureBuf = Buffer.from(signature, 'hex');
-  if (expectedBuf.length !== signatureBuf.length || !crypto.timingSafeEqual(expectedBuf, signatureBuf)) {
+    if (expectedBuf.length !== signatureBuf.length || !timingSafeEqual(expectedBuf, signatureBuf)) {
     console.warn('[n8nAuth] Invalid business signature — possible tenant breakout attempt');
     return false; // Let the calling authenticate middleware handle the 403
   }
@@ -89,6 +89,8 @@ export const authenticate = async (
     try {
       decoded = verifyToken(token) as any;
     } catch (verifyError: any) {
+      // Track failed auth attempts for IP blocking
+      ipBlocker.increment(req.ip || req.socket.remoteAddress || 'unknown');
       return res.status(401).json({
         success: false,
         error: 'Invalid token',
@@ -101,6 +103,7 @@ export const authenticate = async (
     });
 
     if (!user) {
+      ipBlocker.increment(req.ip || req.socket.remoteAddress || 'unknown');
       return res.status(401).json({
         success: false,
         error: 'User not found',
@@ -108,6 +111,7 @@ export const authenticate = async (
     }
 
     if (!user.isActive) {
+      ipBlocker.increment(req.ip || req.socket.remoteAddress || 'unknown');
       return res.status(403).json({
         success: false,
         error: 'Your account has been suspended. Contact support.',
@@ -251,7 +255,7 @@ export const requireBusinessAccess = async (
  * Generate a webhook secret for lead capture endpoints
  */
 export function generateWebhookSecret(): string {
-  return 'wh_' + crypto.randomBytes(24).toString('hex');
+  return 'wh_' + randomBytes(24).toString('hex');
 }
 
 /**
@@ -289,7 +293,7 @@ export async function validateWebhook(
     // Constant-time comparison to prevent timing attacks
     const expected = Buffer.from(business.leadWebhookSecret);
     const received = Buffer.from(webhookSecret);
-    if (expected.length !== received.length || !crypto.timingSafeEqual(expected, received)) {
+    if (expected.length !== received.length || !timingSafeEqual(expected, received)) {
       res.status(403).json({ success: false, error: 'Invalid webhook secret' });
       return;
     }

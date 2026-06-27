@@ -25,19 +25,20 @@ function redisReady(): boolean {
 
 export async function recordFailedLoginAttempt(email: string): Promise<LockoutStatus> {
   if (!redisReady()) return { locked: false, attemptsRemaining: MAX_FAILED_ATTEMPTS, lockedUntil: null };
+  const r = redis!;
 
   try {
     const attemptKey = `${ATTEMPT_PREFIX}${email.toLowerCase()}`;
     const lockKey = `${LOCKOUT_PREFIX}${email.toLowerCase()}`;
 
-    const currentAttempts = await redis.incr(attemptKey);
+    const currentAttempts = await r.incr(attemptKey);
     if (currentAttempts === 1) {
-      await redis.expire(attemptKey, LOCKOUT_WINDOW_SECONDS);
+      await r.expire(attemptKey, LOCKOUT_WINDOW_SECONDS);
     }
 
     if (currentAttempts >= MAX_FAILED_ATTEMPTS) {
-      await redis.setex(lockKey, LOCKOUT_DURATION_SECONDS, '1');
-      await redis.del(attemptKey);
+      await r.setex(lockKey, LOCKOUT_DURATION_SECONDS, '1');
+      await r.del(attemptKey);
       return {
         locked: true,
         attemptsRemaining: 0,
@@ -57,18 +58,20 @@ export async function recordFailedLoginAttempt(email: string): Promise<LockoutSt
 
 export async function clearFailedLoginAttempts(email: string): Promise<void> {
   if (!redisReady()) return;
+  const r = redis!;
   try {
     const attemptKey = `${ATTEMPT_PREFIX}${email.toLowerCase()}`;
-    await redis.del(attemptKey);
+    await r.del(attemptKey);
   } catch {}
 }
 
 export async function getLockoutStatus(email: string): Promise<LockoutStatus> {
   if (!redisReady()) return { locked: false, attemptsRemaining: MAX_FAILED_ATTEMPTS, lockedUntil: null };
+  const r = redis!;
 
   try {
     const lockKey = `${LOCKOUT_PREFIX}${email.toLowerCase()}`;
-    const ttl = await redis.ttl(lockKey);
+    const ttl = await r.ttl(lockKey);
 
     if (ttl > 0) {
       return {

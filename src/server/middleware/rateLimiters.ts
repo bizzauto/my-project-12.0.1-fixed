@@ -1,6 +1,8 @@
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction } from 'express';
 
+const speedTracker: Record<string, { count: number; windowStart: number }> = {};
+
 /**
  * Global Rate Limiter - Prevents brute force & DDoS
  * 100 requests per 15 minutes per IP
@@ -69,10 +71,32 @@ export const uploadRateLimiter = rateLimit({
 });
 
 /**
- * Speed Limiter - No-op placeholder
+ * Speed Limiter - Prevents aggressive scraping/crawling
+ * Adds 100-300ms delay for requests exceeding 1 req/sec sustained
  */
 export const speedLimiter = (req: Request, res: Response, next: NextFunction) => {
-  next();
+  const now = Date.now();
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  const windowMs = 1000; // 1 second window
+
+  if (!speedTracker[ip]) {
+    speedTracker[ip] = { count: 0, windowStart: now };
+  }
+
+  const tracker = speedTracker[ip];
+  if (now - tracker.windowStart > windowMs) {
+    tracker.count = 0;
+    tracker.windowStart = now;
+  }
+
+  tracker.count++;
+
+  if (tracker.count > 1) {
+    const delay = Math.min((tracker.count - 1) * 100, 300);
+    setTimeout(next, delay);
+  } else {
+    next();
+  }
 };
 
 /**

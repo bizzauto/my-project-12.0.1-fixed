@@ -1,17 +1,18 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
+import { createHash, randomBytes, createCipheriv, createDecipheriv, timingSafeEqual } from 'crypto'
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
+import { isTokenBlacklisted } from '../services/token-blacklist.service.js';
 
 // ── JWT_SECRET (lazy resolution) ──
 // NOTE: process.env is read at CALL TIME, not module eval time.
 // This ensures dotenv.config() in index.ts has already run by the time
 // any token sign/verify happens, preventing the "different secret" bug.
 const DEV_JWT_FALLBACK = (() => {
-  const seed = os.hostname() + '__' + process.cwd();
-  return crypto.createHash('sha256').update(seed).digest('hex').slice(0, 32);
+   const seed = os.hostname() + '__' + process.cwd();
+   return createHash('sha256').update(seed).digest('hex').slice(0, 32);
 })();
 
 export function getJwtSecret(): string {
@@ -48,7 +49,7 @@ function loadOrGenerateDevEncryptionKey(): string {
     // Ignore - will generate new
   }
 
-  const newKey = crypto.randomBytes(32).toString('hex');
+  const newKey = randomBytes(32).toString('hex');
   try {
     fs.writeFileSync(keyFile, newKey, 'utf8');
     console.log('[Auth] Generated new encryption key → .encryption.key (DO NOT COMMIT)');
@@ -101,12 +102,21 @@ export const generateToken = (payload: object): string => {
 
 export const verifyToken = (token: string): any => {
   const secret = getJwtSecret();
-  try {
-    const decoded = jwt.verify(token, secret);
-    return decoded;
-  } catch (err: any) {
-    throw err;
+  const decoded = jwt.verify(token, secret) as any;
+
+  // Check if token has been blacklisted (password change, logout, security event)
+  if (decoded.jti) {
+    try {
+      if (isTokenBlacklisted(decoded.jti)) {
+        throw new Error('Token has been revoked');
+      }
+    } catch (err: any) {
+      if (err.message === 'Token has been revoked') throw err;
+      // Redis unavailable — allow token (graceful degradation)
+    }
   }
+
+  return decoded;
 };
 
 export const verifyRefreshToken = (token: string): any => {
@@ -124,9 +134,9 @@ export const generateRefreshToken = (payload: object): string => {
 // Encryption utilities for sensitive data (WhatsApp tokens, API keys)
 export function encrypt(text: string): string {
   if (!text) return '';
-  const iv = crypto.randomBytes(16);
+  const iv = randomBytes(16);
   const key = Buffer.from(getEncryptionKey(), 'hex');
-  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  const cipher = createCipheriv('aes-256-cbc', key, iv);
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
   return iv.toString('hex') + ':' + encrypted;
@@ -138,7 +148,7 @@ export function decrypt(encryptedText: string): string {
     const [ivHex, encrypted] = encryptedText.split(':');
     const iv = Buffer.from(ivHex, 'hex');
     const key = Buffer.from(getEncryptionKey(), 'hex');
-    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    const decipher = createDecipheriv('aes-256-cbc', key, iv);
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;

@@ -1,8 +1,8 @@
 // Manual mock for qrcode.react
-const React = require('react');
+const React_qrcode = require('react');
 
-const QRCodeSVG = (props) =>
-  React.createElement('svg', {
+const QRCodeSVG = (props: any) =>
+  React_qrcode.createElement('svg', {
     'data-testid': 'qrcode-svg',
     ...props,
   });

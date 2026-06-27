@@ -29,7 +29,7 @@ import AutomationPage from '../src/components/AutomationPage';
 
 // ======== Test helpers ========
 const renderWithProviders = (ui: React.ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
-  render(ui, { wrapper: ({ children }) => <BrowserRouter>{children}</BrowserRouter>, ...options });
+  render(ui, { wrapper: ({ children }: { children: React.ReactNode }) => <BrowserRouter>{children}</BrowserRouter>, ...options });
 
 const renderWithRouter = (ui: React.ReactElement) => renderWithProviders(ui);
 

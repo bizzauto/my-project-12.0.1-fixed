@@ -56,7 +56,7 @@ services:
       - NODE_ENV=production
       - PORT=4000
       - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=${REDIS_URL:-redis://:bizzauto-redis-pass@redis:6379}
+      - REDIS_URL=${REDIS_URL:-redis://:${REDIS_PASSWORD:-bizzauto-redis-pass}@redis:6379}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
@@ -110,7 +110,7 @@ services:
     image: redis:7-alpine
     container_name: bizzauto-redis
     restart: always
-    command: redis-server --appendonly yes --save 60 1000 --save 300 10 --requirepass bizzauto-redis-pass --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --save 60 1000 --save 300 10 --requirepass ${REDIS_PASSWORD:-bizzauto-redis-pass} --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
     healthcheck:
@@ -144,7 +144,7 @@ services:
       - DATABASE_SAVE_CONTACTS=true
       - DATABASE_SAVE_INSTANCES=true
       - REDIS_ENABLED=true
-      - REDIS_URI=${REDIS_URL:-redis://:bizzauto-redis-pass@redis:6379}
+      - REDIS_URI=${REDIS_URL:-redis://:${REDIS_PASSWORD:-bizzauto-redis-pass}@redis:6379}
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - WEBHOOK_GLOBAL_URL=${EVOLUTION_WEBHOOK_URL:-${FRONTEND_URL:-https://bizzautoai.com}/api/evolution/webhook}
       - WEBHOOK_GLOBAL_ENABLED=true

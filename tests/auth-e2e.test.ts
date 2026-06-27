@@ -81,6 +81,13 @@ jest.mock('../src/server/utils/auth', () => ({
   comparePassword: jest.fn(),
   generateToken: jest.fn().mockReturnValue('mock_jwt_token_abc123'),
   generateRefreshToken: jest.fn().mockReturnValue('mock_refresh_token'),
+  verifyToken: jest.fn().mockReturnValue({
+    id: 'user-abc-123',
+    email: 'test@example.com',
+    businessId: 'biz-456',
+    role: 'OWNER',
+  }),
+  getJwtSecret: jest.fn().mockReturnValue('test-secret'),
   encrypt: jest.fn().mockReturnValue('encrypted_data'),
   decrypt: jest.fn().mockReturnValue('decrypted_data'),
 }));
@@ -147,11 +154,18 @@ function resetMocks(): void {
   jest.clearAllMocks();
 
   // Re-apply default mock implementations
-  const { hashPassword, comparePassword, generateToken } =
-    jest.requireMock('../src/server/utils/auth');
+  const {
+    hashPassword, comparePassword, generateToken, verifyToken,
+  } = jest.requireMock('../src/server/utils/auth');
   hashPassword.mockResolvedValue('hashed_password_xyz');
   comparePassword.mockReset();
   generateToken.mockReturnValue('mock_jwt_token_abc123');
+  verifyToken.mockReturnValue({
+    id: 'user-abc-123',
+    email: 'test@example.com',
+    businessId: 'biz-456',
+    role: 'OWNER',
+  });
 
   const { TwoFactorService } =
     jest.requireMock('../src/server/services/twoFactor.service');
@@ -161,14 +175,6 @@ function resetMocks(): void {
     jest.requireMock('../src/server/services/csrf.service');
   CSRFService.generateToken.mockResolvedValue('csrf-token-xyz');
   CSRFService.getToken.mockResolvedValue('csrf-token-xyz');
-
-  const jwt = jest.requireMock('jsonwebtoken');
-  jwt.verify.mockReturnValue({
-    id: 'user-abc-123',
-    email: 'test@example.com',
-    businessId: 'biz-456',
-    role: 'OWNER',
-  });
 }
 
 // ─── Cleanup ─────────────────────────────────────────────────────────────────
@@ -629,8 +635,8 @@ describe('GET /api/auth/me', () => {
   });
 
   it('should reject expired JWT token', async () => {
-    const jwt = jest.requireMock('jsonwebtoken');
-    jwt.verify.mockImplementation(() => {
+    const { verifyToken } = jest.requireMock('../src/server/utils/auth');
+    verifyToken.mockImplementation(() => {
       const err: any = new Error('jwt expired');
       err.name = 'TokenExpiredError';
       throw err;
@@ -642,12 +648,12 @@ describe('GET /api/auth/me', () => {
       .expect(401);
 
     expect(res.body.success).toBe(false);
-    expect(res.body.error).toBe('Token expired');
+    expect(res.body.error).toBe('Invalid token');
   });
 
   it('should reject invalid JWT token', async () => {
-    const jwt = jest.requireMock('jsonwebtoken');
-    jwt.verify.mockImplementation(() => {
+    const { verifyToken } = jest.requireMock('../src/server/utils/auth');
+    verifyToken.mockImplementation(() => {
       const err: any = new Error('invalid signature');
       err.name = 'JsonWebTokenError';
       throw err;

@@ -44,7 +44,7 @@ module.exports = {
     getStatus: jest.fn().mockResolvedValue({ data: { success: true, data: { connected: false } } }),
     send: jest.fn(), getTemplates: jest.fn().mockResolvedValue({ data: { success: true, data: [] } }),
     createTemplate: jest.fn(), updateTemplate: jest.fn(), deleteTemplate: jest.fn(), getTemplate: jest.fn(),
-    listConversations: jest.fn().mockResolvedValue({ data: { success: true, data: { conversations: [] } } }),
+    getConversations: jest.fn().mockResolvedValue({ data: { success: true, data: { conversations: [] } } }),
     getConversation: jest.fn(), sendMessage: jest.fn(), sendBulk: jest.fn(), getContacts: jest.fn().mockResolvedValue({ data: { success: true, data: [] } }),
     getAnalytics: jest.fn(), getStats: jest.fn().mockResolvedValue({ data: { success: true, data: { connected: false } } }),
     getWebhook: jest.fn(), setWebhook: jest.fn(),
@@ -89,7 +89,7 @@ module.exports = {
   subscriptionsAPI: createMockAPI({ get: {}, list: {}, create: {} }),
   automationAPI: createMockAPI({
     list: { success: true, data: [] }, get: {}, create: {}, update: {}, delete: {},
-    toggle: {}, getLogs: {}, createRule: {}, updateRule: {}, deleteRule: {},
+    toggle: {}, getLogs: {}, updateRule: {},
     getTemplates: { success: true, data: [] },
     listRules: { success: true, data: [] },
     getSettings: { success: true, data: {} },

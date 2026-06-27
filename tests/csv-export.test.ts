@@ -242,7 +242,7 @@ describe('CSV Export - Edge Cases', () => {
 
   it('should omit id filter when no lead IDs provided', () => {
     const leadIds: string[] | undefined = undefined;
-    const where = leadIds?.length ? { id: { in: leadIds } } : {};
+    const where = (leadIds ?? []).length > 0 ? { id: { in: leadIds! } } : {};
     expect(where).toEqual({});
     expect(Object.keys(where)).toHaveLength(0);
   });

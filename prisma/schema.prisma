@@ -10,12 +10,10 @@ datasource db {
 model User {
   id                   String            @id @default(cuid())
   email                String            @unique
-  googleId             String?           @unique
-  appleId              String?           @unique
   name                 String?
   password             String?
   phone                String?
-  role                 Role              @default(MEMBER)
+  role                 Role              @default(OWNER)
   businessId           String?
   emailVerified        DateTime?
   image                String?
@@ -28,12 +26,14 @@ model User {
   twoFactorSecret      String?
   twoFactorEnabled     Boolean           @default(false)
   twoFactorBackupCodes String?
+  resetToken           String?
   csrfToken            String?
   csrfTokenExpiresAt   DateTime?
-  resetToken           String?
+  appleId              String?           @unique
+  googleId             String?           @unique
   resetTokenExpiresAt  DateTime?
-  verificationToken    String?
   tokenExpiry          DateTime?
+  verificationToken    String?
   aiContents           AIContent[]
   agencies             Agency[]
   notifications        Notification[]
@@ -69,7 +69,6 @@ model Business {
   planExpiresAt          DateTime?
   razorpaySubId          String?
   razorpayOrderId        String?
-  admissionCompleted     Boolean                 @default(false)
   wabaId                 String?
   waPhoneNumberId        String?
   waAccessToken          String?
@@ -83,20 +82,9 @@ model Business {
   linkedinAccessToken    String?
   twitterUserId          String?
   twitterAccessToken     String?
-  youtubeChannelId       String?
-  youtubeAccessToken     String?
   gbpAccessToken         String?
-  gbpRefreshToken        String?
   gbpAccountId           String?
   gbpLocationId          String?
-  gbpTokenExpiry         DateTime?
-  gbpAutoPostEnabled     Boolean                 @default(false)
-  gbpAutoPostTime        String                  @default("09:00")
-  gbpAutoPostTimezone    String                  @default("Asia/Kolkata")
-  gbpAutoPostDays        Json                    @default("[\"monday\", \"tuesday\", \"wednesday\", \"thursday\", \"friday\"]")
-  gbpAutoPostTemplates   Json                    @default("[]")
-  gbpAutoPostLastPosted  DateTime?
-  leadWebhookSecret      String?
   autoReplyEnabled       Boolean                 @default(false)
   autoReplyMessage       String?
   businessHours          Json?
@@ -105,14 +93,27 @@ model Business {
   aiCreditsUsed          Int                     @default(0)
   aiCreditsLimit         Int                     @default(100)
   aiCreditsPurchased     Int                     @default(0)
-  dograhApiKey           String?
-  dograhApiUrl           String?
-  dograhEnabled          Boolean                 @default(false)
-  dograhWebhookSecret    String?
-  dograhDefaultAgentId   Int?
-  telephonyProvider      String                  @default("twilio")
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
+  admissionCompleted     Boolean                 @default(false)
+  onboardingCompleted   Boolean                 @default(false)
+  dograhApiKey           String?
+  dograhApiUrl           String?
+  dograhDefaultAgentId   Int?
+  dograhEnabled          Boolean                 @default(false)
+  dograhWebhookSecret    String?
+  gbpAutoPostDays        Json                    @default("[\"monday\", \"tuesday\", \"wednesday\", \"thursday\", \"friday\"]")
+  gbpAutoPostEnabled     Boolean                 @default(false)
+  gbpAutoPostLastPosted  DateTime?
+  gbpAutoPostTemplates   Json                    @default("[]")
+  gbpAutoPostTime        String                  @default("09:00")
+  gbpAutoPostTimezone    String                  @default("Asia/Kolkata")
+  gbpRefreshToken        String?
+  gbpTokenExpiry         DateTime?
+  leadWebhookSecret      String?
+  telephonyProvider      String                  @default("twilio")
+  youtubeAccessToken     String?
+  youtubeChannelId       String?
   aiFollowUps            AIFollowUp[]
   activities             Activity[]
   analyticsIntegration   AnalyticsIntegration?
@@ -149,6 +150,7 @@ model Business {
   goals                  Goal[]
   integrations           Integration[]
   invoices               Invoice[]
+  leadFinderSearches     LeadFinderSearch[]
   leadScores             LeadScore[]
   ledgerEntries          LedgerEntry[]
   liveChatSessions       LiveChatSession[]
@@ -160,6 +162,8 @@ model Business {
   messageTemplates       MessageTemplate[]
   newEmailTemplates      NewEmailTemplate[]
   orderNotifications     OrderNotification[]
+  outreachCampaigns      OutreachCampaign[]
+  outreachLogs           OutreachLog[]
   paymentLinks           PaymentLink[]
   pipelines              Pipeline[]
   posts                  Post[]
@@ -198,12 +202,6 @@ model Business {
   workflows              Workflow[]
   workflowExecutions     WorkflowExecution[]
   workflowRuns           WorkflowRun[]
-  outreachCampaigns      OutreachCampaign[]
-  outreachLogs           OutreachLog[]
-  leads                  Lead[]
-  crmInvoices            CrmInvoice[]
-  deals                  Deal[]
-  leadFinderSearches     LeadFinderSearch[]
 
   @@index([plan])
 }
@@ -249,9 +247,6 @@ model Contact {
   state                String?
   source               String                 @default("manual")
   sourceId             String?
-  leadFinderData       Json?
-  leadFinderSource     String?
-  leadFinderScore      Int?
   pipelineId           String?
   stageId              String?
   stageName            String?
@@ -262,7 +257,6 @@ model Contact {
   dealStage            String?
   whatsappOptIn        Boolean                @default(false)
   whatsappBlocked      Boolean                @default(false)
-  emailOptIn           Boolean                @default(false)
   waProfilePic         String?
   waLastMessageAt      DateTime?
   lastMessageAt        DateTime?
@@ -272,6 +266,10 @@ model Contact {
   assignedTo           String?
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
+  emailOptIn           Boolean                @default(false)
+  leadFinderData       Json?
+  leadFinderScore      Int?
+  leadFinderSource     String?
   aiFollowUps          AIFollowUp[]
   activities           Activity[]
   appointments         Appointment[]
@@ -289,11 +287,11 @@ model Contact {
   loyaltyPoints        LoyaltyPoints[]
   messages             Message[]
   orders               Order[]
+  outreachLogs         OutreachLog[]
   productReviews       ProductReview[]
   pushSubscriptions    PushSubscription[]
   referredUsers        Referral[]             @relation("Referee")
   referredBy           Referral[]             @relation("Referrer")
-  outreachLogs         OutreachLog[]
   returnRequests       ReturnRequest[]
   scheduledMessages    ScheduledMessage[]
   segmentMembers       SegmentMember[]
@@ -307,16 +305,8 @@ model Contact {
   @@index([businessId, source])
   @@index([businessId, createdAt])
   @@index([businessId, lastMessageAt])
-  @@index([businessId, stage])
-  @@index([businessId, status])
-  @@index([businessId, assignedTo])
-  @@index([businessId, dealValue])
-  @@index([businessId, dealStage, dealValue])
-  @@index([assignedTo])
   @@index([source])
   @@index([tags])
-  @@index([stage])
-  @@index([status])
 }
 
 model Pipeline {
@@ -341,11 +331,9 @@ model Stage {
   name       String
   order      Int
   color      String?
-  businessId String
   pipeline   Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
 
   @@index([pipelineId])
-  @@index([businessId])
 }
 
 model Activity {
@@ -380,7 +368,7 @@ model Activity {
 model Message {
   id               String    @id @default(cuid())
   contactId        String?
-  businessId       String    @default(cuid())
+  businessId       String?   @default(cuid())
   waMessageId      String?
   direction        String
   type             String
@@ -413,8 +401,6 @@ model Message {
   @@index([businessId, contactId])
   @@index([businessId, status])
   @@index([businessId, createdAt])
-  @@index([businessId, direction])
-  @@index([direction])
   @@index([status])
   @@index([createdAt])
 }
@@ -435,7 +421,6 @@ model MessageTemplate {
   business     Business  @relation(fields: [businessId], references: [id])
 
   @@unique([businessId, name])
-  @@index([businessId])
 }
 
 model Campaign {
@@ -483,8 +468,6 @@ model Campaign {
   @@index([status])
   @@index([scheduledAt])
   @@index([businessId, status])
-  @@index([businessId, createdAt])
-  @@index([businessId, scheduledAt])
 }
 
 model Appointment {
@@ -551,7 +534,6 @@ model Product {
   wishlist         Wishlist[]
 
   @@index([businessId])
-  @@index([businessId, isActive])
 }
 
 model ProductVariant {
@@ -579,13 +561,13 @@ model Order {
   shippingAmount     Float               @default(0)
   discountAmount     Float               @default(0)
   total              Float
-  bundleId           String?
   shippingAddress    Json?
   gateway            String?
   gatewayData        Json?
   notes              String?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
+  bundleId           String?
   bundle             ProductBundle?      @relation(fields: [bundleId], references: [id])
   contact            Contact             @relation(fields: [contactId], references: [id])
   items              OrderItem[]
@@ -596,7 +578,6 @@ model Order {
   @@index([contactId])
   @@index([businessId, status])
   @@index([businessId, createdAt])
-  @@index([contactId, status])
   @@index([status])
   @@index([createdAt])
 }
@@ -1227,9 +1208,9 @@ model Review {
   replyStatus   String?
   repliedAt     DateTime?
   repliedBy     String?
-  isRead        Boolean   @default(false)
   isPublished   Boolean   @default(true)
   isFeatured    Boolean   @default(false)
+  isRead        Boolean   @default(false)
   reviewDate    DateTime?
   createdAt     DateTime  @default(now())
   business      Business  @relation(fields: [businessId], references: [id])
@@ -1366,7 +1347,6 @@ model AuditLog {
   @@index([businessId, createdAt])
   @@index([businessId, action])
   @@index([businessId, entity])
-  @@index([entity])
 }
 
 model Notification {
@@ -1386,7 +1366,6 @@ model Notification {
 
   @@index([userId])
   @@index([isRead])
-  @@index([userId, isRead])
 }
 
 model ThemePreference {
@@ -1422,12 +1401,12 @@ model PosterTemplate {
   description  String?
   category     String
   content      String
-  thumbnailUrl String?
   variables    Json[]
   isSystem     Boolean   @default(false)
   usageCount   Int       @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  thumbnailUrl String?
   business     Business? @relation(fields: [businessId], references: [id])
 
   @@index([businessId])
@@ -1476,19 +1455,19 @@ model LeadScore {
   contactId       String
   score           Int       @default(0)
   factors         Json[]
-  category        String    @default("cold")
-  engagementScore Int       @default(0)
-  recencyScore    Int       @default(0)
-  intentScore     Int       @default(0)
-  fitScore        Int       @default(0)
-  aiModel         String    @default("algorithm_v1")
-  aiConfidence    Float     @default(0.0)
-  predictedValue  Float?
-  churnRisk       Int       @default(0)
-  reasons         Json?
-  lastScoredAt    DateTime?
   lastUpdated     DateTime  @updatedAt
   createdAt       DateTime  @default(now())
+  aiConfidence    Float     @default(0.0)
+  aiModel         String    @default("algorithm_v1")
+  category        String    @default("cold")
+  churnRisk       Int       @default(0)
+  engagementScore Int       @default(0)
+  fitScore        Int       @default(0)
+  intentScore     Int       @default(0)
+  lastScoredAt    DateTime?
+  predictedValue  Float?
+  reasons         Json?
+  recencyScore    Int       @default(0)
   business        Business  @relation(fields: [businessId], references: [id])
   contact         Contact   @relation(fields: [contactId], references: [id])
 
@@ -1532,13 +1511,13 @@ model ApiKey {
   businessId  String
   name        String
   key         String    @unique
-  prefix      String?
   permissions Json
   lastUsedAt  DateTime?
   expiresAt   DateTime?
   isActive    Boolean   @default(true)
   createdBy   String
   createdAt   DateTime  @default(now())
+  prefix      String?
   business    Business  @relation(fields: [businessId], references: [id])
 
   @@index([businessId])
@@ -1570,15 +1549,15 @@ model ScheduledMessage {
   scheduledAt      DateTime
   status           String    @default("pending")
   error            String?
-  templateName     String?
-  templateLanguage String?
-  templateVars     Json?
-  mediaUrl         String?
-  mediaType        String?
-  waMessageId      String?
-  sentAt           DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  mediaType        String?
+  mediaUrl         String?
+  sentAt           DateTime?
+  templateLanguage String?
+  templateName     String?
+  templateVars     Json?
+  waMessageId      String?
   business         Business  @relation(fields: [businessId], references: [id])
   contact          Contact?  @relation(fields: [contactId], references: [id])
 
@@ -1601,7 +1580,6 @@ model DripQueue {
 
   @@index([campaignId])
   @@index([status])
-  @@index([status, sendAt])
 }
 
 model EmailTemplate {
@@ -1741,37 +1719,6 @@ model FunnelPage {
 
   @@unique([funnelId, slug])
   @@index([funnelId])
-  views FunnelPageView[]
-}
-
-model FunnelPageView {
-  id         String   @id @default(cuid())
-  pageId     String
-  funnelId   String
-  businessId String
-  visitorId  String?
-  ipAddress  String?
-  userAgent  String?
-  referer    String?
-  createdAt  DateTime @default(now())
-
-  page   FunnelPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
-
-  @@index([pageId])
-  @@index([funnelId])
-  @@index([businessId])
-  @@index([createdAt])
-  @@index([funnelId, createdAt])
-}
-
-model FeatureFlag {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  enabled   Boolean  @default(true)
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
-
-  @@index([key])
 }
 
 model FunnelTemplate {
@@ -2106,7 +2053,6 @@ model ReviewRequest {
   message       String
   reviewUrl     String
   status        String    @default("pending")
-  errorMessage  String?
   sentAt        DateTime?
   openedAt      DateTime?
   completedAt   DateTime?
@@ -2673,184 +2619,65 @@ model PlatformReferralPayout {
   @@index([status])
 }
 
-model wl_clients {
-  id         String   @id @default(cuid())
-  resellerId String
-  name       String
-  email      String
-  phone      String?
-  product    String
-  status     String
-  plan       String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([resellerId])
-}
-
-model wl_resellers {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  password     String
-  company      String
-  phone        String?
-  plan         String
-  domain       String?
-  logo         String?
-  primaryColor String
-  isActive     Boolean  @default(true)
-  revenue      Float    @default(0)
-  joinedAt     DateTime @default(now())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}
-
-model VCards {
-  id          String   @id @default(cuid())
-  businessId  String
-  name        String
-  title       String?
-  company     String?
-  phone       String?
-  email       String?
-  website     String?
-  address     String?
-  template    String   @default("professional")
-  color       String   @default("#2563eb")
-  views       Int      @default(0)
-  shares      Int      @default(0)
-  status      String   @default("active")
-  socialLinks Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model OutreachCampaign {
+  id            String        @id @default(cuid())
+  businessId    String
+  name          String
+  status        String        @default("draft")
+  totalLeads    Int           @default(0)
+  sent          Int           @default(0)
+  delivered     Int           @default(0)
+  replied       Int           @default(0)
+  clicked       Int           @default(0)
+  template      String
+  followUpRules Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  business      Business      @relation(fields: [businessId], references: [id])
+  outreachLogs  OutreachLog[]
 
   @@index([businessId])
+  @@index([status])
 }
 
-model Websites {
-  id           String    @id @default(cuid())
-  businessId   String
-  name         String
-  slug         String
-  template     String    @default("business")
-  blocks       Json?
-  status       String    @default("draft")
-  views        Int       @default(0)
-  leads        Int       @default(0)
-  customDomain String?
-  publishedAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+model OutreachLog {
+  id            String           @id @default(cuid())
+  campaignId    String
+  contactId     String
+  businessId    String
+  messageType   String           @default("initial")
+  message       String
+  status        String           @default("pending")
+  whatsappMsgId String?
+  sentAt        DateTime?
+  deliveredAt   DateTime?
+  readAt        DateTime?
+  repliedAt     DateTime?
+  replyContent  String?
+  createdAt     DateTime         @default(now())
+  business      Business         @relation(fields: [businessId], references: [id])
+  campaign      OutreachCampaign @relation(fields: [campaignId], references: [id])
+  contact       Contact          @relation(fields: [contactId], references: [id])
 
-  @@unique([businessId, slug])
+  @@index([campaignId])
+  @@index([contactId])
   @@index([businessId])
+  @@index([status])
 }
 
-model Surveys {
-  id              String   @id @default(cuid())
-  businessId      String
-  name            String
-  description     String?
-  questions       Json
-  status          String   @default("draft")
-  submissionCount Int      @default(0)
-  completionRate  Float    @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([businessId])
-}
-
-model SurveySubmissions {
-  id         String   @id @default(cuid())
-  surveyId   String
-  answers    Json
-  respondent String?
-  completed  Boolean  @default(true)
-  createdAt  DateTime @default(now())
-
-  @@index([surveyId])
-}
-
-model SSOConfig {
-  id           String   @id @default(cuid())
-  businessId   String
-  provider     String
-  clientId     String
-  clientSecret String
-  domain       String?
-  enabled      Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@unique([businessId, provider])
-  @@index([businessId])
-}
-
-// Landing Page Builder
-model LandingPage {
-  id          String   @id @default(cuid())
-  businessId  String
-  name        String
-  slug        String
-  blocks      String[] @default([]) // Array of block types
-  content     Json?    // Full content as JSON
-  html        String?  // Generated HTML
-  status      LandingPageStatus @default(DRAFT)
-  views       Int      @default(0)
-  conversions Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([businessId, slug])
-  @@index([businessId])
-}
-
-enum LandingPageStatus {
-  DRAFT
-  PUBLISHED
-}
-
-// Custom Roles (business-level role definitions)
-model CustomRole {
-  id          String   @id @default(cuid())
-  businessId  String
-  name        String
-  color       String   @default("bg-purple-100 text-purple-700")
-  permissions String[] // Array of permission strings
-  isSystem    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([businessId, name])
-  @@index([businessId])
-}
-
-// File Upload Tracking
-model Upload {
-  id          String   @id @default(cuid())
-  businessId  String
-  userId      String?
-  originalName String
-  fileName    String
-  mimeType    String
-  size        Int
-  path        String
-  url         String
-  category    String   @default("general") // avatar, product, document, poster, social, general
-  entityType  String?  // contact, product, post, document, etc.
-  entityId    String?
-  width       Int?
-  height      Int?
-  thumbnailUrl String?
-  metadata    Json?
-  createdAt   DateTime @default(now())
+model LeadFinderSearch {
+  id            String   @id @default(cuid())
+  businessId    String
+  query         String
+  category      String
+  city          String
+  radius        Int      @default(10)
+  resultsCount  Int      @default(0)
+  importedCount Int      @default(0)
+  createdAt     DateTime @default(now())
+  business      Business @relation(fields: [businessId], references: [id])
 
   @@index([businessId])
-  @@index([businessId, category])
-  @@index([entityType, entityId])
-  @@index([createdAt])
 }
 
 enum Role {
@@ -2864,10 +2691,7 @@ enum Role {
 enum Plan {
   FREE
   BASIC
-  STARTER
-  GROWTH
   PROFESSIONAL
-  PRO
   ENTERPRISE
   AGENCY
 }
@@ -2887,118 +2711,4 @@ enum PaymentMethod {
 enum CouponType {
   PERCENTAGE
   FIXED
-}
-
-model OutreachCampaign {
-  id           String          @id @default(cuid())
-  businessId   String
-  name         String
-  template     String?
-  status       String          @default("draft")
-  totalLeads   Int             @default(0)
-  sent         Int             @default(0)
-  replied      Int             @default(0)
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  business     Business        @relation(fields: [businessId], references: [id])
-  outreachLogs OutreachLog[]
-
-  @@index([businessId])
-}
-
-model OutreachLog {
-  id           String          @id @default(cuid())
-  campaignId   String
-  contactId    String
-  businessId   String
-  messageType  String          @default("initial")
-  message      String          @default("")
-  status       String          @default("pending")
-  sentAt       DateTime?
-  repliedAt    DateTime?
-  replyContent String?
-  whatsappMsgId String?
-  createdAt    DateTime        @default(now())
-  campaign     OutreachCampaign @relation(fields: [campaignId], references: [id])
-  contact      Contact         @relation(fields: [contactId], references: [id])
-  business     Business        @relation(fields: [businessId], references: [id])
-
-  @@index([campaignId])
-  @@index([contactId])
-  @@index([businessId])
-  @@index([campaignId, contactId, messageType])
-}
-
-model Lead {
-  id           String    @id @default(cuid())
-  businessId   String
-  name         String?
-  phone        String?
-  email        String?
-  company      String?
-  source       String?
-  status       String    @default("new")
-  score        Int?
-  notes        String?
-  customFields Json?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  business     Business  @relation(fields: [businessId], references: [id])
-
-  @@index([businessId])
-  @@index([businessId, status])
-}
-
-model CrmInvoice {
-  id           String    @id @default(cuid())
-  businessId   String
-  contactId    String?
-  total        Float     @default(0)
-  status       String    @default("draft")
-  dueDate      DateTime?
-  paidAt       DateTime?
-  items        Json?
-  notes        String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  business     Business  @relation(fields: [businessId], references: [id])
-
-  @@index([businessId])
-  @@index([businessId, status])
-}
-
-model Deal {
-  id           String    @id @default(cuid())
-  businessId   String
-  contactId    String?
-  name         String
-  value        Float     @default(0)
-  stage        String    @default("Lead")
-  probability  Int?
-  expectedClose DateTime?
-  notes        String?
-  customFields Json?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  business     Business  @relation(fields: [businessId], references: [id])
-
-  @@index([businessId])
-  @@index([businessId, stage])
-  @@index([contactId])
-  @@index([stage])
-}
-
-model LeadFinderSearch {
-  id            String    @id @default(cuid())
-  businessId    String
-  query         String
-  category      String?
-  city          String?
-  radius        Int?
-  resultsCount  Int       @default(0)
-  importedCount Int?
-  createdAt     DateTime  @default(now())
-  business      Business  @relation(fields: [businessId], references: [id])
-
-  @@index([businessId])
 }
